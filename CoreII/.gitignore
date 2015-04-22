@@ -1,0 +1,14 @@
+*~
+*.txt
+*.csv
+*.o*
+*.kdevelop
+.depend
+LinSS*
+*LinSS
+LinSS_debug
+*.swp
+ddd
+input_echo.html
+abc
+xyz

@@ -1,0 +1,69 @@
+; A an example scenario to show how the CSV files produced 
+; for RTCA can be loaded and run with this code.
+
+#echo_file
+"input_echo.html"
+
+; General scenario parameters
+
+; Bada data file input.
+bada_data_path "/data/aaesim/regressionScens/bada" 
+
+; Aircraft definition.
+aircraft
+{
+        ; initialization information for this aircraft
+        initial_altitude 35000 ; feet
+        initial_ias 270 ; knots
+        initial_mach 0.78
+
+	; aircraft intent
+	aircraft_intent
+	{
+	  ; define the csv file that contains the horizontal profile
+	  hfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_HFP.csv"
+	} ; aircraft_intent
+
+	; State model parameters
+	state_model
+	{
+	
+	  ; Dynamics parameters
+	  dynamics
+	  {	
+	
+	    ; Aircraft type: JET1, JET2, JET3, JET4, JET5, JET6. No default.
+	    ac_type JET1
+	
+	    ; Speed management setting
+	    speed_management_type thrust
+	    
+	    ; ENV file, containing weather data by time and distance-to-go
+		env_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ENV.csv"
+		
+	  } ; dynamics
+	
+	  ; Pre-calculated trajectory from file
+	  precalc_traj_file
+	  {
+	    ; define the csv file that contain the horizontal profile
+            hfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_HFP.csv"
+		
+            ; define the csv file that contain the vertical profile
+	    vfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_VFP.csv"		
+	  }
+	
+	airborne_app
+	{
+	  IM_speed_commands_from_file
+	  {
+            imspd_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ImSpd.csv"
+            use_pilot_delay true
+            pilot_delay_seconds 5.0
+	  }
+	} ; airborne_app
+
+  } ; state model
+
+} ; aircraft
+

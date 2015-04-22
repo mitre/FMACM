@@ -1,0 +1,9 @@
+*.exe
+*.o
+.settings/
+/Release
+.project
+.cproject
+.autotools
+.depend
+/Debug

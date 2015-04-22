@@ -1,0 +1,66 @@
+#! /usr/local/bin/perl
+
+#
+# Scan all header files and generate an HTML file with the list
+# of classes and subclasses.
+#
+$outputFile = "unitList.html";
+
+
+$command = "fgrep \"class SCALAR_API\" *.h |";
+
+open(CLASSES, $command) ||
+    die "`$command' failed: $!\n";
+
+while (<CLASSES>)
+{
+    if (/(.*)\.h:class SCALAR_API/ && ($1 ne "Unit"))
+    {
+	$number{$1} = 0;
+    }
+}
+
+close(CLASSES);
+
+
+$command = "fgrep DECLARE_SUBCLASS *.h |";
+
+open(SUBCLASSES, $command) ||
+    die "`$command' failed: $!\n";
+
+while (<SUBCLASSES>)
+{
+    if (/(.*)\.h:.*\((.*)\);/)
+    {
+	$subclass{$1}[$number{$1}++] = $2;
+    }
+}
+
+close(SUBCLASSES);
+
+
+open(OUTPUT, "> $outputFile") ||
+    die "Could not open $outputFile\n";
+
+print OUTPUT "<html><head>\n";
+print OUTPUT "<title>List of Currently Supported Scalar Units</title>\n";
+print OUTPUT "</head><body>\n";
+print OUTPUT "<h1>List of Currently Supported Scalar Units</h1>\n";
+
+foreach $class (sort keys(%number))
+{
+    print OUTPUT "<h3><a href=\"$class.h\">$class</a></h3>\n";
+    for ($i = 0; $i < $number{$class}; $i++)
+    {
+	print OUTPUT "  $subclass{$class}[$i]<br>\n";
+    }
+    if ($class =~ /(.*)dAngle/)
+    {
+	print OUTPUT "  $1dDegreesAngle<br>\n";
+	print OUTPUT "  $1dRadiansAngle<br>\n";
+    }
+}
+
+print OUTPUT "</body></html>\n";
+
+close(OUTPUT);

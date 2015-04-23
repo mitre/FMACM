@@ -59,5 +59,6 @@ void Bada::init( char *type_code /** aircraft type abbreviation, e.g. B737 */ )
 
 Bada::Bada( )
 {
+   cout << "Bada.cpp: Implement this class!" << endl;
    mass.m_ref = -999;
 }

@@ -12,7 +12,8 @@ using namespace std;
 
 BadaWithCalc::BadaWithCalc(void)
 {
-	ac_mass = mass.m_ref;   // default
+    cout << "BadaWithCalc.cpp: Implement this class!" << endl;
+    ac_mass = mass.m_ref;   // default
 }
 
 BadaWithCalc::~BadaWithCalc(void)

@@ -210,5 +210,5 @@ class Bada
      * Maps the aircraft type to an 8-character file name (no extension).
      * Multiple type codes may map to the same value.
      */
-    std::string get_file( char *type_code /** aircraft type abbreviation, e.g. B737 */);
+    std::string get_file( char *type_code /** aircraft type abbreviation, e.g. JET1 */);
 };

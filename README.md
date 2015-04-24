@@ -39,6 +39,7 @@ No attempt has been made to ensure that this code will compile on all operating 
 The CMake utility is used to compile this code. Please use version 2.6 or greater. From the root directory, execute:
 
 > cmake . 
+<br>
 > make
 
 The resulting executable will be found in <root>/CoreII/ and is named FMACM

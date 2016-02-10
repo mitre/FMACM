@@ -73,7 +73,7 @@ void AircraftCalculations::airDensity(double h, double &rho, double &P)
 	else
 	{
 		rho = RHO_TROP*exp(-G/(R*T)*(h-H_TROP));
-	    P = P_TROP*exp(-G/R*T*(h-H_TROP));
+	    P = P_TROP*exp(-G/(R*T)*(h-H_TROP));
 	}
 
 }

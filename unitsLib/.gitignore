@@ -1,3 +1,4 @@
+*.so
 *.exe
 *.o
 .settings/

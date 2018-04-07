@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2017 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /* CustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
@@ -20,92 +20,14 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include "CustomMath.h"
-#include "constants.h"
-#include "micros.h"
+#include <stdexcept>
+#include "math/CustomMath.h"
+#include "utility/constants.h"
 
-
-//uniform
-
-#define IA 16807
-#define IM 2147483647
-#define AM (1.0/IM)
-#define IQ 127773
-#define IR 2836
+using namespace aaesim::constants;
 
 //generate a uniform random number between 0 and 1
 //From "Numerical Recipe"
-
-double uniform(double&  seed) //seed should not be 0.0
-{
-    double ans;
- 
-    long k = (long) (seed/(double)IQ);
-    seed = (double)IA*(seed - (double)(k*IQ)) - (double)(IR*k);
-    if(seed <0) seed += (double) IM;
-    ans = (double) AM * seed;
-    return ans;
-}
-
-
-double gauss(double mean, double sigma, double&  seed)
-{
-
-	// returns gaussian distributed random variable with mean mean and standard
-	// deviation sigma.
-	// usage example:  x = gauss(0., 32.);
-
-	double u1, u2, eln, ang, v1;
-	
-	u1 = uniform(seed);
-	u2 = uniform(seed);	                                                                                            
- 	eln = -2.0 * log(u1);     // ALOG(U1)                                               
-	ang = 2.0 * M_PI * u2;                                                                                                               
-	v1  = sqrt(eln) * cos(ang);
-	v1 = mean + sigma * v1;
-	 
- 	return(v1);
-	
-} // gauss
-
-
-double trunc_gauss(double mean, double sigma, double max_std_dev, double&  seed)
-{
-
-	// returns truncated gaussian random varialbe with mean mean, standard
-	// deviation sigma, and maximum standard deviation max_std_dev
-	double val;
-	
-	val = mean + sigma * max_std_dev + 1.;
-	//gwang 09/05/2002
-	//while (val > (mean + sigma * max_std_dev) )
-	while (val > (mean + sigma * max_std_dev)  ||  val < (mean - sigma * max_std_dev))
-	//end gwang 09/05/2002
-		val = gauss(mean, sigma, seed);
-	
-	return(val);
-	
-} // trunc_gauss
-
-
-Units::Time Rayleigh(Units::Time mean, Units::Time sigma, double&  seed)
-{
-
-       // returns Rayleigh distributed random variable with mean mean and standard
-       // deviation sigma.
-       // usage example:  x = Rayleigh(0., 32.);
-
-       double u1, v1;
-
-       u1 = uniform(seed);
-       v1 = (sqrt(-2.0*log(u1))-1.253)/sqrt(0.429);
-       //v1 = mean + sigma * v1;
-
-       return(mean + sigma * v1);
-
-} // Rayleigh
-
 
 double atan3(double x, double y)
 {
@@ -117,30 +39,42 @@ double atan3(double x, double y)
    	temp =  (double) atan2( x,  y);
    
    	if (temp < 0.0) 
-   		temp = temp + 2.0 * M_PI;
+   		temp = temp + 2.0 * PI;
 
    	return (temp);
 
 } // atan3
 
-  
-double laplace(double lambda, double&  seed)
+double quantize(double value, double lsb)
 {
+	// quantizes value to lsb (least significant bit)
+	double r = round(value / lsb);
+	if (r == -0) r = 0;
+	return(lsb * r);
+} // quantize
 
-	// returns laplacian r.v. with parameter lambda.
- 	
-	double uni, err;
- 	
-	uni = uniform(seed);
-	err = -lambda*log(uni);
-	uni = uniform(seed);
 
-	if (uni < 0.5) err = -err;
-		
-	return(err);
+Units::Length quantize(Units::Length value, Units::Length lsb) {
+	// quantizes value to lsb (least significant bit)
+	double r = round(value / lsb);
+	if (r == -0) r = 0;
+	return(lsb * r);
+}
 
-} // laplace
-  
+
+Units::Speed quantize(Units::Speed value, Units::Speed lsb) {
+	// quantizes value to lsb (least significant bit)
+	double r = round(value / lsb);
+	if (r == -0) r = 0;
+	return(lsb * r);
+}
+
+Units::Time quantize(Units::Time value, Units::Time lsb) {
+	// quantizes value to lsb (least significant bit)
+	double r = round(value / lsb);
+	if (r == -0) r = 0;
+	return(lsb * r);
+}
 
 double subtract_headings(double hd1, double hd2)
 {
@@ -175,8 +109,9 @@ double MachToTas(double mach, double altitude) {
     else if (82000 < altitude && altitude <= 99900) {
             speedOfSound = 120 * altitude / 100000. + 475.4; }
     else {
-    	printf("Unexpected altitude in MachToTas:  %f\n", altitude);
-    	exit(1);
+    	char msg[200];
+    	sprintf(msg, "Unexpected altitude in MachToTas:  %lf", altitude);
+    	throw std::logic_error(msg);
     }
            
     tas = (mach * speedOfSound);
@@ -219,7 +154,7 @@ double MachToCas_MITRE(double mach, double alt)
 /* Gauss-Jordan elimination from Numerical recipe:*/
 bool inverse( DMatrix &in, int n, DMatrix &out)
 {
-	int irow, icol;
+	int irow = -1, icol = -1;
 
 	DVector indxc(1, n);
 	DVector indxr(1, n);
@@ -385,3 +320,39 @@ int roundToInt(double d)
 	return i;
 }
 #endif
+
+/**
+ * Create a matrix which executes a 3-D rotation of a
+ * point around a vector <l,m,n> when a single-row
+ * matrix [x y z] is post-multiplied by the rotation
+ * matrix.
+ */
+DMatrix& createRotationMatrix(double l, double m, double n,
+		const Units::Angle theta) {
+
+	// basic formula acquired from:
+	// https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
+	// Wikipedia uses T * coord_column, while we use coord_row * T.
+	// Therefore, we must transpose the matrix.
+
+	// we need a unit vector
+	double mag2 = l*l + m*m + n*n;
+	if (mag2 != 1) {
+		double mag = sqrt(mag2);
+		l /= mag;
+		m /= mag;
+		n /= mag;
+	}
+
+	double cosT = cos(theta);
+	double sinT = sin(theta);
+	double cosT1 = 1 - cosT;
+
+	double a[3][3] = {
+			{ l * l * cosT1 + cosT, m * l * cosT1 + n * sinT, n * l * cosT1 - m * sinT },
+			{ l * m * cosT1 - n * sinT, m * m * cosT1 + cosT, n * m * cosT1 + l * sinT },
+			{ l * n * cosT1 + m * sinT, m * n * cosT1 - l * sinT, n * n * cosT1 + cosT }
+	};
+    DMatrix *result = new DMatrix((double**)&a, 0, 2, 0, 2);
+    return *result;
+}

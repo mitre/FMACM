@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+set(aaesim_INCLUDE_DIRS
+        "@PROJECT_SOURCE_DIR@/include"
+        "@PROJECT_SOURCE_DIR@/unitsLib/units-2.1/scalar"
+)
+
+set(aaesim_LIBRARIES
+  "@PROJECT_SOURCE_DIR@/unitsLib/lib/libunits-2.1.a"
+  "@PROJECT_SOURCE_DIR@/Loader/lib/libloader.a"
+  "@PROJECT_SOURCE_DIR@/Utility/lib/libutility.a"
+  "@PROJECT_SOURCE_DIR@/Core/lib/libcore.a"
+  "@PROJECT_SOURCE_DIR@/IntervalManagement/lib/libimalgs.a"
+  "@PROJECT_SOURCE_DIR@/Math/lib/libmath.a"
+  "@PROJECT_SOURCE_DIR@/PairedApproach/lib/libpaalgs.a"
+)

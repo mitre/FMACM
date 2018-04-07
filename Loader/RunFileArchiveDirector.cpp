@@ -12,12 +12,14 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2017 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "RunFileArchiveDirector.h"
+#include "loader/RunFileArchiveDirector.h"
 #include <sstream>
 #include <map>
+
+using namespace std;
 
 RunFileArchiveDirector::RunFileArchiveDirector(void)
 {

@@ -12,13 +12,19 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2017 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "HTMLDump.h"
+#include "loader/HTMLDump.h"
 #include <assert.h>
 
 using namespace std;
+
+string HTMLDump::SoftwareVersion("unset");
+
+void HTMLDump::SetSoftwareVersion(const string& softwareVersion) {
+	SoftwareVersion = softwareVersion;
+}
 
 HTMLDump::HTMLDump(void)
 {
@@ -43,6 +49,7 @@ bool HTMLDump::open(const string &file_name)
 	if(dump_file_name.is_open())
 	{
 		dump_file_name << "<html>\n<body bgcolor=dddddd>\n<pre>\n";
+		dump_file_name << "running " << SoftwareVersion << endl;
 	}
 
 	return dump_file_name.is_open();

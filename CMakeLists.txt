@@ -1,166 +1,100 @@
-cmake_minimum_required(VERSION 2.6)
-project(FMACM)
+cmake_minimum_required(VERSION 3.0)
+project(aaesim VERSION 2.0.0.2)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set (CMAKE_CXX_STANDARD 11)
 
-LINK_LIBRARIES()
-ADD_DEFINITIONS(-D_LINUX_)
-INCLUDE_DIRECTORIES(
-    CoreII/
-    Math/
-    Loader/
-    Utility/
-    AircraftDynamicsTestFramework/
-    unitsLib/units-2.1/scalar/
-    unitsLib/units-2.1/system/
-)
-set(SOURCE_FILES
-    CoreII/AirborneApplication.cpp
-    CoreII/AirborneApplication.h
-    CoreII/Aircraft.cpp
-    CoreII/Aircraft.h
-    CoreII/AircraftCalculations.cpp
-    CoreII/AircraftCalculations.h
-    CoreII/AircraftIntent.cpp
-    CoreII/AircraftIntent.h
-    CoreII/AircraftIntentFromFile.cpp
-    CoreII/AircraftIntentFromFile.h
-    CoreII/AircraftState.cpp
-    CoreII/AircraftState.h
-    CoreII/Bada.cpp
-    CoreII/Bada.h
-    CoreII/BadaWithCalc.cpp
-    CoreII/BadaWithCalc.h
-    CoreII/constants.h
-    CoreII/DMatrix.cpp
-    CoreII/DMatrix.h
-    CoreII/DVector.cpp
-    CoreII/DVector.h
-    CoreII/FlightManagementSystem.cpp
-    CoreII/FlightManagementSystem.h
-    CoreII/Guidance.cpp
-    CoreII/Guidance.h
-    CoreII/HorizontalTraj.cpp
-    CoreII/HorizontalTraj.h
-    CoreII/IMSpeedCommandFile.cpp
-    CoreII/IMSpeedCommandFile.h
-    CoreII/IMUtils.cpp
-    CoreII/IMUtils.h
-    CoreII/InternalObserver.cpp
-    CoreII/InternalObserver.h
-    CoreII/InvalidIndexException.cpp
-    CoreII/InvalidIndexException.h
-    CoreII/main.cpp
-    CoreII/micros.h
-    CoreII/PrecalcConstraint.cpp
-    CoreII/PrecalcConstraint.h
-    CoreII/PrecalcWaypoint.cpp
-    CoreII/PrecalcWaypoint.h
-    CoreII/RunFile.cpp
-    CoreII/RunFile.h
-    CoreII/Scenario.cpp
-    CoreII/Scenario.h
-    CoreII/SimulationTime.cpp
-    CoreII/SimulationTime.h
-    CoreII/State.cpp
-    CoreII/State.h
-    CoreII/StateModel.cpp
-    CoreII/StateModel.h
-    CoreII/ThreeDOFDynamics.cpp
-    CoreII/ThreeDOFDynamics.h
-    CoreII/TrajectoryFromFile.cpp
-    CoreII/TrajectoryFromFile.h
-    CoreII/TurnTraj.cpp
-    CoreII/TurnTraj.h
-    CoreII/Waypoint.cpp
-    CoreII/Waypoint.h
-    Loader/ArchiveStreamEcho.h
-    Loader/CommentStream.h
-    Loader/DecodedStream.cpp
-    Loader/DecodedStream.h
-    Loader/EchoStream.h
-    Loader/FormatDifferentiatorStreamEcho.h
-    Loader/HTMLDump.cpp
-    Loader/HTMLDump.h
-    Loader/HTMLStreamEcho.h
-    Loader/IncludeStream.h
-    Loader/IndentManagement.h
-    Loader/ListLoaderLink.h
-    Loader/Loadable.cpp
-    Loader/Loadable.h
-    Loader/LoadableLoaderLink.h
-    Loader/LoadableLoaderLinkWithBrackets.h
-    Loader/LoaderLink.cpp
-    Loader/LoaderLink.h
-    Loader/LoaderSupport.cpp
-    Loader/LoaderSupport.h
-    Loader/NamedElementLoaderLink.h
-    Loader/NativeLoaderLink.h
-    Loader/RunFileArchiveDirector.cpp
-    Loader/RunFileArchiveDirector.h
-    Loader/ScalarLoaderLink.h
-    Loader/SinglePushBackStream.h
-    Loader/StdoutStreamEcho.h
-    Loader/Token.h
-    Loader/TokenStream.cpp
-    Loader/TokenStream.h
-    Math/CustomMath.cpp
-    Math/CustomMath.h
-    Math/Statistics.h
-    AircraftDynamicsTestFramework/TestFrameworkAircraft.cpp
-    AircraftDynamicsTestFramework/TestFrameworkAircraft.h
-    AircraftDynamicsTestFramework/TestFrameworkScenario.cpp
-    AircraftDynamicsTestFramework/TestFrameworkScenario.h
-    unitsLib/units-2.1/scalar/Acceleration.h
-    unitsLib/units-2.1/scalar/Angle.h
-    unitsLib/units-2.1/scalar/Angle.i
-    unitsLib/units-2.1/scalar/AngularAcceleration.h
-    unitsLib/units-2.1/scalar/AngularSpeed.h
-    unitsLib/units-2.1/scalar/Area.h
-    unitsLib/units-2.1/scalar/Current.h
-    unitsLib/units-2.1/scalar/Density.h
-    unitsLib/units-2.1/scalar/Force.h
-    unitsLib/units-2.1/scalar/Format.h
-    unitsLib/units-2.1/scalar/Format.i
-    unitsLib/units-2.1/scalar/Frequency.h
-    unitsLib/units-2.1/scalar/Inertia.h
-    unitsLib/units-2.1/scalar/Length.h
-    unitsLib/units-2.1/scalar/MagneticField.h
-    unitsLib/units-2.1/scalar/MagneticFlux.h
-    unitsLib/units-2.1/scalar/MagneticFluxDensity.h
-    unitsLib/units-2.1/scalar/Mass.h
-    unitsLib/units-2.1/scalar/MassFlowRate.h
-    unitsLib/units-2.1/scalar/Power.h
-    unitsLib/units-2.1/scalar/Pressure.h
-    unitsLib/units-2.1/scalar/ProductUnitFormat.h
-    unitsLib/units-2.1/scalar/ProductUnitFormat.i
-    unitsLib/units-2.1/scalar/RatioUnitFormat.h
-    unitsLib/units-2.1/scalar/RatioUnitFormat.i
-    unitsLib/units-2.1/scalar/SignedAngle.h
-    unitsLib/units-2.1/scalar/SignedAngle.i
-    unitsLib/units-2.1/scalar/SpecificUnit.h
-    unitsLib/units-2.1/scalar/SpecificUnit.i
-    unitsLib/units-2.1/scalar/Speed.h
-    unitsLib/units-2.1/scalar/Temperature.h
-    unitsLib/units-2.1/scalar/Temperature.i
-    unitsLib/units-2.1/scalar/Time.h
-    unitsLib/units-2.1/scalar/Torque.h
-    unitsLib/units-2.1/scalar/Unit.h
-    unitsLib/units-2.1/scalar/Unit.i
-    unitsLib/units-2.1/scalar/UnsignedAngle.h
-    unitsLib/units-2.1/scalar/UnsignedAngle.i
-    unitsLib/units-2.1/scalar/Voltage.h
-    unitsLib/units-2.1/scalar/Volume.h
-    unitsLib/units-2.1/system/units_config.h
-    Utility/FilePath.cpp
-    Utility/FilePath.h
-    Utility/AngleOperations.h
-    Utility/CsvParser.h
-    Utility/CustomUnits.h
-    Utility/MoreStringFunctions.h
-    Utility/Utility_Functions.h)
+# Include a suite of helper functions for output and building the aaesim package
+include(.cmake/functions.cmake)
 
-MESSAGE(${PROJECT_SOURCE_DIR})
-SET (EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/CoreII CACHE PATH "all executables" FORCE)
-add_executable(FMACM ${SOURCE_FILES})
+# Append -SNAPSHOT to the version name if this is a pre-release version
+if (${PROJECT_VERSION_TWEAK})
+    set(aaesim_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-SNAPSHOT)
+else()
+    set(aaesim_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+endif()
+message("-- Generating build for ${PROJECT_NAME} version ${aaesim_VERSION}")
 
+# Gather git info if git exists
+find_package(Git)
+if(GIT_FOUND)
+    message("Git found: ${GIT_EXECUTABLE}")
+    include (.cmake/GetGitRevisionDescription.cmake)
+    get_git_head_revision(GIT_BRANCH GIT_HASH)
+    git_local_changes(GIT_LOCAL_CHANGES)
+endif()
+
+# Write the build_info
+set(USERN $ENV{USER})
+set(HOSTNAME $ENV{HOSTNAME})
+string(TIMESTAMP BUILDDATETIME %Y/%m/%d-%H:%M:%S) # example: 20160101.010101
+configure_file(${PROJECT_SOURCE_DIR}/.cmake/build_info.h.template ${PROJECT_SOURCE_DIR}/include/aaesim/build_info.h)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+
+# cmake -DCMAKE_BUILD_TYPE=Release ..
+# cmake -DCMAKE_BUILD_TYPE=Debug ..
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O0 -g3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-sign-compare -O3 -g3")
+
+set (CAASD_WIND_DIR /devel/caasdwind/release/v2.1.1/local)
+set (caasdwind_LIBRARIES
+        ${CAASD_WIND_DIR}/lib/libwind.so
+        ${CAASD_WIND_DIR}/lib/libgrib_api.so
+        ${CAASD_WIND_DIR}/lib/libopenjpeg.so
+		)
+set (caasdwind_INCLUDE_DIRS
+        ${CAASD_WIND_DIR}/include
+		)
+
+# Create some common paths
+set (LOADER_DIR   ${CMAKE_SOURCE_DIR}/Loader)
+set (UNITSLIB_DIR ${CMAKE_SOURCE_DIR}/unitsLib)
+set (UTILITY_DIR  ${CMAKE_SOURCE_DIR}/Utility)
+set (MATH_DIR     ${CMAKE_SOURCE_DIR}/Math)
+set (CORE_DIR     ${CMAKE_SOURCE_DIR}/Core)
+set (PUBLIC_DIR   ${CMAKE_SOURCE_DIR}/Public)
+set (GROUND_DIR   ${CMAKE_SOURCE_DIR}/GroundSystems)
+set (IM_DIR       ${CMAKE_SOURCE_DIR}/IntervalManagement)
+set (PA_DIR       ${CMAKE_SOURCE_DIR}/PairedApproach)
+set (UNITTEST_DIR ${CMAKE_SOURCE_DIR}/unittest)
+set (GTEST_DIR    ${CMAKE_SOURCE_DIR}/unittest/gtest-1.7.0/)
+set (FRAMEWORK_DIR ${CMAKE_SOURCE_DIR}/AircraftDynamicsTestFramework)
+set (aaesim_INCLUDE_DIRS
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/unitsLib/units-2.1/scalar/)
+
+add_subdirectory(${UNITSLIB_DIR})
+add_subdirectory(${LOADER_DIR})
+add_subdirectory(${UTILITY_DIR})
+add_subdirectory(${PUBLIC_DIR})
+add_subdirectory(${MATH_DIR})
+
+include(${PA_DIR}/pa.cmake OPTIONAL)
+include(${IM_DIR}/im.cmake OPTIONAL)
+include(${CORE_DIR}/core.cmake OPTIONAL)
+include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
+include(${FRAMEWORK_DIR}/framework.cmake OPTIONAL)
+
+set (aaesim_CONFIG_INPUT       ${CMAKE_CURRENT_SOURCE_DIR}/.cmake/aaesim-config.cmake.in)
+set (aaesim_CONFIG_OUTPUT_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set (aaesim_CONFIG_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+build_config(${aaesim_CONFIG_INPUT} ${PROJECT_VERSION} ${aaesim_CONFIG_OUTPUT_DIR} ${aaesim_CONFIG_INCLUDE_DIR})
+
+# add a target to generate API documentation with Doxygen
+FIND_PACKAGE(Doxygen)
+if(DOXYGEN_FOUND)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(doc
+            ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen" VERBATIM
+            )
+endif(DOXYGEN_FOUND)
+
+# add installation information (will also add install target to makefile)
+# NOTE: this works if using: make install/local. However, it's not clear how useful that installation actually is because the libs are all missing.
+SET(DEPLOY_ROOT_PATH /devel/${PROJECT_NAME}/bamboo)
+SET(INSTALL_DIR ${DEPLOY_ROOT_PATH}/${aaesim_VERSION})
+SET(CMAKE_INSTALL_PREFIX ${INSTALL_DIR}) # so that log4cplus installs itself without errors
+# INSTALL(TARGETS aaesim DESTINATION ${INSTALL_DIR})

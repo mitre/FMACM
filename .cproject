@@ -5,57 +5,65 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.base.1133741251" moduleId="org.eclipse.cdt.core.settings" name="Default">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.Cygwin_PE" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactName="aaesim" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.base.1133741251" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="cdt.managedbuild.toolchain.gnu.base.1133741251.249297093" name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.cygwin.base.1621335007" name="Cygwin GCC" superClass="cdt.managedbuild.toolchain.gnu.cygwin.base">
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.Cygwin_PE" id="cdt.managedbuild.target.gnu.platform.cygwin.base.997065418" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.cygwin.base"/>
-							<builder buildPath="${workspace_loc:/aaesim/CoreII}/" id="cdt.managedbuild.target.gnu.builder.cygwin.base.1975513911" incrementalBuildTarget="mode=debug" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.cygwin.base">
-								<outputEntries>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="CoreII"/>
-								</outputEntries>
-							</builder>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.base.539548753" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.base">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.234975874" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
-							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.1013936660" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1463070323" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base">
-								<option id="gnu.cpp.compiler.option.include.paths.1979794731" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/Loader}&quot;"/>
+						<toolChain id="cdt.managedbuild.toolchain.gnu.base.2113371749" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.base">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.base.1296975488" name="Debug Platform" osList="linux,hpux,aix,qnx" superClass="cdt.managedbuild.target.gnu.platform.base"/>
+							<builder id="cdt.managedbuild.target.gnu.builder.base.336161065" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1478674144" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.271303069" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
+								<option id="gnu.cpp.compiler.option.include.paths.1442931117" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/log4cplus-1.2.0-rc3/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/unitsLib/units-2.1/scalar}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/unitsLib/units-2.1/system}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/Utility}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/AircraftDynamicsTestFramework}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/unitsLib/units-2.1}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.4.7"/>
+									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
 								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1464564480" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1413266445" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.819893016" name="Cygwin C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.cygwin.base">
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1311262012" superClass="cdt.managedbuild.tool.gnu.c.compiler.input.cygwin"/>
+							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1608362566" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
+								<option id="gnu.c.compiler.option.include.paths.1651653207" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.139861926" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.cygwin.base.751940605" name="Cygwin C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.cygwin.base"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.cygwin.base.1303510321" name="Cygwin C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.cygwin.base">
-								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.406319103" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1841737043" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
+							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.701631128" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.2037451015" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1074625566" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
+								<option id="gnu.both.asm.option.include.paths.192643479" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1693076143" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.toolchain.gnu.base.1133741251.1166999962" name="Histogram.h" rcbsApplicability="disable" resourcePath="Math/Histogram.h.exclude" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="AircraftDynamicsTestFramework"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CoreII"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="AircraftDynamicsTestFramework"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="GroundSystems"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="IntervalManagement"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Loader"/>
 						<entry excluding="Histogram.h.exclude" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="PairedApproach"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utility"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="log4cplus-1.2.0-rc3/src"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="unittest/src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -74,10 +82,16 @@
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1463070323;cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1464564480">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.819893016;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1311262012">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.c.compiler.cygwin.base.819893016;cdt.managedbuild.tool.gnu.c.compiler.input.cygwin.1311262012">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.cpp.compiler.base.271303069;cdt.managedbuild.tool.gnu.cpp.compiler.input.1413266445">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.c.compiler.base.1608362566;cdt.managedbuild.tool.gnu.c.compiler.input.139861926">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.base.1133741251;cdt.managedbuild.toolchain.gnu.base.1133741251.249297093;cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1463070323;cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1464564480">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

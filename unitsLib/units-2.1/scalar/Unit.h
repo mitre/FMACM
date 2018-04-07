@@ -304,14 +304,15 @@ public:
   Unit const & defaultTolerance();
 
 
+    explicit
+    Unit(ValueType const value);
+
 protected:
   ValueType _value;
 
   static
   Unit const _defaultTolerance;
 
-  explicit
-  Unit(ValueType const value);
 };
 
 

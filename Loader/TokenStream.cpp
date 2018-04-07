@@ -12,15 +12,14 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2017 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "TokenStream.h"
-// #include "string.h"  ADM I think this may be an error 
-#include "HTMLDump.h"
-#include <assert.h>
-#include <string>
+#include "loader/TokenStream.h"
+
 using namespace std;
+
+// log4cplus::Logger TokenStream::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TokenStream"));
 
 TokenStream::TokenStream(void)
 {
@@ -28,7 +27,8 @@ TokenStream::TokenStream(void)
 	indents = 0;
 	echo = false;
 	last_was_return = false;
-	//echo = false; 
+	//echo = false;
+	comment_not_end = false;
 }
 
 TokenStream::~TokenStream(void)
@@ -122,11 +122,12 @@ void TokenStream::report_warning(string message)
 //dump file and command line if echo=true
 char TokenStream::get_char()
 {
-	char out;
+	char out(0);
 	file.get(out);
 	if(file.eof() && comment_not_end)
 	{
 		report_error("\n\nERROR: End of file was reached before comment ended.");
+		// LOG4CPLUS_ERROR(logger, "End of file was reached before comment ended.");
 	}
 
 	if(!file.eof())
@@ -178,6 +179,7 @@ Token TokenStream::get_quote()
 		if(c == '\n')
 		{
 			report_error("\n\nERROR: Newline before end of quote.");
+			// LOG4CPLUS_ERROR(logger, "Newline before end of quote.");
 		}
 		if(is_quote(c))
 		{

@@ -1,3 +1,6 @@
+*.cbp
+*cppcheck*
+Doxyfile
 *.out
 *.swp
 html/*
@@ -6,3 +9,13 @@ docs/*
 *.o
 *.h.gch
 .settings/
+cmake_install.cmake
+CMakeFiles
+CMakeCache.txt
+Makefile
+*.so
+.idea/
+*.a
+bin
+lib
+include/build_info.h

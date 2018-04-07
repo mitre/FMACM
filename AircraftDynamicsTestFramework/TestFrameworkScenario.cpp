@@ -22,14 +22,16 @@
  *      Author: sbowman
  */
 
-#include "TestFrameworkScenario.h"
+#include "framework/TestFrameworkScenario.h"
 #include <stdio.h>
 #include <cstring>
-#include "CustomMath.h"
-#include "Bada.h"
-#include "Loadable.h"
-#include "constants.h"
+#include "math/CustomMath.h"
+#include "aaesim/Bada.h"
+#include "loader/Loadable.h"
+#include "utility/constants.h"
 #include <list>
+
+using namespace std;
 
 // Static member initialization
 const Units::SecondsTime TestFrameworkScenario::mDefaultSimulationTimeStep = Units::SecondsTime(1.0); // default value in case it is not loaded from the scenario file
@@ -48,7 +50,7 @@ TestFrameworkScenario::~TestFrameworkScenario() {
 	// destructor stub
 }
 
-// inherited Loadable method that defines how a IMScenario runfile is loaded
+// inherited Loadable method that defines how a TestFrameworkScenario runfile is loaded
 bool TestFrameworkScenario::load(DecodedStream *input)
 {
 	// local vars used just inside the laoder
@@ -61,24 +63,24 @@ bool TestFrameworkScenario::load(DecodedStream *input)
 	// register things with the Loadable base class
 	set_stream(input); //-----------------------------------------------------
 	register_var("bada_data_path", &bada_data_path, true); // required
-	register_named_list_item("aircraft", &master_aircraft_list, true); // required
+	register_named_vector_item("aircraft", &master_aircraft_list, true); // required
 
 	// get the base class to load things
 	bool r = complete(); //-----------------------------------------------------
 
 	// this takes care of all the adaptation of the data structures
-	post_load(bada_data_path, wind_truth_file, wind_forecast_file,predictedWindOpt,blendWind,mDefaultSimulationTimeStep.value());
+	post_load(bada_data_path, wind_truth_file, wind_forecast_file,predictedWindOpt,blendWind,mDefaultSimulationTimeStep);
 
 	return true;
 }
 
-// method that does initialization after the IMScenario has been loaded
+// method that does initialization after the TestFrameworkScenario has been loaded
 void TestFrameworkScenario::post_load(string bada_data_path,
 			 string wind_truth_file,
 	         string wind_forecast_file,
 			 int predictedWindOpt,
 			 bool blendWind,
-	                 double simulation_time_step) {
+			 Units::Time simulation_time_step) {
 
   strcpy(Bada::input_path,bada_data_path.c_str());
 
@@ -103,12 +105,13 @@ void TestFrameworkScenario::post_load(string bada_data_path,
 
 //-------------------------------
 
-void TestFrameworkScenario::post_load_aircraft(double simulation_time_step,
-				  int predictedWindOpt,
-				  bool blendWind)
+void TestFrameworkScenario::post_load_aircraft(
+		Units::Time simulation_time_step,
+		int predictedWindOpt,
+		bool blendWind)
 {
 	// Post load each aircraft individually.
-	for(list<TestFrameworkAircraft>::iterator i = master_aircraft_list.begin(); i != master_aircraft_list.end(); i++)
+	for(vector<TestFrameworkAircraft>::iterator i = master_aircraft_list.begin(); i != master_aircraft_list.end(); i++)
 	{
 		(*i).post_load(simulation_time_step,predictedWindOpt,blendWind);
 	}
@@ -126,13 +129,14 @@ void TestFrameworkScenario::load_one_scenario_from_scenario_class_into_actor_lis
 
 	int count = 0;
 
-	for(list<TestFrameworkAircraft>::iterator i = aircraft_list.begin(); i != aircraft_list.end(); i++)
+	for(vector<TestFrameworkAircraft>::iterator i = aircraft_list.begin(); i != aircraft_list.end(); i++)
 	{
 		(*i).start_time = start_time;
 		//start time for the next aircraft:
-		start_time += (int) trunc_gauss((double) mean_inter_delivery_time, (double) stdev_inter_delivery_time,  3., start_time_seed);
+		start_time += (int) Scenario::mRand.truncatedGaussianSample((double) mean_inter_delivery_time, (double) stdev_inter_delivery_time,  3.);
 
-		(*i).init(seed);
+		(*i).init(Units::NauticalMilesLength(99));
+		// TODO what to do with seed?
 
 		count++;
 	}
@@ -201,12 +205,10 @@ void TestFrameworkScenario::process_one_iteration(int iter)
 	if (findResult >= 0) {
 		scenName = scenName.replace(findResult, findResult + 9,"");
 	}
-	FILE *acstates = fopen(scenName.append("_AcStates.csv").c_str(), "w");
+	acstates = fopen(scenName.append("_AcStates.csv").c_str(), "w");
 
 	fprintf(acstates, "Time[sec], DTG[m], V(tas)[m/s], vRate[m/s], x[m], y[m], h[m]\n"); // header text
 
-	State initial_state(acstates);
-	State old_state = initial_state;
 	SimulationTime time;
 	time.init();
 	bool iteration_finished = false;
@@ -215,48 +217,44 @@ void TestFrameworkScenario::process_one_iteration(int iter)
 	while(!iteration_finished)
 	{
 //		printf("time: %g\n", time.get_current_simulation_time());
-		State new_state(acstates); //a fresh new empty state
 
-		iteration_finished = process_one_cycle(time, old_state, new_state); // run the cycle and generate the new states
+		iteration_finished = process_one_cycle(time); // run the cycle and generate the new states
 
-		old_state = new_state; //state generated in this cycle is assigned to old_state and will be used for the next cycle
 		time.increment( );
 	}
 	//end cycle loop
-
-	initial_state.clear(); // dump the static outfile variable
-
 }
 
 // method to process the current cycle
-bool TestFrameworkScenario::process_one_cycle(SimulationTime& time, State& old_state,
-				 State& new_state)
+bool TestFrameworkScenario::process_one_cycle(SimulationTime& time)
 {
 	bool iteration_finished = true;
 
 	//Process all the aircraft:
-	iteration_finished = process_all_aircraft(time, old_state, new_state);
+	iteration_finished = process_all_aircraft(time);
 
 	return iteration_finished;
 }
 
 // method to update all of the aircraft for the current cycle
-bool TestFrameworkScenario::process_all_aircraft(SimulationTime& time, State& old_state, State& new_state)
+bool TestFrameworkScenario::process_all_aircraft(SimulationTime& time)
 {
 	bool iteration_finished = true;
 	bool aircraft_iteration_finished = true;
 
 	// loop to process all aircraft:
-	list<TestFrameworkAircraft>::iterator aircraft;
+	vector<TestFrameworkAircraft>::iterator aircraft;
 
 	for (aircraft = aircraft_list.begin(); aircraft != aircraft_list.end(); ++aircraft)
 	{
 		// run the aircraft update method for the current aircraft
 		aircraft_iteration_finished =
-		(*aircraft).update(time,
-			new_state,
-			seed
-		);
+		(*aircraft).update(time);
+
+		if (!aircraft_iteration_finished) {
+			AircraftState state = (*aircraft).truth_state_vector_old;
+			recordState(state);
+		}
 
 		iteration_finished = iteration_finished && aircraft_iteration_finished;
 	}
@@ -264,4 +262,19 @@ bool TestFrameworkScenario::process_all_aircraft(SimulationTime& time, State& ol
 	return iteration_finished;
 }	//end process all aircraft
 
+void TestFrameworkScenario::recordState(const AircraftState &aircraftState) const {
+    double v = hypot(aircraftState.xd * FT_M - aircraftState.Vwx,
+                        aircraftState.yd * FT_M - aircraftState.Vwy)
+            / cos(aircraftState.gamma); // m/s
 
+    fprintf(acstates, "%.0f,%.5f,%.3f,%.3f,%.5f,%.5f,%.5f\n",
+            aircraftState.time,
+            aircraftState.distToGo,
+            v,
+            aircraftState.zd * FT_M,
+            aircraftState.x * FT_M,
+            aircraftState.y * FT_M,
+            aircraftState.z * FT_M
+    );
+    fflush(acstates);
+}

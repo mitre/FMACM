@@ -25,8 +25,7 @@ aircraft
 	} ; aircraft_intent
 
 	; State model parameters
-	state_model
-	{
+	; no longer an explicit structure
 	
 	  ; Dynamics parameters
 	  dynamics
@@ -63,7 +62,7 @@ aircraft
 	  }
 	} ; airborne_app
 
-  } ; state model
+  ; state model
 
 } ; aircraft
 

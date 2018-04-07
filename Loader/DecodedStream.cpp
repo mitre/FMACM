@@ -12,11 +12,13 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2017 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "DecodedStream.h"
+#include "loader/DecodedStream.h"
 #include <limits>
+
+using namespace std;
 
 DecodedStream::DecodedStream(void)
 {
@@ -78,8 +80,8 @@ bool DecodedStream::get_datum(short &s)
 	// ADM jan 24 2011
 	#undef max
 	#undef min
-	
-	string temp = get_next().get_Data(); 
+
+	string temp = get_next().get_Data();
 	static const short big = numeric_limits<short>::max();
 	static const short small = numeric_limits<short>::min();
 
@@ -121,8 +123,8 @@ bool DecodedStream::get_datum(unsigned short &s)
 	// ADM jan 24 2011
 	#undef max
 	#undef min
-	
-	string temp = get_next().get_Data(); 
+
+	string temp = get_next().get_Data();
 	static const unsigned short big = numeric_limits<unsigned short>::max();
 	static const unsigned short small = numeric_limits<unsigned short>::min();
 
@@ -164,8 +166,8 @@ bool DecodedStream::get_datum(int &s)
 	// ADM jan 24 2011
 	#undef max
 	#undef min
-	
-	string temp = get_next().get_Data(); 
+
+	string temp = get_next().get_Data();
 	static const int big = numeric_limits<int>::max();
 	static const int small = numeric_limits<int>::min();
 
@@ -207,8 +209,8 @@ bool DecodedStream::get_datum(unsigned int &s)
 	// ADM jan 24 2011
 	#undef max
 	#undef min
-	
-	string temp = get_next().get_Data(); 
+
+	string temp = get_next().get_Data();
 	static const unsigned int big = numeric_limits<unsigned int>::max();
 	static const unsigned int small = numeric_limits<unsigned int>::min();
 
@@ -246,7 +248,7 @@ bool DecodedStream::get_datum(unsigned int &s)
 
 bool DecodedStream::get_datum(double &s)
 {
-	string temp = get_next().get_Data(); 
+	string temp = get_next().get_Data();
 
 	//wont be necessary- double goes out to 308 digits precision
 	//double big = numeric_limits<double>::max();
@@ -278,7 +280,7 @@ bool DecodedStream::get_datum(double &s)
 
 bool DecodedStream::get_datum(bool &s)
 {
-	string temp = get_next().get_Data(); 
+	string temp = get_next().get_Data();
 	vector<string> testbool;
 	testbool.push_back("yes");
 	testbool.push_back("no");
@@ -318,7 +320,7 @@ bool DecodedStream::get_datum(bool &s)
 
 bool DecodedStream::get_datum(long &s)
 {
-	string temp = get_next().get_Data();  
+	string temp = get_next().get_Data();
 	static const long big = numeric_limits<long>::max();
 	static const long small = numeric_limits<long>::min();
 
@@ -538,13 +540,42 @@ bool DecodedStream::get_datum(Units::MetersArea &s)
 	return true;
 }
 
-bool DecodedStream::get_datum(Units::FeetPerMinute &s)
+bool DecodedStream::get_datum(Units::FeetPerMinuteSpeed &s)
 {
 	double d = 0;
 	bool getDouble = get_datum(d);
 	if (!getDouble)
 		return false;
-	s = Units::FeetPerMinute(d);
+	s = Units::FeetPerMinuteSpeed(d);
 	return true;
 }
 
+bool DecodedStream::get_datum(Units::SecondsPerNauticalMileInvertedSpeed &s)
+{
+	double d = 0;
+	bool getDouble = get_datum(d);
+	if (!getDouble)
+		return false;
+	s = Units::SecondsPerNauticalMileInvertedSpeed(d);
+	return true;
+}
+
+bool DecodedStream::get_datum(Units::HertzFrequency &s)
+{
+	double d = 0;
+	bool getDouble = get_datum(d);
+	if (!getDouble)
+		return false;
+	s = Units::HertzFrequency(d);
+	return true;
+}
+
+bool DecodedStream::get_datum(Units::MetersPerSecondSquaredLengthGain &s)
+{
+	double d = 0;
+	bool getDouble = get_datum(d);
+	if (!getDouble)
+		return false;
+	s = Units::MetersPerSecondSquaredLengthGain(d);
+	return true;
+}

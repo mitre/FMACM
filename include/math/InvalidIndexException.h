@@ -15,37 +15,17 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#pragma once
-#include "loader/LoaderLink.h"
+#ifndef INVALIDINDEXEXCEPTION_H
+#define INVALIDINDEXEXCEPTION_H
 
-template <class DATA>
-class LoadableLoaderLink : public LoaderLink
+#include <exception>
+
+// class to create an invalid index exception if a bad index is used
+class InvalidIndexException : public std::exception
 {
 public:
-
-	LoadableLoaderLink(DATA *address)
-	{
-		var_address = address;
-	}
-	
-	//-------------------------------------------------
-	
-	LoadableLoaderLink(DATA *address, bool required, bool no_reset)
-	{
-		var_address = address;
-		must_load = required;
-		must_load_only_once = no_reset;
-	}
-
-	//-------------------------------------------
-
-	bool load_s(DecodedStream *ds)
-	{
-		return var_address->load(ds);
-	}
-
-
-private:
-	DATA *var_address;
-
+	InvalidIndexException(const int invalid, const int lowValid, const int highValid);
+	InvalidIndexException(char*);
 };
+
+#endif

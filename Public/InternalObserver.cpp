@@ -12,11 +12,10 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/InternalObserver.h"
-#include "utility/micros.h"
 #include "public/Environment.h"
 #include "public/StereographicProjection.h"
 
@@ -158,7 +157,7 @@ string InternalObserver::stateModelString(AircraftState asv, int flapsConfig, fl
 
     // get current speed in FPS
 
-    double currSpeed = sqrt(SQR(asv.xd) + SQR(asv.yd));
+    double currSpeed = sqrt(pow(asv.xd, 2) + pow(asv.yd, 2));
 
     strm << scenario_iter << ","; // iteration number
     strm << asv.id << ","; // id

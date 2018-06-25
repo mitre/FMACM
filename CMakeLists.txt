@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(aaesim VERSION 2.0.0.2)
+project(aaesim VERSION 2.0.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -36,32 +36,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O0 -g3")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-sign-compare -O3 -g3")
 
-set (CAASD_WIND_DIR /devel/caasdwind/release/v2.1.1/local)
-set (caasdwind_LIBRARIES
-        ${CAASD_WIND_DIR}/lib/libwind.so
-        ${CAASD_WIND_DIR}/lib/libgrib_api.so
-        ${CAASD_WIND_DIR}/lib/libopenjpeg.so
-		)
-set (caasdwind_INCLUDE_DIRS
-        ${CAASD_WIND_DIR}/include
-		)
-
 # Create some common paths
-set (LOADER_DIR   ${CMAKE_SOURCE_DIR}/Loader)
-set (UNITSLIB_DIR ${CMAKE_SOURCE_DIR}/unitsLib)
-set (UTILITY_DIR  ${CMAKE_SOURCE_DIR}/Utility)
-set (MATH_DIR     ${CMAKE_SOURCE_DIR}/Math)
-set (CORE_DIR     ${CMAKE_SOURCE_DIR}/Core)
-set (PUBLIC_DIR   ${CMAKE_SOURCE_DIR}/Public)
-set (GROUND_DIR   ${CMAKE_SOURCE_DIR}/GroundSystems)
-set (IM_DIR       ${CMAKE_SOURCE_DIR}/IntervalManagement)
-set (PA_DIR       ${CMAKE_SOURCE_DIR}/PairedApproach)
-set (UNITTEST_DIR ${CMAKE_SOURCE_DIR}/unittest)
-set (GTEST_DIR    ${CMAKE_SOURCE_DIR}/unittest/gtest-1.7.0/)
-set (FRAMEWORK_DIR ${CMAKE_SOURCE_DIR}/AircraftDynamicsTestFramework)
+set (LOADER_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
+set (UNITSLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib)
+set (UTILITY_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Utility)
+set (MATH_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Math)
+set (CORE_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Core)
+set (PUBLIC_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Public)
+set (GROUND_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/GroundSystems)
+set (IM_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/IntervalManagement)
+set (PA_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/PairedApproach)
+set (UNITTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
+set (GTEST_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/unittest/gtest-1.7.0/)
+set (FRAMEWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/unitsLib/units-2.1/scalar/)
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1/scalar/)
 
 add_subdirectory(${UNITSLIB_DIR})
 add_subdirectory(${LOADER_DIR})

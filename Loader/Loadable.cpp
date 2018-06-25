@@ -12,15 +12,14 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/Loadable.h"
 #include "loader/LoadError.h"
+#include "utility/Logging.h"
 
 using namespace std;
-
-// log4cplus::Logger Loadable::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Loadable"));
 
 Loadable::Loadable(void)
 {
@@ -71,7 +70,7 @@ bool Loadable::test_load()
 			if (isdefault && !isDeprecated) {
 				string msg = "The optional tag \"" + (*it).first + "\" was not found. Its default value will be used."; // unfortunately, the default value is unknown here and cannot be included in the message
 				stream->report_warning(msg + "\n");
-				// LOG4CPLUS_WARN(logger, msg);
+//				LOG4CPLUS_INFO(logger, msg);
 			}
 		}
 	}

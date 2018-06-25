@@ -12,14 +12,13 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TrajectoryFromFile.h"
 #include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
 #include "utility/CsvParser.h"
-#include "utility/micros.h"
 
 
 TrajectoryFromFile::TrajectoryFromFile(void) {
@@ -327,12 +326,12 @@ Guidance TrajectoryFromFile::update(AircraftState state, Guidance guidance_in) {
 
   // calculate cross track as difference between actual and precalculated position
 
-  double cross_track = sqrt( SQR(state.x*FT_M - x_pos.value()) + SQR(state.y*FT_M - y_pos.value()) );
+  double cross_track = sqrt( pow(state.x*FT_M - x_pos.value(), 2) + pow(state.y*FT_M - y_pos.value(), 2) );
  
 
   // generate cross-track sign based on distance from turn center and change in course
 
-  double center_dist = sqrt( SQR(state.x*FT_M - h_traj[traj_index].turns.x_turn) + SQR(state.y*FT_M - h_traj[traj_index].turns.y_turn) );
+  double center_dist = sqrt( pow(state.x*FT_M - h_traj[traj_index].turns.x_turn, 2) + pow(state.y*FT_M - h_traj[traj_index].turns.y_turn, 2) );
 
 
   // calculate the cross track error based on distance from center point and course change if turning
@@ -420,7 +419,7 @@ void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
       double delta_y = intent.getFms().yWp[loop-1].value() - intent.getFms().yWp[loop].value();
 
       // calculate leg distance in meters
-      double leg_length = sqrt(SQR(delta_x) + SQR(delta_y));
+      double leg_length = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
 		
       // calculate Psi course
       double course = atan2( delta_y,  delta_x );

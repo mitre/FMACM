@@ -19,7 +19,7 @@ set (SOURCE_FILES
 
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_library(framework ${SOURCE_FILES})
+add_library(framework STATIC ${SOURCE_FILES})
 target_include_directories(framework PUBLIC
         ${aaesim_INCLUDE_DIRS})
 target_link_libraries(framework

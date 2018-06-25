@@ -23,7 +23,7 @@
 <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_ARGUMENTS" value="../input/configs/config-loader_mini.txt"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Core/aaesim"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="bin/aaesim"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="aaesim"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="cdt.managedbuild.toolchain.gnu.base.1133741251"/>

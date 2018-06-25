@@ -1,13 +1,23 @@
 // ****************************************************************************
-//  Copyright © 2015 The MITRE Corporation. All Rights Reserved.  
+// NOTICE
+//
+// This is the copyright work of The MITRE Corporation, and was produced
+// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
+// is subject to Federal Aviation Administration Acquisition Management
+// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
+// (Oct. 1996).  No other use other than that granted to the U. S.
+// Government, or to those acting on behalf of the U. S. Government,
+// under that Clause is authorized without the express written
+// permission of The MITRE Corporation. For further information, please
+// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
+// McLean, VA  22102-7539, (703) 983-6000. 
+//
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "aaesim/Bada.h"
 
-#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <iostream>
 
 using namespace std;
 
@@ -106,6 +116,7 @@ Bada& Bada::operator=(const Bada &obj)
 
   return *this;
 }
+
 
 bool Bada::operator==(const Bada &obj) const
 {
@@ -219,26 +230,17 @@ bool Bada::operator==(const Bada &obj) const
 
   for (auto ix = 0; match && (ix < 3); ix++)
   {
-    match = match && ((isnan(this->procedures[ix].climb.V1) && isnan(obj.procedures[ix].climb.V1)) ||
-		      (this->procedures[ix].climb.V1 == obj.procedures[ix].climb.V1));
-    match = match && ((isnan(this->procedures[ix].climb.V2) && isnan(obj.procedures[ix].climb.V2)) ||
-		      (this->procedures[ix].climb.V2 == obj.procedures[ix].climb.V2));
-    match = match && ((isnan(this->procedures[ix].climb.M) && isnan(obj.procedures[ix].climb.M)) ||
-		      (this->procedures[ix].climb.M == obj.procedures[ix].climb.M));
+    match = match && (this->procedures[ix].climb.V1 == obj.procedures[ix].climb.V1);
+    match = match && (this->procedures[ix].climb.V2 == obj.procedures[ix].climb.V2);
+    match = match && (this->procedures[ix].climb.M == obj.procedures[ix].climb.M);
 
-    match = match && ((isnan(this->procedures[ix].cruise.V1) && isnan(obj.procedures[ix].cruise.V1)) ||
-		      (this->procedures[ix].cruise.V1 == obj.procedures[ix].cruise.V1));
-    match = match && ((isnan(this->procedures[ix].cruise.V2) && isnan(obj.procedures[ix].cruise.V2)) ||
-		      (this->procedures[ix].cruise.V2 == obj.procedures[ix].cruise.V2));
-    match = match && ((isnan(this->procedures[ix].cruise.M) && isnan(obj.procedures[ix].cruise.M)) ||
-		      (this->procedures[ix].cruise.M == obj.procedures[ix].cruise.M));
+    match = match && (this->procedures[ix].cruise.V1 == obj.procedures[ix].cruise.V1);
+    match = match && (this->procedures[ix].cruise.V2 == obj.procedures[ix].cruise.V2);
+    match = match && (this->procedures[ix].cruise.M == obj.procedures[ix].cruise.M);
 
-    match = match && ((isnan(this->procedures[ix].descent.V1) && isnan(obj.procedures[ix].descent.V1)) ||
-		      (this->procedures[ix].descent.V1 == obj.procedures[ix].descent.V1));
-    match = match && ((isnan(this->procedures[ix].descent.V2) && isnan(obj.procedures[ix].descent.V2)) ||
-		      (this->procedures[ix].descent.V2 == obj.procedures[ix].descent.V2));
-    match = match && ((isnan(this->procedures[ix].descent.M) && isnan(obj.procedures[ix].descent.M)) ||
-		      (this->procedures[ix].descent.M == obj.procedures[ix].descent.M));
+    match = match && (this->procedures[ix].descent.V1 == obj.procedures[ix].descent.V1);
+    match = match && (this->procedures[ix].descent.V2 == obj.procedures[ix].descent.V2);
+    match = match && (this->procedures[ix].descent.M == obj.procedures[ix].descent.M);
   }
 
 
@@ -263,8 +265,7 @@ bool Bada::operator==(const Bada &obj) const
 
   for (auto ix = 0; match && (ix < FL_NMAX); ix++)
   {
-    match = match && ((isnan(this->performance.cruise[ix].FL) && isnan(obj.performance.cruise[ix].FL)) ||
-		      (this->performance.cruise[ix].FL == obj.performance.cruise[ix].FL));
+    match = match && (this->performance.cruise[ix].FL == obj.performance.cruise[ix].FL);
     match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.cruise[ix].TAS).value()) &&
 		       isnan(Units::MetersPerSecondSpeed(obj.performance.cruise[ix].TAS).value())) ||
 		      (this->performance.cruise[ix].TAS == obj.performance.cruise[ix].TAS));
@@ -280,8 +281,7 @@ bool Bada::operator==(const Bada &obj) const
 		      (this->performance.cruise[ix].fuel.hi == obj.performance.cruise[ix].fuel.hi));
 
 
-    match = match && ((isnan(this->performance.climb[ix].FL) && isnan(obj.performance.climb[ix].FL)) ||
-		      (this->performance.climb[ix].FL == obj.performance.climb[ix].FL));
+    match = match && (this->performance.climb[ix].FL == obj.performance.climb[ix].FL);
     match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.climb[ix].TAS).value()) &&
 		       isnan(Units::MetersPerSecondSpeed(obj.performance.climb[ix].TAS).value())) ||
 		      (this->performance.climb[ix].TAS == obj.performance.climb[ix].TAS));
@@ -301,8 +301,7 @@ bool Bada::operator==(const Bada &obj) const
 		      (this->performance.climb[ix].fuel == obj.performance.climb[ix].fuel));
 
 
-    match = match && ((isnan(this->performance.descent[ix].FL) && isnan(obj.performance.descent[ix].FL)) ||
-		      (this->performance.descent[ix].FL == obj.performance.descent[ix].FL));
+    match = match && (this->performance.descent[ix].FL == obj.performance.descent[ix].FL);
 
     match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.descent[ix].TAS).value()) &&
 		       isnan(Units::MetersPerSecondSpeed(obj.performance.descent[ix].TAS).value())) ||
@@ -320,3 +319,4 @@ bool Bada::operator==(const Bada &obj) const
 
   return match;
 }
+

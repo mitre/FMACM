@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -105,7 +105,7 @@ public:
     void dump(std::ofstream& fileOut) const;
     void dumpParms(std::string) const;
     std::pair<int, int> findCommonWaypoint(const AircraftIntent &intent) const;
-    void insertPairAtIndex(const std::string wpname, const Units::Length &x, const Units::Length &y, const int index);
+    void insertPairAtIndex(const std::string& wpname, const Units::Length &x, const Units::Length &y, const int index);
 
 protected:
     std::shared_ptr<TangentPlaneSequence> tangentPlaneSequence;
@@ -129,9 +129,9 @@ private:
 
     Units::Speed mach_transition_cas;
 
+    int id;
     bool mIsLoaded;
     static const int UNINITIALIZED_AIRCRAFT_ID;
-    int id;
 
     /**
      * Private because these implementations are no longer used. But, we still want the code around for historical purposes.
@@ -157,7 +157,6 @@ inline bool AircraftIntent::isLoaded() {
     return mIsLoaded;
 }
 
-inline void AircraftIntent::setMachTransCas(const Units::Speed cas)
-{
+inline void AircraftIntent::setMachTransCas(const Units::Speed cas) {
     mach_transition_cas = cas;
 }

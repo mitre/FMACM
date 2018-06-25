@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #if ! defined (AAESIM_VERSION_H)
@@ -25,6 +25,9 @@
 #include <iostream>
 #include <string>
 
+// AAESIM_VERSION_STR is now defined in build_info
+#include "aaesim/build_info.h"
+
 // if suffix is empty, this will end with a hyphen. That will be removed at run-time
 #define AAESIM_MAKE_VERSION_STR(major, minor, point, suffix) \
 #major "." #minor "." #point "-" #suffix
@@ -32,7 +35,7 @@
 //! This is AAESIM version number as a string.
 //! Do not wrap the suffix in quotes, but it may be left empty for a release
 //! Do not leave a space before the right parenthesis
-#define AAESIM_VERSION_STR AAESIM_MAKE_VERSION_STR(1, 4, 4, SNAPSHOT)
+// #define AAESIM_VERSION_STR AAESIM_MAKE_VERSION_STR(1, 4, 4, SNAPSHOT)
 
 namespace aaesim {
     static std::string getVersion() {

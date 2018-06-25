@@ -11,9 +11,8 @@ set(SOURCE_FILES
 
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_library(utility ${SOURCE_FILES})
+add_library(utility STATIC ${SOURCE_FILES})
 target_include_directories(utility PUBLIC
-        ${aaesim_INCLUDE_DIRS}
-        ${caasdwind_INCLUDE_DIRS})
+        ${aaesim_INCLUDE_DIRS})
 target_link_libraries(utility log4cplus units-2.1)
 target_compile_definitions(utility PUBLIC -D_LINUX_ -Dunix)

@@ -19,3 +19,6 @@ Makefile
 bin
 lib
 include/build_info.h
+cmake-build-debug/
+CPackConfig.cmake
+CPackSourceConfig.cmake

@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -91,7 +91,7 @@ void TangentPlaneSequence::initialize(std::list<Waypoint>& waypoint_list) {
 
 void TangentPlaneSequence::convertLocalToGeodetic(
 		EarthModel::LocalPositionEnu localPosition,
-		EarthModel::GeodeticPosition& waypoint) const {
+		EarthModel::GeodeticPosition& geoPosition) const {
 
 	// For the current localPostion, find the closest waypoint in the initialization information
 	int ix = -1;
@@ -111,7 +111,7 @@ void TangentPlaneSequence::convertLocalToGeodetic(
 		throw logic_error("Unable to determine closest point (empty?)");
 	}
 
-	tangentPlanesFromInitialization[ix]->convertLocalToGeodetic(localPosition, waypoint);
+	tangentPlanesFromInitialization[ix]->convertLocalToGeodetic(localPosition, geoPosition);
 }
 
 void TangentPlaneSequence::convertGeodeticToLocal(

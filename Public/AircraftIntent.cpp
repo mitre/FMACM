@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftIntent.h"
@@ -26,10 +26,9 @@ log4cplus::Logger AircraftIntent::logger = log4cplus::Logger::getInstance(LOG4CP
 
 const int AircraftIntent::UNINITIALIZED_AIRCRAFT_ID = -1;
 
-
 AircraftIntent::AircraftIntent()
-        : id (UNINITIALIZED_AIRCRAFT_ID),
-          number_of_waypoints(0),
+        : number_of_waypoints(0),
+          id(UNINITIALIZED_AIRCRAFT_ID),
           mIsLoaded(false)
 {
     waypoint_x[20] = {};
@@ -45,8 +44,8 @@ AircraftIntent::AircraftIntent()
 
 // copy constructor for AircraftIntent
 AircraftIntent::AircraftIntent(const AircraftIntent &in)
-        : id (UNINITIALIZED_AIRCRAFT_ID),
-          number_of_waypoints(0),
+        : number_of_waypoints(0),
+          id(UNINITIALIZED_AIRCRAFT_ID),
           mIsLoaded(false)
 {
     waypoint_x[20] = {};
@@ -557,7 +556,7 @@ pair<int, int> AircraftIntent::findCommonWaypoint(const AircraftIntent &intent) 
     return pair<int, int>(thisIndex, thatIndex);
 }
 
-void AircraftIntent::insertPairAtIndex(const std::string wpname, const Units::Length &x, const Units::Length &y, const int index) {
+void AircraftIntent::insertPairAtIndex(const std::string& wpname, const Units::Length &x, const Units::Length &y, const int index) {
     /*
      * The incoming point must have been validated by the caller.
      *

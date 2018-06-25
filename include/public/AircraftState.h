@@ -12,85 +12,102 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "utility/Logging.h"
-#include "public/ADSBSVReport.h"
+#include "ADSBSVReport.h"
 #include <UnsignedAngle.h>
 #include <string>
 #include "Speed.h"
 
 
 // Aircraft data storage class, for the purpose of the various coversion methods the internal values are assumed to be in feet
+
 class AircraftState
 {
 public:
-    // Creational methods
-    static AircraftState createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
+	// Creational methods
+	static AircraftState createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
 
-    AircraftState(void);
-    ~AircraftState(void);
+	AircraftState(void);
+	~AircraftState(void);
+	
+	AircraftState(const AircraftState &in);
+	AircraftState& operator=(const AircraftState &in);
 
-    AircraftState(const AircraftState &in);
-    AircraftState& operator=(const AircraftState &in);
+	bool is_turning() const;
 
-    bool is_turning() const;
+	bool operator==(const AircraftState &in) const;
 
-    bool operator==(const AircraftState &in) const;
+	// operator < to allow sorting
+	bool operator<(const AircraftState &in) const;
 
-    // operator < to allow sorting
-    bool operator<(const AircraftState &in) const;
+	// heading methods
 
-    // heading methods
-    // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
-    double get_heading() const;
+ // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
+	double get_heading() const;
 
 
-    // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-    Units::UnsignedRadiansAngle get_heading_in_radians_mathematical() const;
+  // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
+	Units::UnsignedRadiansAngle get_heading_in_radians_mathematical() const;
 
-    // psi getter/setters
-    void set_psi(double psi_in);
+	// psi getter/setters
+	void set_psi(double psi_in);
 
-    // speed methods
-    Units::Speed getGroundSpeed(void) const;
+	// speed methods
+	Units::Speed getGroundSpeed(void) const;
 
-    void dumpParms(std::string str) const;
-    void csvHdrDump(std::string str) const;
-    void csvDataDump(std::string str) const;
+	void dumpParms(std::string str) const;
+	void csvHdrDump(std::string str) const;
+	void csvDataDump(std::string str) const;
 
-    AircraftState &interpolate(const AircraftState &a, const AircraftState &b, const double time);
-    static void extrapolate(const AircraftState& in,
-                            const double         time,
-                            AircraftState&       aircraft_state_to_return);
+	AircraftState &interpolate(const AircraftState &a, const AircraftState &b, const double time);
+
+	/**
+	 * @deprecated use ::extrapolate(const AircraftState &in, const Units::SecondsTime &time)
+	 * @param in
+	 * @param time
+	 * @return
+	 */
+	AircraftState &extrapolate(const AircraftState &in, const double time); // deprecated!
+
+    /**
+     * Returns a state that has been fully populated assuming constant ground speed.
+     * @param in
+     * @param time
+     * @return
+     */
+    AircraftState &extrapolate(const AircraftState &in, const Units::SecondsTime &time);
 
     double getZd() const;
+
     void setZd(double zd);
 
-    //Other Data:
-    int id;
-    double time;
-    double x, y, z; //position (ft)
-    double xd, yd, zd; //speed (ft/s)
-    double xdd, ydd, zdd; //acceleration (f/s^2)
-    double gamma;
+//Other Data:
+	int id;
+	double time;
+	double x, y, z; //position (ft)
+	double xd, yd, zd; //speed (ft/s)
+	double xdd, ydd, zdd; //acceleration (f/s^2)
+	double gamma; 
 
 
-    // Additional variables required by sense & avoid algorithm server
-    //
-    double Vwx, Vwy; // true wind direction meters/second
-    double Vw_para, Vw_perp; // true wind factors meters/second
+	// Additional variables required by sense & avoid algorithm server
+	// 
 
-    double psi; // aircraft psi measured from east counter-clockwise
+	double Vwx, Vwy; // true wind direction meters/second
+	double Vw_para, Vw_perp; // true wind factors meters/second
 
-    double distToGo; // For state-model-output in meters.
+	double psi; // aircraft psi measured from east counter-clockwise
+
+	double distToGo; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
 
 
 private:
 
-    static log4cplus::Logger logger;
+	static log4cplus::Logger logger;
 
 };

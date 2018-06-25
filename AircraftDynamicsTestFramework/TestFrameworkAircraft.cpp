@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -24,7 +24,6 @@
 
 #include "framework/TestFrameworkAircraft.h"
 #include "math/CustomMath.h"
-#include "utility/micros.h"
 #include <time.h>
 #include "public/Waypoint.h"
 #include "public/AircraftCalculations.h"
@@ -282,10 +281,10 @@ double TestFrameworkAircraft::calculate_end_time(AircraftState vector_in)
 	double nearest_angle = subtract_headings(aircraft_angle, waypoint_angle);
 
 	// calculate the distance between the previous aircraft point and end waypoint
-	double dist_waypoint = sqrt(SQR(end_point.x) + SQR(end_point.y));
+	double dist_waypoint = sqrt(pow(end_point.x, 2) + pow(end_point.y, 2));
 
 	// calculate the distance between the previous aircraft point and the aircraft end point
-	double dist_aircraft = sqrt(SQR(vector_in.x) + SQR(vector_in.y));
+	double dist_aircraft = sqrt(pow(vector_in.x, 2) + pow(vector_in.y, 2));
 
 	// calculate distance to closest point between the previous and end point
 	double dist_closest = dist_waypoint * cos(nearest_angle);

@@ -12,11 +12,11 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
 #include "public/AircraftCalculations.h"
 #include "math/CustomMath.h"
-#include "utility/micros.h"
 
 log4cplus::Logger AircraftState::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftState"));
 
@@ -130,10 +130,10 @@ bool AircraftState::is_turning() const
 {
     //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
 
-    double spd = sqrt(SQR(xd) + SQR(yd));
+    double spd = sqrt(pow(xd, 2) + pow(yd, 2));
     double turn_rate = (xd*ydd - yd*xdd) / spd;
 
-    return ((ABS(turn_rate) > 1.5));
+    return ((std::fabs(turn_rate) > 1.5));
 }
 
 // operator < to allow sorting
@@ -179,7 +179,7 @@ Units::UnsignedRadiansAngle AircraftState::get_heading_in_radians_mathematical()
 // speed methods
 Units::Speed AircraftState::getGroundSpeed(void) const
 {
-    return Units::FeetPerSecondSpeed(sqrt(SQR(xd) + SQR(yd)));
+    return Units::FeetPerSecondSpeed(sqrt(pow(xd, 2) + pow(yd, 2)));
 }
 
 // psi getter/setters
@@ -295,20 +295,25 @@ AircraftState& AircraftState::interpolate(const AircraftState& a,
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-void AircraftState::extrapolate(const AircraftState& in,
-                                const double         time,
-                                AircraftState&       aircraft_state_to_return)
+AircraftState& AircraftState::extrapolate(const AircraftState &in, const double time_in)
 {
-    double dt = time - in.time;
+    double dt = time_in - in.time;
 
-    aircraft_state_to_return.time = time;
-    aircraft_state_to_return.id = in.id;
-    aircraft_state_to_return.x = in.x + in.xd * dt;
-    aircraft_state_to_return.y = in.y + in.yd * dt;
-    aircraft_state_to_return.z = in.z + in.zd * dt;
-    aircraft_state_to_return.xd = in.xd;
-    aircraft_state_to_return.yd = in.yd;
-    aircraft_state_to_return.setZd(in.zd);
+    time = Units::SecondsTime(time_in).value();
+    id = in.id;
+    x = in.x + in.xd * dt;
+    y = in.y + in.yd * dt;
+    z = in.z + in.zd * dt;
+    xd = in.xd;
+    yd = in.yd;
+    setZd(in.zd);
+
+    return *this;
+}
+
+AircraftState &AircraftState::extrapolate(const AircraftState &in, const Units::SecondsTime &time) {
+    extrapolate(in, time.value());
+    return *this;
 }
 
 double AircraftState::getZd() const {

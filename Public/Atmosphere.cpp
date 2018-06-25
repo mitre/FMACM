@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -24,7 +24,6 @@
 
 #include "public/Atmosphere.h"
 #include "math/CustomMath.h"
-#include "utility/micros.h"
 #include <list>
 
 using namespace std;
@@ -424,8 +423,8 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_, const WindStack &wind
 	{
 		// NOTE! Switched to using the new ind, formula itself needs to be tinkered with
 		//use pow():
-		w_dir = Units::KnotsSpeed(a[(*ind.begin())-1]*pow((h_star.value() - x[(*ind.begin())-1]),3) + b[(*ind.begin())-1]*SQR(h_star.value() - x[(*ind.begin())-1]) + c[(*ind.begin())-1]*(h_star.value() - x[(*ind.begin())-1]) + d[(*ind.begin())-1]);
-		w_dir_grad = Units::KnotsPerFootFrequency(3*a[(*ind.begin())-1]*SQR(h_star.value() - x[(*ind.begin())-1]) + 2*b[(*ind.begin())-1]*(h_star.value() - x[(*ind.begin())-1]) + c[(*ind.begin())-1]);
+		w_dir = Units::KnotsSpeed(a[(*ind.begin())-1]*pow((h_star.value() - x[(*ind.begin())-1]),3) + b[(*ind.begin())-1]*pow(h_star.value() - x[(*ind.begin())-1], 2) + c[(*ind.begin())-1]*(h_star.value() - x[(*ind.begin())-1]) + d[(*ind.begin())-1]);
+		w_dir_grad = Units::KnotsPerFootFrequency(3*a[(*ind.begin())-1]*pow(h_star.value() - x[(*ind.begin())-1], 2) + 2*b[(*ind.begin())-1]*(h_star.value() - x[(*ind.begin())-1]) + c[(*ind.begin())-1]);
 	}
 	else if(ind.size() != 0)
 	{
@@ -440,8 +439,8 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_, const WindStack &wind
 		double tmp7 = b[(*ind.begin())]*SQR(h_star - x[(*ind.begin())]);
 		double tmp8 = c[(*ind.begin())]*(h_star - x[(*ind.begin())]);
 		double tmp9 = d[(*ind.begin())];*/
-		w_dir = Units::KnotsSpeed(a[(*ind.begin())]*pow((h_star.value() - x[(*ind.begin())]),3) + b[(*ind.begin())]*SQR(h_star.value() - x[(*ind.begin())]) + c[(*ind.begin())]*(h_star.value() - x[(*ind.begin())]) + d[(*ind.begin())]);
-		w_dir_grad = Units::KnotsPerFootFrequency(3*a[(*ind.begin())]*SQR(h_star.value() - x[(*ind.begin())]) + 2*b[(*ind.begin())]*(h_star.value() - x[(*ind.begin())]) + c[(*ind.begin())]);
+		w_dir = Units::KnotsSpeed(a[(*ind.begin())]*pow((h_star.value() - x[(*ind.begin())]),3) + b[(*ind.begin())]*pow(h_star.value() - x[(*ind.begin())], 2) + c[(*ind.begin())]*(h_star.value() - x[(*ind.begin())]) + d[(*ind.begin())]);
+		w_dir_grad = Units::KnotsPerFootFrequency(3*a[(*ind.begin())]*pow(h_star.value() - x[(*ind.begin())], 2) + 2*b[(*ind.begin())]*(h_star.value() - x[(*ind.begin())]) + c[(*ind.begin())]);
 	}
 
 
@@ -471,7 +470,7 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas, const Units::Length al
   airDensity(alt,rho,p);
 
   // Terms in the conversion
-  double temp1 = 1 + MU/2*(RHO0.value()/P0.value())*SQR(Units::MetersPerSecondSpeed(vcas).value());
+  double temp1 = 1 + MU/2*(RHO0.value()/P0.value())*pow(Units::MetersPerSecondSpeed(vcas).value(), 2);
 
   double temp2 = pow(temp1, (1/MU)) - 1;
 
@@ -501,7 +500,7 @@ Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas, const Units::Length al
 	airDensity(alt,rho,p);
 
 	// Terms in the conversion
-	double temp1 = 1 + MU/2*(rho/p)*SQR(vtas);
+	double temp1 = 1 + MU/2 * (rho/p) * Units::sqr(vtas);
 
 	double temp2 = pow(temp1, (1/MU)) - 1;
 

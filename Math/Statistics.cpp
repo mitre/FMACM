@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -24,7 +24,6 @@ Or Distance, Area
 #include "math/Statistics.h"
 #include <math.h>
 #include <algorithm>
-#include "utility/micros.h"
 
 
 Statistics::Statistics(void)
@@ -48,8 +47,8 @@ void Statistics::insert(double value)
 	}
 	else
 	{
-		max = MAX(max, value);
-		min = MIN(min, value);
+		max = std::max(max, value);
+		min = std::min(min, value);
 	}
 
 	samples.push_back(value);
@@ -83,11 +82,11 @@ double Statistics::get_std()const
 		{
 			if( loop != 0 )
 			{
-				variance_sum += SQR(samples[loop] - get_mean());
+				variance_sum += pow(samples[loop] - get_mean(), 2);
 			}
 			else
 			{
-				variance_sum = SQR(samples[loop] - get_mean());
+				variance_sum = pow(samples[loop] - get_mean(), 2);
 			}
 		}
 		sDev = sqrt(variance_sum / samples.size() );

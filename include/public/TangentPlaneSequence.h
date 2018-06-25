@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -28,6 +28,7 @@ class TangentPlaneSequence;	// avoid dependency loop
 
 #include <list>
 #include <vector>
+#include <memory>
 #include "public/Waypoint.h"
 #include "public/LocalTangentPlane.h"
 
@@ -38,27 +39,57 @@ class TangentPlaneSequence;	// avoid dependency loop
 class TangentPlaneSequence {
 public:
     TangentPlaneSequence();
+    /**
+     * Constructs a sequence of LocalTangentPlane objects, one
+     * for each waypoint.  The final waypoint in the list maps
+     * to the origin in ENU coordinates, and each of the other
+     * waypoints maps to the same coordinates in its own plane
+     * as it does in its successor's plane.  The altitudes of
+     * the waypoints are ignored and treated as zero (sea level);
+     * only the latitudes and longitudes are used.
+     */
 	TangentPlaneSequence(std::list<Waypoint> &waypoint_list);
 	~TangentPlaneSequence();
     TangentPlaneSequence(const TangentPlaneSequence &in); // copy constructor
 
 	/**
-	 * Algorithm provided by Lesley. This will convert lat/long to
-	 * local-tangent-plane using the default EarthModel and the nearest
-	 * point of tangency in the chain.
+	 * Converts a local ENU point to geodetic coordinates
+	 * using the default EarthModel and the nearest
+	 * point of tangency in the sequence.
 	 *
-	 * Note that altitude is intentionally ignored here (treated as zero). Therefore, this is not
-	 * a complete transformation algorithm.
+	 * Note that altitude is intentionally ignored (treated as
+	 * zero) by EllipsoidalEarthModel.
 	 *
 	 * @param localPosition
 	 * @param waypoint
 	 */
 	void convertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
-			EarthModel::GeodeticPosition &waypoint) const;
+			EarthModel::GeodeticPosition &geoPosition) const;
+	/**
+	 * Converts a geodetic point to local ENU coordinates
+	 * using the default EarthModel and the nearest
+	 * point of tangency in the sequence.
+	 *
+	 * Note that returned altitude is reset to zero by EllipsoidalEarthModel.
+	 *
+	 * @param localPosition
+	 * @param waypoint
+	 */
 	void convertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
 			EarthModel::LocalPositionEnu &localPosition) const;
+	/**
+	 * Returns the ENU coordinates of each of the waypoints
+	 * supplied during construction.
+	 */
 	const std::vector<EarthModel::LocalPositionEnu> &getLocalPositionsFromInitialization() const;
+	/**
+	 * Returns copies of the waypoints used during construction.
+	 */
 	const std::vector<Waypoint> &getWaypointsFromInitialization() const;
+	/**
+	 * Returns tangent planes for each of the waypoints used during
+	 * construction.
+	 */
     const std::vector<std::shared_ptr<LocalTangentPlane> > &getTangentPlanesFromInitialization() const;
 
 private:

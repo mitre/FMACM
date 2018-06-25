@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <cstring>
@@ -21,11 +21,11 @@
 #include "public/SimulationTime.h"
 #include "public/AircraftCalculations.h"
 #include "math/DMatrix.h"
-#include "utility/micros.h"
 #include "utility/CustomUnits.h"
 #include <Area.h>
 #include <Density.h>
 #include <SignedAngle.h>
+#include <public/CoreUtils.h>
 #include "public/Scenario.h"
 
 using namespace std;
@@ -232,7 +232,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	double zeta = 0.88;
 	Units::Frequency wn = Units::HertzFrequency(0.20);
 	Units::Frequency k_t = 2 * zeta * wn; // new thrust gain, roughly .352
-	Units::Frequency k_v = SQR(wn)/k_t; // new velocity gain, roughly .117
+	Units::Frequency k_v = Units::sqr(wn)/k_t; // new velocity gain, roughly .117
 	double k_i = 0.0;//0.005; // velocity error gain
 	double k_speedBrake = 0.20;
 
@@ -258,10 +258,10 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	Vw_para = weather->Vwx * cos(trk) + weather->Vwy * sin(trk);
 	Vw_perp = -weather->Vwx * sin(trk) + weather->Vwy * cos(trk);
 
-	Units::Speed W = sqrt(SQR(weather->Vwx) + SQR(weather->Vwy));
-	Units::Speed gs = sqrt(SQR(V*cos(gamma)) - SQR(Vw_perp)) + Vw_para;
+	Units::Speed W = sqrt(Units::sqr(weather->Vwx) + Units::sqr(weather->Vwy));
+	Units::Speed gs = sqrt(Units::sqr(V*cos(gamma)) - Units::sqr(Vw_perp)) + Vw_para;
 
-	double temp = (SQR(V*cos(gamma)) + SQR(gs) - SQR(W))/(V*2*cos(gamma)*gs);
+	double temp = (Units::sqr(V*cos(gamma)) + Units::sqr(gs) - Units::sqr(W))/(V*2*cos(gamma)*gs);
 
 	// Limit temp so acos function doesn't give undefined value.
 
@@ -270,7 +270,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	else if (temp < -1.0)
 	  temp = -1.0;
 
-	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * SIGN(Units::MetersPerSecondSpeed(Vw_perp).value());
+	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * CoreUtils::sign(Units::MetersPerSecondSpeed(Vw_perp).value());
 
 	//Lateral Control
 
@@ -286,7 +286,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	double dynamic_cross = 1.0;
 
 	// check if guidance has has cross track error and use it if so
-	if( guidance_in.use_cross_track == true )
+	if (guidance_in.use_cross_track)
 	{
 		e_xtrk = Units::MetersLength(guidance_in.cross_track);
 	}
@@ -296,7 +296,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	double unlimited_phi_com = Units::RadiansAngle(phi_com).value();
 
 	// Limit the commanded roll angle
-	double sign_phi_com = SIGN(unlimited_phi_com);
+	double sign_phi_com = CoreUtils::sign(unlimited_phi_com);
 	if (phi_com * sign_phi_com > maxBankAngle)
 	{
 		phi_com = maxBankAngle * sign_phi_com;
@@ -358,19 +358,19 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	// Lift and Drag Coefficients
 	//double 	cL = (2*ac.mass*G)/(rho*V^2*ac.S);
 	// units of cL = kg * m / s^2 / (kg / m^3 * m^2 / s^2 * m^2) = unitless
-	double 	cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*SQR(V)*wing_area*cos(phi));
+	double 	cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*Units::sqr(V)*wing_area*cos(phi));
 	//cD = cd0 + gear + cd2*cL^2;
-	double 	cD = cd0 + gear + cd2*SQR(cL);
+	double 	cD = cd0 + gear + cd2 * pow(cL, 2);
 
 	if (speedBrake != 0.0)
 		cD = (1.0 + 0.6*speedBrake)*cD;
 
 	// Drag
-	Units::Force D = 1./2.*rho*cD*SQR(V)*wing_area;
+	Units::Force D = 1./2. * rho * cD * Units::sqr(V) * wing_area;
 
 
 	// Lift
-	Units::Force L = 1./2.*rho*cL*SQR(V)*wing_area;
+	Units::Force L = 1./2. * rho * cL * Units::sqr(V) * wing_area;
 
 	// Nominal Thrust (no acceleration) at desired speed 
 	Units::Force Tnom;
@@ -467,7 +467,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 			+ V*(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))
 			    *sin(gamma)*cos(gamma);
 	dX.dgamma = k_gamma*(gamma_com - gamma) -
-			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))*SQR(sin(gamma)) * Units::ONE_RADIAN_ANGLE;
+			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))*pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
 	dX.dpsi = (-L*sin(phi)/(ac_mass*V*cos(gamma)) -
 			(weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
 	dX.dT = k_t*(T_com - T);
@@ -610,12 +610,12 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 
 	// Set lift and Drag Coefficients
 
-	double 	cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*SQR(X.V)*wing_area);
-	double 	cD = cd0 + gear + cd2*SQR(cL);
-	Units::Force D = 1./2.*rho*cD*SQR(X.V)*wing_area; // Drag
-	Units::Force L = 1./2.*rho*cL*SQR(X.V)*wing_area; // Lift
+	double 	cL = (2.* ac_mass * Units::ONE_G_ACCELERATION) / (rho * Units::sqr(X.V) * wing_area);
+	double 	cD = cd0 + gear + cd2*pow(cL, 2);
+	Units::Force D = 1./2. * rho * cD * Units::sqr(X.V) * wing_area; // Drag
+	Units::Force L = 1./2. * rho * cL * Units::sqr(X.V) * wing_area; // Lift
 	// Nominal Thrust (no acceleration) at desired speed 
-	Units::Force Tnom = /*ac_mass*vel_dot_com + VELOCITY ERROR IS 0*/ D - ac_mass * Units::ONE_G_ACCELERATION*sin(asin(0.0/*gamma 0.0*/));// - ac_mass*V*(dVwx_dh*cos(psi) + dVwy_dh*sin(psi))*sin(gamma)*cos(gamma); REMOVED WIND
+	Units::Force Tnom = /*ac_mass*vel_dot_com + VELOCITY ERROR IS 0*/ D - ac_mass * Units::ONE_G_ACCELERATION * sin(asin(0.0/*gamma 0.0*/));// - ac_mass*V*(dVwx_dh*cos(psi) + dVwy_dh*sin(psi))*sin(gamma)*cos(gamma); REMOVED WIND
 	// new Thrust commands from model speed change MATLAB code 2/25
 	Units::Force maxThrust = Units::NewtonsForce(ac.getMaxThrust(state_h));
 	Units::Force minThrust = Units::NewtonsForce(ac.getMaxThrust(state_h, mode, "descent"));
@@ -833,7 +833,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	double zeta = 0.88;
 	Units::Frequency wn = Units::HertzFrequency(0.20);
 	Units::Frequency k_t = 2 * zeta * wn; // new thrust gain, roughly .352
-	Units::Frequency k_v = SQR(wn)/k_t; // new velocity gain, roughly .117
+	Units::Frequency k_v = Units::sqr(wn)/k_t; // new velocity gain, roughly .117
 	double k_i = 0.0;//0.005; // velocity error gain
 	double k_speedBrake = 0.10;
 
@@ -859,10 +859,10 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Vw_para = weather->Vwx * cos(trk) + weather->Vwy * sin(trk);
 	Vw_perp = -weather->Vwx * sin(trk) + weather->Vwy * cos(trk);
 
-	Units::Speed W = sqrt(SQR(weather->Vwx) + SQR(weather->Vwy));
-	Units::Speed gs = sqrt(SQR(V*cos(gamma)) - SQR(Vw_perp)) + Vw_para;
+	Units::Speed W = sqrt(Units::sqr(weather->Vwx) + Units::sqr(weather->Vwy));
+	Units::Speed gs = sqrt(Units::sqr(V*cos(gamma)) - Units::sqr(Vw_perp)) + Vw_para;
 
-	double temp = (SQR(V*cos(gamma)) + SQR(gs) - SQR(W))/(V*2*cos(gamma)*gs);
+	double temp = (Units::sqr(V*cos(gamma)) + Units::sqr(gs) - Units::sqr(W))/(V*2*cos(gamma)*gs);
 
 	// Limit temp so the acos function doesn't give an undefined value.
 
@@ -871,7 +871,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	else if (temp < -1.0)
 	  temp = -1.0;
 
-	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * SIGN(Units::MetersPerSecondSpeed(Vw_perp).value());
+	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * CoreUtils::sign(Units::MetersPerSecondSpeed(Vw_perp).value());
 
 	//Lateral Control
 
@@ -888,7 +888,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	double dynamic_cross = 1.0;
 
 	// check if guidance has has cross track error and use it if so
-	if( guidance_in.use_cross_track == true )
+	if (guidance_in.use_cross_track)
 	{
 		e_xtrk = Units::MetersLength(guidance_in.cross_track);
 	}
@@ -898,7 +898,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	double unlimited_phi_com = Units::RadiansAngle(phi_com).value();
 
 	// Limit the commanded roll angle
-	double sign_phi_com = SIGN(unlimited_phi_com);
+	double sign_phi_com = CoreUtils::sign(unlimited_phi_com);
 	if(phi_com * sign_phi_com > maxBankAngle)
 	{
 		phi_com = maxBankAngle * sign_phi_com;
@@ -923,14 +923,14 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Units::Area wing_area = Units::MetersArea(ac.aerodynamics.S);
 
 	// Lift and Drag Calculations
-	double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*SQR(V)*wing_area*cos(phi));
-	double cD = cd0 + gear + cd2*SQR(cL);
+	double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*Units::sqr(V)*wing_area*cos(phi));
+	double cD = cd0 + gear + cd2 * pow(cL, 2);
 
 	if (speedBrake != 0.0)
 		cD = (1.0 + 0.6*speedBrake)*cD;
 
-	Units::Force D = 1./2.*rho*cD*SQR(V)*wing_area;
-	Units::Force L = 1./2.*rho*cL*SQR(V)*wing_area;
+	Units::Force D = 1./2. * rho * cD * Units::sqr(V) * wing_area;
+	Units::Force L = 1./2. * rho * cL * Units::sqr(V) * wing_area;
 
 	Units::Speed ias_com = Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed);
 	Units::Speed tas_com = ATMOSPHERE()->CAS2TAS(ias_com, h);
@@ -1037,7 +1037,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Units::Length xEnd = Units::FeetLength(Fms->xWp[Fms->number_of_waypoints-1]);
 	Units::Length yEnd = Units::FeetLength(Fms->yWp[Fms->number_of_waypoints-1]);
 
-	Units::Length distToEnd = sqrt(SQR(x-xEnd) + SQR(y-yEnd));
+	Units::Length distToEnd = sqrt(Units::sqr(x-xEnd) + Units::sqr(y-yEnd));
 
 	//if(T_com == minThrust && distToEnd < 15.0 * NM_M && (h - Fms->constraints[Fms->NextWp].constraint_altLow) > 250.0 * FT_M)
 	if(T_com == minThrust)
@@ -1097,7 +1097,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 			+ V*(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))
 			  *sin(gamma)*cos(gamma);
 	dX.dgamma = k_gamma * (gamma_com - gamma) -
-			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh * sin(psi)) * SQR(sin(gamma)) * Units::ONE_RADIAN_ANGLE;
+			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh * sin(psi)) * pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
 	dX.dpsi = (-L*sin(phi)/(ac_mass*V*cos(gamma))
 			- (weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
 	dX.dT = k_t*(T_com - T);

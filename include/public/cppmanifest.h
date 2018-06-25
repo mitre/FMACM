@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -68,7 +68,7 @@ namespace cppmanifest {
    }
 
    static bool getGitIsClean() {
-       if (CPPMANIFEST_GIT_LOCAL_CHANGES == "CLEAN")
+       if (CPPMANIFEST_GIT_LOCAL_CHANGES == std::string("CLEAN"))
            return 1;
        else
            return 0;

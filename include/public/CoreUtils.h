@@ -10,10 +10,11 @@
 // under that Clause is authorized without the express written
 // permission of The MITRE Corporation. For further information, please
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000.
+// McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
 #ifndef AAESIM_COREUTILS_H
 #define AAESIM_COREUTILS_H
 
@@ -30,6 +31,7 @@ class CoreUtils
 {
 public:
     static const int UNINITIALIZED_AIRCRAFT_ID;
+    static const Units::Length BEYOND_END_OF_ROUTE_TOL;
 
     // Returns index using a value into a vector of similar values.
     static int nearestIndex(int startIx, double v, std::vector<double> &vVect);
@@ -37,18 +39,21 @@ public:
     // Interpolates using a value into a value to compute an output value of a different kind.
     static double interpolate(int upperIx, double v, std::vector<double> &vVect, std::vector<double> &oVect);
 
-    static const std::vector<AircraftState>::const_iterator findCrossingState(
-            const std::vector<AircraftState> &aircraftstates, const std::pair<Units::Length, Units::Length> &xyLoc);
-
     static const Units::Length calculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
                                                           const std::pair<Units::Length, Units::Length> &xyLoc2);
 
+    static const double limit(double value,
+                              double low_limit = std::numeric_limits<double>::min(),
+                              double high_limit = std::numeric_limits<double>::max());
+
+    static const int sign(double value);
 private:
+
     // Method to check index validity.
     static bool indexValid(int upperIx, double v, std::vector<double> &vVect);
 
     static log4cplus::Logger logger;
-
 };
 
 #endif
+

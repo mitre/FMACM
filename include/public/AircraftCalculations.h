@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -39,17 +39,12 @@ public:
 	~AircraftCalculations(void);
 
 	// method to get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
-	static bool getPosFromPathLength(const Units::Length dist_in, const std::vector<HorizontalPath> &traj_in,
+	static bool getPosFromPathLength(const Units::Length &dist_in, const std::vector<HorizontalPath> &traj_in,
 			Units::Length &x_out, Units::Length &y_out, Units::UnsignedAngle &course_out, int &traj_index);
 
 	// method to get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
 	static void getPathLengthFromPos(const Units::Length x, const Units::Length y,
 			const std::vector<HorizontalPath> &hTraj, Units::Length &dist, Units::Angle &trk);
-
-	// method to project target aircraft position onto ownship horizontal trajectory
-	static bool projectTargetPos(const Units::Length xTarget,
-			const Units::Length yTarget, const std::vector<HorizontalPath> &traj_in,
-			Units::Length &xProjected, Units::Length &yProjected, Units::Length &dtg);
 
 	static Units::UnsignedRadiansAngle convert0to2Pi(Units::Angle course_in);
 	static Units::SignedRadiansAngle convertPitoPi(Units::Angle course_in);
@@ -65,6 +60,7 @@ public:
 	static Units::Speed gsAtACS(AircraftState acs);
 
     static Units::SignedRadiansAngle computeAngleBetweenVectors(const Units::Length &xvertex, const Units::Length &yvertex, const Units::Length &x1, const Units::Length &y1, const Units::Length &x2, const Units::Length &y2);
+
     static double computeCrossProduct(const Units::Length &xvertex, const Units::Length &yvertex, const Units::Length &x1, const Units::Length &y1, const Units::Length &x2, const Units::Length &y2);
 
  private:

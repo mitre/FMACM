@@ -12,12 +12,12 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <public/CoreUtils.h>
 #include "public/AircraftControl.h"
 #include "public/Environment.h"
-#include "utility/micros.h"
 #include "public/InternalObserver.h"
 
 log4cplus::Logger AircraftControl::logger = log4cplus::Logger::getInstance("AircraftControl");
@@ -47,14 +47,14 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
                                    (int) (eqmState.flapConfig+0.1),cd0,cd2,gear,newFlapConfiguration);
 
     // Lift and Drag Estimate Calculations
-    double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*SQR(eqmState.V)*wing_area*cos(eqmState.phi));
-    double cD = cd0 + gear + cd2*SQR(cL);
+    double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho * Units::sqr(eqmState.V) * wing_area * cos(eqmState.phi));
+    double cD = cd0 + gear + cd2*pow(cL, 2);
 
     if (eqmState.speedBrake != 0.0)
         cD = (1.0 + 0.6*eqmState.speedBrake)*cD;
 
-    drag = 1./2.*rho*cD*SQR(eqmState.V)*wing_area;
-    lift = 1./2.*rho*cL*SQR(eqmState.V)*wing_area;
+    drag = 1./2. * rho * cD * Units::sqr(eqmState.V) * wing_area;
+    lift = 1./2. * rho * cL * Units::sqr(eqmState.V) * wing_area;
 }
 
 /**
@@ -88,18 +88,20 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance, const E
     Units::Speed Vw_para = Vwx * cos(trk) + Vwy * sin(trk);
     Units::Speed Vw_perp = -Vwx * sin(trk) + Vwy * cos(trk);
 
-    Units::Speed W = sqrt(SQR(Vwx) + SQR(Vwy));
-    Units::Speed gs = sqrt(SQR(V*cos(gamma)) - SQR(Vw_perp)) + Vw_para;
+    Units::Speed W = sqrt(Units::sqr(Vwx) + Units::sqr(Vwy));
+    Units::Speed gs = sqrt(Units::sqr(V*cos(gamma)) - Units::sqr(Vw_perp)) + Vw_para;
 
-    double temp = (SQR(V*cos(gamma)) + SQR(gs) - SQR(W))/(V*2*cos(gamma)*gs);
+    double temp = (Units::sqr(V*cos(gamma)) + Units::sqr(gs) - Units::sqr(W))/(V*2*cos(gamma)*gs);
 
     // Limit temp so acos function doesn't give undefined value.
-    if (temp > 1.0)
+    if (temp > 1.0) {
         temp = 1.0;
-    else if (temp < -1.0)
+    }
+    else if (temp < -1.0) {
         temp = -1.0;
+    }
 
-    Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * SIGN(Units::MetersPerSecondSpeed(Vw_perp).value());
+    Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * CoreUtils::sign(Units::MetersPerSecondSpeed(Vw_perp).value());
 
     // Convert track guidance to heading using winds (beta is the Wind Correction Angle)
     Units::Angle headingCom = trk + beta;
@@ -114,7 +116,7 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance, const E
     double dynamic_cross = 1.0;
 
     // check if guidance has has cross track error and use it if so
-    if( guidance.use_cross_track == true )
+    if (guidance.use_cross_track)
     {
         e_xtrk = Units::MetersLength(guidance.cross_track);
     }
@@ -125,7 +127,7 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance, const E
     double unlimited_phi_com = Units::RadiansAngle(phi_com).value();
 
     // Limit the commanded roll angle
-    double sign_phi_com = SIGN(unlimited_phi_com);
+    double sign_phi_com = CoreUtils::sign(unlimited_phi_com);
     if (phi_com * sign_phi_com > mMaxBankAngle)
     {
         phi_com = mMaxBankAngle * sign_phi_com;

@@ -12,8 +12,9 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
 #include <stdexcept>
 
 #include "public/CoreUtils.h"
@@ -165,36 +166,6 @@ bool CoreUtils::indexValid(int upperIx, double v, vector<double> &vVect)
     return valid;
 }
 
-/*
- * Find a state in the vector that is very close to the xyloc. But, there is no guarantee regarding
- * which side of the xyloc the returned point is. That must be determined by the caller, which is
- * why an iterator is returned.
- */
-const vector<AircraftState>::const_iterator
-CoreUtils::findCrossingState(const std::vector<AircraftState> &aircraftstates,
-                             const std::pair<Units::Length, Units::Length> &xyloc)
-{
-    // FIXME this method should use a binary search, not an iterator loop
-
-    vector<AircraftState>::const_iterator citerator;
-    for (citerator = aircraftstates.begin(); citerator != aircraftstates.end(); ++citerator)
-    {
-        /*
-         * Fast-find state just after waypoint using Euclidean distance calculation and speed.
-         */
-        const std::pair<Units::Length, Units::Length> p(Units::FeetLength(citerator->x), Units::FeetLength(citerator->y));
-        const Units::Length eucldist = CoreUtils::calculateEuclideanDistance(p, xyloc);
-        const Units::Length dist1step =
-                Units::FeetPerSecondSpeed(sqrt((citerator->xd*citerator->xd) + (citerator->yd*citerator->yd))) *
-                (SimulationTime::get_simulation_time_step()); // The distance travelled in one time step
-        if (eucldist < dist1step)
-        {
-            break;
-        }
-    }
-    return citerator;
-}
-
 const Units::Length CoreUtils::calculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
                                                           const std::pair<Units::Length, Units::Length> &xyLoc2)
 {
@@ -202,4 +173,16 @@ const Units::Length CoreUtils::calculateEuclideanDistance(const std::pair<Units:
     Units::Length ydiff = xyLoc1.second - xyLoc2.second;
     Units::Length eucldist = sqrt((xdiff*xdiff) + (ydiff*ydiff));
     return eucldist;
+}
+
+const double CoreUtils::limit(double value,
+                              double low_limit,
+                              double high_limit)
+{
+    return (value < low_limit ? low_limit : (value > high_limit ? high_limit : value));
+}
+
+const int CoreUtils::sign(double value)
+{
+    return (((value) == (0)) ?	0: (((value) > (0)) ? (1) : (-1)));
 }

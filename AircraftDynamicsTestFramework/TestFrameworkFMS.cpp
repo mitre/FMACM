@@ -12,13 +12,13 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2015 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <public/CoreUtils.h>
 #include "framework/TestFrameworkFMS.h"
 #include "math/CustomMath.h"
 #include "public/AircraftCalculations.h"
-#include "utility/micros.h"
 
 Units::DegreesAngle TestFrameworkFMS::MAX_BANK_ANGLE(25.0);
 
@@ -33,10 +33,10 @@ TestFrameworkFMS::~TestFrameworkFMS(void)
 
 // primary calculation method to update the FMS model
 void TestFrameworkFMS::update(AircraftState state, std::vector<PrecalcWaypoint> &precalcWaypoints,
-				      std::vector<HorizontalPath> &hTraj) {
+							  std::vector<HorizontalPath> &hTraj) {
 
 	double xWp, yWp, dx, dy;
-	
+
 	double DesiredCourse;
 	double xdot, ydot;
 	double Course;
@@ -63,7 +63,7 @@ void TestFrameworkFMS::update(AircraftState state, std::vector<PrecalcWaypoint> 
 		{
 			this->NextWp++;
 
-			if (this->NextWp > this->number_of_waypoints - 1) 
+			if (this->NextWp > this->number_of_waypoints - 1)
 				//The next waypoint (Fms.NextWp) is beyond the final waypoint (Fms.number_of_waypoints - 1)
 				//which means that the final waypoint has just been passed.
 			{
@@ -77,25 +77,23 @@ void TestFrameworkFMS::update(AircraftState state, std::vector<PrecalcWaypoint> 
 			this->RangeToNextWp	=  sqrt(dx*dx + dy*dy);
 		}
 
-		
+
 		//	Determine if the a/c changes course between two waypoints
 		//	- - - - - - - - - - - - - - - - - -
 		if(this->NextWp >= this->number_of_waypoints - 1)
 			this->DeltaTrack = 0.;
 		else
 			this->DeltaTrack	=  this->Track[this->NextWp+1] - this->Track[this->NextWp];
-		
-		double BankAngle	=  LIMIT(this->DeltaTrack,
-				Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
-				Units::RadiansAngle(MAX_BANK_ANGLE).value());
-//		this->RAD		= ( fabs(BankAngle)/ROLL_RATE_)*state.get_groundspeed_in_FPS()/2.0;
 
+		double BankAngle = CoreUtils::limit(this->DeltaTrack,
+											Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
+											Units::RadiansAngle(MAX_BANK_ANGLE).value());
 
 		if (BankAngle != 0.00)
 		{
 			double gs = Units::FeetPerSecondSpeed(state.getGroundSpeed()).value();
-            this->TurnRadius = gs * gs /
-					(GRAV_MPS / FT_M * tan(BankAngle)); // v^2/(g*tan theta)
+			this->TurnRadius = gs * gs /
+							   (GRAV_MPS / FT_M * tan(BankAngle)); // v^2/(g*tan theta)
 
 			this->RangeStartTurn	=  fabs(this->TurnRadius*tan(0.5*this->DeltaTrack));
 		}
@@ -179,11 +177,11 @@ void TestFrameworkFMS::update(AircraftState state, std::vector<PrecalcWaypoint> 
 
 	for (int ix = 1;(ix<precalcWaypoints.size());ix++) {
 
-	  if ((currDist.value() < precalcWaypoints[ix-1].constraints.constraint_dist) &&
-	      (currDist.value() >= precalcWaypoints[ix].constraints.constraint_dist)) {
-	    this->NextWp = ix;
-	    break;
-	  }
+		if ((currDist.value() < precalcWaypoints[ix-1].constraints.constraint_dist) &&
+			(currDist.value() >= precalcWaypoints[ix].constraints.constraint_dist)) {
+			this->NextWp = ix;
+			break;
+		}
 
 	}
 }
@@ -201,12 +199,12 @@ void TestFrameworkFMS::init()
 		dx	=  this->xWp[i]-this->xWp[i-1];
 		dy	=  this->yWp[i]-this->yWp[i-1];
 		Heading	= (double)atan3(dx, dy);// atan2(dy, dx); switched from Angle to Heading
-		
+
 		this->Track[i]	=  Heading;
 		this->psi[i] = (double)atan2(dy,dx); // psi measured from east counter-clockwise
 		this->Length[i]	=  sqrt(dx*dx + dy*dy);
 	}
-	
+
 	for (i=this->number_of_waypoints ; i<127 ; i++)
 	{
 		this->Track[i]	=  -999.9;

@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2017 The MITRE Corporation. All Rights Reserved.
+// Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/StereographicProjection.h"
@@ -55,7 +55,7 @@ void StereographicProjection::init(Units::Angle lat, Units::Angle lon, Units::Le
   sin_latTPT   = sin(latTPT);
 
   /* Calculate sin and cos of conformal latitude instead of geodetic    */
-  sin_clatTPT = TO_CONFORMAL_SIN(sin_latTPT);
+  sin_clatTPT = toConformalSin(sin_latTPT);
   if (sin_clatTPT > 1.0) sin_clatTPT = 1.0;
   else if (sin_clatTPT < -1.0) sin_clatTPT = -1.0;
 
@@ -263,7 +263,7 @@ void StereographicProjection::ll_to_xy(
   sin_dlong = sin(dlong);
 
   /* Convert to conformal latitude instead of geodetic*/
-  sin_PHI  = TO_CONFORMAL_SIN(sin_lat);
+  sin_PHI  = toConformalSin(sin_lat);
 
   if (sin_PHI > 1.0) sin_PHI = 1.0;
   else if (sin_PHI < -1.) sin_PHI = -1.0;
@@ -282,4 +282,8 @@ void StereographicProjection::ll_to_xy(
   x = 2.0*eRadius*sin_dlong*cos_PHI/denom;
   y = 2.0*eRadius*(sin_PHI*cos_clatTPT - cos_PHI*sin_clatTPT*cos_dlong)/denom;
 
+}
+
+double StereographicProjection::toConformalSin(double x) {
+  return x * (GEOD_CONST_A  + GEOD_CONST_B *(x)*(x));
 }

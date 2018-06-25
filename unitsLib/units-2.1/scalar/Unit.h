@@ -69,16 +69,16 @@ namespace Units
                   angleExp2
 
 #define UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT \
-     ValueType_, \
-     2*massExp_, \
-     2*lengthExp_, \
-     2*timeExp_, \
-     2*currentExp_, \
-     2*temperatureExp_, \
-     2*amountExp_, \
-     2*intensityExp_, \
-     AngleExponent<2*angleExp_, \
-                   2*lengthExp_>::value
+     ValueType1, \
+     2*massExp1, \
+     2*lengthExp1, \
+     2*timeExp1, \
+     2*currentExp1, \
+     2*temperatureExp1, \
+     2*amountExp1, \
+     2*intensityExp1, \
+     AngleExponent<2*angleExp1, \
+                   2*lengthExp1>::value
 
 #define UNITS_UNIT_TEMPLATE_ARGS_MUL_RESULT \
        ValueType1, \
@@ -292,6 +292,12 @@ public:
   friend
   Unit<UNITS_UNIT_TEMPLATE_ARGS_SQRT_RESULT>
   sqrt(Unit<UNITS_UNIT_TEMPLATE_ARGS1> const & value);
+
+    template <typename ValueType1,
+            UNITS_UNIT_TEMPLATE_EXP_DECL_ARGS(1)>
+    friend
+    Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>
+    sqr(Unit<UNITS_UNIT_TEMPLATE_ARGS1> const & value);
 
   template <typename ValueType1,
             UNITS_UNIT_TEMPLATE_EXP_DECL_ARGS(1)>

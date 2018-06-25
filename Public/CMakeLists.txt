@@ -25,7 +25,6 @@ set (SOURCE_FILES
         HorizontalTurnPath.cpp
         IMCommandObserver.cpp
         InternalObserver.cpp
-        InvalidIndexException.cpp
         LocalTangentPlane.cpp
         LoggingLoadable.cpp
         MaintainMetric.cpp
@@ -49,7 +48,7 @@ set (SOURCE_FILES
 
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_library(pub ${SOURCE_FILES})
+add_library(pub STATIC ${SOURCE_FILES})
 target_include_directories(pub PUBLIC
         ${aaesim_INCLUDE_DIRS})
 target_link_libraries(pub

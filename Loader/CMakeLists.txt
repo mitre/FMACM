@@ -16,6 +16,6 @@ set(SOURCE_FILES
 
 set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_library(loader ${SOURCE_FILES})
+add_library(loader STATIC ${SOURCE_FILES})
 target_link_libraries(loader utility)
 target_compile_definitions(loader PUBLIC -D_LINUX_ -Dunix)

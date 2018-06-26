@@ -1,4 +1,6 @@
+#!/bin/sh
 # this assumes travis-ci will run: ./configure & make & make test
+
 # mkdir build
 # cd build
 cmake .

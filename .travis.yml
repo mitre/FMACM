@@ -5,3 +5,5 @@ os:
  - linux
 compiler:
  - gcc
+before_script:
+ - chmod +x ./configure

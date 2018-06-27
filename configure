@@ -1,6 +1,14 @@
 #!/bin/sh
 # this assumes travis-ci will run: ./configure & make & make test
 
-# mkdir build
-# cd build
+# Must install log4cplus from git tag
+wget --no-check-certificate https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_1/log4cplus-1.2.1.zip
+unzip log4cplus-1.2.1.zip
+cd log4cplus-1.2.1
+./configure;make;make install
+cd ..
+
+# Run cmake
+mkdir build
+cd build
 cmake .

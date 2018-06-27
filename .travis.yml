@@ -6,6 +6,7 @@ os:
 compiler:
  - gcc
 before_install:
+ - git config core.filemode false   # this is needed to keep the next line from causing git to think the project has changed
  - chmod +x ./configure
 install:
  - ./configure

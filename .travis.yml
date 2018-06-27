@@ -14,3 +14,5 @@ script:
  - cd build
  - cmake ..
  - make
+after_script:
+ - bin/FMACM --buildinfo

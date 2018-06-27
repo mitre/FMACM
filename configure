@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Install FMACM custom dependencies
 
 # log4cplus (from git zip file)

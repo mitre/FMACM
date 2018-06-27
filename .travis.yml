@@ -7,4 +7,4 @@ compiler:
  - gcc
 before_script:
  - chmod +x ./configure
- - sudo apt-get install liblog4cplus-1.1-9
+ # try to do this in the configure script - sudo apt-get install liblog4cplus-1.1-9

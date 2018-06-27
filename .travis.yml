@@ -8,6 +8,7 @@ compiler:
 before_script:
  - chmod +x ./configure
 script:
+ - ./configure
  - mkdir build
  - cd build
  - cmake ..

@@ -1,12 +1,10 @@
 #!/bin/sh
-# this assumes travis-ci will run: ./configure & make & make test
+# Install FMACM custom dependencies
 
-# Must install log4cplus from git tag
+# log4cplus (from git zip file)
 wget --no-check-certificate https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_1/log4cplus-1.2.1.zip
 unzip log4cplus-1.2.1.zip
 cd log4cplus-1.2.1
 ./configure; make; sudo make install
 cd ..
 
-# Run cmake, but not in a build dir b/c travis-ci doens't support that so easily
-# cmake .

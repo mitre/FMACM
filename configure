@@ -8,7 +8,5 @@ cd log4cplus-1.2.1
 ./configure; make; sudo make install
 cd ..
 
-# Run cmake
-mkdir build
-cd build
-cmake ..
+# Run cmake, but not in a build dir b/c travis-ci doens't support that so easily
+cmake .

@@ -5,10 +5,11 @@ os:
  - linux
 compiler:
  - gcc
-before_script:
+before_install:
  - chmod +x ./configure
-script:
+install:
  - ./configure
+script:
  - mkdir build
  - cd build
  - cmake ..

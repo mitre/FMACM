@@ -16,4 +16,5 @@ script:
  - make
  - cd ..
 after_script:
+ - export LD_LIBRARY_PATH=/usr/local/lib/   # this is needed to ensure run-time linking occurs
  - bin/FMACM --buildinfo

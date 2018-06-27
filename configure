@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Install FMACM custom dependencies
 
 # log4cplus (from git zip file)
@@ -6,5 +6,6 @@ wget --no-check-certificate https://github.com/log4cplus/log4cplus/releases/down
 unzip log4cplus-1.2.1.zip
 cd log4cplus-1.2.1
 ./configure; make; sudo make install
+export LD_LIBRARY_PATH=/usr/local/lib/   # this is needed to ensure run-time linking occurs
 cd ..
 

@@ -9,4 +9,4 @@ cd log4cplus-1.2.1
 cd ..
 
 # Run cmake, but not in a build dir b/c travis-ci doens't support that so easily
-cmake .
+# cmake .

@@ -22,16 +22,53 @@
 
 log4cplus::Logger AircraftControl::logger = log4cplus::Logger::getInstance("AircraftControl");
 
-Units::Frequency AircraftControl::calculateThrustGain() {
+AircraftControl::AircraftControl()
+        : speedBrakeGain(0.0),
+          mBadaWithCalc(nullptr)
+{
+}
+
+void AircraftControl::init(BadaWithCalc &aircraftPerformance,
+                           const Units::Length &altAtFAF,
+                           const Units::Angle &maxBankAngle,
+                           const PrecalcWaypoint &finalWaypoint)
+{
+    mMaxBankAngle = maxBankAngle;
+    mAltAtFAF = altAtFAF;
+    mBadaWithCalc = &aircraftPerformance;
+
+    ac_mass = mBadaWithCalc->mAircraftMass;
+    wing_area = mBadaWithCalc->aerodynamics.S;
+    mFinalWaypoint = finalWaypoint;
+}
+
+ControlCommands AircraftControl::calculateControlCommands(const Guidance &guidance,
+                                                          const EquationsOfMotionState& eqmState,
+                                                          const WindStack &wind_x,
+                                                          const WindStack &wind_y) {
+    const Units::Angle phi = Units::ZERO_ANGLE;
+    const Units::Force thrust = Units::ZERO_FORCE;
+    const Units::Angle gamma = Units::ZERO_ANGLE;
+    const Units::Speed trueAirspeed = Units::ZERO_SPEED;
+    const double speedBrake = 0;
+    const int flapMode = 0;
+
+    return ControlCommands(phi, thrust, gamma, trueAirspeed, speedBrake, flapMode);
+}
+
+Units::Frequency AircraftControl::calculateThrustGain()
+{
     const double zeta = 0.88;
     naturalFrequency = Units::HertzFrequency(0.20);
-    const Units::Frequency thrustGain = 2 * zeta * this->naturalFrequency; // new thrust gain, roughly .352
+    const Units::Frequency thrustGain = 2 * zeta * naturalFrequency; // new thrust gain, roughly .352
     return thrustGain;
 }
 
-
-void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmState, Units::Force &lift,
-                                            Units::Force &drag, int& newFlapConfiguration) {
+void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmState,
+                                            Units::Force &lift,
+                                            Units::Force &drag,
+                                            int& newFlapConfiguration)
+{
     Units::Speed v_cas = ATMOSPHERE()->TAS2CAS(Units::MetersPerSecondSpeed(eqmState.V),Units::MetersLength(eqmState.h)); // current indicated airspeed in meters per second
 
     // Get temp, density, and pressure
@@ -43,8 +80,13 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
     // Get AC Configuration
     double cd0,cd2;
     double gear;
-    aircraftPerformance->getConfig(v_cas,eqmState.h,mAltAtFAF,
-                                   (int) (eqmState.flapConfig+0.1),cd0,cd2,gear,newFlapConfiguration);
+    mBadaWithCalc->getConfig(v_cas,
+                             eqmState.h,
+                             eqmState.flapConfig + 0.1,
+                             cd0,
+                             cd2,
+                             gear,
+                             newFlapConfiguration);
 
     // Lift and Drag Estimate Calculations
     double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho * Units::sqr(eqmState.V) * wing_area * cos(eqmState.phi));
@@ -63,15 +105,19 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
  *
  * Override this method to provide alternate implemenations.
  */
-void AircraftControl::calculateSensedWind(const WindStack &wind_x, const WindStack &wind_y,
-                                          const Units::MetersLength &altitude) {
+void AircraftControl::calculateSensedWind(const WindStack &wind_x,
+                                          const WindStack &wind_y,
+                                          const Units::MetersLength &altitude)
+{
     // Get Winds and Wind Gradients at altitude
     ATMOSPHERE()->calcWindGrad(altitude, wind_x, Vwx, dVwx_dh);
     ATMOSPHERE()->calcWindGrad(altitude, wind_y, Vwy, dVwy_dh);
 
 }
 
-Units::Angle AircraftControl::doLateralControl(const Guidance& guidance, const EquationsOfMotionState& eqmState) {
+Units::Angle AircraftControl::doLateralControl(const Guidance& guidance,
+                                               const EquationsOfMotionState& eqmState)
+{
     const Units::InvertedLength k_xtrk = Units::PerMeterInvertedLength(5e-4);  // meters^-1
     const double k_trk = 3;      // unitless
 
@@ -141,13 +187,4 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance, const E
     return phi_com;
 }
 
-void AircraftControl::init(BadaWithCalc &aircraftPerformance, const Units::Length &altAtFAF,
-                           const Units::Angle &mMaxBankAngle, const PrecalcWaypoint &finalWaypoint) {
-    this->mMaxBankAngle = mMaxBankAngle;
-    this->mAltAtFAF = altAtFAF;
-    this->aircraftPerformance = &aircraftPerformance;
-    this->ac_mass = this->aircraftPerformance->ac_mass;
-    this->wing_area = this->aircraftPerformance->aerodynamics.S;
-    this->mFinalWaypoint = finalWaypoint;
-}
 

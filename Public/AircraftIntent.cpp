@@ -99,6 +99,8 @@ void AircraftIntent::initialize()
         fms.LatCp[c] = Units::ZERO_ANGLE;
         fms.LonCp[c] = Units::ZERO_ANGLE;
     }
+
+    plannedCruiseAltitude = Units::ZERO_LENGTH;
 }
 
 // assignment operator overload
@@ -369,10 +371,15 @@ Units::MetersLength AircraftIntent::getWaypointY(unsigned int i) const {
     return Units::MetersLength(waypoint_y[i]);
 }
 
+Units::MetersLength AircraftIntent::getPlannedCruiseAltitude() {
+    return Units::MetersLength(plannedCruiseAltitude);
+}
+
 // helper method for copy constructor and assignment operator
 void AircraftIntent::copy(const AircraftIntent &in)
 {
     id = in.id;
+    plannedCruiseAltitude = in.plannedCruiseAltitude;
     number_of_waypoints = in.number_of_waypoints;
     mIsLoaded = in.mIsLoaded;
 
@@ -434,11 +441,13 @@ bool AircraftIntent::load(DecodedStream *input)
     register_var("MachTransitionCas",&machtransitioncasload);
 
 
-    // TODO:Get these scenario parameters removed.  They are not
+    // TODO:Remove scenario parameter plannedCruiseMach. It is not
     // actually used.
 
     register_var("plannedCruiseMach",&tmp1);
-    register_var("plannedCruiseAltitude",&tmp2);
+
+    // plannedCruiseAltitude is used for kinematic vertical path prediction
+    register_var("plannedCruiseAltitude",&tmp2, true);
 
     // register the waypoint list
     register_named_list("waypoints",&waypoint_list, true);
@@ -447,6 +456,7 @@ bool AircraftIntent::load(DecodedStream *input)
     mIsLoaded = complete();
 
     mach_transition_cas = machtransitioncasload;
+    plannedCruiseAltitude = Units::FeetLength(tmp2);
 
     // loads all the waypoint information from the list
     load_waypoints_from_list(waypoint_list);

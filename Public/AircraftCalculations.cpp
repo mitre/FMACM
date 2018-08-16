@@ -413,7 +413,7 @@ void AircraftCalculations::crossTrackError(Units::Length x,
     // dummy values
 
     cte = Units::Infinity();
-    nextTrajIx = -INFINITY;
+    nextTrajIx = (int)-INFINITY;
 
     if (trajIx >= hTraj.size() - 1) {
         // No segment going to first point on route (last trajectory point)

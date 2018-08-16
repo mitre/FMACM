@@ -20,15 +20,13 @@
 #include "utility/constants.h"
 #include <cstdlib>
 
-using namespace std;
-
-BadaWithCalc::BadaWithCalc(void)
+BadaWithCalc::BadaWithCalc()
 {
-    cout << "BadaWithCalc.cpp: Implement this class!" << endl;
-    ac_mass = mass.m_ref;   // default
+    std::cout << "BadaWithCalc.cpp: Implement this class!" << std::endl;
+    mAircraftMass = mass.m_ref;   // default
 }
 
-BadaWithCalc::~BadaWithCalc(void)
+BadaWithCalc::~BadaWithCalc()
 {
 }
 
@@ -38,7 +36,8 @@ BadaWithCalc::~BadaWithCalc(void)
  * 1.  Loads the data files by calling init(), if not already done.
  * 2.  Sets ac_mass based on the percentile.
  */
-void BadaWithCalc::getAircraftParameters(string aircraft_type, double mass_percentile)
+void BadaWithCalc::getAircraftParameters(std::string aircraft_type,
+                                         double      mass_percentile)
 {
 // INPUTS:
 //   aircraft type
@@ -48,8 +47,6 @@ void BadaWithCalc::getAircraftParameters(string aircraft_type, double mass_perce
 //       ac.S: m^2
 //       ac.__.cd0,cd2,gear: unitless
 //       ac.__.Vstall: kts (CAS)
-
-
 }
 
 
@@ -65,10 +62,9 @@ void BadaWithCalc::getAircraftParameters(string aircraft_type, double mass_perce
 // OUTPUTS:
 //   cd0,cd2,gear: drag coefficients for the specific configuration
 void BadaWithCalc::getConfig(
-    Units::Speed V_cas, /** [in] Calibrated airspeed in knots */
-        Units::Length alt,         /** [in] Altitude in meters */
-        Units::Length altAtFAF,    /** [in] Altitude at final approach fix in meters */
-    int modeLast,       /** [in] previous flap configuration (0-3) */
+        const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
+        const Units::Length& altitude,    /** [in] Altitude in meters */
+        int modeLast,       /** [in] previous flap configuration (0-3) */
         double &cd0,        /** [out] parasitic drag coefficient */
         double &cd2,        /** [out] induced drag coefficient */
         double &gear,       /** [out] landing gear drag coefficient */
@@ -92,9 +88,8 @@ void BadaWithCalc::getConfig(
 // OUTPUTS:
 //   cd0,cd2,gear: drag coefficients for the specific configuration
 void BadaWithCalc::getConfigTrajGen(
-	Units::Speed V_cas,     /** [in] Calibrated airspeed in knots */
-        double alt,             /** [in] Altitude in meters */
-        Units::Length altAtFAF, /** [in] Altitude at final approach fix */
+        const Units::Speed& velocity_cas,     /** [in] Calibrated airspeed in knots */
+        const Units::Length& altitude,             /** [in] Altitude in meters */
         double &cd0,            /** [out] parasitic drag coefficient */
         double &cd2,            /** [out] induced drag coefficient */
         double &gear,           /** [out] landing gear drag coefficient */
@@ -116,47 +111,39 @@ void BadaWithCalc::getConfigTrajGen(
 // OUTPUTS:
 //   mode: configuration
 void BadaWithCalc::getConfigForDrag(
-    Units::Speed V_cas, /** [in] Calibrated airspeed in knots */
-        double alt,         /** [in] Altitude in meters */
-        double altAtFAF,    /** [in] Altitude at final approach fix in meters */
+        const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
+        const Units::Length& altitude,         /** [in] Altitude in meters */
         int modeLast,       /** [in] previous flap configuration (0-3) */
-        int &mode           /** [out] flap configuration (0-3):
-            0=cruise, 1=approach, 2=landing, 3=gear down */)
+        int &mode)           /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
 {
-	
+
 }
 
 
 // gets maximum aircraft thrust, takes input as altitude in Meters
-double BadaWithCalc::getMaxThrust(Units::Length h, int mode, string type)
+double BadaWithCalc::getMaxThrust(const Units::Length& altitude,
+                                  int mode,
+                                  std::string type)
 {
-	double Tmax = 0;
-
-	return Tmax;
+    return 0;
 }
 
-void BadaWithCalc::setFlapsSpeeds(string acType) {
-
+void BadaWithCalc::setFlapSpeeds(const std::string &aircraftType)
+{
 }
 
 
 BadaWithCalc& BadaWithCalc::operator=(const BadaWithCalc &obj)
 {
+    if (this != &obj)
+    {
+        Bada::operator=(obj);
 
-	// Generic = operator.
-	//
-	// obj:BadaWithCalc object to set with.
-	// returns this object with new values.
+        mAircraftMass = obj.mAircraftMass;
+        mFlapSpeeds = obj.mFlapSpeeds;
+    }
 
-	if (this != &obj)
-	{
-		this->Bada::operator=(obj);
-
-		this->ac_mass = obj.ac_mass;
-		this->flapsSpeeds = obj.flapsSpeeds;
-	}
-
-	return *this;
+    return *this;
 
 }
 
@@ -164,18 +151,18 @@ BadaWithCalc& BadaWithCalc::operator=(const BadaWithCalc &obj)
 bool BadaWithCalc::operator==(const BadaWithCalc &obj) const
 {
 
-  bool match = this->Bada::operator==(obj);
+    bool match = Bada::operator==(obj);
 
-  match = match && (this->ac_mass == obj.ac_mass);
+    match = match && (mAircraftMass == obj.mAircraftMass);
 
-  match = match && (this->flapsSpeeds.VappMin == obj.flapsSpeeds.VappMin);
-  match = match && (this->flapsSpeeds.VappMax == obj.flapsSpeeds.VappMax);
-  match = match && (this->flapsSpeeds.VlndMin == obj.flapsSpeeds.VlndMin);
-  match = match && (this->flapsSpeeds.VlndMax == obj.flapsSpeeds.VlndMax);
-  match = match && (this->flapsSpeeds.VgearMin == obj.flapsSpeeds.VgearMin);
-  match = match && (this->flapsSpeeds.VgearMax == obj.flapsSpeeds.VgearMax);
+    match = match && (mFlapSpeeds.VappMin == obj.mFlapSpeeds.VappMin);
+    match = match && (mFlapSpeeds.VappMax == obj.mFlapSpeeds.VappMax);
+    match = match && (mFlapSpeeds.VlndMin == obj.mFlapSpeeds.VlndMin);
+    match = match && (mFlapSpeeds.VlndMax == obj.mFlapSpeeds.VlndMax);
+    match = match && (mFlapSpeeds.VgearMin == obj.mFlapSpeeds.VgearMin);
+    match = match && (mFlapSpeeds.VgearMax == obj.mFlapSpeeds.VgearMax);
 
-  return match;
+    return match;
 
 }
 
@@ -183,12 +170,12 @@ bool BadaWithCalc::operator==(const BadaWithCalc &obj) const
 bool BadaWithCalc::operator!=(const BadaWithCalc &obj) const
 {
 
-  // Generic not equals operator.
-  //
-  // obj:comparison object.
-  // returns true if obj doesn't match.
-  //         false if obj matches.
+    // Generic not equals operator.
+    //
+    // obj:comparison object.
+    // returns true if obj doesn't match.
+    //         false if obj matches.
 
-  return !this->operator==(obj);
+    return !operator==(obj);
 
 }

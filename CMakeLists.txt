@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(aaesim VERSION 2.0.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 2.1.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -33,8 +33,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 # cmake -DCMAKE_BUILD_TYPE=Release ..
 # cmake -DCMAKE_BUILD_TYPE=Debug ..
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O0 -g3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-sign-compare -O3 -g3")
+
+# Add stuff to turn on code coverage only if a Debug build
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(.cmake/CodeCoverage.cmake)
+    APPEND_COVERAGE_COMPILER_FLAGS()
+endif()
 
 # Create some common paths
 set (LOADER_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Loader)

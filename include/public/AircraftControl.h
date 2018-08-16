@@ -28,13 +28,24 @@
 /**
  * This class is really intended to be sub-classes to allow specialized behavior and gain values.
  */
-class AircraftControl {
+class AircraftControl
+{
 
 public:
-    AircraftControl() {
-        speedBrakeGain = 0.0;
-        aircraftPerformance = 0;
-    }
+    AircraftControl();
+
+    virtual void init(BadaWithCalc          &aircraftPerformance,
+                      const Units::Length   &altAtFAF,
+                      const Units::Angle    &mMaxBankAngle,
+                      const PrecalcWaypoint &finalWaypoint);
+
+     /**
+     * This should be reimplemented in a subclass.
+     */
+    virtual ControlCommands calculateControlCommands(const Guidance &guidance,
+                                                     const EquationsOfMotionState& eqmState,
+                                                     const WindStack &wind_x,
+                                                     const WindStack &wind_y);
 
     const Units::Frequency &getAltGain() const {
         return altGain;
@@ -55,21 +66,6 @@ public:
     const Units::Frequency &getThrustGain() const {
         return thrustGain;
     }
-
-    /**
-     * This should be reimplemented in a subclass.
-     */
-    virtual ControlCommands calculateControlCommands(const Guidance &guidance, const EquationsOfMotionState& eqmState, const WindStack &wind_x, const WindStack &wind_y) {
-        const Units::Angle phi = Units::ZERO_ANGLE;
-        const Units::Force thrust = Units::ZERO_FORCE;
-        const Units::Angle gamma = Units::ZERO_ANGLE;
-        const Units::Speed trueAirspeed = Units::ZERO_SPEED;
-        const double speedBrake = 0;
-        const int flapMode = 0;
-        return ControlCommands(phi,thrust,gamma,trueAirspeed,speedBrake,flapMode);
-    };
-
-    virtual void init(BadaWithCalc &aircraftPerformance, const Units::Length &altAtFAF, const Units::Angle &mMaxBankAngle, const PrecalcWaypoint &finalWaypoint);
 
 protected:
     /**
@@ -97,7 +93,7 @@ protected:
     double speedBrakeGain;
     Units::Angle mMaxBankAngle; // Maximum bank angle for dynamics and speed_on_pitch_control_dynamics calculations (parameter max_bank_angle)
     Units::Length mAltAtFAF;
-    BadaWithCalc *aircraftPerformance;
+    BadaWithCalc *mBadaWithCalc;
     PrecalcWaypoint mFinalWaypoint; // the last waypoint on the planned route
 
 private:

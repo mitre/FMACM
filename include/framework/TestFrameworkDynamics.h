@@ -157,7 +157,7 @@ public:
 	AircraftState state_vector;
 	bool model_loaded;
 
-	BadaWithCalc ac;
+	BadaWithCalc mBadaWithCalc;
 	Guidance prev_guidance; // previous Guidance to be used if no new command
 	Units::Length alt_thresh; // (m)
 	Units::Speed speed_thresh; // (m/s)

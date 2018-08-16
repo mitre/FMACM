@@ -97,6 +97,7 @@ public:
     const std::string& getWaypointName(unsigned int i) const;
     Units::MetersLength getWaypointX(unsigned int i) const;
     Units::MetersLength getWaypointY(unsigned int i) const;
+    Units::MetersLength getPlannedCruiseAltitude();
     const struct Fms& getFms() const;
     void setMachTransCas(const Units::Speed cas);
 
@@ -128,6 +129,7 @@ private:
     double                            waypoint_mach[MAX_NUM_WAYPOINTS];
 
     Units::Speed mach_transition_cas;
+    Units::MetersLength  plannedCruiseAltitude;
 
     int id;
     bool mIsLoaded;

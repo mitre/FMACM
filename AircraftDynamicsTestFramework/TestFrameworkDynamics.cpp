@@ -66,9 +66,9 @@ TestFrameworkDynamics::TestFrameworkDynamics(void)
 	altAtFAF = Units::FeetLength(-100.0);
 
 	// Default flaps speed values
-	
+
 	state.flapConfig = 0;
-	ac.setFlapsSpeeds("");
+	mBadaWithCalc.setFlapSpeeds("");
 }
 
 TestFrameworkDynamics::~TestFrameworkDynamics(void)
@@ -97,7 +97,7 @@ AircraftState TestFrameworkDynamics::update(const AircraftState state_in, const 
 	}
 
 	result_state = integrate(guidance_in);
-	
+
 	return result_state;
 }
 
@@ -121,7 +121,7 @@ AircraftState TestFrameworkDynamics::integrate(Guidance guidance_in)
 	{
 		dX = speed_on_pitch_control_dynamics(guidance_in);
 	}
-		
+
 	//Integrate the state:
 	X.x += dX.dx * dt;
 	X.y += dX.dy * dt;
@@ -162,9 +162,9 @@ AircraftState TestFrameworkDynamics::integrate(Guidance guidance_in)
 	int mode;
 	double gear;
 	Units::MetersLength state_h(state.h);
-	ac.getConfig(v_cas, state_h, altAtFAF, state.flapConfig, cd0, cd2, gear, mode);
-	Units::Force maxThrust = Units::NewtonsForce(ac.getMaxThrust(state_h, mode, "cruise"));
-	Units::Force minThrust = Units::NewtonsForce(ac.getMaxThrust(state_h, mode, "descent"));
+	mBadaWithCalc.getConfig(v_cas, state_h, state.flapConfig, cd0, cd2, gear, mode);
+	Units::Force maxThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h, mode, "cruise"));
+	Units::Force minThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h, mode, "descent"));
 
 	if(state.T > Units::NewtonsForce(maxThrust).value())
 	{
@@ -266,9 +266,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	// Limit temp so acos function doesn't give undefined value.
 
 	if (temp > 1.0)
-	  temp = 1.0;
+		temp = 1.0;
 	else if (temp < -1.0)
-	  temp = -1.0;
+		temp = -1.0;
 
 	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * CoreUtils::sign(Units::MetersPerSecondSpeed(Vw_perp).value());
 
@@ -303,9 +303,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	}
 
 	InternalObserver::getInstance()->cross_output(Units::MetersLength(x).value(),
-			Units::MetersLength(y).value(),
-			dynamic_cross, guidance_in.cross_track,guidance_in.psi, unlimited_phi_com,
-			Units::RadiansAngle(phi_com).value() );
+												  Units::MetersLength(y).value(),
+												  dynamic_cross, guidance_in.cross_track,guidance_in.psi, unlimited_phi_com,
+												  Units::RadiansAngle(phi_com).value() );
 
 	//% Vertical Control
 	Units::Speed hdot_ref = Units::FeetPerSecondSpeed(guidance_in.altitude_rate);
@@ -329,8 +329,8 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	//% Speed Control
 
 	Units::Speed tas_com = ATMOSPHERE()->CAS2TAS(
-                              Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed),
-			      h);   // GUIDANCE true airspeed
+			Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed),
+			h);   // GUIDANCE true airspeed
 	Units::Speed v_cas = ATMOSPHERE()->TAS2CAS(V, h); // current indicated airspeed in meters per second
 
 	//% Speed Error 
@@ -346,17 +346,17 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	ATMOSPHERE()->airDensity(h, rho, P_tmp);
 	// Don't bother converting P_tmp from kg/m^2 because we don't need it.
 
-	// Get AC Configuration
+	// Get mBadaWithCalc Configuration
 	double cd0,cd2;
 	int flapConfig_new;
 	double gear;
-	ac.getConfig(v_cas,h,altAtFAF,flapConfig,cd0,cd2,gear,flapConfig_new);
+	mBadaWithCalc.getConfig(v_cas, h, flapConfig, cd0, cd2, gear, flapConfig_new);
 
-	Units::Mass ac_mass = Units::KilogramsMass(ac.ac_mass);
-	Units::Area wing_area = Units::MetersArea(ac.aerodynamics.S);
+	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
+	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
 
 	// Lift and Drag Coefficients
-	//double 	cL = (2*ac.mass*G)/(rho*V^2*ac.S);
+	//double 	cL = (2*mBadaWithCalc.mass*G)/(rho*V^2*mBadaWithCalc.S);
 	// units of cL = kg * m / s^2 / (kg / m^3 * m^2 / s^2 * m^2) = unitless
 	double 	cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*Units::sqr(V)*wing_area*cos(phi));
 	//cD = cd0 + gear + cd2*cL^2;
@@ -375,28 +375,28 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	// Nominal Thrust (no acceleration) at desired speed 
 	Units::Force Tnom;
 	Tnom = ac_mass*vel_dot_com
-			+ D - ac_mass * Units::ONE_G_ACCELERATION*sin(gamma)
-			- ac_mass * V
-			* (weather->dVwx_dh * cos(psi) + weather->dVwy_dh * sin(psi))
-		    * sin(gamma)*cos(gamma);
+		   + D - ac_mass * Units::ONE_G_ACCELERATION*sin(gamma)
+		   - ac_mass * V
+			 * (weather->dVwx_dh * cos(psi) + weather->dVwy_dh * sin(psi))
+			 * sin(gamma)*cos(gamma);
 
 
 	Units::Force T_com = Tnom;
-	
+
 	// Thrust Limits
 	Units::Force maxThrust = Units::NewtonsForce(
-			ac.getMaxThrust(h, flapConfig_new, "cruise"));
+			mBadaWithCalc.getMaxThrust(h, flapConfig_new, "cruise"));
 	Units::Force minThrust = Units::NewtonsForce(
-			ac.getMaxThrust(h, flapConfig_new, "descent"));
+			mBadaWithCalc.getMaxThrust(h, flapConfig_new, "descent"));
 	speedBrakeCom = 0.0;
 
 	// Check Configuration if minThrust is Commanded
 	if(T_com < minThrust) {
 
 		T_com = minThrust;
-		
-		int mode_new = 0;	
-		ac.getConfigForDrag(v_cas,Units::MetersLength(h).value(),Units::MetersLength(altAtFAF).value(),flapConfig_new,mode_new);
+
+		int mode_new = 0;
+		mBadaWithCalc.getConfigForDrag(v_cas, Units::MetersLength(h), flapConfig_new, mode_new);
 
 		flapConfig_new = mode_new;
 
@@ -410,7 +410,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 		// Limit Thrust if T_com exceeds Max Thrust
 		if(T_com > maxThrust)
 			T_com = maxThrust;
-	
+
 	}
 
 	// Use speed brakes, if necessary
@@ -458,18 +458,18 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 			speedBrakeCom = 0.5;
 		}
 	}
-		
+
 	// calculate the first-order derivative of the state vector:
 	dX.dx = Units::MetersPerSecondSpeed(V*cos(gamma)*cos(psi) + weather->Vwx);
 	dX.dy = Units::MetersPerSecondSpeed(V*cos(gamma)*sin(psi) + weather->Vwy);
 	dX.dh = Units::MetersPerSecondSpeed(-V*sin(gamma));
 	dX.dV = (T-D)/ac_mass + Units::ONE_G_ACCELERATION*sin(gamma)
 			+ V*(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))
-			    *sin(gamma)*cos(gamma);
+			  *sin(gamma)*cos(gamma);
 	dX.dgamma = k_gamma*(gamma_com - gamma) -
-			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))*pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
+				(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))*pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
 	dX.dpsi = (-L*sin(phi)/(ac_mass*V*cos(gamma)) -
-			(weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
+			   (weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
 	dX.dT = k_t*(T_com - T);
 	dX.dphi = k_phi*(phi_com - phi);
 	dX.dspeedBrake = k_speedBrake * (speedBrakeCom - speedBrake);
@@ -492,19 +492,19 @@ bool TestFrameworkDynamics::is_loaded()
 }
 
 void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_in, Units::Length initialAltitude,
-			    Units::Speed initialIas, double initialMach, double start_time)
+								 Units::Speed initialIas, double initialMach, double start_time)
 {
 	setWeatherFromTime(Units::SecondsTime(start_time));
 
 	altAtFAF = Units::MetersLength(altAtFAF_in);
 
-        if (altAtFAF < Units::MetersLength(0.0)) {
-	  std::cout << "WARNING:FAF altitude " << Units::FeetLength(altAtFAF) << " < 0." << std::endl
-		    << "Probably was not initialized in precalculated trajectory." << std::endl;
+	if (altAtFAF < Units::MetersLength(0.0)) {
+		std::cout << "WARNING:FAF altitude " << Units::FeetLength(altAtFAF) << " < 0." << std::endl
+				  << "Probably was not initialized in precalculated trajectory." << std::endl;
 	}
 
-	ac.getAircraftParameters(ac_type_name, mass_percentile);
-	ac.setFlapsSpeeds(ac_type_name);
+	mBadaWithCalc.getAircraftParameters(ac_type_name, mass_percentile);
+	mBadaWithCalc.setFlapSpeeds(ac_type_name);
 
 	double ias_;
 
@@ -528,7 +528,7 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	state.gamma		= 0;
 	state.phi		= 0;
 
-	
+
 	// Determine whether aircraft is flying IAS or MACH
 
 	double ias_at_waypoint = Units::FeetPerSecondSpeed(initialIas).value(); //FPS
@@ -537,15 +537,15 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	if(initialMach != 0.0) //may fly MACH
 	{
 		//may need to do mach-cas transition:
-		double tas_from_ias = 
-		  Units::FeetPerSecondSpeed(ATMOSPHERE()->CAS2TAS(
-			     Units::FeetPerSecondSpeed(ias_at_waypoint),
-			     Units::FeetLength(altitude))).value();
+		double tas_from_ias =
+				Units::FeetPerSecondSpeed(ATMOSPHERE()->CAS2TAS(
+						Units::FeetPerSecondSpeed(ias_at_waypoint),
+						Units::FeetLength(altitude))).value();
 
 		double tas_from_mach = MachToTas(initialMach, altitude); //FPS
 		if(tas_from_ias <= tas_from_mach) //fly ias_at_waypoint
 		{
-			ias_ = ias_at_waypoint; 
+			ias_ = ias_at_waypoint;
 		}
 		else //fly MACH
 		{
@@ -560,14 +560,14 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	// Convert IAS to TAS
 
 	state.V	= Units::MetersPerSecondSpeed(ATMOSPHERE()->CAS2TAS(
-		      Units::FeetPerSecondSpeed(ias_),
-		      Units::MetersLength(state.h))).value();
+			Units::FeetPerSecondSpeed(ias_),
+			Units::MetersLength(state.h))).value();
 
 	// Determine Groundspeed
 	xdot = state.V*cos(state.psi)*cos(state.gamma)
-			+ Units::MetersPerSecondSpeed(weather->Vwx).value(); // mps
+		   + Units::MetersPerSecondSpeed(weather->Vwx).value(); // mps
 	ydot = state.V*sin(state.psi)*cos(state.gamma)
-			+ Units::MetersPerSecondSpeed(weather->Vwy).value(); // mps
+		   + Units::MetersPerSecondSpeed(weather->Vwy).value(); // mps
 
 	state.xd = xdot; // mps
 	state.yd = ydot; // mps
@@ -594,15 +594,15 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	ATMOSPHERE()->airDensity(state_h, rho, P_tmp);
 	// Don't bother converting P_tmp from kg/m^2 because we don't need it.
 
-	// Get AC Configuration
+	// Get mBadaWithCalc Configuration
 	double cd0,cd2;
 	int mode;
 	double gear;
-	ac.getConfig(ATMOSPHERE()->TAS2CAS(Units::MetersPerSecondSpeed(state.V), Units::MetersLength(state.h)),
-		     state_h, altAtFAF, 0,cd0,cd2,gear,mode);
+	mBadaWithCalc.getConfig(ATMOSPHERE()->TAS2CAS(Units::MetersPerSecondSpeed(state.V), Units::MetersLength(state.h)),
+				 state_h, 0, cd0, cd2, gear, mode);
 
-	Units::Mass ac_mass = Units::KilogramsMass(ac.ac_mass);
-	Units::Area wing_area = Units::MetersArea(ac.aerodynamics.S);
+	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
+	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
 
 	// Set values for flaps speed.
 
@@ -617,8 +617,8 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	// Nominal Thrust (no acceleration) at desired speed 
 	Units::Force Tnom = /*ac_mass*vel_dot_com + VELOCITY ERROR IS 0*/ D - ac_mass * Units::ONE_G_ACCELERATION * sin(asin(0.0/*gamma 0.0*/));// - ac_mass*V*(dVwx_dh*cos(psi) + dVwy_dh*sin(psi))*sin(gamma)*cos(gamma); REMOVED WIND
 	// new Thrust commands from model speed change MATLAB code 2/25
-	Units::Force maxThrust = Units::NewtonsForce(ac.getMaxThrust(state_h));
-	Units::Force minThrust = Units::NewtonsForce(ac.getMaxThrust(state_h, mode, "descent"));
+	Units::Force maxThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h));
+	Units::Force minThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h, mode, "descent"));
 	if(Tnom > maxThrust * maxThrustPercent)
 	{
 		Tnom = maxThrust * maxThrustPercent;
@@ -640,7 +640,7 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	Vw_para = Units::MetersPerSecondSpeed(0.0);
 	Vw_perp = Units::MetersPerSecondSpeed(0.0);
 
-} 
+}
 
 
 bool TestFrameworkDynamics::load(DecodedStream *input)
@@ -656,7 +656,7 @@ bool TestFrameworkDynamics::load(DecodedStream *input)
 	register_var("env_csv_file", &env_csv_file, false);
 
 	//do the actual reading:
-	results = complete(); 
+	results = complete();
 
 	if (ac_type_name.size() != 4) {
 		cout << "ac_type was not correct. Found: " << ac_type_name << endl;
@@ -705,8 +705,8 @@ void TestFrameworkDynamics::load_env_file(string env_csv_file) {
 		fgets(line, sizeof(line), env);
 		if (strlen(line) > 6) {
 			sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf",
-					&time, &distToGo, &Vwx, &Vwy,
-					&dVwx_dh, &dVwy_dh, &temperature);
+				   &time, &distToGo, &Vwx, &Vwy,
+				   &dVwx_dh, &dVwy_dh, &temperature);
 			weather = new Weather();
 			weather->Vwx = Units::MetersPerSecondSpeed(Vwx);
 			weather->Vwy = Units::MetersPerSecondSpeed(Vwy);
@@ -761,15 +761,15 @@ TestFrameworkDynamics::Weather TestFrameworkDynamics::getWeatherFromTime(double 
 // helper method to add a new guidance command to the pilot delay buffer
 void TestFrameworkDynamics::add_to_pilot_delay(Guidance guidance_in, double time)
 {
-  int delayed_time;
+	int delayed_time;
 
 #ifdef _LINUX_
-  delayed_time = (int) (round(time + Units::SecondsTime(
-		  Scenario::mRand.rayleighSample(
-				  TestFrameworkDynamics::pilot_delay_mean,
-				  TestFrameworkDynamics::pilot_delay_std)).value())+0.1);
+	delayed_time = (int) (round(time + Units::SecondsTime(
+			Scenario::mRand.rayleighSample(
+					TestFrameworkDynamics::pilot_delay_mean,
+					TestFrameworkDynamics::pilot_delay_std)).value())+0.1);
 #else
-  delayed_time = roundToInt(time + Units::SecondsTime(
+	delayed_time = roundToInt(time + Units::SecondsTime(
 		  Scenario::mRand.rayleighSample(
 				  TestFrameworkDynamics::pilot_delay_mean,
 				  TestFrameworkDynamics::pilot_delay_std)).value());
@@ -778,12 +778,12 @@ void TestFrameworkDynamics::add_to_pilot_delay(Guidance guidance_in, double time
 	// if the delay time is less than the current time, set back to current time
 	if( delayed_time < time )
 	{
-	  delayed_time = (int) (time+0.1);
+		delayed_time = (int) (time+0.1);
 	}
 
 	pilot_delay_buffer.insert(pair<int,Guidance>(delayed_time, guidance_in ));
 }
-	
+
 // helper method to get the current command from the delay buffer
 Guidance TestFrameworkDynamics::get_pilot_delay_guidance(Guidance prev_guidance, double time)
 {
@@ -867,9 +867,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	// Limit temp so the acos function doesn't give an undefined value.
 
 	if (temp > 1.0)
-	  temp = 1.0;
+		temp = 1.0;
 	else if (temp < -1.0)
-	  temp = -1.0;
+		temp = -1.0;
 
 	Units::Angle beta = Units::RadiansAngle(acos(temp)) * -1.0 * CoreUtils::sign(Units::MetersPerSecondSpeed(Vw_perp).value());
 
@@ -913,21 +913,22 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	ATMOSPHERE()->airDensity(h, rho, P_tmp);
 	// Don't bother converting P_tmp from kg/m^2 because we don't need it.
 
-	// Get AC Configuration
+	// Get mBadaWithCalc Configuration
 	double cd0,cd2;
 	int flapConfig_new;
 	double gear;
-	ac.getConfig(v_cas, h, altAtFAF,flapConfig,cd0,cd2,gear,flapConfig_new);
+	mBadaWithCalc.getConfig(v_cas, h, flapConfig, cd0, cd2, gear, flapConfig_new);
 
-	Units::Mass ac_mass = Units::KilogramsMass(ac.ac_mass);
-	Units::Area wing_area = Units::MetersArea(ac.aerodynamics.S);
+	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
+	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
 
 	// Lift and Drag Calculations
 	double cL = (2.*ac_mass * Units::ONE_G_ACCELERATION)/(rho*Units::sqr(V)*wing_area*cos(phi));
 	double cD = cd0 + gear + cd2 * pow(cL, 2);
 
-	if (speedBrake != 0.0)
-		cD = (1.0 + 0.6*speedBrake)*cD;
+	if (speedBrake != 0.0) {
+		cD = (1.0 + 0.6 * speedBrake) * cD;
+	}
 
 	Units::Force D = 1./2. * rho * cD * Units::sqr(V) * wing_area;
 	Units::Force L = 1./2. * rho * cL * Units::sqr(V) * wing_area;
@@ -936,9 +937,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Units::Speed tas_com = ATMOSPHERE()->CAS2TAS(ias_com, h);
 
 	Units::Force maxThrust = Units::NewtonsForce(
-			ac.getMaxThrust(h, flapConfig_new, "cruise"));
+			mBadaWithCalc.getMaxThrust(h, flapConfig_new, "cruise"));
 	Units::Force minThrust = Units::NewtonsForce(
-			ac.getMaxThrust(h, flapConfig_new, "descent"));
+			mBadaWithCalc.getMaxThrust(h, flapConfig_new, "descent"));
 
 	//Speed Management Method check
 	Units::Length alt_ref = Units::FeetLength(guidance_in.reference_altitude);
@@ -946,9 +947,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Units::Speed h_dot = Units::FeetPerSecondSpeed(guidance_in.altitude_rate);
 	Units::Force T_com = Units::NewtonsForce(0.0);
 	Units::Angle gamma_com = Units::RadiansAngle(0.0);
-	
+
 	// LEVEL FLIGHT - manage speed with thrust and altitude with pitch
-	if( levelFlight == true )
+	if (levelFlight)
 	{
 		Units::Speed ev = tas_com - V;
 		Units::Acceleration vDotCom = k_v * ev;
@@ -958,8 +959,8 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 				+ D
 				- ac_mass * Units::ONE_G_ACCELERATION*sin(gamma)
 				- ac_mass * V * (weather->dVwx_dh*cos(psi) +
-						weather->dVwy_dh*sin(psi))
-				*sin(gamma)*cos(gamma);
+								 weather->dVwy_dh*sin(psi))
+				  *sin(gamma)*cos(gamma);
 
 		// command a level altitude
 		gamma_com = Units::RadiansAngle(0.0);
@@ -971,7 +972,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 		}
 
 	}
-	// DESCENDING FLIGHT - manage altitude with thrust, speed with pitch
+		// DESCENDING FLIGHT - manage altitude with thrust, speed with pitch
 	else
 	{
 		double esf = AircraftCalculations::ESFconstantCAS(V, h);
@@ -1046,9 +1047,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 
 		if(e_alt > alt_thresh)
 		{
-		
-			int mode_new = 0;	
-			ac.getConfigForDrag(v_cas, Units::MetersLength(h).value(), Units::MetersLength(altAtFAF).value(),flapConfig_new,mode_new);
+
+			int mode_new = 0;
+			mBadaWithCalc.getConfigForDrag(v_cas, Units::MetersLength(h), flapConfig_new, mode_new);
 
 			if(mode_new == flapConfig_new && mode_new <= 2)
 			{
@@ -1057,11 +1058,11 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 				speedBrakeCounter = speedBrakeCounter + 1;
 			}
 
-			flapConfig_new = mode_new; 
+			flapConfig_new = mode_new;
 		}
 		minThrustCounter = minThrustCounter + 1;
-	} 
-	else 
+	}
+	else
 	{
 		minThrustCounter = 0.0;
 	}
@@ -1085,8 +1086,8 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 			speedBrakeCounter = speedBrakeCounter + 1;
 			speedBrakeCom = 0.5;
 		}
-	} 
-	
+	}
+
 
 	//% calculate the firsr-order derivative of the state vector:
 	//Wind speed needs to be checked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1097,9 +1098,9 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 			+ V*(weather->dVwx_dh*cos(psi) + weather->dVwy_dh*sin(psi))
 			  *sin(gamma)*cos(gamma);
 	dX.dgamma = k_gamma * (gamma_com - gamma) -
-			(weather->dVwx_dh*cos(psi) + weather->dVwy_dh * sin(psi)) * pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
+				(weather->dVwx_dh*cos(psi) + weather->dVwy_dh * sin(psi)) * pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
 	dX.dpsi = (-L*sin(phi)/(ac_mass*V*cos(gamma))
-			- (weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
+			   - (weather->dVwx_dh*sin(psi) - weather->dVwy_dh*cos(psi))*tan(gamma)) * Units::ONE_RADIAN_ANGLE;
 	dX.dT = k_t*(T_com - T);
 	dX.dphi = k_phi*(phi_com - phi);
 	dX.dspeedBrake = k_speedBrake*(speedBrakeCom - speedBrake);

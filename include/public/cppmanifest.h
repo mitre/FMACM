@@ -74,15 +74,16 @@ namespace cppmanifest {
            return 0;
    }
 
-   static std::string getVersion() {
-       std::string verStr(CPPMANIFEST_VERSION_STR);
-       bool stripLastChar = verStr.find("-") == verStr.length() - 1;
-       if (stripLastChar) {
-           // dump the last char
-           verStr.resize(verStr.find("-"));
-       }
-       return verStr;
-   }
+   // Not needed by AAESim
+//   static std::string getVersion() {
+//       std::string verStr(CPPMANIFEST_VERSION_STR);
+//       bool stripLastChar = verStr.find("-") == verStr.length() - 1;
+//       if (stripLastChar) {
+//           // dump the last char
+//           verStr.resize(verStr.find("-"));
+//       }
+//       return verStr;
+//   }
 }
 
 #endif

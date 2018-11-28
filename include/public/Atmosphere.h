@@ -81,7 +81,7 @@ public:
 	Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Length alt) const;
 
 	// method to calculate the MACH to IAS transition
-	Units::Length getMachIASTransition(const Units::Speed ias, const double mach) const;
+	Units::Length GetMachIASTransition(const Units::Speed &ias, const double &mach) const;
 
 	// method to convert mach to ias-ias in meters per second.
 	Units::Speed machToIAS(const double mach, const Units::Length alt) const;

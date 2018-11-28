@@ -24,7 +24,7 @@ class BadaWithCalc : public Bada
 {
 public:
     // Set enum values for different modes
-    enum FlapConfiguration
+    enum FlapConfiguration // AAES-771 use this enum fully
     {
         CRUISE = 0,
         APPROACH = 1,
@@ -61,10 +61,11 @@ public:
      */
     void getConfigTrajGen(const Units::Speed&  airspeed,     /** [in] Calibrated airspeed in knots */
                           const Units::Length& altitude,             /** [in] Altitude in meters */
+                          const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
                           double &cd0,            /** [out] parasitic drag coefficient */
                           double &cd2,            /** [out] induced drag coefficient */
                           double &gear,           /** [out] landing gear drag coefficient */
-                          int &mode);             /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
+                          int &mode) const;             /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
 
     /**
      * getConfig() calculates drag coefficients and increments flap
@@ -72,11 +73,12 @@ public:
      */
     void getConfig(const Units::Speed& airspeed, /** [in] Calibrated airspeed in knots */
                    const Units::Length& altitude,         /** [in] Altitude in meters */
+                   const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
                    int modeLast,       /** [in] previous flap configuration (0-3) */
                    double &cd0,        /** [out] parasitic drag coefficient */
                    double &cd2,        /** [out] induced drag coefficient */
                    double &gear,       /** [out] landing gear drag coefficient */
-                   int &mode);         /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
+                   int &mode) const;         /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
 
     /**
      * getConfigForDrag() determines when flap configuration mode
@@ -84,8 +86,9 @@ public:
      */
     void getConfigForDrag(const Units::Speed&  airspeed, /** [in] Calibrated airspeed in knots */
                           const Units::Length& altitude,     /** [in] Altitude in meters */
+                          const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
                           int                  modeLast,     /** [in] previous flap configuration (0-3) */
-                          int&                 mode);        /** [out] flap configuration (0-3):
+                          int&                 mode) const;        /** [out] flap configuration (0-3):
                                                                 0=cruise, 1=approach, 2=landing, 3=gear down */
 
     /**
@@ -93,7 +96,7 @@ public:
      */
     double getMaxThrust(const Units::Length& altitude,          /** [in] altitude */
                         int                  mode = 0,          /** [in] flap configuration */
-                        std::string          type = "cruise");  /** [in] "cruise" or "descent" */
+                        std::string          type = "cruise") const;  /** [in] "cruise" or "descent" */
 
     /**
      * Populate the flapsSpeeds structure based on
@@ -127,8 +130,11 @@ public:
 
 
 private:
-    FlapConfiguration getFlapConfiguration(const Units::Speed&  airspeed,
-                                           const Units::Length& altitude);
+    FlapConfiguration getFlapConfiguration(const Units::Speed&  airspeed, /** [in] Calibrated airspeed */
+                                           const Units::Length& altitude, /** [in] Altitude */
+                                           const Units::Length& altitude_faf /** [in] Altitude at final approach fix */) const;
 
     double massFactor();
+
+    bool CloseToFinalApproachFixAltitude(const Units::Length &altitude, const Units::Length &altitude_faf) const;
 };

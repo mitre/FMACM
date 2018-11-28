@@ -79,24 +79,32 @@ bool AircraftCalculations::getPosFromPathLength(const Units::Length& dist_in,
         }
         else if(traj_in[index].segment == "turn")
         {
-            Units::Length radius = Units::MetersLength(traj_in[index].turns.radius);
-            Units::UnsignedAngle start = Units::UnsignedRadiansAngle(traj_in[index].turns.q_start);
-            Units::UnsignedAngle end = Units::UnsignedRadiansAngle(traj_in[index].turns.q_end);
+            if ((dist_in - Units::MetersLength(traj_in[index].L) ) < Units::MetersLength(3))
+            {
+                x_out = Units::MetersLength(traj_in[index].x);
+                y_out = Units::MetersLength(traj_in[index].y);
+                course_out = Units::UnsignedRadiansAngle(traj_in[index].course) + Units::PI_RADIANS_ANGLE;
+            } else {
+                Units::Length radius = Units::MetersLength(traj_in[index].turns.radius);
+                Units::UnsignedAngle start = Units::UnsignedRadiansAngle(traj_in[index].turns.q_start);
+                Units::UnsignedAngle end = Units::UnsignedRadiansAngle(traj_in[index].turns.q_end);
 
-            // calculate course change between the start and end of turn
-            Units::SignedRadiansAngle course_change = convertPitoPi(end - start);
+                // calculate course change between the start and end of turn
+                Units::SignedRadiansAngle course_change = convertPitoPi(end - start);
 
-            // calculate difference in distance
-            Units::Angle delta = Units::RadiansAngle((dist_in - Units::MetersLength(traj_in[index].L))/radius);
+                // calculate difference in distance
+                Units::Angle delta = Units::RadiansAngle((dist_in - Units::MetersLength(traj_in[index].L)) / radius);
 
-            // calculate the theta of the turn
-            Units::Angle theta = start + delta * CoreUtils::sign(course_change.value());
+                // calculate the theta of the turn
+                Units::Angle theta = start + delta * CoreUtils::sign(course_change.value());
 
-            // calculate X and Y positions
-            x_out = Units::MetersLength(traj_in[index].turns.x_turn) + radius*cos(theta);
-            y_out = Units::MetersLength(traj_in[index].turns.y_turn) + radius*sin(theta);
+                // calculate X and Y positions
+                x_out = Units::MetersLength(traj_in[index].turns.x_turn) + radius * cos(theta);
+                y_out = Units::MetersLength(traj_in[index].turns.y_turn) + radius * sin(theta);
 
-            course_out = AircraftCalculations::convert0to2Pi(theta - Units::PI_RADIANS_ANGLE/2.0 * CoreUtils::sign(course_change.value()));
+                course_out = AircraftCalculations::convert0to2Pi(
+                        theta - Units::PI_RADIANS_ANGLE / 2.0 * CoreUtils::sign(course_change.value()));
+            }
         }
         traj_index = index;
         return true;
@@ -213,7 +221,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x, const Uni
         double lx = (Units::MetersLength(x)).value();
         double ly = (Units::MetersLength(y)).value();
 
-        if (pow(lx-(hTraj[nextTrajIx]).x, 2) + pow(ly-(hTraj[nextTrajIx]).y, 2) < 25) {
+        if (pow(lx-(hTraj[nextTrajIx]).x, 2) + pow(ly-(hTraj[nextTrajIx]).y, 2) < 9) {
             dist = Units::MetersLength(hTraj[nextTrajIx].L);
             trk = AircraftCalculations::convert0to2Pi(Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
             return;
@@ -397,7 +405,10 @@ void AircraftCalculations::crossTrackError(Units::Length x,
     //  If the orientation of the points center of turn, turn stop, position
     //  does not have the opposite orientation, return a large number for cte.
     //  If the conditions are met, then return the distance from the turn
-    //  center minus the radius for cte.
+    //  center minus the radius for cte.  It is possible for two sequential
+    //  turn segments to be slightly misaligned so that a position could be
+    //  after one segment and before another segment.  In this case, the
+    //  position will be considered as on the next segment.
     //
     //  Straight Segment:
     //  Straight segments could have a small turn, and still be considered
@@ -409,6 +420,10 @@ void AircraftCalculations::crossTrackError(Units::Length x,
     //  the distance from the position to the beginning of the segment
     //  (preceding horizontal trajectory point) is returned for cte and the
     //  horizontal trajectory point is returned for nextTrajIx.
+    //
+    //  In either case, the preceding segment could be of the other type and
+    //  a gap could exist.  Must test if in the gap and not within the
+    //  preceding segment.
 
     // dummy values
 
@@ -442,6 +457,7 @@ void AircraftCalculations::crossTrackError(Units::Length x,
         double dy = Units::MetersLength(y).value();
 
         // determine orientation of turn.  If crossproduct is zero, then points are colinear
+        // sign(P0, P1, p2) i.e., center, start, end.
         double crossProdSign0 = (y0 - y1) * x2 + (x1 - x0) * y2 + (x0 * y1 - x1 * y0);
         if (crossProdSign0 == 0) // zero length turn
             return;
@@ -449,8 +465,36 @@ void AircraftCalculations::crossTrackError(Units::Length x,
         // determine orientation of turn center, start turn, position
         double crossProdSign1 = (y0 - y1) * dx + (x1 - x0) * dy + (x0 * y1 - x1 * y0);
         if (((crossProdSign0 > 0) && (crossProdSign1 < 0)) || ((crossProdSign0 < 0)
-                                                               && (crossProdSign1 > 0)))
+                                                               && (crossProdSign1 > 0))) {
+            // position is before start turn
+            // need to test if not in previous segment, i.e. in the V between two segments (see AAES-360)
+            if (hTraj[trajIx+1].segment == "turn")
+            {
+                double x3 = hTraj[trajIx+1].turns.x_turn;
+                double y3 = hTraj[trajIx+1].turns.y_turn;
+                double crossProdSign3 = (y3 - y1) * dx + (x1 - x3) * dy + (x3 * y1 - x1 * y3);
+                if (((crossProdSign3 > 0) && (crossProdSign1 < 0)) || ((crossProdSign3 < 0)
+                                                                      && (crossProdSign1 > 0)))
+                { // not in previous section - so calculate error
+                    nextTrajIx = trajIx;
+                    cte = abs(Units::MetersLength(sqrt(pow(x0 - dx, 2) + pow(y0 - dy, 2))) -
+                              Units::MetersLength(hTraj[trajIx].turns.radius));
+                } // otherwise return not in segment
+            } else { // previous segment is straight
+                // Use Pythagorean Theorem
+                if (trajIx >= hTraj.size()-2)
+                    return;
+                double x3 = hTraj[trajIx+2].x;
+                double y3 = hTraj[trajIx+2].y;
+                if (pow(x3 - dx, 2) + pow(y3 - dy, 2) >
+                        (pow(x1 - dx, 2) + pow(y1 - dy, 2) + pow(x3 - x1, 2) + pow(y3 - y1, 2))) {
+                    // not in preceding segment so calculate cte
+                    cte = abs(Units::MetersLength(sqrt(pow(x1 - dx, 2) + pow(y1 - dy, 2))));
+                    nextTrajIx = trajIx;
+                }
+            }
             return; // position is before start turn
+        }
 
         double crossProdSign2 = (y0 - y2) * dx + (x2 - x0) * dy + (x0 * y2 - x2 * y0);
         if (((crossProdSign1 > 0) && (crossProdSign2 > 0)) || ((crossProdSign1 < 0)
@@ -491,16 +535,31 @@ void AircraftCalculations::crossTrackError(Units::Length x,
 
         double c1 = vx * wx + vy * wy;
         if ( c1 < 0 ) { // before start of segment
-            // See if in preceeding segment
+            // See if in preceding segment
             if (trajIx+2 < hTraj.size()) {
-                double x2 = hTraj[trajIx+2].x;
-                double y2 = hTraj[trajIx+2].y;
-                double ux = x2 - x0;
-                double uy = y2 - y0;
-                double c3 = ux * wx + uy * wy;
-                if (c3 >= 0) {
-                    // position is in the preceeding segment
-                    return;
+                if (hTraj[trajIx+1].segment == "straight") {
+                    double x2 = hTraj[trajIx + 2].x;
+                    double y2 = hTraj[trajIx + 2].y;
+                    double ux = x2 - x0;
+                    double uy = y2 - y0;
+                    double c3 = ux * wx + uy * wy;
+                    if (c3 >= 0) {
+                        // position is in the preceding segment
+                        return;
+                    }
+                } else { // previous segment is turn}
+                    double x3 = hTraj[trajIx].turns.x_turn; // turn center
+                    double y3 = hTraj[trajIx].turns.y_turn;
+                    double x2 = hTraj[trajIx+1].x;          // start turn
+                    double y2 = hTraj[trajIx+1].y;
+                    double crossProdSign0 = (y3 - y0) * x2 + (x0 - x3) * y2 + (x3 * y0 - x0 * y3);
+                    if (crossProdSign0 == 0) // zero length turn
+                        return;
+                    double crossProdSign1 = (y3 - y0) * dx + (x0 - x3) * dy + (x3 * y0 - x0 * y3);
+                    if (((crossProdSign0 > 0) && (crossProdSign1 > 0)) ||
+                        ((crossProdSign0 < 0) && (crossProdSign1 < 0))) {
+                        return; // in previous section
+                    }
                 }
             }
             // Not in preeceding segment so include with this segment

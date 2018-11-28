@@ -58,7 +58,7 @@ public:
 
     void processSpeedConstraints(Units::Speed speed_in);
 
-    const std::string& getName();
+    const std::string& getName() const;
     void setName(const std::string name_in);
 
     Units::Angle getLatitude() const;
@@ -127,7 +127,7 @@ private:
     Units::Length rf_turn_arc_radius;
 };
 
-inline const std::string& Waypoint::getName() {
+inline const std::string& Waypoint::getName() const {
     return name;
 }
 
@@ -239,3 +239,7 @@ inline Units::Length Waypoint::getRfTurnArcRadius() const {
 inline void Waypoint::setRfTurnArcRadius(const Units::Length &rf_turn_radius_in) {
     rf_turn_arc_radius = rf_turn_radius_in;
 }
+
+std::ostream& operator<<(std::ostream &out, const Waypoint &waypoint);
+std::ostream& operator<<(std::ostream &out, const std::list<Waypoint> &waypoints);
+

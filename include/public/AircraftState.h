@@ -22,6 +22,7 @@
 #include <UnsignedAngle.h>
 #include <string>
 #include "Speed.h"
+#include <Frequency.h>
 
 
 // Aircraft data storage class, for the purpose of the various coversion methods the internal values are assumed to be in feet
@@ -92,18 +93,14 @@ public:
 	double x, y, z; //position (ft)
 	double xd, yd, zd; //speed (ft/s)
 	double xdd, ydd, zdd; //acceleration (f/s^2)
-	double gamma; 
-
-
-	// Additional variables required by sense & avoid algorithm server
-	// 
-
+	double gamma;
 	double Vwx, Vwy; // true wind direction meters/second
 	double Vw_para, Vw_perp; // true wind factors meters/second
+    Units::Frequency Vwx_dh, Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
 
 	double psi; // aircraft psi measured from east counter-clockwise
 
-	double distToGo; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
+	double m_distance_to_go; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
 
 
 private:

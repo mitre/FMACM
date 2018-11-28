@@ -371,7 +371,7 @@ Units::MetersLength AircraftIntent::getWaypointY(unsigned int i) const {
     return Units::MetersLength(waypoint_y[i]);
 }
 
-Units::MetersLength AircraftIntent::getPlannedCruiseAltitude() {
+Units::MetersLength AircraftIntent::getPlannedCruiseAltitude() const {
     return Units::MetersLength(plannedCruiseAltitude);
 }
 
@@ -432,36 +432,32 @@ bool AircraftIntent::load(DecodedStream *input)
     set_stream(input);
 
     double tmp1;
-    double tmp2;
+    Units::FeetLength tmp2(0);
 
     Units::KnotsSpeed machtransitioncasload;
 
     // register all the variables used by the Aircraft Intent
-    register_var("number_of_waypoints",&number_of_waypoints);
-    register_var("MachTransitionCas",&machtransitioncasload);
-
-
-    // TODO:Remove scenario parameter plannedCruiseMach. It is not
-    // actually used.
-
-    register_var("plannedCruiseMach",&tmp1);
-
-    // plannedCruiseAltitude is used for kinematic vertical path prediction
-    register_var("plannedCruiseAltitude",&tmp2, true);
-
-    // register the waypoint list
+    register_var("number_of_waypoints",&number_of_waypoints, true);
+    register_var("MachTransitionCas",&machtransitioncasload, true); // used for kinematic vertical path prediction
+    register_var("plannedCruiseMach",&tmp1, true); // used for kinematic vertical path prediction
+    register_var("plannedCruiseAltitude",&tmp2, true); // used for kinematic vertical path prediction
     register_named_list("waypoints",&waypoint_list, true);
 
     //do the actual reading:
     mIsLoaded = complete();
 
     mach_transition_cas = machtransitioncasload;
-    plannedCruiseAltitude = Units::FeetLength(tmp2);
+    plannedCruiseAltitude = tmp2;
+    m_planned_cruise_mach = tmp1;
 
     // loads all the waypoint information from the list
     load_waypoints_from_list(waypoint_list);
 
     return mIsLoaded;
+}
+
+double AircraftIntent::GetPlannedCruiseMach() const {
+    return m_planned_cruise_mach;
 }
 
 void AircraftIntent::dumpParms(std::string str) const {
@@ -535,7 +531,7 @@ const shared_ptr<TangentPlaneSequence> &AircraftIntent::getTangentPlaneSequence(
     return tangentPlaneSequence;
 }
 
-const struct AircraftIntent::Fms& AircraftIntent::getFms() const {
+const struct AircraftIntent::RouteData& AircraftIntent::getFms() const {
     return fms;
 }
 
@@ -588,4 +584,17 @@ void AircraftIntent::insertPairAtIndex(const std::string& wpname, const Units::L
     // Re-initialize this object with the new waypoints
     load_waypoints_from_list(waypoints);
     update_xyz_from_latlon_wgs84();
+}
+
+std::ostream& operator<<(std::ostream &out, const AircraftIntent &intent) {
+	out << "aircraft_intent {" << std::endl;
+	out << "number_of_waypoints " << intent.getNumberOfWaypoints() << std::endl;
+	out << "MachTransitionCas " << intent.getMachTransCas().value() << std::endl;
+	out << "plannedCruiseMach 0" << std::endl;	// not used or saved but required
+	out << "plannedCruiseAltitude " << Units::FeetLength(intent.getPlannedCruiseAltitude()).value() << std::endl;
+	out << "waypoints {" << std::endl;
+	out << intent.waypoints;
+	out << "    }" << std::endl;
+	out << "}" << std::endl;
+	return out;
 }

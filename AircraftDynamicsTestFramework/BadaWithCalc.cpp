@@ -64,12 +64,13 @@ void BadaWithCalc::getAircraftParameters(std::string aircraft_type,
 void BadaWithCalc::getConfig(
         const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
         const Units::Length& altitude,    /** [in] Altitude in meters */
+        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
         int modeLast,       /** [in] previous flap configuration (0-3) */
         double &cd0,        /** [out] parasitic drag coefficient */
         double &cd2,        /** [out] induced drag coefficient */
         double &gear,       /** [out] landing gear drag coefficient */
         int &mode           /** [out] flap configuration (0-3):
-            0=cruise, 1=approach, 2=landing, 3=gear down */)
+            0=cruise, 1=approach, 2=landing, 3=gear down */) const
 {
 
 }
@@ -90,11 +91,12 @@ void BadaWithCalc::getConfig(
 void BadaWithCalc::getConfigTrajGen(
         const Units::Speed& velocity_cas,     /** [in] Calibrated airspeed in knots */
         const Units::Length& altitude,             /** [in] Altitude in meters */
+        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
         double &cd0,            /** [out] parasitic drag coefficient */
         double &cd2,            /** [out] induced drag coefficient */
         double &gear,           /** [out] landing gear drag coefficient */
         int &mode           	/** [out] flap configuration (0-3):
-            0=cruise, 1=approach, 2=landing, 3=gear down */)
+            0=cruise, 1=approach, 2=landing, 3=gear down */) const
 {
 
 }
@@ -113,8 +115,9 @@ void BadaWithCalc::getConfigTrajGen(
 void BadaWithCalc::getConfigForDrag(
         const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
         const Units::Length& altitude,         /** [in] Altitude in meters */
+        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
         int modeLast,       /** [in] previous flap configuration (0-3) */
-        int &mode)           /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
+        int &mode) const    /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
 {
 
 }
@@ -123,7 +126,7 @@ void BadaWithCalc::getConfigForDrag(
 // gets maximum aircraft thrust, takes input as altitude in Meters
 double BadaWithCalc::getMaxThrust(const Units::Length& altitude,
                                   int mode,
-                                  std::string type)
+                                  std::string type) const
 {
     return 0;
 }

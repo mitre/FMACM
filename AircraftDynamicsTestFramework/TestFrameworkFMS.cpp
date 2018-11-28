@@ -222,7 +222,7 @@ void TestFrameworkFMS::copy_waypoints_from_intent(AircraftIntent intent_in)
 {
 	number_of_waypoints =  intent_in.getNumberOfWaypoints();
 
-	const AircraftIntent::Fms &fms(intent_in.getFms());
+	const AircraftIntent::RouteData &fms(intent_in.getFms());
 	for(int j = 0; j < number_of_waypoints; j++)
 	{
 		xWp[j] = Units::FeetLength(fms.xWp[j]).value();

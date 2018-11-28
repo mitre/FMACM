@@ -34,7 +34,7 @@ class AircraftIntent : public LoggingLoadable
 {
 public:
 
-    struct Fms
+    struct RouteData
     {
         std::string Name[MAX_NUM_WAYPOINTS];
         Units::MetersLength xWp[MAX_NUM_WAYPOINTS]; // meters
@@ -97,9 +97,10 @@ public:
     const std::string& getWaypointName(unsigned int i) const;
     Units::MetersLength getWaypointX(unsigned int i) const;
     Units::MetersLength getWaypointY(unsigned int i) const;
-    Units::MetersLength getPlannedCruiseAltitude();
-    const struct Fms& getFms() const;
+    Units::MetersLength getPlannedCruiseAltitude() const;
+    const struct RouteData& getFms() const;
     void setMachTransCas(const Units::Speed cas);
+    const Units::KnotsSpeed getMachTransCas() const;
 
     // misc
     int findWaypointIx(std::string waypoint) const;
@@ -108,14 +109,16 @@ public:
     std::pair<int, int> findCommonWaypoint(const AircraftIntent &intent) const;
     void insertPairAtIndex(const std::string& wpname, const Units::Length &x, const Units::Length &y, const int index);
 
+    double GetPlannedCruiseMach() const;
+
 protected:
     std::shared_ptr<TangentPlaneSequence> tangentPlaneSequence;
 
     unsigned int number_of_waypoints;
-    struct Fms fms;
+    struct RouteData fms;
 
 private:
-
+    friend std::ostream& operator<<(std::ostream &out, const AircraftIntent &intent);
     std::list<Waypoint> waypoints;
     static log4cplus::Logger logger;
 
@@ -130,6 +133,7 @@ private:
 
     Units::Speed mach_transition_cas;
     Units::MetersLength  plannedCruiseAltitude;
+    double m_planned_cruise_mach;
 
     int id;
     bool mIsLoaded;
@@ -162,3 +166,9 @@ inline bool AircraftIntent::isLoaded() {
 inline void AircraftIntent::setMachTransCas(const Units::Speed cas) {
     mach_transition_cas = cas;
 }
+
+inline const Units::KnotsSpeed AircraftIntent::getMachTransCas() const {
+	return mach_transition_cas;
+}
+
+std::ostream& operator<<(std::ostream &out, const AircraftIntent &intent);

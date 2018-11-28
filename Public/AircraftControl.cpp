@@ -82,6 +82,7 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
     double gear;
     mBadaWithCalc->getConfig(v_cas,
                              eqmState.h,
+                             mAltAtFAF,
                              eqmState.flapConfig + 0.1,
                              cd0,
                              cd2,
@@ -119,7 +120,7 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance,
                                                const EquationsOfMotionState& eqmState)
 {
     const Units::InvertedLength k_xtrk = Units::PerMeterInvertedLength(5e-4);  // meters^-1
-    const double k_trk = 3;      // unitless
+   const double k_trk = 3;      // unitless
 
     // States
     const Units::Length x = eqmState.x;           // aircraft position east coordinate (m)
@@ -164,7 +165,15 @@ Units::Angle AircraftControl::doLateralControl(const Guidance& guidance,
     // check if guidance has has cross track error and use it if so
     if (guidance.use_cross_track)
     {
-        e_xtrk = Units::MetersLength(guidance.cross_track);
+        //e_xtrk = Units::MetersLength(guidance.cross_track);
+        //compensate for turn
+        if (guidance.reference_phi != Units::ZERO_ANGLE)
+        {
+            e_xtrk = Units::MetersLength(guidance.cross_track - Units::MetersLength((guidance.reference_phi
+                              / k_xtrk)).value() );
+        }
+        else
+            e_xtrk = Units::MetersLength(guidance.cross_track);
     }
 
     // Calculate commanded roll angle

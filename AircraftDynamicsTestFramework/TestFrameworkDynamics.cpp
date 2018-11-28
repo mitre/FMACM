@@ -162,7 +162,7 @@ AircraftState TestFrameworkDynamics::integrate(Guidance guidance_in)
 	int mode;
 	double gear;
 	Units::MetersLength state_h(state.h);
-	mBadaWithCalc.getConfig(v_cas, state_h, state.flapConfig, cd0, cd2, gear, mode);
+	mBadaWithCalc.getConfig(v_cas, state_h, altAtFAF, state.flapConfig, cd0, cd2, gear, mode);
 	Units::Force maxThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h, mode, "cruise"));
 	Units::Force minThrust = Units::NewtonsForce(mBadaWithCalc.getMaxThrust(state_h, mode, "descent"));
 
@@ -329,7 +329,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	//% Speed Control
 
 	Units::Speed tas_com = ATMOSPHERE()->CAS2TAS(
-			Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed),
+			Units::FeetPerSecondSpeed(guidance_in.m_im_speed_command_ias),
 			h);   // GUIDANCE true airspeed
 	Units::Speed v_cas = ATMOSPHERE()->TAS2CAS(V, h); // current indicated airspeed in meters per second
 
@@ -350,7 +350,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 	double cd0,cd2;
 	int flapConfig_new;
 	double gear;
-	mBadaWithCalc.getConfig(v_cas, h, flapConfig, cd0, cd2, gear, flapConfig_new);
+	mBadaWithCalc.getConfig(v_cas, h, altAtFAF, flapConfig, cd0, cd2, gear, flapConfig_new);
 
 	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
 	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
@@ -396,7 +396,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_th
 		T_com = minThrust;
 
 		int mode_new = 0;
-		mBadaWithCalc.getConfigForDrag(v_cas, Units::MetersLength(h), flapConfig_new, mode_new);
+		mBadaWithCalc.getConfigForDrag(v_cas, h, altAtFAF, flapConfig_new, mode_new);
 
 		flapConfig_new = mode_new;
 
@@ -598,8 +598,8 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	double cd0,cd2;
 	int mode;
 	double gear;
-	mBadaWithCalc.getConfig(ATMOSPHERE()->TAS2CAS(Units::MetersPerSecondSpeed(state.V), Units::MetersLength(state.h)),
-				 state_h, 0, cd0, cd2, gear, mode);
+	mBadaWithCalc.getConfig(ATMOSPHERE()->TAS2CAS(Units::MetersPerSecondSpeed(state.V), state_h), state_h,
+                           altAtFAF, 0, cd0, cd2, gear, mode);
 
 	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
 	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
@@ -631,7 +631,7 @@ void TestFrameworkDynamics::init(double mass_percentile, Units::Length altAtFAF_
 	X.T = Tnom; // sets the initial Thrust
 
 	// initialize the previous Guidance to have a default until the first command is processed from pilot delay
-	prev_guidance.indicated_airspeed = ias_;
+	prev_guidance.m_im_speed_command_ias = ias_;
 	prev_guidance.psi = state.psi;
 	prev_guidance.reference_altitude = state.h/FT_M;
 	prev_guidance.altitude_rate = 0;
@@ -917,7 +917,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	double cd0,cd2;
 	int flapConfig_new;
 	double gear;
-	mBadaWithCalc.getConfig(v_cas, h, flapConfig, cd0, cd2, gear, flapConfig_new);
+	mBadaWithCalc.getConfig(v_cas, h, altAtFAF, flapConfig, cd0, cd2, gear, flapConfig_new);
 
 	Units::Mass ac_mass = Units::KilogramsMass(mBadaWithCalc.mAircraftMass);
 	Units::Area wing_area = Units::MetersArea(mBadaWithCalc.aerodynamics.S);
@@ -933,7 +933,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 	Units::Force D = 1./2. * rho * cD * Units::sqr(V) * wing_area;
 	Units::Force L = 1./2. * rho * cL * Units::sqr(V) * wing_area;
 
-	Units::Speed ias_com = Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed);
+	Units::Speed ias_com = Units::FeetPerSecondSpeed(guidance_in.m_im_speed_command_ias);
 	Units::Speed tas_com = ATMOSPHERE()->CAS2TAS(ias_com, h);
 
 	Units::Force maxThrust = Units::NewtonsForce(
@@ -1049,7 +1049,7 @@ TestFrameworkDynamics::InternalAircraftStateD TestFrameworkDynamics::speed_on_pi
 		{
 
 			int mode_new = 0;
-			mBadaWithCalc.getConfigForDrag(v_cas, Units::MetersLength(h), flapConfig_new, mode_new);
+			mBadaWithCalc.getConfigForDrag(v_cas, h, altAtFAF, flapConfig_new, mode_new);
 
 			if(mode_new == flapConfig_new && mode_new <= 2)
 			{

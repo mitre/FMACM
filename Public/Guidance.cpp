@@ -19,7 +19,8 @@
 
 Guidance::Guidance(void)
 {
-	indicated_airspeed = 0;
+	m_im_speed_command_ias = 0;
+	gs = Units::ZERO_SPEED;
 	heading = 0;
 	reference_altitude = 0;
 	altitude_rate = 0; 
@@ -28,6 +29,7 @@ Guidance::Guidance(void)
 	use_cross_track = false; 
 	level = true;
 	setValid(true);
+	reference_phi = Units::ZERO_ANGLE;
 }
 
 Guidance::~Guidance(void)

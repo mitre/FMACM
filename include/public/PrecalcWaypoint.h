@@ -33,7 +33,9 @@ public:
 	bool load(DecodedStream *input);
 
 	// method to check if the model loaded properly
-	bool is_loaded(); 
+	bool is_loaded();
+
+	std::string name;	// for diagnostics
 
 	double leg_length; // in meters
 	Units::UnsignedRadiansAngle course_angle; // in radians

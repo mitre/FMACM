@@ -126,14 +126,14 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 
     // First
 
-    guidance.indicated_airspeed = Units::FeetPerSecondSpeed(mSpeedData[0].mSpeed).value();
+    guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[0].mSpeed).value();
     guidance.setValid(true);
 
   } else if (mSpeedData[(mSpeedData.size()-1)].mTime <= time) {
 
     // Last
 
-    guidance.indicated_airspeed = Units::FeetPerSecondSpeed(mSpeedData[(mSpeedData.size()-1)].mSpeed).value();
+    guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[(mSpeedData.size()-1)].mSpeed).value();
     guidance.setValid(true);
 
 
@@ -151,7 +151,7 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 
       // Exact match on next
 
-      guidance.indicated_airspeed = Units::FeetPerSecondSpeed(mSpeedData[(ix+1)].mSpeed).value();
+      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[(ix+1)].mSpeed).value();
       guidance.setValid(true);
 
     } else {
@@ -163,7 +163,7 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 
       Units::Speed interpolatedspeed = (1.0-pct) * mSpeedData[ix].mSpeed + pct * mSpeedData[(ix+1)].mSpeed;
 
-      guidance.indicated_airspeed = Units::FeetPerSecondSpeed(interpolatedspeed).value();
+      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(interpolatedspeed).value();
       guidance.setValid(true);
 
     }
@@ -176,13 +176,13 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 		for (int i = histLen - 1; i > 0; i--) {
 			iasHist[i] = iasHist[i - 1];
 		}
-		iasHist[0] = guidance.indicated_airspeed;
+		iasHist[0] = guidance.m_im_speed_command_ias;
 
 		if (historyIndexer < hardcodeDelay) {
 			// protect against not enough history for requested delay
-			guidance.indicated_airspeed = iasHist[historyIndexer];
+			guidance.m_im_speed_command_ias = iasHist[historyIndexer];
 		} else {
-			guidance.indicated_airspeed = iasHist[hardcodeDelay];
+			guidance.m_im_speed_command_ias = iasHist[hardcodeDelay];
 		}
 		historyIndexer++;
 	}//end delay processing

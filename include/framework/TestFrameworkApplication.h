@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "public/AircraftState.h"
 #include "public/AircraftIntent.h"
 #include "framework/IMSpeedCommandFile.h"
@@ -29,28 +30,29 @@
 
 class TestFrameworkApplication : public Loadable
 {
- public:
-  TestFrameworkApplication (void);
-  ~TestFrameworkApplication (void);
+public:
+   TestFrameworkApplication(void);
 
-  Guidance update(const SimulationTime &simTime,
-		  TestFrameworkDynamics &dynamics,
-		  AircraftState state_in,
-		  Guidance guidance_in);
+   ~TestFrameworkApplication(void);
 
-  bool load(DecodedStream *input);
+   Guidance update(const SimulationTime &simTime,
+                   TestFrameworkDynamics &dynamics,
+                   AircraftState state_in,
+                   Guidance guidance_in);
 
-  // Conditionals
-  bool is_loaded();
+   bool load(DecodedStream *input);
+
+   // Conditionals
+   bool is_loaded();
 
 private:
 
-  // Interval Management classes
-  IMSpeedCommandFile mIMSpeedCommandFile;
+   // Interval Management classes
+   IMSpeedCommandFile mIMSpeedCommandFile;
 
-  //Input Data
-  std::string application_type;
+   //Input Data
+   std::string application_type;
 
-  bool loaded;
+   bool loaded;
 
 };

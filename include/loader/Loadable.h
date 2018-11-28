@@ -35,381 +35,425 @@
 #include "loader/LoaderSupport.h"
 #include "loader/LoadableLoaderLinkWithBrackets.h"
 
-static const LoaderDeprecatedMetaInfo defMetaInfo = {false,""};
+static const LoaderDeprecatedMetaInfo defMetaInfo = {false, ""};
 
-class Loadable: public LoaderSupport
+class Loadable : public LoaderSupport
 {
 public:
-	Loadable(void);
-	Loadable(const Loadable &in);
-	virtual ~Loadable(void);
-	virtual void operator=(const Loadable &in);
+   Loadable(void);
 
-	virtual bool load(DecodedStream *input) = 0; // all children of this class must implement this function it will return true if it can load
+   Loadable(const Loadable &in);
 
-	// for loading sequences of things that are not named
+   virtual ~Loadable(void);
 
-	template<class TYPE>
-	bool load_datum(TYPE &datum) // load one var
-	{
-		bool out = stream->get_datum(datum);
+   virtual void operator=(const Loadable &in);
 
-		return out;
-	}
+   virtual bool
+   load(DecodedStream *input) = 0; // all children of this class must implement this function it will return true if it can load
 
-	bool loadAngleDegrees(Units::Angle &angle);
-	bool loadLengthFeet(Units::Length &length);
-	bool loadSpeedKnots(Units::Speed &speed);
-	bool loadAccelerationKnotsPerSecond(Units::Acceleration &acceleration);
-	bool loadLengthNM(Units::Length &length);
+   // for loading sequences of things that are not named
 
-	//========================================================================
-	// for loading named vars ------------------------------------------------------
-	
-	/**
-	 * Register an optional tag to load.
-	 *
-	 * @param name
-	 * @param var_address
-	 */
-	template<class TYPE>
-	void register_var(std::string name, TYPE *var_address)
-	{
-		register_var(name, var_address, false, defMetaInfo);
-	}
+   template<class TYPE>
+   bool load_datum(TYPE &datum) // load one var
+   {
+      bool out = stream->get_datum(datum);
 
-	/**
-	 * Use this to declare a variable and to control its required flag. By definition, a required variable is NOT deprecated.
-	 *
-	 * @param name
-	 * @param var_address
-	 * @param required
-	 * @param deprecated
-	 */
-	template<class TYPE>
-	void register_var(std::string name, TYPE *var_address, bool isRequired)
-	{
-		register_var(name, var_address, isRequired, defMetaInfo);
-	}
+      return out;
+   }
 
-	/**
-	 * Use this to declare a variable and to control its deprecated flag. The required flag will be set to false.
-	 *
-	 * @param name
-	 * @param var_address
-	 */
-	template<class TYPE>
-	void register_var(std::string name, TYPE *var_address, LoaderDeprecatedMetaInfo info)
-	{
-		register_var(name, var_address, false, info);
-	}
+   bool loadAngleDegrees(Units::Angle &angle);
 
-	// for loading lists ---------------------------------------------------------
-	// in the run file the named list appears once and is proceeded by the name of the list
+   bool loadLengthFeet(Units::Length &length);
 
-	/**
-	 * Register an optional LOADABLE_TYPE named list.
-	 * @param name
-	 * @param target
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_vector_item(std::string name, std::vector<LOADABLE_TYPE> *target)
-	{
-		register_named_vector_item(name, target, false, defMetaInfo);
-	}
+   bool loadSpeedKnots(Units::Speed &speed);
 
-	/**
-	 * Register an optional LOADABLE_TYPE named list with required information.
-	 *
-	 * @param name
-	 * @param target
-	 * @param isRequired
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_vector_item(std::string name, std::vector<LOADABLE_TYPE> *target, bool isRequired)
-	{
-		register_named_vector_item(name, target, isRequired, defMetaInfo);
-	}
+   bool loadAccelerationKnotsPerSecond(Units::Acceleration &acceleration);
 
-	/**
-	 * Register an optional LOADABLE_TYPE named list with deprecated information.
-	 *
-	 * @param name
-	 * @param target
-	 * @param info
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_vector_item(std::string name, std::vector<LOADABLE_TYPE> *target, LoaderDeprecatedMetaInfo info)
-	{
-		register_named_vector_item(name, target, false, info);
-	}
+   bool loadLengthNM(Units::Length &length);
 
-	//---------------------------------------------------------------------------------------------------
+   //========================================================================
+   // for loading named vars ------------------------------------------------------
 
-	/**
-	 * Register an optional LOADABLE_TYPE list. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
-	 *
-	 * @param name
-	 * @param target
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function 
-	void register_named_list(const std::string &name, std::list<LOADABLE_TYPE> *target)
-	{
-		register_named_list(name, target, false, defMetaInfo);
-	}
+   /**
+    * Register an optional tag to load.
+    *
+    * @param name
+    * @param var_address
+    */
+   template<class TYPE>
+   void register_var(std::string name,
+                     TYPE *var_address) {
+      register_var(name, var_address, false, defMetaInfo);
+   }
 
-	/**
-	 * Register a LOADABLE_TYPE list with an specific required setting. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
-	 *
-	 * @param name
-	 * @param target
-	 * @param isRequired
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_list(const std::string &name, std::list<LOADABLE_TYPE> *target, bool isRequired)
-	{
-		register_named_list(name, target, isRequired, defMetaInfo);
-	}
+   /**
+    * Use this to declare a variable and to control its required flag. By definition, a required variable is NOT deprecated.
+    *
+    * @param name
+    * @param var_address
+    * @param required
+    * @param deprecated
+    */
+   template<class TYPE>
+   void register_var(std::string name,
+                     TYPE *var_address,
+                     bool isRequired) {
+      register_var(name, var_address, isRequired, defMetaInfo);
+   }
 
-	/**
-	 * Register an optional LOADABLE_TYPE list with an specific LoaderDeprecatedMetaInfo setting. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
-	 *
-	 * @param name
-	 * @param target
-	 * @param info
-	 */
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_list(const std::string &name, std::list<LOADABLE_TYPE> *target, LoaderDeprecatedMetaInfo info)
-	{
-		register_named_list(name, target, false, info);
-	}
+   /**
+    * Use this to declare a variable and to control its deprecated flag. The required flag will be set to false.
+    *
+    * @param name
+    * @param var_address
+    */
+   template<class TYPE>
+   void register_var(std::string name,
+                     TYPE *var_address,
+                     LoaderDeprecatedMetaInfo info) {
+      register_var(name, var_address, false, info);
+   }
 
-	//void register_named_list(string heading, Loadable_List *list); // this is used if all the list items are in a single block
-	//----------------------------------------------------------------------------------------------------------------------------
+   // for loading lists ---------------------------------------------------------
+   // in the run file the named list appears once and is proceeded by the name of the list
 
-	/**
-	 * Register an optional inline loadable tag. This is useful for multiple parameters on a single line with a custom Loadable.
-	 *
-	 * @param name
-	 * @param target
-	 */
-	template <class LOADABLE_TYPE> 
-	void register_loadable(const std::string &name, LOADABLE_TYPE *target)
-	{
-		register_loadable(name, target, false, defMetaInfo);
-	}
+   /**
+    * Register an optional LOADABLE_TYPE named list.
+    * @param name
+    * @param target
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_vector_item(std::string name,
+                                   std::vector<LOADABLE_TYPE> *target) {
+      register_named_vector_item(name, target, false, defMetaInfo);
+   }
 
-	/**
-	 * Register an inline loadable tag with specific required properties.
-	 *
-	 * @param name
-	 * @param target
-	 * @param isRequired
-	 */
-	template <class LOADABLE_TYPE>
-	void register_loadable(const std::string &name, LOADABLE_TYPE *target, bool isRequired)
-	{
-		register_loadable(name, target, isRequired, defMetaInfo);
-	}
+   /**
+    * Register an optional LOADABLE_TYPE named list with required information.
+    *
+    * @param name
+    * @param target
+    * @param isRequired
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_vector_item(std::string name,
+                                   std::vector<LOADABLE_TYPE> *target,
+                                   bool isRequired) {
+      register_named_vector_item(name, target, isRequired, defMetaInfo);
+   }
 
-	/**
-	 * Register an optional inline loadable tag with specific deprecated properties.
-	 *
-	 * @param name
-	 * @param target
-	 * @param info
-	 */
-	template <class LOADABLE_TYPE>
-	void register_loadable(const std::string &name, LOADABLE_TYPE *target, LoaderDeprecatedMetaInfo info)
-	{
-		register_loadable(name, target, false, info);
-	}
+   /**
+    * Register an optional LOADABLE_TYPE named list with deprecated information.
+    *
+    * @param name
+    * @param target
+    * @param info
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_vector_item(std::string name,
+                                   std::vector<LOADABLE_TYPE> *target,
+                                   LoaderDeprecatedMetaInfo info) {
+      register_named_vector_item(name, target, false, info);
+   }
 
-	//-------------------------------------------------------------------------------------------------
-	
-	/**
-	 * This will register the bracket as optional and not deprecated.
-	 *
-	 * @param name bracket name
-	 * @param target pointer to storage variable
-	 */
-	template <class LOADABLE_TYPE> 
-	void register_loadable_with_brackets(const std::string &name, LOADABLE_TYPE *target)
-	{
-		register_loadable_with_brackets(name, target, false, defMetaInfo);
-	}
+   //---------------------------------------------------------------------------------------------------
 
-	/**
-	 * Register a loadable tag with and set the required field.
-	 *
-	 * @param name
-	 * @param target
-	 * @param isRequired
-	 */
-	template <class LOADABLE_TYPE>
-	void register_loadable_with_brackets(const std::string &name, LOADABLE_TYPE *target, bool isRequired)
-	{
-		register_loadable_with_brackets(name, target, isRequired, defMetaInfo);
-	}
+   /**
+    * Register an optional LOADABLE_TYPE list. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
+    *
+    * @param name
+    * @param target
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_list(const std::string &name,
+                            std::list<LOADABLE_TYPE> *target) {
+      register_named_list(name, target, false, defMetaInfo);
+   }
 
-	/**
-	 * Register an optional loadable tag and set the deprecated information.
-	 *
-	 * @param name
-	 * @param target
-	 * @param info
-	 */
-	template <class LOADABLE_TYPE>
-	void register_loadable_with_brackets(const std::string &name, LOADABLE_TYPE *target, LoaderDeprecatedMetaInfo info)
-	{
-		register_loadable_with_brackets(name, target, false, info);
-	}
+   /**
+    * Register a LOADABLE_TYPE list with an specific required setting. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
+    *
+    * @param name
+    * @param target
+    * @param isRequired
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_list(const std::string &name,
+                            std::list<LOADABLE_TYPE> *target,
+                            bool isRequired) {
+      register_named_list(name, target, isRequired, defMetaInfo);
+   }
 
-	/**
-	 * Call this after you finish registering things at it will load all the things it could and return false if it fails
-	 *
-	 * @return
-	 * @see loaded_successfully()
-	 */
-	virtual bool complete();
+   /**
+    * Register an optional LOADABLE_TYPE list with an specific LoaderDeprecatedMetaInfo setting. LOADABLE_TYPE Must be a child of loadable or provide the necessary load function.
+    *
+    * @param name
+    * @param target
+    * @param info
+    */
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_list(const std::string &name,
+                            std::list<LOADABLE_TYPE> *target,
+                            LoaderDeprecatedMetaInfo info) {
+      register_named_list(name, target, false, info);
+   }
 
-	virtual void dump() { /* intentionally empty */ }; // dump them to cout
+   //void register_named_list(string heading, Loadable_List *list); // this is used if all the list items are in a single block
+   //----------------------------------------------------------------------------------------------------------------------------
 
-	virtual void report_error(std::string error_message);
+   /**
+    * Register an optional inline loadable tag. This is useful for multiple parameters on a single line with a custom Loadable.
+    *
+    * @param name
+    * @param target
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable(const std::string &name,
+                          LOADABLE_TYPE *target) {
+      register_loadable(name, target, false, defMetaInfo);
+   }
 
-        virtual void report_warning(std::string warning_message);
+   /**
+    * Register an inline loadable tag with specific required properties.
+    *
+    * @param name
+    * @param target
+    * @param isRequired
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable(const std::string &name,
+                          LOADABLE_TYPE *target,
+                          bool isRequired) {
+      register_loadable(name, target, isRequired, defMetaInfo);
+   }
 
-	/**
-	 * returns true if the call to complete() went well
-	 *
-	 * @return
-	 */
-	bool loaded_successfully();
+   /**
+    * Register an optional inline loadable tag with specific deprecated properties.
+    *
+    * @param name
+    * @param target
+    * @param info
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable(const std::string &name,
+                          LOADABLE_TYPE *target,
+                          LoaderDeprecatedMetaInfo info) {
+      register_loadable(name, target, false, info);
+   }
+
+   //-------------------------------------------------------------------------------------------------
+
+   /**
+    * This will register the bracket as optional and not deprecated.
+    *
+    * @param name bracket name
+    * @param target pointer to storage variable
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable_with_brackets(const std::string &name,
+                                        LOADABLE_TYPE *target) {
+      register_loadable_with_brackets(name, target, false, defMetaInfo);
+   }
+
+   /**
+    * Register a loadable tag with and set the required field.
+    *
+    * @param name
+    * @param target
+    * @param isRequired
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable_with_brackets(const std::string &name,
+                                        LOADABLE_TYPE *target,
+                                        bool isRequired) {
+      register_loadable_with_brackets(name, target, isRequired, defMetaInfo);
+   }
+
+   /**
+    * Register an optional loadable tag and set the deprecated information.
+    *
+    * @param name
+    * @param target
+    * @param info
+    */
+   template<class LOADABLE_TYPE>
+   void register_loadable_with_brackets(const std::string &name,
+                                        LOADABLE_TYPE *target,
+                                        LoaderDeprecatedMetaInfo info) {
+      register_loadable_with_brackets(name, target, false, info);
+   }
+
+   /**
+    * Call this after you finish registering things at it will load all the things it could and return false if it fails
+    *
+    * @return
+    * @see loaded_successfully()
+    */
+   virtual bool complete();
+
+   virtual void dump() { /* intentionally empty */ }; // dump them to cout
+
+   virtual void report_error(std::string error_message);
+
+   virtual void report_warning(std::string warning_message);
+
+   /**
+    * returns true if the call to complete() went well
+    *
+    * @return
+    */
+   bool loaded_successfully();
 
 protected://----------------------------------------------------------------------------------------------------------------------------
 
-	void set_stream(DecodedStream *input) // This should be called in the loader function of the child 
-	{
-		stream = input;
-	}
+   void set_stream(DecodedStream *input) // This should be called in the loader function of the child
+   {
+      stream = input;
+   }
 
-        DecodedStream *stream;
+   DecodedStream *stream;
 
-	void cleanup();
-	virtual bool test_load();
+   void cleanup();
 
-	std::shared_ptr<LoaderLink> getLoaderLink(std::string name);
+   virtual bool test_load();
 
-        std::map<std::string, std::shared_ptr<LoaderLink> > lookup_table;
+   std::shared_ptr<LoaderLink> getLoaderLink(std::string name);
 
-        bool was_load_successful;
+   std::map<std::string, std::shared_ptr<LoaderLink> > lookup_table;
+
+   bool was_load_successful;
 
 private://----------------------------------------------------------------
-	/* static log4cplus::Logger logger; */
-	/* DecodedStream *stream; */
-	/* bool was_load_successful; */
+   /* static log4cplus::Logger logger; */
+   /* DecodedStream *stream; */
+   /* bool was_load_successful; */
 
-	/* std::map<std::string, std::shared_ptr<LoaderLink> > lookup_table; */
+   /* std::map<std::string, std::shared_ptr<LoaderLink> > lookup_table; */
 
-	#ifdef _DEBUG
-		
-		template <class P>
-		void check_address(P* a)
-		{
-			assert(set1.find((void*)a) == set1.end()); //if assertion fails, it is because someone tried to register same address more than once
-			set1.insert((void*)a);
-		}
+#ifdef _DEBUG
 
-		set<void*> set1;
+   template <class P>
+   void check_address(P* a)
+   {
+      assert(set1.find((void*)a) == set1.end()); //if assertion fails, it is because someone tried to register same address more than once
+      set1.insert((void*)a);
+   }
 
-	#endif
+   set<void*> set1;
 
-	template<class TYPE>
-	void register_var(std::string name, TYPE *var_address, bool isRequired, LoaderDeprecatedMetaInfo depInfo)
-	{
-		std::string varnameclean = clean_token(name);
+#endif
 
-		#ifdef _DEBUG
-				std::cout << "In register_var: " << *var_address << std::endl; // returns the preset value if one exists
-				check_address(var_address);
-		#endif
+   template<class TYPE>
+   void register_var(std::string name,
+                     TYPE *var_address,
+                     bool isRequired,
+                     LoaderDeprecatedMetaInfo depInfo) {
+      std::string varnameclean = clean_token(name);
 
-		assert(lookup_table.find(varnameclean) == lookup_table.end()); // The user caller to register the variable name twice
+#ifdef _DEBUG
+      std::cout << "In register_var: " << *var_address << std::endl; // returns the preset value if one exists
+      check_address(var_address);
+#endif
 
-		std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new NativeLoaderLink<TYPE>(var_address));
-		new_link->set_must_load(isRequired); // set required flag
-		new_link->set_deprecated_info(depInfo);
+      assert(lookup_table.find(varnameclean) ==
+             lookup_table.end()); // The user caller to register the variable name twice
 
-		lookup_table[varnameclean] = new_link;
-	}
+      std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new NativeLoaderLink<TYPE>(var_address));
+      new_link->set_must_load(isRequired); // set required flag
+      new_link->set_deprecated_info(depInfo);
 
-	template <class LOADABLE_TYPE>
-	void register_loadable_with_brackets(const std::string &name, LOADABLE_TYPE *target, bool isRequired, LoaderDeprecatedMetaInfo depInfo)
-	{
-		std::string varnameclean = clean_token(name);
+      lookup_table[varnameclean] = new_link;
+   }
 
-		#ifdef _DEBUG
-			check_address(target);
-		#endif
+   template<class LOADABLE_TYPE>
+   void register_loadable_with_brackets(const std::string &name,
+                                        LOADABLE_TYPE *target,
+                                        bool isRequired,
+                                        LoaderDeprecatedMetaInfo depInfo) {
+      std::string varnameclean = clean_token(name);
 
-		assert(lookup_table.find(varnameclean) == lookup_table.end()); // The user caller to register the variable name twice
+#ifdef _DEBUG
+      check_address(target);
+#endif
 
-		std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new LoadableLoaderLinkWithBrackets<LOADABLE_TYPE>(target));
-		new_link->set_must_load(isRequired);
-		new_link->set_deprecated_info(depInfo);
+      assert(lookup_table.find(varnameclean) ==
+             lookup_table.end()); // The user caller to register the variable name twice
 
-		lookup_table[varnameclean] = new_link;
-	}
+      std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(
+            new LoadableLoaderLinkWithBrackets<LOADABLE_TYPE>(target));
+      new_link->set_must_load(isRequired);
+      new_link->set_deprecated_info(depInfo);
 
-	template <class LOADABLE_TYPE>
-	void register_loadable(const std::string &name, LOADABLE_TYPE *target, bool isRequired, LoaderDeprecatedMetaInfo info)
-	{
-		std::string varnameclean = clean_token(name);
+      lookup_table[varnameclean] = new_link;
+   }
 
-		#ifdef _DEBUG
-				check_address(target);
-		#endif
-		assert(lookup_table.find(varnameclean) == lookup_table.end()); // The user caller to register the variable name twice
+   template<class LOADABLE_TYPE>
+   void register_loadable(const std::string &name,
+                          LOADABLE_TYPE *target,
+                          bool isRequired,
+                          LoaderDeprecatedMetaInfo info) {
+      std::string varnameclean = clean_token(name);
 
-		std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new LoadableLoaderLink<LOADABLE_TYPE>(target));
-		new_link->set_must_load(isRequired);
-		new_link->set_deprecated_info(info);
+#ifdef _DEBUG
+      check_address(target);
+#endif
+      assert(lookup_table.find(varnameclean) ==
+             lookup_table.end()); // The user caller to register the variable name twice
 
-		lookup_table[varnameclean] = new_link;
-	}
+      std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new LoadableLoaderLink<LOADABLE_TYPE>(target));
+      new_link->set_must_load(isRequired);
+      new_link->set_deprecated_info(info);
 
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_list(const std::string &name, std::list<LOADABLE_TYPE> *target, bool isRequired, LoaderDeprecatedMetaInfo info)
-	{
-		std::string varnameclean = clean_token(name);
+      lookup_table[varnameclean] = new_link;
+   }
 
-		#ifdef _DEBUG
-				check_address(target);
-		#endif
-		assert(lookup_table.find(varnameclean) == lookup_table.end()); // The user caller to register the variable name twice
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_list(const std::string &name,
+                            std::list<LOADABLE_TYPE> *target,
+                            bool isRequired,
+                            LoaderDeprecatedMetaInfo info) {
+      std::string varnameclean = clean_token(name);
 
-		std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new ListLoaderLink<LOADABLE_TYPE>(target));
-		new_link->set_must_load(isRequired);
-		new_link->set_deprecated_info(info);
+#ifdef _DEBUG
+      check_address(target);
+#endif
+      assert(lookup_table.find(varnameclean) ==
+             lookup_table.end()); // The user caller to register the variable name twice
 
-		lookup_table[varnameclean] = new_link;
-	}
+      std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new ListLoaderLink<LOADABLE_TYPE>(target));
+      new_link->set_must_load(isRequired);
+      new_link->set_deprecated_info(info);
 
-	template <class LOADABLE_TYPE> // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
-	void register_named_vector_item(std::string name, std::vector<LOADABLE_TYPE> *target, bool isRequired, LoaderDeprecatedMetaInfo info)
-	{
-		std::string varnameclean = clean_token(name);
+      lookup_table[varnameclean] = new_link;
+   }
 
-		#ifdef _DEBUG
-				check_address(target);
-		#endif
+   template<class LOADABLE_TYPE>
+   // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
+   void register_named_vector_item(std::string name,
+                                   std::vector<LOADABLE_TYPE> *target,
+                                   bool isRequired,
+                                   LoaderDeprecatedMetaInfo info) {
+      std::string varnameclean = clean_token(name);
 
-		assert(lookup_table.find(varnameclean) == lookup_table.end()); // The user caller to register the variable name twice
+#ifdef _DEBUG
+      check_address(target);
+#endif
 
-		std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(new NamedElementLoaderLink<LOADABLE_TYPE>(target));
-		new_link->set_must_load(isRequired);
-		new_link->set_deprecated_info(info);
+      assert(lookup_table.find(varnameclean) ==
+             lookup_table.end()); // The user caller to register the variable name twice
 
-		lookup_table[varnameclean] = new_link;
-	}
+      std::shared_ptr<LoaderLink> new_link = std::shared_ptr<LoaderLink>(
+            new NamedElementLoaderLink<LOADABLE_TYPE>(target));
+      new_link->set_must_load(isRequired);
+      new_link->set_deprecated_info(info);
+
+      lookup_table[varnameclean] = new_link;
+   }
 };

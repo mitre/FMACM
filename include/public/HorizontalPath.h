@@ -16,21 +16,24 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <string>
 #include "public/HorizontalTurnPath.h"
 
 class HorizontalPath
 {
 public:
-	HorizontalPath(void);
-	~HorizontalPath(void);
-	bool operator==(const HorizontalPath &that) const;
+   HorizontalPath(void);
 
-	double x; // in meters
-	double y; // in meters
-	std::string segment;
-	double L; // leg length in meters
-	double course;
-	HorizontalTurnPath turns;
+   ~HorizontalPath(void);
+
+   bool operator==(const HorizontalPath &that) const;
+
+   double x; // in meters
+   double y; // in meters
+   std::string segment;
+   double L; // leg length in meters
+   double course;
+   HorizontalTurnPath turns;
 };
 

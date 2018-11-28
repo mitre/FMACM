@@ -23,86 +23,77 @@
 /**
  * Meta info for the concept of deprecated in the Loadable system.
  */
-struct LoaderDeprecatedMetaInfo {
-	bool isDeprecated;
-	std::string supersededByTagName;
+struct LoaderDeprecatedMetaInfo
+{
+   bool isDeprecated;
+   std::string supersededByTagName;
 //	std::string deprecatedInVersion; // keep this commented out until a final concept of versioning is implemented in AAESim
 };
 
 class LoaderLink
 {
 public:
-	LoaderLink(void);
-	
-	virtual ~LoaderLink () = 0;
+   LoaderLink(void);
 
-	bool load(DecodedStream *ds);
+   virtual ~LoaderLink() = 0;
 
-	virtual bool load_s(DecodedStream *ds) = 0;
+   bool load(DecodedStream *ds);
 
-	//-----------------------------------------------------------
+   virtual bool load_s(DecodedStream *ds) = 0;
 
-	bool get_loaded_status()
-	{
-		return loaded;
-	}
+   //-----------------------------------------------------------
 
-	//-----------------------------------------------------------
+   bool get_loaded_status() {
+      return loaded;
+   }
 
-	bool is_a_must_load()
-	{
-		return must_load;
-	}
+   //-----------------------------------------------------------
 
-	//-----------------------------------------------------------
+   bool is_a_must_load() {
+      return must_load;
+   }
 
-	void set_must_load(bool b)
-	{
-		must_load = b;
-	}
-	
-	//-----------------------------------------------------------
+   //-----------------------------------------------------------
 
-	bool was_loaded()
-	{
-		return loaded;
-	}
+   void set_must_load(bool b) {
+      must_load = b;
+   }
 
-	//-----------------------------------------------------------
+   //-----------------------------------------------------------
 
-	bool ok()
-	{
-		if(!must_load)
-		{
-			return true;
-		}
-		else if(loaded)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}	
+   bool was_loaded() {
+      return loaded;
+   }
 
-	void set_deprecated_info(LoaderDeprecatedMetaInfo info) {
-		deprecatedInfo = info;
-	}
+   //-----------------------------------------------------------
 
-	LoaderDeprecatedMetaInfo get_deprecated_info() {
-		return deprecatedInfo;
-	}
+   bool ok() {
+      if (!must_load) {
+         return true;
+      } else if (loaded) {
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   void set_deprecated_info(LoaderDeprecatedMetaInfo info) {
+      deprecatedInfo = info;
+   }
+
+   LoaderDeprecatedMetaInfo get_deprecated_info() {
+      return deprecatedInfo;
+   }
 
 protected:
 
-	bool loaded;
-	bool must_load; // if true you must load one or more times
-	bool must_load_only_once; // if true you can only load it once or 0 times 
-	bool is_a_list; // if set high the two above do not apply
-	LoaderDeprecatedMetaInfo deprecatedInfo;
+   bool loaded;
+   bool must_load; // if true you must load one or more times
+   bool must_load_only_once; // if true you can only load it once or 0 times
+   bool is_a_list; // if set high the two above do not apply
+   LoaderDeprecatedMetaInfo deprecatedInfo;
 
 private:
-	/* static log4cplus::Logger logger; */
+   /* static log4cplus::Logger logger; */
 
 };

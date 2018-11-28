@@ -17,110 +17,103 @@
 
 #include "public/PrecalcConstraint.h"
 
-bool operator<=(ActiveFlagType l, ActiveFlagType r) {
-    return ((static_cast<int> (l)) <= (static_cast<int> (r)));
+bool operator<=(ActiveFlagType l,
+                ActiveFlagType r) {
+   return ((static_cast<int> (l)) <= (static_cast<int> (r)));
 }
 
-PrecalcConstraint::PrecalcConstraint(void)
-{
+PrecalcConstraint::PrecalcConstraint(void) {
 
-  active_flag = ActiveFlagType::UNSET;
-  constraint_dist = 0.0; // distance constraints-meters.
-  constraint_altHi = 0.0; // altitude max constraints-meters.
-  constraint_altLow = 0.0; // altitude min constraints-meters.
-  constraint_speedHi = 0.0; // speed max constraint-meters per second.
-  constraint_speedLow = 0.0; // speed min constraint-meters per second.
-  index = -1;
-  violation_flag = false;
-
-}
-
-
-PrecalcConstraint::~PrecalcConstraint(void)
-{
-}
-
-
-PrecalcConstraint& PrecalcConstraint::operator=(const PrecalcConstraint &obj)
-{
-
-	// Generic = operator.
-	//
-	// obj:VerticalPredictor object to set with.
-	// returns this object with new values.
-
-	if (this != &obj)
-	{
-
-		this->constraint_dist = obj.constraint_dist;
-		this->constraint_altHi = obj.constraint_altHi;
-		this->constraint_altLow = obj.constraint_altLow;
-		this->constraint_speedHi = obj.constraint_speedHi;
-		this->constraint_speedLow = obj.constraint_speedLow;
-		this->index = obj.index;
-		this->active_flag = obj.active_flag;
-    this->violation_flag = obj.violation_flag;
-
-	}
-
-	return *this;
+   active_flag = ActiveFlagType::UNSET;
+   constraint_dist = 0.0; // distance constraints-meters.
+   constraint_altHi = 0.0; // altitude max constraints-meters.
+   constraint_altLow = 0.0; // altitude min constraints-meters.
+   constraint_speedHi = 0.0; // speed max constraint-meters per second.
+   constraint_speedLow = 0.0; // speed min constraint-meters per second.
+   index = -1;
+   violation_flag = false;
 
 }
 
 
-bool PrecalcConstraint::operator<(const PrecalcConstraint &obj) const
-{
+PrecalcConstraint::~PrecalcConstraint(void) {
+}
 
-  bool result = false;
 
-  if (this->constraint_dist < obj.constraint_dist)
-  {
-    result = true;
-  }
+PrecalcConstraint &PrecalcConstraint::operator=(const PrecalcConstraint &obj) {
 
-  return result;
+   // Generic = operator.
+   //
+   // obj:VerticalPredictor object to set with.
+   // returns this object with new values.
+
+   if (this != &obj) {
+
+      this->constraint_dist = obj.constraint_dist;
+      this->constraint_altHi = obj.constraint_altHi;
+      this->constraint_altLow = obj.constraint_altLow;
+      this->constraint_speedHi = obj.constraint_speedHi;
+      this->constraint_speedLow = obj.constraint_speedLow;
+      this->index = obj.index;
+      this->active_flag = obj.active_flag;
+      this->violation_flag = obj.violation_flag;
+
+   }
+
+   return *this;
 
 }
 
 
-bool PrecalcConstraint::operator==(const PrecalcConstraint &obj) const
-{
+bool PrecalcConstraint::operator<(const PrecalcConstraint &obj) const {
 
-	// Generic equals operator.
-	//
-	// obj:comparison object.
-	// returns true if obj matches.
-	//         false if object doesn't match.
+   bool result = false;
 
+   if (this->constraint_dist < obj.constraint_dist) {
+      result = true;
+   }
 
-  bool match = (this->constraint_dist == obj.constraint_dist);
-
-  match = match && (this->constraint_altHi == obj.constraint_altHi);
-  match = match && (this->constraint_altLow == obj.constraint_altLow);
-
-  match = match && (this->constraint_speedHi == obj.constraint_speedHi);
-  match = match && (this->constraint_speedLow == obj.constraint_speedLow);
-
-  match = match && (this->index == obj.index);
-
-  match = match && (this->active_flag == obj.active_flag);
-  match = match && (this->violation_flag == obj.violation_flag);
-
-  return match;
+   return result;
 
 }
 
 
-bool PrecalcConstraint::operator!=(const PrecalcConstraint &obj) const
-{
+bool PrecalcConstraint::operator==(const PrecalcConstraint &obj) const {
 
-  // Generic not equals operator.
-  //
-  // obj:comparison object.
-  // returns true if obj doesn't match.
-  //         false if obj matches.
+   // Generic equals operator.
+   //
+   // obj:comparison object.
+   // returns true if obj matches.
+   //         false if object doesn't match.
 
-  return !this->operator==(obj);
+
+   bool match = (this->constraint_dist == obj.constraint_dist);
+
+   match = match && (this->constraint_altHi == obj.constraint_altHi);
+   match = match && (this->constraint_altLow == obj.constraint_altLow);
+
+   match = match && (this->constraint_speedHi == obj.constraint_speedHi);
+   match = match && (this->constraint_speedLow == obj.constraint_speedLow);
+
+   match = match && (this->index == obj.index);
+
+   match = match && (this->active_flag == obj.active_flag);
+   match = match && (this->violation_flag == obj.violation_flag);
+
+   return match;
+
+}
+
+
+bool PrecalcConstraint::operator!=(const PrecalcConstraint &obj) const {
+
+   // Generic not equals operator.
+   //
+   // obj:comparison object.
+   // returns true if obj doesn't match.
+   //         false if obj matches.
+
+   return !this->operator==(obj);
 
 }
 

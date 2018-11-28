@@ -30,81 +30,89 @@
 class AircraftState
 {
 public:
-	// Creational methods
-	static AircraftState createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
+   // Creational methods
+   static AircraftState createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
 
-	AircraftState(void);
-	~AircraftState(void);
-	
-	AircraftState(const AircraftState &in);
-	AircraftState& operator=(const AircraftState &in);
+   AircraftState(void);
 
-	bool is_turning() const;
+   ~AircraftState(void);
 
-	bool operator==(const AircraftState &in) const;
+   AircraftState(const AircraftState &in);
 
-	// operator < to allow sorting
-	bool operator<(const AircraftState &in) const;
+   AircraftState &operator=(const AircraftState &in);
 
-	// heading methods
+   bool is_turning() const;
 
- // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
-	double get_heading() const;
+   bool operator==(const AircraftState &in) const;
+
+   // operator < to allow sorting
+   bool operator<(const AircraftState &in) const;
+
+   // heading methods
+
+   // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
+   double get_heading() const;
 
 
-  // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-	Units::UnsignedRadiansAngle get_heading_in_radians_mathematical() const;
+   // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
+   Units::UnsignedRadiansAngle get_heading_in_radians_mathematical() const;
 
-	// psi getter/setters
-	void set_psi(double psi_in);
+   // psi getter/setters
+   void set_psi(double psi_in);
 
-	// speed methods
-	Units::Speed getGroundSpeed(void) const;
+   // speed methods
+   Units::Speed getGroundSpeed(void) const;
 
-	void dumpParms(std::string str) const;
-	void csvHdrDump(std::string str) const;
-	void csvDataDump(std::string str) const;
+   void dumpParms(std::string str) const;
 
-	AircraftState &interpolate(const AircraftState &a, const AircraftState &b, const double time);
+   void csvHdrDump(std::string str) const;
 
-	/**
-	 * @deprecated use ::extrapolate(const AircraftState &in, const Units::SecondsTime &time)
-	 * @param in
-	 * @param time
-	 * @return
-	 */
-	AircraftState &extrapolate(const AircraftState &in, const double time); // deprecated!
+   void csvDataDump(std::string str) const;
 
-    /**
-     * Returns a state that has been fully populated assuming constant ground speed.
-     * @param in
-     * @param time
-     * @return
-     */
-    AircraftState &extrapolate(const AircraftState &in, const Units::SecondsTime &time);
+   AircraftState &interpolate(const AircraftState &a,
+                              const AircraftState &b,
+                              const double time);
 
-    double getZd() const;
+   /**
+    * @deprecated use ::extrapolate(const AircraftState &in, const Units::SecondsTime &time)
+    * @param in
+    * @param time
+    * @return
+    */
+   AircraftState &extrapolate(const AircraftState &in,
+                              const double time); // deprecated!
 
-    void setZd(double zd);
+   /**
+    * Returns a state that has been fully populated assuming constant ground speed.
+    * @param in
+    * @param time
+    * @return
+    */
+   AircraftState &extrapolate(const AircraftState &in,
+                              const Units::SecondsTime &time);
+
+   double getZd() const;
+
+   void setZd(double zd);
 
 //Other Data:
-	int id;
-	double time;
-	double x, y, z; //position (ft)
-	double xd, yd, zd; //speed (ft/s)
-	double xdd, ydd, zdd; //acceleration (f/s^2)
-	double gamma;
-	double Vwx, Vwy; // true wind direction meters/second
-	double Vw_para, Vw_perp; // true wind factors meters/second
-    Units::Frequency Vwx_dh, Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
+   int id;
+   double time;
+   double x, y, z; //position (ft)
+   double xd, yd, zd; //speed (ft/s)
+   double xdd, ydd, zdd; //acceleration (f/s^2)
+   double gamma;
+   double Vwx, Vwy; // true wind direction meters/second
+   double Vw_para, Vw_perp; // true wind factors meters/second
+   Units::Frequency Vwx_dh, Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
 
-	double psi; // aircraft psi measured from east counter-clockwise
+   double psi; // aircraft psi measured from east counter-clockwise
 
-	double m_distance_to_go; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
+   double m_distance_to_go; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
 
 
 private:
 
-	static log4cplus::Logger logger;
+   static log4cplus::Logger logger;
 
 };

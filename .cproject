@@ -81,7 +81,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="IntervalManagement"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Loader"/>
 						<entry excluding="Histogram.h.exclude" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="PairedApproach"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Public"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utility"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="unittest/src"/>
 					</sourceEntries>

@@ -23,29 +23,30 @@
 static bool Logging_initialized = false;
 
 void init_logging() {
-	if (Logging_initialized) return;
-	Logging_initialized = true;
+   if (Logging_initialized) {
+      return;
+   }
+   Logging_initialized = true;
 
-	log4cplus::initialize();
-	log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("logging.init"));
-	char *prop_file = getenv("LOG4CPLUS_PROPERTIES");
-    if (prop_file == NULL) {
-        // fall back to log4cplus.properties
-        prop_file = (char *) "log4cplus.properties";
-    }
-    if (access(prop_file, F_OK) == -1) {
-		log4cplus::BasicConfigurator config;
-		config.configure();
-		LOG4CPLUS_WARN(logger, "Cannot access LOG4CPLUS_PROPERTIES " 
+   log4cplus::initialize();
+   log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("logging.init"));
+   char *prop_file = getenv("LOG4CPLUS_PROPERTIES");
+   if (prop_file == NULL) {
+      // fall back to log4cplus.properties
+      prop_file = (char *) "log4cplus.properties";
+   }
+   if (access(prop_file, F_OK) == -1) {
+      log4cplus::BasicConfigurator config;
+      config.configure();
+      LOG4CPLUS_WARN(logger, "Cannot access LOG4CPLUS_PROPERTIES "
             << prop_file << ", using BasicConfigurator.");
-	}
-	else {
-		log4cplus::PropertyConfigurator config(prop_file);
-		config.configure();
-		LOG4CPLUS_INFO(logger, "LOG4CPLUS_PROPERTIES file is " <<
-				LOG4CPLUS_TEXT(prop_file));
-	}
+   } else {
+      log4cplus::PropertyConfigurator config(prop_file);
+      config.configure();
+      LOG4CPLUS_INFO(logger, "LOG4CPLUS_PROPERTIES file is " <<
+                                                             LOG4CPLUS_TEXT(prop_file));
+   }
 
-	// Example usage of the debug logger
+   // Example usage of the debug logger
 //	LOG4CPLUS_DEBUG(logger, "Pi is " << (4 * atan(1)) << " approximately");
 }

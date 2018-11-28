@@ -25,6 +25,7 @@
 #include "loader/LoadError.h"
 #include "loader/Loadable.h"
 
-LoadError::LoadError(const std::string& text) :
-logic_error(text) {
+LoadError::LoadError(const std::string &text)
+      :
+      logic_error(text) {
 }

@@ -23,29 +23,30 @@
 #include <Speed.h>
 #include <Length.h>
 
-class EquationsOfMotionState {
+class EquationsOfMotionState
+{
 public:
-    /*
-    X is the internal state visible only in this class. Its units are metric.
-    The meanings of the elements of X are as follows:
-    X[1]: aircraft position east coordinate (m)
-    X[2]: aircraft position  north coordinate (m)
-    X[3]: aircraft position altitude (m)
-    X[4]: aircraft true airspeed (m/s)
-    X[5]: aircraft flight-path angle (rad). NOTE: for flight-path angle (gamma), heading down is positive; heading up is negative
-    X[6]: aircraft heading (psi) measured from east counter-clockwise (rad).
-    X[7]: aircraft thrust (N)
-    X[8]: aircraft roll angle (phi) (rad)
-    X[9]: aircraft speed brake (% of deployment)
-    */
-    Units::Length x, y, h;	// [1..3] east, north, altitude
-    Units::Speed V;			// [4] true airspeed
-    Units::Angle gamma;		// [5] flight-path angle NOTE: for flight-path angle (gamma), heading down is positive; heading up is negative
-    Units::Angle psi;		// [6] heading measured from east counter-clockwise
-    Units::Force T;			// [7] thrust
-    Units::Angle phi;		// [8] roll angle
-    double speedBrake;		// [9] speed brake (% of deployment)
-    int flapConfig;			// [10] flap configuration
+   /*
+   X is the internal state visible only in this class. Its units are metric.
+   The meanings of the elements of X are as follows:
+   X[1]: aircraft position east coordinate (m)
+   X[2]: aircraft position  north coordinate (m)
+   X[3]: aircraft position altitude (m)
+   X[4]: aircraft true airspeed (m/s)
+   X[5]: aircraft flight-path angle (rad). NOTE: for flight-path angle (gamma), heading down is positive; heading up is negative
+   X[6]: aircraft heading (psi) measured from east counter-clockwise (rad).
+   X[7]: aircraft thrust (N)
+   X[8]: aircraft roll angle (phi) (rad)
+   X[9]: aircraft speed brake (% of deployment)
+   */
+   Units::Length x, y, h;   // [1..3] east, north, altitude
+   Units::Speed V;         // [4] true airspeed
+   Units::Angle gamma;      // [5] flight-path angle NOTE: for flight-path angle (gamma), heading down is positive; heading up is negative
+   Units::Angle psi;      // [6] heading measured from east counter-clockwise
+   Units::Force T;         // [7] thrust
+   Units::Angle phi;      // [8] roll angle
+   double speedBrake;      // [9] speed brake (% of deployment)
+   int flapConfig;         // [10] flap configuration
 
 };
 

@@ -21,19 +21,17 @@ using namespace std;
 
 // log4cplus::Logger TokenStream::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TokenStream"));
 
-TokenStream::TokenStream(void)
-{
-	error = false;
-	indents = 0;
-	echo = false;
-	last_was_return = false;
-	//echo = false;
-	comment_not_end = false;
+TokenStream::TokenStream(void) {
+   error = false;
+   indents = 0;
+   echo = false;
+   last_was_return = false;
+   //echo = false;
+   comment_not_end = false;
 }
 
-TokenStream::~TokenStream(void)
-{
-	
+TokenStream::~TokenStream(void) {
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -47,71 +45,58 @@ TokenStream::~TokenStream(void)
 //is a quote. Return string if character is a delimiter
 //otherwise keep getting characters
 
-Token TokenStream::get_next()
-{
-	Token out;
-	char c;
-	comment_not_end = false;
+Token TokenStream::get_next() {
+   Token out;
+   char c;
+   comment_not_end = false;
 
-	assert(file.is_open());
+   assert(file.is_open());
 
-	while(!file.eof())
-	{
-		c = get_char();
+   while (!file.eof()) {
+      c = get_char();
 
-		if(is_comment(c))
-		{
-			while(true)
-			{
-				out.add_Format(c);
-				c = get_char();
-				if(c == '\n' || file.eof())
-				{
-					break;
-				}
-			}
-		}
+      if (is_comment(c)) {
+         while (true) {
+            out.add_Format(c);
+            c = get_char();
+            if (c == '\n' || file.eof()) {
+               break;
+            }
+         }
+      }
 
-		if(is_quote(c))
-		{
-			return get_quote();
-		}
+      if (is_quote(c)) {
+         return get_quote();
+      }
 
-		if(!is_delimiter(c))
-		{
-			do
-			{
-				out.add_Data(c);
-				c = get_char();
-				if(is_delimiter(c) || is_comment(c))
-				{
-					file.putback(c);
-					break;
-				}
-			}
-			while(!is_delimiter(c) && !file.eof());
-			return out;
-		}
-		//must be a delimiter so add to format
-		out.add_Format(c);
-	}
+      if (!is_delimiter(c)) {
+         do {
+            out.add_Data(c);
+            c = get_char();
+            if (is_delimiter(c) || is_comment(c)) {
+               file.putback(c);
+               break;
+            }
+         } while (!is_delimiter(c) && !file.eof());
+         return out;
+      }
+      //must be a delimiter so add to format
+      out.add_Format(c);
+   }
 
-	return out;
+   return out;
 }
 
 
-void TokenStream::close()
-{
-	file.close();
+void TokenStream::close() {
+   file.close();
 }
 
 
-void TokenStream::report_error(string message)
-{
+void TokenStream::report_error(string message) {
 }
 
-void TokenStream::report_warning(string message)
-{
+void TokenStream::report_warning(string message) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -120,114 +105,96 @@ void TokenStream::report_warning(string message)
 
 //returns the next character and echos to 
 //dump file and command line if echo=true
-char TokenStream::get_char()
-{
-	char out(0);
-	file.get(out);
-	if(file.eof() && comment_not_end)
-	{
-		report_error("\n\nERROR: End of file was reached before comment ended.");
-		// LOG4CPLUS_ERROR(logger, "End of file was reached before comment ended.");
-	}
+char TokenStream::get_char() {
+   char out(0);
+   file.get(out);
+   if (file.eof() && comment_not_end) {
+      report_error("\n\nERROR: End of file was reached before comment ended.");
+      // LOG4CPLUS_ERROR(logger, "End of file was reached before comment ended.");
+   }
 
-	if(!file.eof())
-	{
-		string out1;
-		out1 = add_indent(out);
-	}
-	return out;
+   if (!file.eof()) {
+      string out1;
+      out1 = add_indent(out);
+   }
+   return out;
 }
 
-bool TokenStream::is_comment(char c)
-{
-	if(c == ';')
-	{
-		return true;
-	}
-	else return false;
+bool TokenStream::is_comment(char c) {
+   if (c == ';') {
+      return true;
+   } else {
+      return false;
+   }
 }
 
-bool TokenStream::is_quote(char c)
-{
-	if(c == '\"')
-	{
-		return true;
-	}
-	else return false;
+bool TokenStream::is_quote(char c) {
+   if (c == '\"') {
+      return true;
+   } else {
+      return false;
+   }
 }
 
-bool TokenStream::is_char(char c)
-{
-	if(!is_delimiter(c))
-	{
-		return true;
-	}
-	else return false;
+bool TokenStream::is_char(char c) {
+   if (!is_delimiter(c)) {
+      return true;
+   } else {
+      return false;
+   }
 }
 
 //a quote was found so the text inside the quote should
 //be returned. Ensures that there is not a newline
 //before the quote ends
-Token TokenStream::get_quote()
-{
-	Token out;
-	char c;
+Token TokenStream::get_quote() {
+   Token out;
+   char c;
 
-	while(true)
-	{
-		c = get_char();
-		if(c == '\n')
-		{
-			report_error("\n\nERROR: Newline before end of quote.");
-			// LOG4CPLUS_ERROR(logger, "Newline before end of quote.");
-		}
-		if(is_quote(c))
-		{
-			return out;
-		}
-		//out += c;
-		out.add_Data(c);
-	}
+   while (true) {
+      c = get_char();
+      if (c == '\n') {
+         report_error("\n\nERROR: Newline before end of quote.");
+         // LOG4CPLUS_ERROR(logger, "Newline before end of quote.");
+      }
+      if (is_quote(c)) {
+         return out;
+      }
+      //out += c;
+      out.add_Data(c);
+   }
 }
 
 //returns true if a delimiter is found
-bool TokenStream::is_delimiter(char ch)
-{
-	switch(ch)
-	{
-		case ' ' : //space
-		case ',' : //comma
-		case 9 : //tab 
-		case 10 : //newline
-		case -52:
-			return true;
-		default : 
-			return false;
-	}
+bool TokenStream::is_delimiter(char ch) {
+   switch (ch) {
+      case ' ' : //space
+      case ',' : //comma
+      case 9 : //tab
+      case 10 : //newline
+      case -52:
+         return true;
+      default :
+         return false;
+   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
 //private functions
 ///////////////////////////////////////////////////////////////////////////////////
 
-string TokenStream::add_indent(char c)
-{
-	string out;
-	if(c == '\n')
-	{
-		last_was_return = true;
-	}
-	else
-	{
-		if(last_was_return)
-		{
-			for(int i = 0; i < indents; i++)
-			{
-				out = out + "   ";
-			}
-			last_was_return = false;
-		}
-	}
-	out = out + c;
-	return out;
+string TokenStream::add_indent(char c) {
+   string out;
+   if (c == '\n') {
+      last_was_return = true;
+   } else {
+      if (last_was_return) {
+         for (int i = 0; i < indents; i++) {
+            out = out + "   ";
+         }
+         last_was_return = false;
+      }
+   }
+   out = out + c;
+   return out;
 }

@@ -25,11 +25,14 @@ class LoggingLoadable : public Loadable
 {
 public:
    LoggingLoadable(void);
+
    LoggingLoadable(const LoggingLoadable &in);
+
    virtual ~LoggingLoadable(void);
+
    virtual void operator=(const LoggingLoadable &in);
 
-   
+
    /**
     * Call this after you finish registering things at it will load all the things it could and return false if it fails
     *
@@ -39,7 +42,7 @@ public:
    virtual bool complete();
 
    virtual void report_error(std::string error_message);
-   
+
    virtual void report_warning(std::string warning_message);
 
 protected:

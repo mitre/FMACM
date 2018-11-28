@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "loader/LoaderLink.h"
 #include "loader/DecodedStream.h"
 #include <string>
@@ -27,68 +28,62 @@ class LoadableLoaderLinkWithBrackets : public LoaderLink
 {
 public:
 
-	LoadableLoaderLinkWithBrackets(DATA *address)
-	{
-		var_address = address;
-	}
+   LoadableLoaderLinkWithBrackets(DATA *address) {
+      var_address = address;
+   }
 
-	//-------------------------------------------------
-	
-	LoadableLoaderLinkWithBrackets(DATA *address, bool required, bool no_reset)
-	{
-		var_address = address;
-		must_load = required;
-		must_load_only_once = no_reset;
-	}
+   //-------------------------------------------------
 
-	bool load_s(DecodedStream *ds)
-	{
-		std::string barck;
-		bool r = ds->get_datum(barck);
+   LoadableLoaderLinkWithBrackets(DATA *address,
+                                  bool required,
+                                  bool no_reset) {
+      var_address = address;
+      must_load = required;
+      must_load_only_once = no_reset;
+   }
 
-		if(!r)
-		{
-			std::string msg = "ERROR: end of file while looking for {";
-			ds->report_error("\n" + msg);
-			throw std::runtime_error(msg);
-		}
-		
-		if(barck != "{")
-		{
-			std::string msg = "ERROR: found " + barck + "while looking for {";
-			ds->report_error("\n" + msg);
-			throw std::runtime_error(msg);
-		}
+   bool load_s(DecodedStream *ds) {
+      std::string barck;
+      bool r = ds->get_datum(barck);
 
-		r = var_address->load(ds);
+      if (!r) {
+         std::string msg = "ERROR: end of file while looking for {";
+         ds->report_error("\n" + msg);
+         throw std::runtime_error(msg);
+      }
 
-		if(!r)
-		{
-			std::string msg = "ERROR: could not load object";
-			ds->report_error("\n" + msg);
-			throw std::runtime_error(msg);
-		}
+      if (barck != "{") {
+         std::string msg = "ERROR: found " + barck + "while looking for {";
+         ds->report_error("\n" + msg);
+         throw std::runtime_error(msg);
+      }
 
-		r = ds->get_datum(barck);
+      r = var_address->load(ds);
 
-		if(!r)
-		{
-			std::string msg = "ERROR: end of file while looking for }";
-			ds->report_error("\n" + msg);
-			throw std::runtime_error(msg);
-		}
-		
-		if(barck != "}")
-		{
-			std::string msg = "ERROR: found " + barck + "while looking for }";
-			ds->report_error("\n" + msg);
-			throw std::runtime_error(msg);
-		}
+      if (!r) {
+         std::string msg = "ERROR: could not load object";
+         ds->report_error("\n" + msg);
+         throw std::runtime_error(msg);
+      }
 
-		return true;
-	}
+      r = ds->get_datum(barck);
+
+      if (!r) {
+         std::string msg = "ERROR: end of file while looking for }";
+         ds->report_error("\n" + msg);
+         throw std::runtime_error(msg);
+      }
+
+      if (barck != "}") {
+         std::string msg = "ERROR: found " + barck + "while looking for }";
+         ds->report_error("\n" + msg);
+         throw std::runtime_error(msg);
+      }
+
+      return true;
+   }
 
 private:
-	DATA *var_address;
+   DATA *var_address;
 
 };

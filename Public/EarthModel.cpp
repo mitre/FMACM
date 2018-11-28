@@ -25,11 +25,11 @@
 #include "public/EarthModel.h"
 
 EarthModel::EarthModel() {
-	// TODO Auto-generated constructor stub
+   // TODO Auto-generated constructor stub
 
 }
 
 EarthModel::~EarthModel() {
-	// TODO Auto-generated destructor stub
+   // TODO Auto-generated destructor stub
 }
 

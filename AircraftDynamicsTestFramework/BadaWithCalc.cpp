@@ -20,14 +20,12 @@
 #include "utility/constants.h"
 #include <cstdlib>
 
-BadaWithCalc::BadaWithCalc()
-{
-    std::cout << "BadaWithCalc.cpp: Implement this class!" << std::endl;
-    mAircraftMass = mass.m_ref;   // default
+BadaWithCalc::BadaWithCalc() {
+   std::cout << "BadaWithCalc.cpp: Implement this class!" << std::endl;
+   mAircraftMass = mass.m_ref;   // default
 }
 
-BadaWithCalc::~BadaWithCalc()
-{
+BadaWithCalc::~BadaWithCalc() {
 }
 
 /**
@@ -37,8 +35,7 @@ BadaWithCalc::~BadaWithCalc()
  * 2.  Sets ac_mass based on the percentile.
  */
 void BadaWithCalc::getAircraftParameters(std::string aircraft_type,
-                                         double      mass_percentile)
-{
+                                         double mass_percentile) {
 // INPUTS:
 //   aircraft type
 // OUTPUTS:
@@ -62,16 +59,15 @@ void BadaWithCalc::getAircraftParameters(std::string aircraft_type,
 // OUTPUTS:
 //   cd0,cd2,gear: drag coefficients for the specific configuration
 void BadaWithCalc::getConfig(
-        const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
-        const Units::Length& altitude,    /** [in] Altitude in meters */
-        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
-        int modeLast,       /** [in] previous flap configuration (0-3) */
-        double &cd0,        /** [out] parasitic drag coefficient */
-        double &cd2,        /** [out] induced drag coefficient */
-        double &gear,       /** [out] landing gear drag coefficient */
-        int &mode           /** [out] flap configuration (0-3):
-            0=cruise, 1=approach, 2=landing, 3=gear down */) const
-{
+      const Units::Speed &velocity_cas, /** [in] Calibrated airspeed in knots */
+      const Units::Length &altitude,    /** [in] Altitude in meters */
+      const Units::Length &altitude_faf, /** [in] Altitude at final approach fix */
+      int modeLast,       /** [in] previous flap configuration (0-3) */
+      double &cd0,        /** [out] parasitic drag coefficient */
+      double &cd2,        /** [out] induced drag coefficient */
+      double &gear,       /** [out] landing gear drag coefficient */
+      int &mode           /** [out] flap configuration (0-3):
+            0=cruise, 1=approach, 2=landing, 3=gear down */) const {
 
 }
 
@@ -89,15 +85,14 @@ void BadaWithCalc::getConfig(
 // OUTPUTS:
 //   cd0,cd2,gear: drag coefficients for the specific configuration
 void BadaWithCalc::getConfigTrajGen(
-        const Units::Speed& velocity_cas,     /** [in] Calibrated airspeed in knots */
-        const Units::Length& altitude,             /** [in] Altitude in meters */
-        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
-        double &cd0,            /** [out] parasitic drag coefficient */
-        double &cd2,            /** [out] induced drag coefficient */
-        double &gear,           /** [out] landing gear drag coefficient */
-        int &mode           	/** [out] flap configuration (0-3):
-            0=cruise, 1=approach, 2=landing, 3=gear down */) const
-{
+      const Units::Speed &velocity_cas,     /** [in] Calibrated airspeed in knots */
+      const Units::Length &altitude,             /** [in] Altitude in meters */
+      const Units::Length &altitude_faf, /** [in] Altitude at final approach fix */
+      double &cd0,            /** [out] parasitic drag coefficient */
+      double &cd2,            /** [out] induced drag coefficient */
+      double &gear,           /** [out] landing gear drag coefficient */
+      int &mode            /** [out] flap configuration (0-3):
+            0=cruise, 1=approach, 2=landing, 3=gear down */) const {
 
 }
 
@@ -113,72 +108,66 @@ void BadaWithCalc::getConfigTrajGen(
 // OUTPUTS:
 //   mode: configuration
 void BadaWithCalc::getConfigForDrag(
-        const Units::Speed& velocity_cas, /** [in] Calibrated airspeed in knots */
-        const Units::Length& altitude,         /** [in] Altitude in meters */
-        const Units::Length& altitude_faf, /** [in] Altitude at final approach fix */
-        int modeLast,       /** [in] previous flap configuration (0-3) */
-        int &mode) const    /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
+      const Units::Speed &velocity_cas, /** [in] Calibrated airspeed in knots */
+      const Units::Length &altitude,         /** [in] Altitude in meters */
+      const Units::Length &altitude_faf, /** [in] Altitude at final approach fix */
+      int modeLast,       /** [in] previous flap configuration (0-3) */
+      int &mode) const    /** [out] flap configuration (0-3): 0=cruise, 1=approach, 2=landing, 3=gear down */
 {
 
 }
 
 
 // gets maximum aircraft thrust, takes input as altitude in Meters
-double BadaWithCalc::getMaxThrust(const Units::Length& altitude,
+double BadaWithCalc::getMaxThrust(const Units::Length &altitude,
                                   int mode,
-                                  std::string type) const
-{
-    return 0;
+                                  std::string type) const {
+   return 0;
 }
 
-void BadaWithCalc::setFlapSpeeds(const std::string &aircraftType)
-{
+void BadaWithCalc::setFlapSpeeds(const std::string &aircraftType) {
 }
 
 
-BadaWithCalc& BadaWithCalc::operator=(const BadaWithCalc &obj)
-{
-    if (this != &obj)
-    {
-        Bada::operator=(obj);
+BadaWithCalc &BadaWithCalc::operator=(const BadaWithCalc &obj) {
+   if (this != &obj) {
+      Bada::operator=(obj);
 
-        mAircraftMass = obj.mAircraftMass;
-        mFlapSpeeds = obj.mFlapSpeeds;
-    }
+      mAircraftMass = obj.mAircraftMass;
+      mFlapSpeeds = obj.mFlapSpeeds;
+   }
 
-    return *this;
+   return *this;
 
 }
 
 
-bool BadaWithCalc::operator==(const BadaWithCalc &obj) const
-{
+bool BadaWithCalc::operator==(const BadaWithCalc &obj) const {
 
-    bool match = Bada::operator==(obj);
+   bool match = Bada::operator==(obj);
 
-    match = match && (mAircraftMass == obj.mAircraftMass);
+   match = match && (mAircraftMass == obj.mAircraftMass);
 
-    match = match && (mFlapSpeeds.VappMin == obj.mFlapSpeeds.VappMin);
-    match = match && (mFlapSpeeds.VappMax == obj.mFlapSpeeds.VappMax);
-    match = match && (mFlapSpeeds.VlndMin == obj.mFlapSpeeds.VlndMin);
-    match = match && (mFlapSpeeds.VlndMax == obj.mFlapSpeeds.VlndMax);
-    match = match && (mFlapSpeeds.VgearMin == obj.mFlapSpeeds.VgearMin);
-    match = match && (mFlapSpeeds.VgearMax == obj.mFlapSpeeds.VgearMax);
+   match = match && (mFlapSpeeds.VappMin == obj.mFlapSpeeds.VappMin);
+   match = match && (mFlapSpeeds.VappMax == obj.mFlapSpeeds.VappMax);
+   match = match && (mFlapSpeeds.VlndMin == obj.mFlapSpeeds.VlndMin);
+   match = match && (mFlapSpeeds.VlndMax == obj.mFlapSpeeds.VlndMax);
+   match = match && (mFlapSpeeds.VgearMin == obj.mFlapSpeeds.VgearMin);
+   match = match && (mFlapSpeeds.VgearMax == obj.mFlapSpeeds.VgearMax);
 
-    return match;
+   return match;
 
 }
 
 
-bool BadaWithCalc::operator!=(const BadaWithCalc &obj) const
-{
+bool BadaWithCalc::operator!=(const BadaWithCalc &obj) const {
 
-    // Generic not equals operator.
-    //
-    // obj:comparison object.
-    // returns true if obj doesn't match.
-    //         false if obj matches.
+   // Generic not equals operator.
+   //
+   // obj:comparison object.
+   // returns true if obj doesn't match.
+   //         false if obj matches.
 
-    return !operator==(obj);
+   return !operator==(obj);
 
 }

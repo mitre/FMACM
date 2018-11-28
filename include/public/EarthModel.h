@@ -36,33 +36,43 @@ class LocalTangentPlane;
  * geodetic and ECEF coordinate systems.  It also acts as a factory
  * for EnuConverter, which converts between ECEF and ENU coordinates.
  */
-class EarthModel {
+class EarthModel
+{
 public:
-	class GeodeticPosition {
-	public:
-		Units::SignedAngle latitude, longitude;
-		Units::Length altitude;
-	};
-	class AbsolutePositionEcef {
-	public:
-		Units::Length x, y, z;
-	};
-	class LocalPositionEnu {
-	public:
-		Units::Length x, y, z;
-	};
+   class GeodeticPosition
+   {
+   public:
+      Units::SignedAngle latitude, longitude;
+      Units::Length altitude;
+   };
 
-	virtual ~EarthModel();
-	virtual void convertGeodeticToAbsolute(
-			const EarthModel::GeodeticPosition &geo, EarthModel::AbsolutePositionEcef &ecef) const = 0;
-	virtual void convertAbsoluteToGeodetic(
-			const EarthModel::AbsolutePositionEcef &ecef, EarthModel::GeodeticPosition &geo) const = 0;
+   class AbsolutePositionEcef
+   {
+   public:
+      Units::Length x, y, z;
+   };
 
-	virtual std::shared_ptr<LocalTangentPlane>  makeEnuConverter(
-		   const GeodeticPosition &pointOfTangencyGeo,
-		   const LocalPositionEnu &pointOfTangencyEnu) const = 0;
+   class LocalPositionEnu
+   {
+   public:
+      Units::Length x, y, z;
+   };
+
+   virtual ~EarthModel();
+
+   virtual void convertGeodeticToAbsolute(
+         const EarthModel::GeodeticPosition &geo,
+         EarthModel::AbsolutePositionEcef &ecef) const = 0;
+
+   virtual void convertAbsoluteToGeodetic(
+         const EarthModel::AbsolutePositionEcef &ecef,
+         EarthModel::GeodeticPosition &geo) const = 0;
+
+   virtual std::shared_ptr<LocalTangentPlane> makeEnuConverter(
+         const GeodeticPosition &pointOfTangencyGeo,
+         const LocalPositionEnu &pointOfTangencyEnu) const = 0;
 
 protected:
-	EarthModel();
+   EarthModel();
 };
 

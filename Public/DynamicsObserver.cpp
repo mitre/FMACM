@@ -17,29 +17,25 @@
 
 #include "public/DynamicsObserver.h"
 
-DynamicsObserver::DynamicsObserver(void)
-{
-	iter = -1;
-	id = -1;
-	time = -99999.0;
-	achieved_groundspeed = 0.0;
-	speed_command = 0.0;
-	IAS_command = 0.0;
+DynamicsObserver::DynamicsObserver(void) {
+   iter = -1;
+   id = -1;
+   time = -99999.0;
+   achieved_groundspeed = 0.0;
+   speed_command = 0.0;
+   IAS_command = 0.0;
 }
 
-DynamicsObserver::~DynamicsObserver(void)
-{
+DynamicsObserver::~DynamicsObserver(void) {
 }
 
 // < operator to enable sorting of Dynamic Observer objects
-bool DynamicsObserver::operator<(const DynamicsObserver &dyn_in) const
-{
-	bool result = false;
+bool DynamicsObserver::operator<(const DynamicsObserver &dyn_in) const {
+   bool result = false;
 
-	if( this->iter <= dyn_in.iter && this->id < dyn_in.id )
-	{
-		result = true;
-	}
+   if (this->iter <= dyn_in.iter && this->id < dyn_in.id) {
+      result = true;
+   }
 
-	return result;
+   return result;
 }

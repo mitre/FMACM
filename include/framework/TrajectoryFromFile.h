@@ -28,79 +28,87 @@
 #include <Length.h>
 
 
-class TrajectoryFromFile : Loadable {
+class TrajectoryFromFile : Loadable
+{
 
- public:
+public:
 
-  struct VerticalData {
-    std::vector<double> mTimeToGo; // secs
-    std::vector<double> mDistToGo; // meters
-    std::vector<double> mAlt; // meters
-    std::vector<double> mIas; // mps
-    std::vector<double> mDotAlt; // mps
-  } v_traj;
+   struct VerticalData
+   {
+      std::vector<double> mTimeToGo; // secs
+      std::vector<double> mDistToGo; // meters
+      std::vector<double> mAlt; // meters
+      std::vector<double> mIas; // mps
+      std::vector<double> mDotAlt; // mps
+   } v_traj;
 
-  TrajectoryFromFile(void);
-  ~TrajectoryFromFile(void);
+   TrajectoryFromFile(void);
 
-  bool load(DecodedStream *input);
+   ~TrajectoryFromFile(void);
 
-  std::vector<HorizontalPath> getHorizontalData(void);
-  VerticalData getVerticalData(void);
+   bool load(DecodedStream *input);
 
-  Guidance update(AircraftState state, Guidance guidance_in);
+   std::vector<HorizontalPath> getHorizontalData(void);
 
-  void calculateWaypoints(AircraftIntent &intent);
+   VerticalData getVerticalData(void);
 
-  bool is_loaded(void);
+   Guidance update(AircraftState state,
+                   Guidance guidance_in);
 
-  std::vector<HorizontalPath> h_traj;
+   void calculateWaypoints(AircraftIntent &intent);
 
-  Units::Length mAltAtFAF;
-  double mMassPercentile;
+   bool is_loaded(void);
 
-  std::vector<PrecalcWaypoint> waypoint_vector;
+   std::vector<HorizontalPath> h_traj;
 
+   Units::Length mAltAtFAF;
+   double mMassPercentile;
 
- private:
-
-  // Fields from vertical file in order.
-
-  enum VerticalFields {
-    TIME_TO_GO_SEC = 0,
-    DISTANCE_TO_GO_VERT_M,
-    ALTITUDE_M,
-    IAS_MPS,
-    DOT_ALTITUDE_MPS,
-    NUM_VERTICAL_TRAJ_FIELDS
-  };
-
-  enum HorizontalFields {
-    IX = 0,
-    X_M,
-    Y_M,
-    DISTANCE_TO_GO_HORZ_M,
-    SEGMENT_TYPE,
-    COURSE_R,
-    TURN_CENTER_X_M,
-    TURN_CENTER_Y_M,
-    ANGLE_AT_TURN_START_R,
-    ANGLE_AT_TURN_END_R,
-    TURN_RADIUS_M,
-    LAT_D,
-    LON_D,
-    TURN_CENTER_LAT_D,
-    TURN_CENTER_LON_D,
-    NUM_HORIZONTAL_TRAJ_FIELDS
-  };
+   std::vector<PrecalcWaypoint> waypoint_vector;
 
 
-  void readVerticalTrajectoryFile(void);
-  void readHorizontalTrajectoryFile(void);
+private:
 
-  std::string mVerticalTrajectoryFile;
-  std::string mHorizontalTrajectoryFile;
+   // Fields from vertical file in order.
 
-  bool mLoaded;
+   enum VerticalFields
+   {
+      TIME_TO_GO_SEC = 0,
+      DISTANCE_TO_GO_VERT_M,
+      ALTITUDE_M,
+      IAS_MPS,
+      DOT_ALTITUDE_MPS,
+      NUM_VERTICAL_TRAJ_FIELDS
+   };
+
+   enum HorizontalFields
+   {
+      IX = 0,
+      X_M,
+      Y_M,
+      DISTANCE_TO_GO_HORZ_M,
+      SEGMENT_TYPE,
+      COURSE_R,
+      TURN_CENTER_X_M,
+      TURN_CENTER_Y_M,
+      ANGLE_AT_TURN_START_R,
+      ANGLE_AT_TURN_END_R,
+      TURN_RADIUS_M,
+      LAT_D,
+      LON_D,
+      TURN_CENTER_LAT_D,
+      TURN_CENTER_LON_D,
+      NUM_HORIZONTAL_TRAJ_FIELDS
+   };
+
+
+   void readVerticalTrajectoryFile(void);
+
+   void readHorizontalTrajectoryFile(void);
+
+   std::string mVerticalTrajectoryFile;
+   std::string mHorizontalTrajectoryFile;
+
+   bool mLoaded;
 
 };

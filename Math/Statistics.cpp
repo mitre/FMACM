@@ -26,135 +26,120 @@ Or Distance, Area
 #include <algorithm>
 
 
-Statistics::Statistics(void)
-{
-	s1 = 0;
-	max = 0.0;
-	min = 0.0;
+Statistics::Statistics(void) {
+   s1 = 0;
+   max = 0.0;
+   min = 0.0;
 }
 
-Statistics::~Statistics(void)
-{
+Statistics::~Statistics(void) {
 
 }
 
-void Statistics::insert(double value)
-{
-	if(samples.size() == 0)
-	{
-		max = value;
-		min = value;
-	}
-	else
-	{
-		max = std::max(max, value);
-		min = std::min(min, value);
-	}
+void Statistics::insert(double value) {
+   if (samples.size() == 0) {
+      max = value;
+      min = value;
+   } else {
+      max = std::max(max, value);
+      min = std::min(min, value);
+   }
 
-	samples.push_back(value);
+   samples.push_back(value);
 
-	s1 += value;
+   s1 += value;
 }
 
-double Statistics::get_std()const
-{
-	// Computes standard deviation over samples
-	//
-	// returns standard deviation or -1 if no samples to compute from.
+double Statistics::get_std() const {
+   // Computes standard deviation over samples
+   //
+   // returns standard deviation or -1 if no samples to compute from.
 
-	// TODO see if this is the correct formula
-	// wrong formula
-	// return sqrt(s2 * number_of_samples - s1 * s1)/number_of_samples;
+   // TODO see if this is the correct formula
+   // wrong formula
+   // return sqrt(s2 * number_of_samples - s1 * s1)/number_of_samples;
 
-	//double dof = 1/(number_of_samples - 1);
-	//return sqrt( dof*s2 - SQR( get_mean() ) );
+   //double dof = 1/(number_of_samples - 1);
+   //return sqrt( dof*s2 - SQR( get_mean() ) );
 
-	//return sqrt( fabs((s2 / (number_of_samples - 1.0)) - (number_of_samples)*(get_mean()*get_mean())/(number_of_samples - 1.0)) );
+   //return sqrt( fabs((s2 / (number_of_samples - 1.0)) - (number_of_samples)*(get_mean()*get_mean())/(number_of_samples - 1.0)) );
 
-	// Pierre C. May 2013, formula is still wrong, (Sum^2 - N*Mean()^2)/N != ( SUM((s - mean)^2)/N
+   // Pierre C. May 2013, formula is still wrong, (Sum^2 - N*Mean()^2)/N != ( SUM((s - mean)^2)/N
 
-	double sDev = -1.0;
+   double sDev = -1.0;
 
-	if (samples.size() > 0) {
+   if (samples.size() > 0) {
 
-		double variance_sum = 0.0;
-		for(int loop = 0; loop < (int)samples.size(); loop++)
-		{
-			if( loop != 0 )
-			{
-				variance_sum += pow(samples[loop] - get_mean(), 2);
-			}
-			else
-			{
-				variance_sum = pow(samples[loop] - get_mean(), 2);
-			}
-		}
-		sDev = sqrt(variance_sum / samples.size() );
-	}
+      double variance_sum = 0.0;
+      for (int loop = 0; loop < (int) samples.size(); loop++) {
+         if (loop != 0) {
+            variance_sum += pow(samples[loop] - get_mean(), 2);
+         } else {
+            variance_sum = pow(samples[loop] - get_mean(), 2);
+         }
+      }
+      sDev = sqrt(variance_sum / samples.size());
+   }
 
-	return sDev;
+   return sDev;
 }
 
 //gwang 2013-11-08
 //input: pct is the percent (0 <= pct <= 1)
-double Statistics::get_percentile(double pct)
-{
-	int desired_sample_num;
-	double result;
-	vector<double> samples_sorted;
+double Statistics::get_percentile(double pct) {
+   int desired_sample_num;
+   double result;
+   vector<double> samples_sorted;
 
-	//samples_sorted = samples;
-	for(unsigned int i=0; i<samples.size(); i++)
-	{
-		double tmp = samples.at(i);
-		samples_sorted.push_back(tmp);
-	}
+   //samples_sorted = samples;
+   for (unsigned int i = 0; i < samples.size(); i++) {
+      double tmp = samples.at(i);
+      samples_sorted.push_back(tmp);
+   }
 
-	stable_sort(samples_sorted.begin(), samples_sorted.end());
+   stable_sort(samples_sorted.begin(), samples_sorted.end());
 
-	desired_sample_num = (int) (pct * samples.size() );
+   desired_sample_num = (int) (pct * samples.size());
 
-	if(desired_sample_num == 0) //handling exceptional case
-	{
-		result = samples_sorted.at(0); //We use this, although this is not true strictly (because 0-percentile is not defined)
-	}
-	else
-	{
-		result = samples_sorted.at(desired_sample_num-1);
-	}
+   if (desired_sample_num == 0) //handling exceptional case
+   {
+      result = samples_sorted.at(
+            0); //We use this, although this is not true strictly (because 0-percentile is not defined)
+   } else {
+      result = samples_sorted.at(desired_sample_num - 1);
+   }
 
-	return(result);
+   return (result);
 
 } // get_percentile
 //end gwang
 
-double Statistics::get_bound95()
-{
-	// Computes 95th bounds of the vector samples.  This
-	// based on Lesley's matlab code.
-	//
-	// Returns:95th bound calculation.
+double Statistics::get_bound95() {
+   // Computes 95th bounds of the vector samples.  This
+   // based on Lesley's matlab code.
+   //
+   // Returns:95th bound calculation.
 
-	double bound95 = -1.0;
+   double bound95 = -1.0;
 
-	double n = (double) samples.size();
-	double prob = 0.0;
-	double delta = 0.1;
+   double n = (double) samples.size();
+   double prob = 0.0;
+   double delta = 0.1;
 
-	while (prob < 0.95) {
-		double size = 0.0;
+   while (prob < 0.95) {
+      double size = 0.0;
 
-		for (unsigned int ix = 0; ix < samples.size(); ix ++) {
-			if (fabs(samples[ix]) < delta) {
-				size = size + 1.0;
-			}
-		}
+      for (unsigned int ix = 0; ix < samples.size(); ix++) {
+         if (fabs(samples[ix]) < delta) {
+            size = size + 1.0;
+         }
+      }
 
-		prob = size/n;
+      prob = size / n;
 
-		bound95 = delta;
-		delta = delta + 0.1;
-	}
+      bound95 = delta;
+      delta = delta + 0.1;
+   }
 
-	return bound95;
+   return bound95;
 }

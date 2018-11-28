@@ -17,17 +17,14 @@
 
 #include "public/Aircraft.h"
 
-Aircraft::Aircraft()
-{
-	// Do nothing
+Aircraft::Aircraft() {
+   // Do nothing
 }
 
-Aircraft::~Aircraft()
-{
-	// Do nothing
+Aircraft::~Aircraft() {
+   // Do nothing
 }
 
-Aircraft& Aircraft::operator=(const Aircraft &in)
-{
-	return *this;
+Aircraft &Aircraft::operator=(const Aircraft &in) {
+   return *this;
 }

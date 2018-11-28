@@ -18,21 +18,19 @@
 #include "public/CrossTrackObserver.h"
 
 
-CrossTrackObserver::CrossTrackObserver(void)
-{
-	time = -99999.0;
-	x = 0.0;
-	y = 0.0;
-	dynamic_cross = 0.0;
-	commanded_cross= 0.0;
-	unmodified_cross= 0.0;
-	psi_command = 0.0;
-	phi = 0.0;
-	limited_phi = 0.0;
-	reported_distance = 0.0;
+CrossTrackObserver::CrossTrackObserver(void) {
+   time = -99999.0;
+   x = 0.0;
+   y = 0.0;
+   dynamic_cross = 0.0;
+   commanded_cross = 0.0;
+   unmodified_cross = 0.0;
+   psi_command = 0.0;
+   phi = 0.0;
+   limited_phi = 0.0;
+   reported_distance = 0.0;
 }
 
 
-CrossTrackObserver::~CrossTrackObserver(void)
-{
+CrossTrackObserver::~CrossTrackObserver(void) {
 }

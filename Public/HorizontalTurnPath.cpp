@@ -18,26 +18,24 @@
 #include "public/HorizontalTurnPath.h"
 
 
-HorizontalTurnPath::HorizontalTurnPath(void)
-{
-	x_turn = 0;
-	y_turn = 0;
-	q_start = Units::UnsignedRadiansAngle(0);
-	q_end = Units::UnsignedRadiansAngle(0);
-	radius = Units::MetersLength(0);
-	bankAngle = Units::UnsignedRadiansAngle(0);
-	groundspeed = Units::MetersPerSecondSpeed(0);
+HorizontalTurnPath::HorizontalTurnPath(void) {
+   x_turn = 0;
+   y_turn = 0;
+   q_start = Units::UnsignedRadiansAngle(0);
+   q_end = Units::UnsignedRadiansAngle(0);
+   radius = Units::MetersLength(0);
+   bankAngle = Units::UnsignedRadiansAngle(0);
+   groundspeed = Units::MetersPerSecondSpeed(0);
 }
 
 
-HorizontalTurnPath::~HorizontalTurnPath(void)
-{
+HorizontalTurnPath::~HorizontalTurnPath(void) {
 }
 
 bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
-	return ((this->x_turn == that.x_turn) &&
-			(this->y_turn == that.y_turn) &&
-			(this->q_start == that.q_start) &&
-			(this->q_end == that.q_end) &&
-			(this->radius == that.radius));
+   return ((this->x_turn == that.x_turn) &&
+           (this->y_turn == that.y_turn) &&
+           (this->q_start == that.q_start) &&
+           (this->q_end == that.q_end) &&
+           (this->radius == that.radius));
 }

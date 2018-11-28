@@ -16,98 +16,90 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "loader/LoaderLink.h"
 
-template <class DATA>
+template<class DATA>
 class NamedElementLoaderLink : public LoaderLink
 {
 public:
 
-	NamedElementLoaderLink(std::vector<DATA> *address)
-	{
-		var_address = address;
-		must_load_only_once = false;
-		is_a_list = true;
-	}
+   NamedElementLoaderLink(std::vector<DATA> *address) {
+      var_address = address;
+      must_load_only_once = false;
+      is_a_list = true;
+   }
 
-	//-------------------------------------------------
+   //-------------------------------------------------
 
-	bool load_s(DecodedStream *ds)
-	{
-		DATA temp;
-		std::string token;
-		bool f;
+   bool load_s(DecodedStream *ds) {
+      DATA temp;
+      std::string token;
+      bool f;
 
-		// read off the {
+      // read off the {
 
-		f = ds->get_datum(token);
-		
-		if(!f)
-		{
-			std::string msg = "load attempt failed:  no first token";
-			ds->highlight_on();
-			ds->report_error("\n" + msg + "\n");
-			ds->highlight_off();
-			throw std::runtime_error(msg);
-		}
+      f = ds->get_datum(token);
 
-		if(token.compare("{") != 0)
-		{
-			std::string msg = "load attempt failed:  first token not {";
-			ds->highlight_on();
-			ds->report_error("\n" + msg + "\n");
-			ds->highlight_off();
-			throw std::runtime_error(msg);
-		}
+      if (!f) {
+         std::string msg = "load attempt failed:  no first token";
+         ds->highlight_on();
+         ds->report_error("\n" + msg + "\n");
+         ds->highlight_off();
+         throw std::runtime_error(msg);
+      }
 
-		// load the entry ----------------------------------------------
+      if (token.compare("{") != 0) {
+         std::string msg = "load attempt failed:  first token not {";
+         ds->highlight_on();
+         ds->report_error("\n" + msg + "\n");
+         ds->highlight_off();
+         throw std::runtime_error(msg);
+      }
 
-		f = temp.load(ds);
+      // load the entry ----------------------------------------------
 
-		if(!f)
-		{
-			std::string msg = "load attempt failed.";
-			ds->highlight_on();
-			ds->report_error("\n" + msg + "\n");
-			ds->highlight_off();
-			throw std::runtime_error(msg);
-		}
+      f = temp.load(ds);
 
-		// add it to the list ----------------------------------------------
+      if (!f) {
+         std::string msg = "load attempt failed.";
+         ds->highlight_on();
+         ds->report_error("\n" + msg + "\n");
+         ds->highlight_off();
+         throw std::runtime_error(msg);
+      }
 
-		var_address->push_back(temp);
+      // add it to the list ----------------------------------------------
 
-		// get the end of the entry ----------------------------------------------
+      var_address->push_back(temp);
 
-		f = ds->get_datum(token);
+      // get the end of the entry ----------------------------------------------
 
-		if(!f)
-		{
-			std::string msg = "load attempt failed:  no last token";
-			ds->highlight_on();
-			ds->report_error("\n" + msg + "\n");
-			ds->highlight_off();
-			throw std::runtime_error(msg);
-		}
+      f = ds->get_datum(token);
 
-		// look for the } at the end of the list ----------------------------------------------
+      if (!f) {
+         std::string msg = "load attempt failed:  no last token";
+         ds->highlight_on();
+         ds->report_error("\n" + msg + "\n");
+         ds->highlight_off();
+         throw std::runtime_error(msg);
+      }
 
-		if( token.compare("}") == 0)
-		{
-			return true;
-		}
-		else
-		{
-			std::string msg = "load attempt failed:  last token not }";
-			ds->highlight_on();
-			ds->report_error("\n" + msg + "\n");
-			ds->highlight_off();
-			throw std::runtime_error(msg);
-		}
+      // look for the } at the end of the list ----------------------------------------------
 
-		return true;
-	}
+      if (token.compare("}") == 0) {
+         return true;
+      } else {
+         std::string msg = "load attempt failed:  last token not }";
+         ds->highlight_on();
+         ds->report_error("\n" + msg + "\n");
+         ds->highlight_off();
+         throw std::runtime_error(msg);
+      }
+
+      return true;
+   }
 
 private:
-	std::vector<DATA> *var_address;
+   std::vector<DATA> *var_address;
 };

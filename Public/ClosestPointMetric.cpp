@@ -20,7 +20,7 @@
 
 
 ClosestPointMetric::ClosestPointMetric(void) {
-  mMinDist = Units::NauticalMilesLength(1000000000.0);
+   mMinDist = Units::NauticalMilesLength(1000000000.0);
 }
 
 
@@ -28,31 +28,35 @@ ClosestPointMetric::~ClosestPointMetric(void) {
 }
 
 
-void ClosestPointMetric::update(double imx,double imy,double targx,double targy) {
+void ClosestPointMetric::update(double imx,
+                                double imy,
+                                double targx,
+                                double targy) {
 
-  // Computes the distance between im and target aircraft based on the input
-  // positions and replaces the minimum distance if the new distance closer.
-  // Distance is in nmi.
-  //
-  // imx,imy:position of IM aircraft.
-  // targx,targy:position of target aircraft.
+   // Computes the distance between im and target aircraft based on the input
+   // positions and replaces the minimum distance if the new distance closer.
+   // Distance is in nmi.
+   //
+   // imx,imy:position of IM aircraft.
+   // targx,targy:position of target aircraft.
 
-  Units::Length dist = AircraftCalculations::ptToPtDist(
-		  Units::FeetLength(imx),
-		  Units::FeetLength(imy),
-		  Units::FeetLength(targx),
-		  Units::FeetLength(targy));
+   Units::Length dist = AircraftCalculations::ptToPtDist(
+         Units::FeetLength(imx),
+         Units::FeetLength(imy),
+         Units::FeetLength(targx),
+         Units::FeetLength(targy));
 
-  if (dist < mMinDist)
-    mMinDist = dist;
+   if (dist < mMinDist) {
+      mMinDist = dist;
+   }
 }
 
 
 Units::Length ClosestPointMetric::getMinDist() {
 
-  // Gets minimum distance.
-  //
-  // returns minimum distance.
+   // Gets minimum distance.
+   //
+   // returns minimum distance.
 
-  return mMinDist;
+   return mMinDist;
 }

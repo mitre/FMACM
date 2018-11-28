@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "public/LoggingLoadable.h"
 #include "public/PrecalcConstraint.h"
 #include "UnsignedAngle.h"
@@ -23,40 +24,43 @@
 class PrecalcWaypoint : public LoggingLoadable
 {
 public:
-	PrecalcWaypoint(void);
-	~PrecalcWaypoint(void);
+   PrecalcWaypoint(void);
 
-	// equals operator
-	bool operator==(const PrecalcWaypoint &obj) const;
+   ~PrecalcWaypoint(void);
 
-	// load method to read in the Dynamics values
-	bool load(DecodedStream *input);
+   // equals operator
+   bool operator==(const PrecalcWaypoint &obj) const;
 
-	// method to check if the model loaded properly
-	bool is_loaded();
+   // load method to read in the Dynamics values
+   bool load(DecodedStream *input);
 
-	std::string name;	// for diagnostics
+   // method to check if the model loaded properly
+   bool is_loaded();
 
-	double leg_length; // in meters
-	Units::UnsignedRadiansAngle course_angle; // in radians
-	
-	double x_pos; // in meters
-	double y_pos; // in meters
+   std::string name;   // for diagnostics
 
-    // Added for RF legs
-    double x_cp; // center point for RF leg
-    double y_cp;
-    double radius_cp; // in meters
+   double leg_length; // in meters
+   Units::UnsignedRadiansAngle course_angle; // in radians
 
-	// added for research
-	Units::RadiansAngle bankAngle;
-	Units::MetersPerSecondSpeed groundspeed;
+   double x_pos; // in meters
+   double y_pos; // in meters
 
-	PrecalcConstraint constraints;
+   // Added for RF legs
+   double x_cp; // center point for RF leg
+   double y_cp;
+   double radius_cp; // in meters
 
-    void setLoaded(bool val) {loaded = val;};
+   // added for research
+   Units::RadiansAngle bankAngle;
+   Units::MetersPerSecondSpeed groundspeed;
+
+   PrecalcConstraint constraints;
+
+   void setLoaded(bool val) {
+      loaded = val;
+   };
 
 private:
-	bool loaded;
+   bool loaded;
 };
 

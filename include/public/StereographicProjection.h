@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <Angle.h>
 #include <Length.h>
 
@@ -23,30 +24,40 @@ class StereographicProjection
 {
 public:
 
-    StereographicProjection(void);
-    ~StereographicProjection(void);
-    static void init(Units::Angle lat, Units::Angle lon, Units::Length earthRadius);
-    static void xy_to_ll(const Units::Length x, const Units::Length y,
-                         Units::Angle &lat2, Units::Angle &lon2);
-    static void ll_to_xy(
-            const Units::Angle lat2, Units::Angle lon2,
-            Units::Length &x, Units::Length &y);
+   StereographicProjection(void);
+
+   ~StereographicProjection(void);
+
+   static void init(Units::Angle lat,
+                    Units::Angle lon,
+                    Units::Length earthRadius);
+
+   static void xy_to_ll(const Units::Length x,
+                        const Units::Length y,
+                        Units::Angle &lat2,
+                        Units::Angle &lon2);
+
+   static void ll_to_xy(
+         const Units::Angle lat2,
+         Units::Angle lon2,
+         Units::Length &x,
+         Units::Length &y);
 
 private:
 
-    static double toConformalSin(double x);
+   static double toConformalSin(double x);
 
-    /* Raw parameters for the NAS conversion */
-    static Units::RadiansAngle latTPT;  /* North latitude of tangency point (radians) */
-    static Units::RadiansAngle lonTPT;  /* **WEST** longitude of tangency point (radians) */
-    static Units::FeetLength eRadius; //earth radius at tangent point (lon1, lat1), feet
+   /* Raw parameters for the NAS conversion */
+   static Units::RadiansAngle latTPT;  /* North latitude of tangency point (radians) */
+   static Units::RadiansAngle lonTPT;  /* **WEST** longitude of tangency point (radians) */
+   static Units::FeetLength eRadius; //earth radius at tangent point (lon1, lat1), feet
 
-    /* Convienience parameters calculated from raw parameters */
-    static double sin_latTPT; /* sin of latitude of tangency point */
-    static double sin_clatTPT; /* sin of conformal latitude of tangency point */
-    static double cos_clatTPT; /* cos of conformal latitude of tangency point */
+   /* Convienience parameters calculated from raw parameters */
+   static double sin_latTPT; /* sin of latitude of tangency point */
+   static double sin_clatTPT; /* sin of conformal latitude of tangency point */
+   static double cos_clatTPT; /* cos of conformal latitude of tangency point */
 
-    /* Convienience parameters used only for the reverse NAS projection */
-    static double cos_gamma;
-    static double sin_gamma;
+   /* Convienience parameters used only for the reverse NAS projection */
+   static double cos_gamma;
+   static double sin_gamma;
 };

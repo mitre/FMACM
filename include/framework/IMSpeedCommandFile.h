@@ -26,52 +26,58 @@
 class IMSpeedCommandFile : public Loadable
 {
 
- public:
+public:
 
-  class SpeedRecord {
+   class SpeedRecord
+   {
 
-    public:
+   public:
 
       SpeedRecord();
-      SpeedRecord(Units::Time t,Units::Speed s);
+
+      SpeedRecord(Units::Time t,
+                  Units::Speed s);
+
       ~SpeedRecord();
 
       bool operator==(const IMSpeedCommandFile::SpeedRecord &sr) const;
+
       bool operator!=(const IMSpeedCommandFile::SpeedRecord &sr) const;
 
       Units::Time mTime;
       Units::Speed mSpeed;
-  };
+   };
 
-  IMSpeedCommandFile(void);
-  ~IMSpeedCommandFile(void);
+   IMSpeedCommandFile(void);
 
-  bool load(DecodedStream *strm);
+   ~IMSpeedCommandFile(void);
 
-  Guidance update(Units::Time time);
+   bool load(DecodedStream *strm);
 
-  std::vector<IMSpeedCommandFile::SpeedRecord> getdata(void);
+   Guidance update(Units::Time time);
 
-  void dump(void);
+   std::vector<IMSpeedCommandFile::SpeedRecord> getdata(void);
 
-
- protected:
-
-  std::vector<SpeedRecord> mSpeedData;
+   void dump(void);
 
 
- private:
+protected:
 
-  static const int histLen = 20;
-  double iasHist[histLen];
-  int historyIndexer;
+   std::vector<SpeedRecord> mSpeedData;
 
-  void readData(void);
 
-  std::string mFilePath;
-  bool mApplyPilotDelay;
-  Units::SecondsTime mPilotDelaySeconds;
+private:
 
-  bool mLoaded;
+   static const int histLen = 20;
+   double iasHist[histLen];
+   int historyIndexer;
+
+   void readData(void);
+
+   std::string mFilePath;
+   bool mApplyPilotDelay;
+   Units::SecondsTime mPilotDelaySeconds;
+
+   bool mLoaded;
 
 };

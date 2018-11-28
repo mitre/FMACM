@@ -38,66 +38,94 @@
 
 namespace CsvParser {
 
-class CsvRow
-{
-    public:
-        std::string const& operator[](std::size_t index) const
-        {
-            return m_data[index];
-        }
-        std::size_t size() const
-        {
-            return m_data.size();
-        }
-        void readNextRow(std::istream& str)
-        {
-            std::string         line;
-            std::getline(str,line);
+   class CsvRow
+   {
+   public:
+      std::string const &operator[](std::size_t index) const {
+         return m_data[index];
+      }
 
-            std::stringstream   lineStream(line);
-            std::string         cell;
+      std::size_t size() const {
+         return m_data.size();
+      }
 
-            m_data.clear();
-            while(std::getline(lineStream,cell,','))
-            {
-                m_data.push_back(cell);
-            }
-        }
-    private:
-        std::vector<std::string>    m_data;
-};
+      void readNextRow(std::istream &str) {
+         std::string line;
+         std::getline(str, line);
 
-inline std::istream& operator>>(std::istream& str,CsvRow& data)
-{
-    data.readNextRow(str);
-    return str;
-}
+         std::stringstream lineStream(line);
+         std::string cell;
 
-class CsvIterator
-{
-    public:
-        typedef std::input_iterator_tag     iterator_category;
-        typedef CsvRow                      value_type;
-        typedef std::size_t                 difference_type;
-        typedef CsvRow*                     pointer;
-        typedef CsvRow&                     reference;
+         m_data.clear();
+         while (std::getline(lineStream, cell, ',')) {
+            m_data.push_back(cell);
+         }
+      }
 
-        CsvIterator(std::istream& str)  :m_str(str.good()?&str:NULL) { ++(*this); }
-        CsvIterator()                   :m_str(NULL) {}
+   private:
+      std::vector<std::string> m_data;
+   };
 
-        // Pre Increment
-        CsvIterator& operator++()               {if (m_str) { (*m_str) >> m_row;m_str = m_str->good()?m_str:NULL;}return *this;}
-        // Post increment
-        CsvIterator operator++(int)             {CsvIterator    tmp(*this);++(*this);return tmp;}
-        CsvRow const& operator*()   const       {return m_row;}
-        CsvRow const* operator->()  const       {return &m_row;}
+   inline std::istream &operator>>(std::istream &str,
+                                   CsvRow &data) {
+      data.readNextRow(str);
+      return str;
+   }
 
-        bool operator==(CsvIterator const& rhs) {return ((this == &rhs) || ((this->m_str == NULL) && (rhs.m_str == NULL)));}
-        bool operator!=(CsvIterator const& rhs) {return !((*this) == rhs);}
-    private:
-        std::istream*       m_str;
-        CsvRow              m_row;
-};
+   class CsvIterator
+   {
+   public:
+      typedef std::input_iterator_tag iterator_category;
+      typedef CsvRow value_type;
+      typedef std::size_t difference_type;
+      typedef CsvRow *pointer;
+      typedef CsvRow &reference;
+
+      CsvIterator(std::istream &str)
+            : m_str(str.good() ? &str : NULL) {
+         ++(*this);
+      }
+
+      CsvIterator()
+            : m_str(NULL) {
+      }
+
+      // Pre Increment
+      CsvIterator &operator++() {
+         if (m_str) {
+            (*m_str) >> m_row;
+            m_str = m_str->good() ? m_str : NULL;
+         }
+         return *this;
+      }
+
+      // Post increment
+      CsvIterator operator++(int) {
+         CsvIterator tmp(*this);
+         ++(*this);
+         return tmp;
+      }
+
+      CsvRow const &operator*() const {
+         return m_row;
+      }
+
+      CsvRow const *operator->() const {
+         return &m_row;
+      }
+
+      bool operator==(CsvIterator const &rhs) {
+         return ((this == &rhs) || ((this->m_str == NULL) && (rhs.m_str == NULL)));
+      }
+
+      bool operator!=(CsvIterator const &rhs) {
+         return !((*this) == rhs);
+      }
+
+   private:
+      std::istream *m_str;
+      CsvRow m_row;
+   };
 
 } // namespace CsvParser
 

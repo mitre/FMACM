@@ -4,15 +4,15 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 set(SOURCE_FILES
-      CustomMath.cpp  
-      DMatrix.cpp  
-      DVector.cpp
-      InvalidIndexException.cpp
-      RandomGenerator.cpp  
-      Statistics.cpp
-)
+        CustomMath.cpp
+        DMatrix.cpp
+        DVector.cpp
+        InvalidIndexException.cpp
+        RandomGenerator.cpp
+        Statistics.cpp
+        )
 
-set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(math STATIC ${SOURCE_FILES})
 target_include_directories(math PUBLIC

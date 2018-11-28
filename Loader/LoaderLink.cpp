@@ -22,49 +22,43 @@ using namespace std;
 
 // log4cplus::Logger LoaderLink::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("LoaderLink"));
 
-LoaderLink::LoaderLink(void)
-{
-	loaded = false;
-	must_load = false;
-	must_load_only_once = false;
-	is_a_list = false;
+LoaderLink::LoaderLink(void) {
+   loaded = false;
+   must_load = false;
+   must_load_only_once = false;
+   is_a_list = false;
 }
 
-LoaderLink::~LoaderLink(void)
-{
+LoaderLink::~LoaderLink(void) {
 
 }
 
 //---------------------------------------------------------
 
-bool LoaderLink::load(DecodedStream *ds)
-{
-	if(must_load_only_once && loaded)
-	{
-		string msg = "Attempted to load variable second time which is marked as load once";
-		ds->report_error(string("\nERROR: ") + msg);
-		// LOG4CPLUS_FATAL(logger, msg);
-		throw LoadError(msg);
-	}
+bool LoaderLink::load(DecodedStream *ds) {
+   if (must_load_only_once && loaded) {
+      string msg = "Attempted to load variable second time which is marked as load once";
+      ds->report_error(string("\nERROR: ") + msg);
+      // LOG4CPLUS_FATAL(logger, msg);
+      throw LoadError(msg);
+   }
 
-	bool out = load_s(ds);
+   bool out = load_s(ds);
 
-	if(!out)
-	{
-		string msg = "Problem loading variable ";
-		ds->report_error(string("\nERROR: ") + msg);
-		// LOG4CPLUS_FATAL(logger, msg);
-		throw LoadError(msg);
-	}
+   if (!out) {
+      string msg = "Problem loading variable ";
+      ds->report_error(string("\nERROR: ") + msg);
+      // LOG4CPLUS_FATAL(logger, msg);
+      throw LoadError(msg);
+   }
 
-	if(loaded && !is_a_list)
-	{
+   if (loaded && !is_a_list) {
 
-		ds->report_warning("\nWarning: This variable was already loaded once \n");
-		// LOG4CPLUS_WARN(logger, "This variable was already loaded once");
-	}
+      ds->report_warning("\nWarning: This variable was already loaded once \n");
+      // LOG4CPLUS_WARN(logger, "This variable was already loaded once");
+   }
 
-	loaded = true;
+   loaded = true;
 
-	return true;
+   return true;
 }

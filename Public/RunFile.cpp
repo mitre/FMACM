@@ -17,13 +17,12 @@
 
 #include "public/RunFile.h"
 
-using namespace std ;
+using namespace std;
 
-RunFile::RunFile(void) 
-{
+RunFile::RunFile(void) {
 
 }
-RunFile::~RunFile(void)
-{
-	scenariosToRun.clear();
+
+RunFile::~RunFile(void) {
+   scenariosToRun.clear();
 }

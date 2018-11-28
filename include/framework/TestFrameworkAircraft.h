@@ -45,61 +45,68 @@
 #include "Speed.h"
 #include "Length.h"
 
-class TestFrameworkAircraft: public Aircraft {
+class TestFrameworkAircraft : public Aircraft
+{
 public:
-	TestFrameworkAircraft();
-	virtual ~TestFrameworkAircraft();
-	TestFrameworkAircraft(const TestFrameworkAircraft &in);
-	TestFrameworkAircraft& operator=(const TestFrameworkAircraft &in);
+   TestFrameworkAircraft();
 
-	/**
-	 * Override the base class loader
-	 */
-	bool load(DecodedStream *input);
+   virtual ~TestFrameworkAircraft();
 
-	bool update(const SimulationTime& time);
+   TestFrameworkAircraft(const TestFrameworkAircraft &in);
 
-	void post_load(Units::Time simulation_time_step, int predictedWindOpt, bool blendWind);
+   TestFrameworkAircraft &operator=(const TestFrameworkAircraft &in);
 
-	void init(Units::Length adsbReceptionRangeThreshold);
+   /**
+    * Override the base class loader
+    */
+   bool load(DecodedStream *input);
 
-	//Other Member Data:
-	int start_time;
-	int id;
-	AircraftState truth_state_vector_old;
-	//StateModel state_model;
-	AircraftIntentFromFile mAircraftIntent;
-	TestFrameworkDynamics mDynamics;
-	AircraftIntent mTargetIntentNotUsed; // NOT USED, but some signatures require it still
-	TrajectoryFromFile precalc_traj;
-	TestFrameworkApplication airborne_app;
-	TestFrameworkFMS mFms;
-	AircraftControl mAircraftControl;	// for FMS
+   bool update(const SimulationTime &time);
+
+   void post_load(Units::Time simulation_time_step,
+                  int predictedWindOpt,
+                  bool blendWind);
+
+   void init(Units::Length adsbReceptionRangeThreshold,
+             const WeatherTruth &weather);
+
+   //Other Member Data:
+   int start_time;
+   int id;
+   AircraftState truth_state_vector_old;
+   //StateModel state_model;
+   AircraftIntentFromFile mAircraftIntent;
+   TestFrameworkDynamics mDynamics;
+   AircraftIntent mTargetIntentNotUsed; // NOT USED, but some signatures require it still
+   TrajectoryFromFile precalc_traj;
+   TestFrameworkApplication airborne_app;
+   TestFrameworkFMS mFms;
+   AircraftControl mAircraftControl;   // for FMS
 
 private:
-	void init_truth_state_vector_old(void);
+   void init_truth_state_vector_old(void);
 
-	// helper method to calculate the end time of the aircraft
-	double calculate_end_time(AircraftState vector_in);
+   // helper method to calculate the end time of the aircraft
+   double calculate_end_time(AircraftState vector_in);
 
-	void copy(const TestFrameworkAircraft &in);
+   void copy(const TestFrameworkAircraft &in);
 
-	// Data Members
-	bool mIsFinished;
+   // Data Members
+   bool mIsFinished;
 
-	// Wind data, setup as 5x2 matrices.
-	// 1st Column:altitudes in feet.
-	// 2nd Column:wind speed in feet/sec.
+   // Wind data, setup as 5x2 matrices.
+   // 1st Column:altitudes in feet.
+   // 2nd Column:wind speed in feet/sec.
 //	DMatrix mPredictedWindX;
 //	DMatrix mPredictedWindY;
-	// WeatherPrediction mPredictedWind;
+   // WeatherPrediction mPredictedWind;
 
-	// Initialization loadables
-	Units::FeetLength mInitialAltitude;
-	Units::KnotsSpeed mInitialIas;
-	double mInitialMach; // default 0.78
+   // Initialization loadables
+   Units::FeetLength mInitialAltitude;
+   Units::KnotsSpeed mInitialIas;
+   double mInitialMach; // default 0.78
 
-	// std::shared_ptr<AircraftControl> mAircraftControl;
+   // std::shared_ptr<AircraftControl> mAircraftControl;
 //	static FILE *mGuidanceOut;
 };
 

@@ -30,50 +30,51 @@
 class MaintainMetric
 {
 public:
-	MaintainMetric(void);
-	~MaintainMetric(void);
+   MaintainMetric(void);
 
-	// Adds data to be added for each pass through an IM::update method.
-	void addErr(double err);
+   ~MaintainMetric(void);
 
-	// Sets time aircraft went by achieve by point.
-	void setAchieve(double time);
+   // Adds data to be added for each pass through an IM::update method.
+   void addErr(double err);
 
-	// Boolean to determine if achieveBy set (achieveBy < 0.0)
-	bool hasAchieve();
+   // Sets time aircraft went by achieve by point.
+   void setAchieve(double time);
 
-	// Computes total maintain time subtracting the achieveByTime
-	// from the current time.
-	void computeTotalMaintainTime(double cTime);
+   // Boolean to determine if achieveBy set (achieveBy < 0.0)
+   bool hasAchieve();
 
-	// Gets mean spacing error.
-	double getMeanErr();
+   // Computes total maintain time subtracting the achieveByTime
+   // from the current time.
+   void computeTotalMaintainTime(double cTime);
 
-	// Gets standard deviation of spacing error.
-	double getStdErr();
+   // Gets mean spacing error.
+   double getMeanErr();
 
-	// Gets 95th bound of spacing error.
-	double getBound95();
+   // Gets standard deviation of spacing error.
+   double getStdErr();
 
-	// Gets total maintain time.
-	double getTotMaintain();
+   // Gets 95th bound of spacing error.
+   double getBound95();
 
-	// Gets number of cycles with spacing errors > cycle threshold
-	int getNumCycles();
+   // Gets total maintain time.
+   double getTotMaintain();
 
-	// Returns whether there are data samples to collect metrics from.
-	bool hasSamples();
+   // Gets number of cycles with spacing errors > cycle threshold
+   int getNumCycles();
+
+   // Returns whether there are data samples to collect metrics from.
+   bool hasSamples();
 
 private:
-	// Running sum of time spacing errors between IM and target ac.
-	Statistics spacingError;
+   // Running sum of time spacing errors between IM and target ac.
+   Statistics spacingError;
 
-	// Time went by achieve by point.
-	double achieveByTime;
+   // Time went by achieve by point.
+   double achieveByTime;
 
-	// Time spent in maintain stage, (current time - achieve by time)
-	double totalMaintainTime;
+   // Time spent in maintain stage, (current time - achieve by time)
+   double totalMaintainTime;
 
-	// Number of cycles with a spacing error > 10 secs.
-	int numCyclesOutsideThreshold;
+   // Number of cycles with a spacing error > 10 secs.
+   int numCyclesOutsideThreshold;
 };

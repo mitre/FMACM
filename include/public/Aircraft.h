@@ -17,15 +17,22 @@
 
 #pragma once
 
+#include "public/WeatherTruth.h"
 #include "public/LoggingLoadable.h"
 #include "public/SimulationTime.h"
+
 
 class Aircraft : public LoggingLoadable
 {
 public:
-	Aircraft(void);
-	virtual ~Aircraft(void);
-	virtual Aircraft& operator=(const Aircraft &in);
-	virtual void init(Units::Length adsbReceptionRangeThreshold) = 0;
-	virtual bool update(const SimulationTime &time) = 0;
+   Aircraft(void);
+
+   virtual ~Aircraft(void);
+
+   virtual Aircraft &operator=(const Aircraft &in);
+
+   virtual void init(Units::Length adsbReceptionRangeThreshold,
+                     const WeatherTruth &weather) = 0;
+
+   virtual bool update(const SimulationTime &time) = 0;
 };

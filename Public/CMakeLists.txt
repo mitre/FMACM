@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-set (SOURCE_FILES
+set(SOURCE_FILES
         AchieveObserver.cpp
         ADSBSVReport.cpp
         AircraftCalculations.cpp
@@ -37,16 +37,19 @@ set (SOURCE_FILES
         Scenario.cpp
         SimulationTime.cpp
         SingleTangentPlaneSequence.cpp
+        StandardAtmosphere.cpp
         StereographicProjection.cpp
         TangentPlaneSequence.cpp
         VerticalPath.cpp
         VerticalPathObserver.cpp
         Waypoint.cpp
+        WeatherEstimate.cpp
         WeatherPrediction.cpp
+        WeatherTruth.cpp
         WindStack.cpp
-)
+        )
 
-set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(pub STATIC ${SOURCE_FILES})
 target_include_directories(pub PUBLIC

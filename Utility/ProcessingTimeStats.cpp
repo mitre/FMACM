@@ -19,67 +19,69 @@
 #include <iostream>
 
 
-ProcessingTimeStats::ProcessingTimeStats(void) : hdr("") {
-	// Basic constructor.
+ProcessingTimeStats::ProcessingTimeStats(void)
+      : hdr("") {
+   // Basic constructor.
 
-	ms = 0.0;
-	entries = 0;
+   ms = 0.0;
+   entries = 0;
 }
 
-ProcessingTimeStats::ProcessingTimeStats(std::string str) : hdr(str) {
-	// Copy constructor.
+ProcessingTimeStats::ProcessingTimeStats(std::string str)
+      : hdr(str) {
+   // Copy constructor.
 
-	ms = 0.0;
-	entries = 0;
+   ms = 0.0;
+   entries = 0;
 }
 
 ProcessingTimeStats::~ProcessingTimeStats(void) {
-	// Destructor.  Dumps collected stats.
+   // Destructor.  Dumps collected stats.
 
-	dump();
+   dump();
 }
 
 void ProcessingTimeStats::setHdr(std::string str) {
-	// Header setter.
+   // Header setter.
 
-	hdr = str;
+   hdr = str;
 }
 
 void ProcessingTimeStats::start(void) {
-	// Gets time to start from.
+   // Gets time to start from.
 
-	t0 = clock();
+   t0 = clock();
 }
 
 void ProcessingTimeStats::stop(void) {
-	// Gets time at stop point and gathers time between start and stop time.
+   // Gets time at stop point and gathers time between start and stop time.
 
-	t1 = clock();
-	gather();
+   t1 = clock();
+   gather();
 }
 
 void ProcessingTimeStats::gather(void) {
-	// Gathers stats between start and stop time.
+   // Gathers stats between start and stop time.
 
-	double diffticks = t1 - t0;
+   double diffticks = t1 - t0;
 
-	double denom = ((double)CLOCKS_PER_SEC)/1000.0;
+   double denom = ((double) CLOCKS_PER_SEC) / 1000.0;
 
-	double diffms = diffticks/denom;
+   double diffms = diffticks / denom;
 
-	ms += diffms;
-	++entries;
+   ms += diffms;
+   ++entries;
 
 }
 
 void ProcessingTimeStats::dump(void) {
-	// Dumps stats.
+   // Dumps stats.
 
-	double avgms = ms/(double)entries;
+   double avgms = ms / (double) entries;
 
-	std::cout << std::endl << "Final timing stats for "
-						<< hdr.c_str() << std::endl;
-	std::cout << "Entries  " << entries << std::endl;
-	std::cout << "Total ms " << ms << std::endl;
-	std::cout << "Avg ms   " << avgms << std::endl << std::endl;
+   std::cout << std::endl << "Final timing stats for "
+             << hdr.c_str() << std::endl;
+   std::cout << "Entries  " << entries << std::endl;
+   std::cout << "Total ms " << ms << std::endl;
+   std::cout << "Avg ms   " << avgms << std::endl << std::endl;
 }

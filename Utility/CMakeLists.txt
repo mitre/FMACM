@@ -7,9 +7,9 @@ set(SOURCE_FILES
         FilePath.cpp
         constants.cpp
         Logging.cpp
-)
+        )
 
-set (LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(utility STATIC ${SOURCE_FILES})
 target_include_directories(utility PUBLIC

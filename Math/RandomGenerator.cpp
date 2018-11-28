@@ -31,113 +31,100 @@ const double RandomGenerator::IR = 2836.0;
 log4cplus::Logger RandomGenerator::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RandomGenerator"));
 
 
-RandomGenerator::RandomGenerator()
-{
-  // should never initialize to zero
-  double seed = time(NULL);
-  long k = seed / IM;
-  mSeed = seed - (k * IM);
+RandomGenerator::RandomGenerator() {
+   // should never initialize to zero
+   double seed = time(NULL);
+   long k = seed / IM;
+   mSeed = seed - (k * IM);
 }
 
-RandomGenerator::RandomGenerator(const double seed)
-{
-	assert(seed != 0.0);
-	long k = seed / IM;
-	mSeed = seed - (k * IM);
+RandomGenerator::RandomGenerator(const double seed) {
+   assert(seed != 0.0);
+   long k = seed / IM;
+   mSeed = seed - (k * IM);
 }
 
-RandomGenerator::~RandomGenerator()
-{
+RandomGenerator::~RandomGenerator() {
 }
 
 //generate a uniform random number between 0 and 1
 //From "Numerical Recipe"
-const double RandomGenerator::uniformSample()
-{
-  long k = mSeed / IQ;
+const double RandomGenerator::uniformSample() {
+   long k = mSeed / IQ;
 
-  mSeed = IA * (mSeed - k * IQ) - IR * k;
+   mSeed = IA * (mSeed - k * IQ) - IR * k;
 
-  if (mSeed < 0.0)
-  {
-    mSeed += IM;
-  }
+   if (mSeed < 0.0) {
+      mSeed += IM;
+   }
 
-  double sample = AM * mSeed;
+   double sample = AM * mSeed;
 
-  LOG4CPLUS_TRACE(logger, mSeed << "," << sample);
+   LOG4CPLUS_TRACE(logger, mSeed << "," << sample);
 
-  return sample;
+   return sample;
 }
 
 // returns gaussian distributed random variable with mean 0 and standard
 // deviation 1.
 // usage example:  x = gauss(0., 32.);
-const double RandomGenerator::gaussianSample()
-{
-  double u1 = uniformSample();
-  double u2 = uniformSample();
+const double RandomGenerator::gaussianSample() {
+   double u1 = uniformSample();
+   double u2 = uniformSample();
 
-  double eln = -2.0 * log(u1);     // ALOG(U1)
-  double ang =  2.0 * M_PI * u2;
+   double eln = -2.0 * log(u1);     // ALOG(U1)
+   double ang = 2.0 * M_PI * u2;
 
-  double v1  = sqrt(eln) * cos(ang);
+   double v1 = sqrt(eln) * cos(ang);
 
-  LOG4CPLUS_TRACE(logger, mSeed);
+   LOG4CPLUS_TRACE(logger, mSeed);
 
-  return v1;
+   return v1;
 }
 
 // returns truncated gaussian random varialbe with mean 0, standard
 // deviation 1, and maximum standard deviation max_std_dev
 const double RandomGenerator::truncatedGaussianSample(
-                        const double maxstddev)
-{
-  double val = maxstddev + 1.0;
+      const double maxstddev) {
+   double val = maxstddev + 1.0;
 
-  while (val > (maxstddev)  ||  val < ( - maxstddev))
-  {
-    val = gaussianSample();
-  }
-  LOG4CPLUS_TRACE(logger, mSeed);
+   while (val > (maxstddev) || val < (-maxstddev)) {
+      val = gaussianSample();
+   }
+   LOG4CPLUS_TRACE(logger, mSeed);
 
-  return val;
+   return val;
 }
 
 // returns Rayleigh distributed random variable with mean 0 and standard
 // deviation 1.
 // usage example:  x = Rayleigh(0., 32.);
-const double RandomGenerator::rayleighSample()
-{
-  double u1 = uniformSample();
-  double v1 = (sqrt(-2.0*log(u1))-1.253)/sqrt(0.429);
+const double RandomGenerator::rayleighSample() {
+   double u1 = uniformSample();
+   double v1 = (sqrt(-2.0 * log(u1)) - 1.253) / sqrt(0.429);
 
-  return v1;
+   return v1;
 }
 
 // returns laplacian r.v. with lambda=1.
-const double RandomGenerator::laplaceSample()
-{
-  double uni = uniformSample();
-  double err = -log(uni);
-  uni = uniformSample();
+const double RandomGenerator::laplaceSample() {
+   double uni = uniformSample();
+   double err = -log(uni);
+   uni = uniformSample();
 
-  if (uni < 0.5)
-  { 
-    err = -err;
-  }
+   if (uni < 0.5) {
+      err = -err;
+   }
 
-  return err ;
+   return err;
 }
 
-void RandomGenerator::setSeed(const double seed)
-{
-  // not allowed to set seed to zero
-  assert(seed != 0.0);
-  mSeed = seed;
+void RandomGenerator::setSeed(const double seed) {
+   // not allowed to set seed to zero
+   assert(seed != 0.0);
+   mSeed = seed;
 }
 
-const double RandomGenerator::getSeed(void)
-{
-  return mSeed;
+const double RandomGenerator::getSeed(void) {
+   return mSeed;
 }

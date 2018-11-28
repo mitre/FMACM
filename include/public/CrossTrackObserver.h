@@ -16,21 +16,23 @@
 // ****************************************************************************
 
 #pragma once
+
 class CrossTrackObserver
 {
 public:
-	CrossTrackObserver(void);
-	~CrossTrackObserver(void);
+   CrossTrackObserver(void);
 
-	double time;
-	double x;
-	double y;
-	double dynamic_cross; 
-	double commanded_cross;
-	double unmodified_cross;
-	double psi_command;
-	double phi;
-	double limited_phi;
-	double reported_distance;
+   ~CrossTrackObserver(void);
+
+   double time;
+   double x;
+   double y;
+   double dynamic_cross;
+   double commanded_cross;
+   double unmodified_cross;
+   double psi_command;
+   double phi;
+   double limited_phi;
+   double reported_distance;
 };
 

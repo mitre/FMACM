@@ -24,18 +24,20 @@
 class HorizontalTurnPath
 {
 public:
-	HorizontalTurnPath(void);
-	~HorizontalTurnPath(void);
-	bool operator==(const HorizontalTurnPath &that) const;
+   HorizontalTurnPath(void);
 
-	double x_turn;
-	double y_turn;
-	Units::UnsignedRadiansAngle q_start;
-	Units::UnsignedRadiansAngle q_end;
-	Units::MetersLength radius;
+   ~HorizontalTurnPath(void);
 
-	// added for research - not used to determine equality
-	Units::UnsignedRadiansAngle bankAngle;
-	Units::MetersPerSecondSpeed groundspeed;
+   bool operator==(const HorizontalTurnPath &that) const;
+
+   double x_turn;
+   double y_turn;
+   Units::UnsignedRadiansAngle q_start;
+   Units::UnsignedRadiansAngle q_end;
+   Units::MetersLength radius;
+
+   // added for research - not used to determine equality
+   Units::UnsignedRadiansAngle bankAngle;
+   Units::MetersPerSecondSpeed groundspeed;
 };
 

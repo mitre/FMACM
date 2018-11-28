@@ -21,75 +21,81 @@
 using namespace std;
 
 AchieveObserver::AchieveObserver(void) {
-	// Default constructor.
+   // Default constructor.
 
-	iteration = -1;
-	id = -1;
-	time = Units::SecondsTime(-99999.0);
-	targTtgToAch = Units::SecondsTime(-99999.0);
-	ownTtgToAch = Units::SecondsTime(-99999.0);
-	currDist = Units::MetersLength(-99999.0);
-	refDist = Units::MetersLength(-99999.0);
+   iteration = -1;
+   id = -1;
+   time = Units::SecondsTime(-99999.0);
+   targTtgToAch = Units::SecondsTime(-99999.0);
+   ownTtgToAch = Units::SecondsTime(-99999.0);
+   currDist = Units::MetersLength(-99999.0);
+   refDist = Units::MetersLength(-99999.0);
 }
 
 
-AchieveObserver::AchieveObserver(int iter,int aircraftId,double tm,double target_ttg_to_ach,double own_ttg_to_ach,double curr_distance,double reference_distance) {
-	// Constructor to set values.
-	//
-	// iter:iteration.
-	// aircraftId:aircraft id.
-	// tm:time (seconds).
-	// target_ttg_to_ach:target time to go to achieve (seconds).
-	// own_ttg_to_ach:own time to go to achieve (seconds).
-	// curr_distance:current distance (meters).
-	// reference_distance:reference distance (meters).
+AchieveObserver::AchieveObserver(int iter,
+                                 int aircraftId,
+                                 double tm,
+                                 double target_ttg_to_ach,
+                                 double own_ttg_to_ach,
+                                 double curr_distance,
+                                 double reference_distance) {
+   // Constructor to set values.
+   //
+   // iter:iteration.
+   // aircraftId:aircraft id.
+   // tm:time (seconds).
+   // target_ttg_to_ach:target time to go to achieve (seconds).
+   // own_ttg_to_ach:own time to go to achieve (seconds).
+   // curr_distance:current distance (meters).
+   // reference_distance:reference distance (meters).
 
-	iteration = iter;
-	id = aircraftId;
-	time = Units::SecondsTime(tm);
-	targTtgToAch = Units::SecondsTime(target_ttg_to_ach);
-	ownTtgToAch = Units::SecondsTime(own_ttg_to_ach);
-	currDist = Units::MetersLength(curr_distance);
-	refDist = Units::MetersLength(reference_distance);
+   iteration = iter;
+   id = aircraftId;
+   time = Units::SecondsTime(tm);
+   targTtgToAch = Units::SecondsTime(target_ttg_to_ach);
+   ownTtgToAch = Units::SecondsTime(own_ttg_to_ach);
+   currDist = Units::MetersLength(curr_distance);
+   refDist = Units::MetersLength(reference_distance);
 }
 
 
 AchieveObserver::~AchieveObserver(void) {
-	// Destructor.
+   // Destructor.
 }
 
 
 string AchieveObserver::hdr() {
-	// Creates output header for csv file output.
-	//
-	// returns header csv string.
+   // Creates output header for csv file output.
+   //
+   // returns header csv string.
 
-	string str = "Iteration,AircrafId,Time(s),Targ_TTG_to_Ach(s),Own_TTG_to_Ach(s),CurrDistance(m),RefDistance(m)";
+   string str = "Iteration,AircrafId,Time(s),Targ_TTG_to_Ach(s),Own_TTG_to_Ach(s),CurrDistance(m),RefDistance(m)";
 
-	return str;
+   return str;
 }
 
 
 string AchieveObserver::toString() {
-	// Creates string of object for csv file output.
-	//
-	// returns data csv string.
+   // Creates string of object for csv file output.
+   //
+   // returns data csv string.
 
-	string str;
+   string str;
 
-	char *txt = new char[301];
+   char *txt = new char[301];
 
-	sprintf(txt,"%d,%d,%lf,%lf,%lf,%lf,%lf",
-		iteration,id,
-		Units::SecondsTime(time).value(),
-		Units::SecondsTime(targTtgToAch).value(),
-		Units::SecondsTime(ownTtgToAch).value(),
-		Units::MetersLength(currDist).value(),
-		Units::MetersLength(refDist).value());
+   sprintf(txt, "%d,%d,%lf,%lf,%lf,%lf,%lf",
+           iteration, id,
+           Units::SecondsTime(time).value(),
+           Units::SecondsTime(targTtgToAch).value(),
+           Units::SecondsTime(ownTtgToAch).value(),
+           Units::MetersLength(currDist).value(),
+           Units::MetersLength(refDist).value());
 
-	str = txt;
+   str = txt;
 
-	delete[] txt;
+   delete[] txt;
 
-	return str;
+   return str;
 }

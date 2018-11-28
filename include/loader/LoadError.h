@@ -28,8 +28,9 @@
 
 #include <stdexcept>
 
-class LoadError: public std::logic_error {
+class LoadError : public std::logic_error
+{
 public:
-	explicit LoadError(const std::string &text);
+   explicit LoadError(const std::string &text);
 };
 

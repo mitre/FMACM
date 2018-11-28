@@ -25,80 +25,90 @@
 
 class RandomGenerator
 {
-  public:
+public:
 
-    RandomGenerator();
-	RandomGenerator(const double seed);
-    ~RandomGenerator();
+   RandomGenerator();
 
-    void setSeed(const double seed);
-    const double getSeed(void);
+   RandomGenerator(const double seed);
 
-    const double uniformSample();
-    const double gaussianSample();
-    const double truncatedGaussianSample(const double maxstddev);
-    const double rayleighSample();
-    const double laplaceSample();
+   ~RandomGenerator();
 
-    /**
-     * Returns a random sample from Gaussian distribution
-     * with average = mean and standard deviation = sigma.
-     */
-    template <typename T>
-    const T gaussianSample(const T mean, const T sigma) {
-    	T v1 = mean + sigma * gaussianSample();
-    	return v1;
-    }
+   void setSeed(const double seed);
 
-    /**
-     * Returns a random sample from Gaussian distribution
-     * with average = mean and standard deviation = sigma,
-     * with the deviation not exceeding maxstddev * sigma.
-     */
-    template <typename T>
-    const T truncatedGaussianSample(const T mean, const T sigma,
-					 const double maxstddev) {
+   const double getSeed(void);
+
+   const double uniformSample();
+
+   const double gaussianSample();
+
+   const double truncatedGaussianSample(const double maxstddev);
+
+   const double rayleighSample();
+
+   const double laplaceSample();
+
+   /**
+    * Returns a random sample from Gaussian distribution
+    * with average = mean and standard deviation = sigma.
+    */
+   template<typename T>
+   const T gaussianSample(const T mean,
+                          const T sigma) {
+      T v1 = mean + sigma * gaussianSample();
+      return v1;
+   }
+
+   /**
+    * Returns a random sample from Gaussian distribution
+    * with average = mean and standard deviation = sigma,
+    * with the deviation not exceeding maxstddev * sigma.
+    */
+   template<typename T>
+   const T truncatedGaussianSample(const T mean,
+                                   const T sigma,
+                                   const double maxstddev) {
 /*      Logging only works if T is a SpecificUnit or other streamable.
     	LOG4CPLUS_TRACE(logger, "Params:  mean=" << mean
     			<< ", sigma=" << sigma << ", maxstddev=" << maxstddev);*/
-    	// check for zero standard deviation
-    	if (sigma * 0 == sigma) {
-    		return mean;
-    	}
-    	T v1 = mean + sigma * truncatedGaussianSample(maxstddev);
-    	return v1;
-    }
+      // check for zero standard deviation
+      if (sigma * 0 == sigma) {
+         return mean;
+      }
+      T v1 = mean + sigma * truncatedGaussianSample(maxstddev);
+      return v1;
+   }
 
-    /**
-     * Returns a random sample from a Raleigh distribution sample with
-     * the given mean and standard deviation.
-     */
-    template <typename T>
-    const T rayleighSample(const T mean, const T sigma) {
-    	T v1 = mean + sigma * rayleighSample();
-    	return v1;
-    }
+   /**
+    * Returns a random sample from a Raleigh distribution sample with
+    * the given mean and standard deviation.
+    */
+   template<typename T>
+   const T rayleighSample(const T mean,
+                          const T sigma) {
+      T v1 = mean + sigma * rayleighSample();
+      return v1;
+   }
 
-    /**
-     * Returns a random sample from a LaPlace distribution with
-     * the given value of lambda.
-     */
-    template <typename T>
-    const T laplaceSample(const T lambda) {
-    	T v1 = lambda * laplaceSample();
-    	return v1;
-    }
+   /**
+    * Returns a random sample from a LaPlace distribution with
+    * the given value of lambda.
+    */
+   template<typename T>
+   const T laplaceSample(const T lambda) {
+      T v1 = lambda * laplaceSample();
+      return v1;
+   }
 
 
-  private:
-    static log4cplus::Logger logger;
+private:
+   static log4cplus::Logger logger;
 
-    static const double IA;
-    static const double IM;
-    static const double AM;
-    static const double IQ;
-    static const double IR;
+   static const double IA;
+   static const double IM;
+   static const double AM;
+   static const double IQ;
+   static const double IR;
 
-    double mSeed;
+   double mSeed;
 
 };

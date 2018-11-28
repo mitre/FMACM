@@ -23,156 +23,138 @@ using std::cout;
 using std::endl;
 
 // default constructor
-DVector::DVector(void)
-{
-	minIndex = 0;
-	maxIndex = -1;
-	vector = NULL;
+DVector::DVector(void) {
+   minIndex = 0;
+   maxIndex = -1;
+   vector = NULL;
 }
 
 // constructor that takes the bouonds of the vector as arguments
 // NOTE: max index is inclusive
-DVector::DVector(int min, int max)
-{
-	// gets the size of the vector
-	int size = max - min + 1;
+DVector::DVector(int min,
+                 int max) {
+   // gets the size of the vector
+   int size = max - min + 1;
 
-	// set the min/max index
-	minIndex = min;
-	maxIndex = max;
+   // set the min/max index
+   minIndex = min;
+   maxIndex = max;
 
-	// allocate the array
-	vector = new double[size];
+   // allocate the array
+   vector = new double[size];
 }
 
 // copy constructor to copy the values of a given DVector
-DVector::DVector(const DVector& in)
-{
-	int size = in.maxIndex - in.minIndex + 1;
-	minIndex = in.minIndex;
-	maxIndex = in.maxIndex;
-	vector = new double[size];
+DVector::DVector(const DVector &in) {
+   int size = in.maxIndex - in.minIndex + 1;
+   minIndex = in.minIndex;
+   maxIndex = in.maxIndex;
+   vector = new double[size];
 
-	//loop to copy the values of the given DVector
-	for(int loop = 0; loop < size; loop++)
-	{
-		vector[loop] = in.vector[loop];
-	}
+   //loop to copy the values of the given DVector
+   for (int loop = 0; loop < size; loop++) {
+      vector[loop] = in.vector[loop];
+   }
 }
 
 // deconstructor to free dynamicly allocated array
-DVector::~DVector(void)
-{
-	delete[] vector;
-	vector = NULL;
+DVector::~DVector(void) {
+   delete[] vector;
+   vector = NULL;
 }
 
 // method to get the double at a given index
-double DVector::get(int index)
-{
-	if(inRange(index))
-	{
-		return vector[index-minIndex];
-	}
+double DVector::get(int index) {
+   if (inRange(index)) {
+      return vector[index - minIndex];
+   }
 
-	throw InvalidIndexException(index, minIndex, maxIndex);
+   throw InvalidIndexException(index, minIndex, maxIndex);
 }
 
 // method to set the value at a given index
-void DVector::set(int index, double value)
-{
-	if( inRange(index))
-	{
-		vector[index-minIndex]= value;
-	}
-	else
-	{	
-		throw InvalidIndexException(index, minIndex, maxIndex);
-	}
+void DVector::set(int index,
+                  double value) {
+   if (inRange(index)) {
+      vector[index - minIndex] = value;
+   } else {
+      throw InvalidIndexException(index, minIndex, maxIndex);
+   }
 }
 
 // private method to check if the given index is in the valid range of the DVector
 // NOTE: the max index is inclusive
-bool DVector::inRange(int index) const
-{
-	bool result = false;
+bool DVector::inRange(int index) const {
+   bool result = false;
 
-	if( index >= minIndex && index <= maxIndex)
-	{
-		result = true;
-	}
+   if (index >= minIndex && index <= maxIndex) {
+      result = true;
+   }
 
-	return result;
+   return result;
 }
 
 // method to set the bounds of the vector and dynamicly allocate the proper size
 // NOTE: max index is inclusive
-void DVector::setBounds(int min, int max)
-{
-	int size0 = this->maxIndex - this->minIndex + 1;
-	minIndex = min;
-	maxIndex = max;
+void DVector::setBounds(int min,
+                        int max) {
+   int size0 = this->maxIndex - this->minIndex + 1;
+   minIndex = min;
+   maxIndex = max;
 
-	int size = max - min +1;
+   int size = max - min + 1;
 
-	if (size != size0) {
-		delete[] vector;
-		vector = new double[size];
-	}
+   if (size != size0) {
+      delete[] vector;
+      vector = new double[size];
+   }
 }
 
 // method to overload the [] indexing operator to make it act like a double array
-double& DVector::operator[](int index)
-{
-	// if index is in valid range get the value
-	if(inRange(index))
-	{
-		return vector[index-minIndex];
-	}
+double &DVector::operator[](int index) {
+   // if index is in valid range get the value
+   if (inRange(index)) {
+      return vector[index - minIndex];
+   }
 
-	throw InvalidIndexException(index, minIndex, maxIndex);
+   throw InvalidIndexException(index, minIndex, maxIndex);
 }
 
 // method to overload the [] indexing operator to make it act like a double array
-const double& DVector::operator[](int index) const
-{
-	// if index is in valid range get the value
-	if(inRange(index))
-	{
-		return vector[index-minIndex];
-	}
+const double &DVector::operator[](int index) const {
+   // if index is in valid range get the value
+   if (inRange(index)) {
+      return vector[index - minIndex];
+   }
 
-	throw InvalidIndexException(index, minIndex, maxIndex);
+   throw InvalidIndexException(index, minIndex, maxIndex);
 }
 
 // overloads the equals operator
-DVector& DVector::operator=(const DVector &in)
-{
-  if (this != &in) {
-	setBounds(in.minIndex, in.maxIndex);
-    int size = maxIndex - minIndex + 1;
-    //loop to copy the values of the given DVector
-    for(int loop = 0; loop < size; loop++)
-    {
-      vector[loop] = in.vector[loop];
-    }
-  }
-  
-  return *this;
+DVector &DVector::operator=(const DVector &in) {
+   if (this != &in) {
+      setBounds(in.minIndex, in.maxIndex);
+      int size = maxIndex - minIndex + 1;
+      //loop to copy the values of the given DVector
+      for (int loop = 0; loop < size; loop++) {
+         vector[loop] = in.vector[loop];
+      }
+   }
+
+   return *this;
 }
 
 // overloads less than operator
 bool DVector::operator<(const DVector &other) const {
-	return vector[0] < other.vector[0];
+   return vector[0] < other.vector[0];
 }
 
 // getter methods
-int DVector::get_min()
-{
-	return minIndex;
+int DVector::get_min() {
+   return minIndex;
 }
-int DVector::get_max()
-{
-	return maxIndex;
+
+int DVector::get_max() {
+   return maxIndex;
 }
 

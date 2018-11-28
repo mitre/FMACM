@@ -26,7 +26,7 @@
 #include "utility/Logging.h"
 #include <stdio.h>
 #include <iostream>
-#include <fstream> 
+#include <fstream>
 #include <stdlib.h>
 #include <string>
 #include <unistd.h>
@@ -41,194 +41,193 @@ using namespace std;
 #define _MAX_PATH 260
 
 
-void read_runfile(RunFile &run_file, std::string str);
+void read_runfile(RunFile &run_file,
+                  std::string str);
+
 void process_scenarios(RunFile &run_file);
+
 void process_overall_output(InternalObserver &internal_observer);
 
 static log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
 const std::string versionFlag("--version");
 const std::string buildinfoFlag("--buildinfo");
 
-int main(int argc, char* argv[])
-{
+int main(int argc,
+         char *argv[]) {
    init_logging();
    string version = "aaesim version " + aaesim::getVersion();
-   LOG4CPLUS_INFO(logger,"running " << version);
+   LOG4CPLUS_INFO(logger, "running " << version);
    HTMLDump::SetSoftwareVersion(version);
 
    // handle command line flag --version, --buildinfo
    if (argc == 2) {
-       std::string arg1(argv[1]);
-       if (arg1 == versionFlag) {
-           cout << "aaesim version " << aaesim::getVersion() << endl;
-           return 0; // nothing else to do
-       } else if (arg1 == buildinfoFlag) {
-           cout << "aaesim build info:" << endl;
-           cout << "Build version: " << aaesim::getVersion() << endl;
-           cout << "Created by: " << cppmanifest::getUserName() << endl;
-           cout << "Created date-time: " << cppmanifest::getBuildTimeStamp() << endl;
-           cout << "Built with GCC version: " << cppmanifest::getBuildCompilerVersion() << endl;
-           cout << "Built on system name: " << cppmanifest::getBuildSystemName() << endl;
-           cout << "Built on system processor: " << cppmanifest::getBuildSystemProcessor() << endl;
-           cout << "Built with system ver: " << cppmanifest::getBuildSystemVersion() << endl;
-           cout << "Built on system host name: " << cppmanifest::getBuildHostName() << endl;
-           cout << "Built from git branch: " << cppmanifest::getGitBranch() << endl;
-           if (cppmanifest::getGitIsClean()) {
-               cout << "Built from git hash: " << cppmanifest::getGitHash() << endl;
-           } else {
-               cout << "Built from git hash: " << cppmanifest::getGitHash() << "-DIRTY" << endl;
-           }
+      std::string arg1(argv[1]);
+      if (arg1 == versionFlag) {
+         cout << "aaesim version " << aaesim::getVersion() << endl;
+         return 0; // nothing else to do
+      } else if (arg1 == buildinfoFlag) {
+         cout << "aaesim build info:" << endl;
+         cout << "Build version: " << aaesim::getVersion() << endl;
+         cout << "Created by: " << cppmanifest::getUserName() << endl;
+         cout << "Created date-time: " << cppmanifest::getBuildTimeStamp() << endl;
+         cout << "Built with GCC version: " << cppmanifest::getBuildCompilerVersion() << endl;
+         cout << "Built on system name: " << cppmanifest::getBuildSystemName() << endl;
+         cout << "Built on system processor: " << cppmanifest::getBuildSystemProcessor() << endl;
+         cout << "Built with system ver: " << cppmanifest::getBuildSystemVersion() << endl;
+         cout << "Built on system host name: " << cppmanifest::getBuildHostName() << endl;
+         cout << "Built from git branch: " << cppmanifest::getGitBranch() << endl;
+         if (cppmanifest::getGitIsClean()) {
+            cout << "Built from git hash: " << cppmanifest::getGitHash() << endl;
+         } else {
+            cout << "Built from git hash: " << cppmanifest::getGitHash() << "-DIRTY" << endl;
+         }
 
-           return 0; // nothing else to do
-       }
+         return 0; // nothing else to do
+      }
    }
 
    RunFile run_file;
    std::string arg2("");
-   if(argc == 2)
+   if (argc == 2) {
       arg2 = argv[1];
+   }
 
    read_runfile(run_file, arg2);
 
    process_scenarios(run_file);
 }
 
-void read_runfile(RunFile &run_file, std::string arg)
-{
-  // Gets list of run scenario files from configuration file.
-  //
-  // run_file:output list of scenario files.
-  // arg:argument from run command.  If set, contains
-  //     configuration file name for Linux runs, (can
-  //     include directory).
+void read_runfile(RunFile &run_file,
+                  std::string arg) {
+   // Gets list of run scenario files from configuration file.
+   //
+   // run_file:output list of scenario files.
+   // arg:argument from run command.  If set, contains
+   //     configuration file name for Linux runs, (can
+   //     include directory).
 
 
-  // Set configuration filename to be opened.
+   // Set configuration filename to be opened.
 
-  std::string configFile("");
-   
+   std::string configFile("");
+
 #ifdef _LINUX_
 
-  // Setup for linux run.
+   // Setup for linux run.
 
-  if (!arg.empty()) {
+   if (!arg.empty()) {
 
-    // Argument set
+      // Argument set
 
-    if (arg.find('/') != string::npos) {
+      if (arg.find('/') != string::npos) {
 
-      // Has directory-take the argument as the whole 
-      // configuration file name.
+         // Has directory-take the argument as the whole
+         // configuration file name.
 
-      configFile = arg;
+         configFile = arg;
 
-    } else {
+      } else {
 
-      // Set configuration file name to default
-      // directory plus argument.
+         // Set configuration file name to default
+         // directory plus argument.
 
-      configFile = "../Run_Files/";
-      configFile += arg.c_str();
-    }
+         configFile = "../Run_Files/";
+         configFile += arg.c_str();
+      }
 
-  } else {
+   } else {
 
-    // Argument not set-use default directory and name.
+      // Argument not set-use default directory and name.
 
-    configFile = "../Run_Files/config-loader.txt";
+      configFile = "../Run_Files/config-loader.txt";
 
-  }
+   }
 
 #else
 
-  // Setup for windows run-a straight default.
+   // Setup for windows run-a straight default.
 
-  configFile = "C:/WinSS/config-loader.txt";
+   configFile = "C:/WinSS/config-loader.txt";
 
 #endif
 
-  FILE *fp;
+   FILE *fp;
 
-  fp = fopen(configFile.c_str(), "r");
+   fp = fopen(configFile.c_str(), "r");
 
-  if (fp == NULL)
-    printf("Configuration file %s not found.", configFile.c_str());
+   if (fp == NULL) {
+      printf("Configuration file %s not found.", configFile.c_str());
+   } else {
+      // Get scenario files for the run.
 
-  else {
-    // Get scenario files for the run.
+      int numScenarios;
+      char scenarioFileName[300];
 
-    int numScenarios;
-    char scenarioFileName[300];
+      fscanf(fp, "%d", &numScenarios);
+      for (int i = 0; i < numScenarios; i++) {
+         fscanf(fp, "%s", scenarioFileName);
+         pair<string, std::shared_ptr<Scenario> > newPair;
+         newPair.first = scenarioFileName;
+         newPair.second = std::shared_ptr<TestFrameworkScenario>(new TestFrameworkScenario);
 
-    fscanf(fp, "%d", &numScenarios);
-    for(int i=0; i<numScenarios; i++) {
-      fscanf(fp, "%s", scenarioFileName);
-      pair<string, std::shared_ptr<Scenario> > newPair;
-      newPair.first = scenarioFileName;
-      newPair.second = std::shared_ptr<TestFrameworkScenario>(new TestFrameworkScenario);
-
-      run_file.scenariosToRun.push_back(newPair);
-    }
-    fclose(fp);
-  }
+         run_file.scenariosToRun.push_back(newPair);
+      }
+      fclose(fp);
+   }
 }
 
 
-void process_scenarios(RunFile &run_file)
-{
-    bool r ;
+void process_scenarios(RunFile &run_file) {
+   bool r;
 
-    list<string>::iterator i;
+   list<string>::iterator i;
 
-    //iterating through all the scenarios:
-    vector<pair<string,std::shared_ptr<Scenario> > >::const_iterator citr;
-    for (citr = run_file.scenariosToRun.begin();citr != run_file.scenariosToRun.end();++citr)
-    {
-        std::string sFileName = citr->first;
+   //iterating through all the scenarios:
+   vector<pair<string, std::shared_ptr<Scenario> > >::const_iterator citr;
+   for (citr = run_file.scenariosToRun.begin(); citr != run_file.scenariosToRun.end(); ++citr) {
+      std::string sFileName = citr->first;
 
-        DecodedStream stream;
+      DecodedStream stream;
 
-        r = stream.open_file(sFileName);
-        if(!r)
-        {
-        	string msg = string("Cannot open file ") + sFileName;
-            LOG4CPLUS_FATAL(logger, msg);
-            throw runtime_error(msg);
-        }
+      r = stream.open_file(sFileName);
+      if (!r) {
+         string msg = string("Cannot open file ") + sFileName;
+         LOG4CPLUS_FATAL(logger, msg);
+         throw runtime_error(msg);
+      }
 
-        stream.set_echo(false); // default set to false, must turn it on in input file
+      stream.set_echo(false); // default set to false, must turn it on in input file
 
-        char CurrentPath[_MAX_PATH];
+      char CurrentPath[_MAX_PATH];
 
-        getcwd(CurrentPath, _MAX_PATH);
+      getcwd(CurrentPath, _MAX_PATH);
 
-        string cwd = CurrentPath;
+      string cwd = CurrentPath;
 
-        stream.set_Local_Path(cwd);
+      stream.set_Local_Path(cwd);
 
-        std::shared_ptr<RunFileArchiveDirector> rfad = std::make_shared<RunFileArchiveDirector>();
+      std::shared_ptr<RunFileArchiveDirector> rfad = std::make_shared<RunFileArchiveDirector>();
 
-        stream.set_Archive_Director(rfad);
+      stream.set_Archive_Director(rfad);
 
-        // Set scenario name here, before load, for time to go output.
-        citr->second->set_scenario_name(sFileName); // sets the scenario name
+      // Set scenario name here, before load, for time to go output.
+      citr->second->set_scenario_name(sFileName); // sets the scenario name
 
-        // So user can tell which scenario is being processed during regression testing
-        LOG4CPLUS_INFO(logger,"Processing Scenario File: " << sFileName << std::endl);
+      // So user can tell which scenario is being processed during regression testing
+      LOG4CPLUS_INFO(logger, "Processing Scenario File: " << sFileName << std::endl);
 
-        // Load the parameters for this scenario
-        citr->second->load(&stream);
+      // Load the parameters for this scenario
+      citr->second->load(&stream);
 
-        // Process the loaded scenario
-        citr->second->process_one_scenario();
+      // Process the loaded scenario
+      citr->second->process_one_scenario();
 
-        // Clear out the aircraft id map
-        citr->second->clearAircraftIdMap();
-    }
+      // Clear out the aircraft id map
+      citr->second->clearAircraftIdMap();
+   }
 }
 
 
-void process_overall_output(InternalObserver &internal_observer)
-{
+void process_overall_output(InternalObserver &internal_observer) {
 
 }

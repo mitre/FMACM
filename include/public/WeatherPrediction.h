@@ -15,45 +15,54 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * WeatherPrediction.h
- *
- *  Created on: Sep 11, 2017
- *      Author: klewis
- */
-
 #pragma once
 
 #include <memory>
-#include "public/WindStack.h"
+#include "public/WeatherEstimate.h"
 
-class Wind;
+enum PredictedWindOption
+{
+   SINGLE_DTG = 0,
+   MULTIPLE_DTG_LEGACY = 1,
+   MULTIPLE_DTG_ALONG_ROUTE = 2
+};
 
-enum PredictedWindOption { SINGLE_DTG = 0, MULTIPLE_DTG_LEGACY = 1, MULTIPLE_DTG_ALONG_ROUTE = 2 };
+class WeatherPrediction : public WeatherEstimate
+{
+   friend class Wind_populate_predicted_wind_matrices_Test;
 
-class WeatherPrediction {
-	friend class Wind_populate_predicted_wind_matrices_Test;
-	friend class TrajectoryPredictor_updateWeatherPrediction_Test;
-	friend class TrajectoryPredictor_startAltitudeInDescentAltList_Test;
-	friend class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
+   friend class TrajectoryPredictor_updateWeatherPrediction_Test;
+
+   friend class TrajectoryPredictor_startAltitudeInDescentAltList_Test;
+
+   friend class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
+
 public:
-	static const PredictedWindOption PWOValues[];
+   static const PredictedWindOption PWOValues[];
 
-	WindStack east_west;
-	WindStack north_south;
+   WeatherPrediction();
 
-	WeatherPrediction();
-	WeatherPrediction(PredictedWindOption option, std::shared_ptr<Wind> wind);
-	virtual ~WeatherPrediction();
-	PredictedWindOption getPredictedWindOption() const;
-	std::shared_ptr<Wind> getForecastWind() const;
-	void dump();
-	int incrementUpdateCount();
-	int getUpdateCount() const;
+   WeatherPrediction(PredictedWindOption option,
+                     std::shared_ptr<Wind> wind,
+                     std::shared_ptr<Atmosphere> atmosphere);
+
+   virtual ~WeatherPrediction();
+
+   PredictedWindOption getPredictedWindOption() const;
+
+   // for backward compatibility
+   std::shared_ptr<Wind> getForecastWind() const;
+
+   std::shared_ptr<Atmosphere> getForecastAtmosphere() const;
+
+   void dump();
+
+   int incrementUpdateCount();
+
+   int getUpdateCount() const;
 
 private:
-	int updateCount;
-	PredictedWindOption mPredictedWindOption;
-	std::shared_ptr<Wind> mForecastWind;
+   int updateCount;
+   PredictedWindOption mPredictedWindOption;
 };
 

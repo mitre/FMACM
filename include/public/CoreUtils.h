@@ -30,29 +30,43 @@
 class CoreUtils
 {
 public:
-    static const int UNINITIALIZED_AIRCRAFT_ID;
-    static const Units::Length BEYOND_END_OF_ROUTE_TOL;
 
-    // Returns index using a value into a vector of similar values.
-    static int nearestIndex(int startIx, double v, std::vector<double> &vVect);
+   /**
+    * Find the index of a value in a vector. Uses STL upper_bound(), but with one modified return.
+    *
+    * @param ignored_parameter: UNUSED
+    * @param value_to_find: value to search for
+    * @param vector_to_search: vector to be searched
+    * @return
+    */
+   static int FindNearestIndex(int ignored_parameter,
+                               const double &value_to_find,
+                               const std::vector<double> &vector_to_search);
 
-    // Interpolates using a value into a value to compute an output value of a different kind.
-    static double interpolate(int upperIx, double v, std::vector<double> &vVect, std::vector<double> &oVect);
+   // Interpolates using a value into a value to compute an output value of a different kind.
+   static double interpolate(int upperIx,
+                             double v,
+                             const std::vector<double> &vVect,
+                             const std::vector<double> &oVect);
 
-    static const Units::Length calculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
-                                                          const std::pair<Units::Length, Units::Length> &xyLoc2);
+   /**
+    *
+    * @param xyLoc1: first x,y pair
+    * @param xyLoc2  second x,y pair
+    * @return The straight line distance between the two points.
+    */
+   static const Units::Length CalculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
+                                                         const std::pair<Units::Length, Units::Length> &xyLoc2);
 
-    static const double limit(double value,
-                              double low_limit = std::numeric_limits<double>::min(),
-                              double high_limit = std::numeric_limits<double>::max());
+   static const double limit(double value,
+                             double low_limit = std::numeric_limits<double>::min(),
+                             double high_limit = std::numeric_limits<double>::max());
 
-    static const int sign(double value);
+   static const int sign(double value);
+
 private:
 
-    // Method to check index validity.
-    static bool indexValid(int upperIx, double v, std::vector<double> &vVect);
-
-    static log4cplus::Logger logger;
+   static log4cplus::Logger logger;
 };
 
 #endif

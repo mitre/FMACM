@@ -23,24 +23,27 @@
 class HTMLDump
 {
 public:
-    static void SetSoftwareVersion(const std::string &version);
+   static void SetSoftwareVersion(const std::string &version);
 
-	HTMLDump(void);
-	~HTMLDump(void);
+   HTMLDump(void);
 
-	bool open(const std::string &file_name);
-	void close();
+   ~HTMLDump(void);
 
-	void dump(const std::string &data);
-	void highlight_on(const std::string& color);
-	void highlight_off();
+   bool open(const std::string &file_name);
 
-	bool is_open()
-	{
-		return NULL != dump_file_name;
-	}
+   void close();
+
+   void dump(const std::string &data);
+
+   void highlight_on(const std::string &color);
+
+   void highlight_off();
+
+   bool is_open() {
+      return NULL != dump_file_name;
+   }
 
 private:
-	static std::string SoftwareVersion;
-	std::ofstream dump_file_name;
+   static std::string SoftwareVersion;
+   std::ofstream dump_file_name;
 };

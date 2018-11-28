@@ -19,7 +19,7 @@
  * This is just an aggregator header file. 
  */
 
-#if ! defined (CPPMANIFEST_H)
+#if !defined (CPPMANIFEST_H)
 #define CPPMANIFEST_H
 
 #if defined (CPPMANIFEST_HAVE_PRAGMA_ONCE)
@@ -32,46 +32,47 @@
 namespace cppmanifest {
 
    static std::string getUserName() {
-       return CPPMANIFEST_USERNAME_STR;
+      return CPPMANIFEST_USERNAME_STR;
    }
 
    static std::string getBuildTimeStamp() {
-       return CPPMANIFEST_BUILDTIMESTAMP_STR;
+      return CPPMANIFEST_BUILDTIMESTAMP_STR;
    }
 
    static std::string getBuildCompilerVersion() {
-       return CPPMANIFEST_BUILDGCCVERSION_STR;
+      return CPPMANIFEST_BUILDGCCVERSION_STR;
    }
 
    static std::string getBuildSystemVersion() {
-       return CPPMANIFEST_BUILDSYSTEMVERSION_STR;
+      return CPPMANIFEST_BUILDSYSTEMVERSION_STR;
    }
 
    static std::string getBuildSystemName() {
-       return CPPMANIFEST_BUILDSYSTEMNAME_STR;
+      return CPPMANIFEST_BUILDSYSTEMNAME_STR;
    }
 
    static std::string getBuildSystemProcessor() {
-       return CPPMANIFEST_BUILDSYSTEMPROCESSOR_STR;
+      return CPPMANIFEST_BUILDSYSTEMPROCESSOR_STR;
    }
 
    static std::string getBuildHostName() {
-       return CPPMANIFEST_BUILDHOSTNAME_STR;
+      return CPPMANIFEST_BUILDHOSTNAME_STR;
    }
 
    static std::string getGitBranch() {
-       return CPPMANIFEST_GIT_BRANCH;
+      return CPPMANIFEST_GIT_BRANCH;
    }
 
    static std::string getGitHash() {
-       return CPPMANIFEST_GIT_HASH;
+      return CPPMANIFEST_GIT_HASH;
    }
 
    static bool getGitIsClean() {
-       if (CPPMANIFEST_GIT_LOCAL_CHANGES == std::string("CLEAN"))
-           return 1;
-       else
-           return 0;
+      if (CPPMANIFEST_GIT_LOCAL_CHANGES == std::string("CLEAN")) {
+         return 1;
+      } else {
+         return 0;
+      }
    }
 
    // Not needed by AAESim

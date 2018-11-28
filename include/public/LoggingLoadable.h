@@ -24,11 +24,11 @@
 class LoggingLoadable : public Loadable
 {
 public:
-   LoggingLoadable(void);
+   LoggingLoadable();
 
    LoggingLoadable(const LoggingLoadable &in);
 
-   virtual ~LoggingLoadable(void);
+   virtual ~LoggingLoadable();
 
    virtual void operator=(const LoggingLoadable &in);
 
@@ -51,5 +51,5 @@ protected:
 
 
 private:
-   static log4cplus::Logger logger;
+   static log4cplus::Logger m_logger;
 };

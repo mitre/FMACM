@@ -15,14 +15,7 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * TestFrameworkScenario.h
- *
- *  Created on: Mar 2, 2015
- *      Author: sbowman
- */
-#ifndef TESTFRAMEWORKSCENARIO_H_
-#define TESTFRAMEWORKSCENARIO_H_
+#pragma once
 
 #include "public/Scenario.h"
 #include "framework/TestFrameworkAircraft.h"
@@ -45,34 +38,34 @@ public:
 
    void process_one_scenario();
 
-   void initializeIterationState(int numberOfAircraft);
+   void InitializeIterationState(int number_of_aircraft);
 
-   void initializeIterationMetrics(int numberOfAircraft);
+   void InitializeIterationMetrics(int number_of_aircraft);
 
-   void process_one_iteration(int iter);
+   void ProcessOneIteration(int iter);
 
-   bool process_one_cycle(SimulationTime &time);
+   bool ProcessOneCycle(SimulationTime &time);
 
-   bool process_all_aircraft(SimulationTime &time);
+   bool ProcessAllAircraft(SimulationTime &time);
 
-   void load_one_scenario_from_scenario_class_into_actor_lists();
+   void LoadOneScenarioFromScenarioClassIntoActorLists();
 
    bool load(DecodedStream *input);
 
 private:
 
-   void post_load_aircraft(Units::Time simulation_time_step,
-                           int predictedWindOpt,
-                           bool blendWind);
+   void PostLoadAircraft(Units::Time simulation_time_step,
+         int predicted_wind_opt,
+         bool blend_wind);
 
-   void post_load(std::string bada_data_path,
-                  std::string wind_truth,
-                  std::string wind_forecast,
-                  int predictedWindOpt,
-                  bool blendWind,
-                  Units::Time simulation_time_step);
+   void PostLoad(std::string bada_data_path,
+         std::string wind_truth,
+         std::string wind_forecast,
+         int predicted_wind_opt,
+         bool blend_wind,
+         Units::Time simulation_time_step);
 
-   void recordState(const AircraftState &aircraftState) const;
+   void RecordState(const AircraftState &aircraft_state) const;
 
    // Default declarations for the loadable parameters
    static const Units::SecondsTime mDefaultSimulationTimeStep;
@@ -80,16 +73,14 @@ private:
    // scenario initialization
    static const int number_of_iterations = 1;
    static const int number_of_aircraft = 1;
-   std::vector<TestFrameworkAircraft> aircraft_list;
-   double seed;
-   std::vector<TestFrameworkAircraft> master_aircraft_list; // this list is loaded and then copied for each iteration
+   std::vector<TestFrameworkAircraft> m_aircraft_list;
+   double m_seed;
+   std::vector<TestFrameworkAircraft> m_master_aircraft_list; // this list is loaded and then copied for each iteration
 
    //scenario data used for all iterations:
-   double mean_inter_delivery_time;
-   double stdev_inter_delivery_time;
-   double start_time_seed;
-   double earth_radius;
-   FILE *acstates;
+   double m_mean_inter_delivery_time;
+   double m_stdev_inter_delivery_time;
+   double m_start_time_seed;
+   FILE *m_acstates;
 };
 
-#endif /* TESTFRAMEWORKSCENARIO_H_ */

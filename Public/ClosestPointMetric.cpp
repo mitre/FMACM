@@ -40,7 +40,7 @@ void ClosestPointMetric::update(double imx,
    // imx,imy:position of IM aircraft.
    // targx,targy:position of target aircraft.
 
-   Units::Length dist = AircraftCalculations::ptToPtDist(
+   Units::Length dist = AircraftCalculations::PtToPtDist(
          Units::FeetLength(imx),
          Units::FeetLength(imy),
          Units::FeetLength(targx),

@@ -22,17 +22,17 @@
 
 Units::DegreesAngle TestFrameworkFMS::MAX_BANK_ANGLE(25.0);
 
-TestFrameworkFMS::TestFrameworkFMS(void) {
+TestFrameworkFMS::TestFrameworkFMS() {
 }
 
-TestFrameworkFMS::~TestFrameworkFMS(void) {
+TestFrameworkFMS::~TestFrameworkFMS() {
 }
 
 
 // primary calculation method to update the FMS model
-void TestFrameworkFMS::update(AircraftState state,
-                              std::vector<PrecalcWaypoint> &precalcWaypoints,
-                              std::vector<HorizontalPath> &hTraj) {
+void TestFrameworkFMS::Update(AircraftState state,
+      std::vector<PrecalcWaypoint> &precalc_waypoints,
+      std::vector<HorizontalPath> &horizontal_trajectory) {
 
    double xWp, yWp, dx, dy;
 
@@ -45,87 +45,87 @@ void TestFrameworkFMS::update(AircraftState state,
    //-------------------------------------------------------------------------------------------------
    //	Computes RANGE to next WP
    //	- - - - - - - - - - - - -
-   xWp = this->xWp[this->NextWp];
-   yWp = this->yWp[this->NextWp];
+   xWp = m_waypoint_x[m_next_waypoint_ix];
+   yWp = m_waypoint_y[m_next_waypoint_ix];
 
-   dx = xWp - state.x;
-   dy = yWp - state.y;
+   dx = xWp - state.m_x;
+   dy = yWp - state.m_y;
 
-   this->RangeToNextWpM1 = this->RangeToNextWp;
-   this->RangeToNextWp = sqrt(dx * dx + dy * dy);
+   m_previous_range_to_next_waypoint = m_range_to_next_waypoint;
+   m_range_to_next_waypoint = sqrt(dx * dx + dy * dy);
 
 
-   if (this->Mode == TRACKING) {
+   if (m_mode == TRACKING) {
       //Gwang 2010-08: This may give a false premature indication of turn because of the noisiness of Fms.RangeToNextWp.
-      if (this->RangeToNextWp > this->RangeToNextWpM1 && this->RangeToNextWp < 4000.0) {
-         this->NextWp++;
+      if (m_range_to_next_waypoint > m_previous_range_to_next_waypoint && m_range_to_next_waypoint < 4000.0) {
+         m_next_waypoint_ix++;
 
-         if (this->NextWp > this->number_of_waypoints - 1)
+         if (m_next_waypoint_ix > m_number_of_waypoints - 1)
             //The next waypoint (Fms.NextWp) is beyond the final waypoint (Fms.number_of_waypoints - 1)
             //which means that the final waypoint has just been passed.
          {
             return;
          }
-         xWp = this->xWp[this->NextWp];
-         yWp = this->yWp[this->NextWp];
-         dx = xWp - state.x;
-         dy = yWp - state.y;
-         this->RangeToNextWpM1 = 1.0e+10;
-         this->RangeToNextWp = sqrt(dx * dx + dy * dy);
+         xWp = m_waypoint_x[m_next_waypoint_ix];
+         yWp = m_waypoint_y[m_next_waypoint_ix];
+         dx = xWp - state.m_x;
+         dy = yWp - state.m_y;
+         m_previous_range_to_next_waypoint = 1.0e+10;
+         m_range_to_next_waypoint = sqrt(dx * dx + dy * dy);
       }
 
 
       //	Determine if the a/c changes course between two waypoints
       //	- - - - - - - - - - - - - - - - - -
-      if (this->NextWp >= this->number_of_waypoints - 1) {
-         this->DeltaTrack = 0.;
+      if (m_next_waypoint_ix >= m_number_of_waypoints - 1) {
+         m_delta_track = 0.;
       } else {
-         this->DeltaTrack = this->Track[this->NextWp + 1] - this->Track[this->NextWp];
+         m_delta_track = m_track[m_next_waypoint_ix + 1] - m_track[m_next_waypoint_ix];
       }
 
-      double BankAngle = CoreUtils::limit(this->DeltaTrack,
-                                          Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
-                                          Units::RadiansAngle(MAX_BANK_ANGLE).value());
+      double BankAngle = CoreUtils::LimitOnInterval(m_delta_track,
+                                                    Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
+                                                    Units::RadiansAngle(MAX_BANK_ANGLE).value());
 
       if (BankAngle != 0.00) {
-         double gs = Units::FeetPerSecondSpeed(state.getGroundSpeed()).value();
-         this->TurnRadius = gs * gs /
-                            (GRAV_MPS / FT_M * tan(BankAngle)); // v^2/(g*tan theta)
+         double gs = Units::FeetPerSecondSpeed(state.GetGroundSpeed()).value();
+         m_turn_radius = gs * gs /
+               (GRAVITY_METERS_PER_SECOND / FEET_TO_METERS * tan(BankAngle)); // v^2/(g*tan theta)
 
-         this->RangeStartTurn = fabs(this->TurnRadius * tan(0.5 * this->DeltaTrack));
+               m_range_start_turn = fabs(m_turn_radius * tan(0.5 * m_delta_track));
       } else {
-         this->TurnRadius = 1.0e+10;
-         this->RangeStartTurn = 0.00;
+         m_turn_radius = 1.0e+10;
+         m_range_start_turn = 0.00;
       }
 
-      if (this->RangeToNextWp <= (this->RangeStartTurn)) {
-         this->Mode = TURNING;
-         this->NextWp++;
+      if (m_range_to_next_waypoint <= (m_range_start_turn)) {
+         m_mode = TURNING;
+         m_next_waypoint_ix++;
 
-         if (this->NextWp > this->number_of_waypoints - 1) {
+         if (m_next_waypoint_ix > m_number_of_waypoints - 1) {
             return;
          }
 
-         xWp = this->xWp[this->NextWp];
-         yWp = this->yWp[this->NextWp];
-         dx = xWp - state.x;
-         dy = yWp - state.y;
-         this->RangeToNextWpM1 = 1.0e+10;
-         this->RangeToNextWp = sqrt(dx * dx + dy * dy);
+         xWp = m_waypoint_x[m_next_waypoint_ix];
+         yWp = m_waypoint_y[m_next_waypoint_ix];
+         dx = xWp - state.m_x;
+         dy = yWp - state.m_y;
+         m_previous_range_to_next_waypoint = 1.0e+10;
+         m_range_to_next_waypoint = sqrt(dx * dx + dy * dy);
       }
    }
 
    //--------------------------------------------------------------------------------------------
-   DesiredCourse = this->Track[this->NextWp];
+   DesiredCourse = m_track[m_next_waypoint_ix];
 
    // sin and cos swapped to account for heading instead of angle
    CrossTrackError = -1.0 * (-dy * sin(DesiredCourse) + dx * cos(DesiredCourse));
    //gwang
-   double gs = Units::FeetPerSecondSpeed(state.getGroundSpeed()).value();
-   xdot = gs * sin(state.get_heading()) *
-          cos(state.gamma); // + state.wind_x; // changed from cos to sin, since the value is a heading
-   ydot = gs * cos(state.get_heading()) *
-          cos(state.gamma); // + state.wind_y; // changed from sin to cos, since the value is a heading
+   double gs = Units::FeetPerSecondSpeed(state.GetGroundSpeed()).value();
+   xdot = gs * sin(state.GetHeading()) *
+         cos(state.m_gamma); // + state.wind_x; // changed from cos to sin, since the value is a heading
+   ydot = gs * cos(state.GetHeading()) *
+         cos(state.m_gamma); // + state.wind_y; // changed from sin to cos, since the value is a heading
    //end gwang
    Course = atan3(xdot, ydot); // atan2(ydot, xdot); switched from Angle to Heading
 
@@ -145,19 +145,19 @@ void TestFrameworkFMS::update(AircraftState state,
 
    //--------------------------------------------------------------------------------------------
 
-   if (this->Mode == TURNING) {
+   if (m_mode == TURNING) {
       double DeltaGroundTrack = -1.0 * TrackError;
 
-      if (CrossTrackError < 0.00 && DeltaGroundTrack < 10.00 * DTORAD) {
-         this->Mode = TRACKING;
+      if (CrossTrackError < 0.00 && DeltaGroundTrack < 10.00 * DEGREES_TO_RADIAN) {
+         m_mode = TRACKING;
       }
 
-      if (CrossTrackError > 0.00 && DeltaGroundTrack > 10.00 * DTORAD) {
-         this->Mode = TRACKING;
+      if (CrossTrackError > 0.00 && DeltaGroundTrack > 10.00 * DEGREES_TO_RADIAN) {
+         m_mode = TRACKING;
       }
 
-      if (fabs(CrossTrackError) < 1000.0 && fabs(TrackError) < 5.0 * DTORAD) {
-         this->Mode = TRACKING;
+      if (fabs(CrossTrackError) < 1000.0 && fabs(TrackError) < 5.0 * DEGREES_TO_RADIAN) {
+         m_mode = TRACKING;
       }
    }
 
@@ -166,17 +166,17 @@ void TestFrameworkFMS::update(AircraftState state,
 
    Units::MetersLength currDist;
    Units::RadiansAngle tempCrs;
-   AircraftCalculations::getPathLengthFromPos(
-         Units::FeetLength(state.x), Units::FeetLength(state.y),
-         hTraj, currDist, tempCrs);
+   AircraftCalculations::GetPathLengthFromPos(
+         Units::FeetLength(state.m_x), Units::FeetLength(state.m_y),
+         horizontal_trajectory, currDist, tempCrs);
 
-   this->NextWp = precalcWaypoints.size() - 1;
+   m_next_waypoint_ix = precalc_waypoints.size() - 1;
 
-   for (int ix = 1; (ix < precalcWaypoints.size()); ix++) {
+   for (int ix = 1; (ix < precalc_waypoints.size()); ix++) {
 
-      if ((currDist.value() < precalcWaypoints[ix - 1].constraints.constraint_dist) &&
-          (currDist.value() >= precalcWaypoints[ix].constraints.constraint_dist)) {
-         this->NextWp = ix;
+      if ((currDist.value() < precalc_waypoints[ix - 1].constraints.constraint_dist) &&
+            (currDist.value() >= precalc_waypoints[ix].constraints.constraint_dist)) {
+         m_next_waypoint_ix = ix;
          break;
       }
 
@@ -185,55 +185,55 @@ void TestFrameworkFMS::update(AircraftState state,
 
 
 // init method to initialize the FMS data
-void TestFrameworkFMS::init() {
+void TestFrameworkFMS::Init() {
    int i;
    double dx;
    double dy;
    double Heading;
-   for (i = 1; i < this->number_of_waypoints; i++) {
-      dx = this->xWp[i] - this->xWp[i - 1];
-      dy = this->yWp[i] - this->yWp[i - 1];
+   for (i = 1; i < m_number_of_waypoints; i++) {
+      dx = m_waypoint_x[i] - m_waypoint_x[i - 1];
+      dy = m_waypoint_y[i] - m_waypoint_y[i - 1];
       Heading = (double) atan3(dx, dy);// atan2(dy, dx); switched from Angle to Heading
 
-      this->Track[i] = Heading;
-      this->psi[i] = (double) atan2(dy, dx); // psi measured from east counter-clockwise
-      this->Length[i] = sqrt(dx * dx + dy * dy);
+      m_track[i] = Heading;
+      m_psi[i] = (double) atan2(dy, dx); // psi measured from east counter-clockwise
+      m_length[i] = sqrt(dx * dx + dy * dy);
    }
 
-   for (i = this->number_of_waypoints; i < 127; i++) {
-      this->Track[i] = -999.9;
-      this->psi[i] = -999.9;
-      this->Length[i] = -999.0;
+   for (i = m_number_of_waypoints; i < 127; i++) {
+      m_track[i] = -999.9;
+      m_psi[i] = -999.9;
+      m_length[i] = -999.0;
    }
 
-   this->NextWp = 1;
-   this->Mode = TRACKING;
-   this->RangeToNextWp = 1.0e+10;
-   this->RangeToNextWpM1 = 1.0e+10;
+   m_next_waypoint_ix = 1;
+   m_mode = TRACKING;
+   m_range_to_next_waypoint = 1.0e+10;
+   m_previous_range_to_next_waypoint = 1.0e+10;
 }
 
-void TestFrameworkFMS::copy_waypoints_from_intent(AircraftIntent intent_in) {
-   number_of_waypoints = intent_in.getNumberOfWaypoints();
+void TestFrameworkFMS::CopyWaypointsFromIntent(AircraftIntent intent_in) {
+   m_number_of_waypoints = intent_in.GetNumberOfWaypoints();
 
-   const AircraftIntent::RouteData &fms(intent_in.getFms());
-   for (int j = 0; j < number_of_waypoints; j++) {
-      xWp[j] = Units::FeetLength(fms.xWp[j]).value();
-      yWp[j] = Units::FeetLength(fms.yWp[j]).value();
-      AltWp[j] = Units::FeetLength(fms.AltWp[j]).value();
-      nominal_IAS_at_waypoint[j] = fms.nominal_IAS_at_waypoint[j].value();
-      MACH_at_waypoint[j] = fms.MACH_at_waypoint[j];
-      constraints[j].constraint_altHi = fms.altHi[j].value();
-      constraints[j].constraint_altLow = fms.altLow[j].value();
-      constraints[j].constraint_speedHi = fms.speedHi[j].value();
-      constraints[j].constraint_speedLow = fms.speedLow[j].value();
+   const AircraftIntent::RouteData &fms(intent_in.GetFms());
+   for (int j = 0; j < m_number_of_waypoints; j++) {
+      m_waypoint_x[j] = Units::FeetLength(fms.xWp[j]).value();
+      m_waypoint_y[j] = Units::FeetLength(fms.yWp[j]).value();
+      m_waypoint_altitude[j] = Units::FeetLength(fms.AltWp[j]).value();
+      m_nominal_ias_at_waypoint[j] = fms.nominal_IAS_at_waypoint[j].value();
+      m_mach_at_waypoint[j] = fms.MACH_at_waypoint[j];
+      m_constraints[j].constraint_altHi = fms.altHi[j].value();
+      m_constraints[j].constraint_altLow = fms.altLow[j].value();
+      m_constraints[j].constraint_speedHi = fms.speedHi[j].value();
+      m_constraints[j].constraint_speedLow = fms.speedLow[j].value();
    }
 }
 
 // check to see if the FMS has reached the last waypoint
-bool TestFrameworkFMS::is_finished() {
+bool TestFrameworkFMS::IsFinished() {
    bool result = false;
 
-   if (NextWp > number_of_waypoints - 1) {
+   if (m_next_waypoint_ix > m_number_of_waypoints - 1) {
       result = true;
    }
 
@@ -241,11 +241,11 @@ bool TestFrameworkFMS::is_finished() {
 }
 
 // get the psi of the given index if in range, returns -999.9 if out of range
-double TestFrameworkFMS::get_psi(int index) {
+double TestFrameworkFMS::GetPsi(int index) {
    double psi_result = -999.9;
 
-   if (index >= 0 && index < number_of_waypoints) {
-      psi_result = this->psi[index];
+   if (index >= 0 && index < m_number_of_waypoints) {
+      psi_result = m_psi[index];
    }
 
    return psi_result;

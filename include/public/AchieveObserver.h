@@ -26,28 +26,28 @@
 class AchieveObserver
 {
 public:
-   AchieveObserver(void);
+   AchieveObserver();
 
-   AchieveObserver(int iter,
-                   int aircraftId,
-                   double tm,
-                   double target_ttg_to_ach,
-                   double own_ttg_to_ach,
-                   double curr_distance,
-                   double reference_distance);
+   AchieveObserver(const int iter,
+                   const int aircraft_id,
+                   const double tm,
+                   const double target_ttg_to_ach,
+                   const double own_ttg_to_ach,
+                   const double curr_distance,
+                   const double reference_distance);
 
-   ~AchieveObserver(void);
+   ~AchieveObserver();
 
-   std::string hdr();
+   const std::string Hdr();
 
-   std::string toString();
+   std::string ToString();
 
 private:
-   int iteration;
-   int id; // aircraft id
-   Units::Time time;
-   Units::Time targTtgToAch;
-   Units::Time ownTtgToAch;
-   Units::Length currDist;
-   Units::Length refDist;
+   int m_iteration;
+   int m_id; // aircraft id
+   Units::Time m_time;
+   Units::Time m_targ_ttg_to_ach;
+   Units::Time m_own_ttg_to_ach;
+   Units::Length m_curr_dist;
+   Units::Length m_ref_dist;
 };

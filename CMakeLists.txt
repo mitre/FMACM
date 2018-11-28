@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(aaesim VERSION 2.3.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 3.0.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -47,11 +47,10 @@ set (LOADER_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
 set (UNITSLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib)
 set (UTILITY_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Utility)
 set (MATH_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Math)
-set (CORE_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Core)
+set (CORE_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/AAESim)
 set (PUBLIC_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Public)
 set (GROUND_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/GroundSystems)
 set (IM_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/IntervalManagement)
-set (PA_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/PairedApproach)
 set (UNITTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
 set (GTEST_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/unittest/gtest-1.7.0/)
 set (FRAMEWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
@@ -65,9 +64,8 @@ add_subdirectory(${UTILITY_DIR})
 add_subdirectory(${PUBLIC_DIR})
 add_subdirectory(${MATH_DIR})
 
-include(${PA_DIR}/pa.cmake OPTIONAL)
 include(${IM_DIR}/im.cmake OPTIONAL)
-include(${CORE_DIR}/core.cmake OPTIONAL)
+include(${CORE_DIR}/aaesim.cmake OPTIONAL)
 include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
 include(${FRAMEWORK_DIR}/framework.cmake OPTIONAL)
 

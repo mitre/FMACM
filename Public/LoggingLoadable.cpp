@@ -20,7 +20,7 @@
 
 using namespace std;
 
-log4cplus::Logger LoggingLoadable::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("LoggingLoadable"));
+log4cplus::Logger LoggingLoadable::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("LoggingLoadable"));
 
 LoggingLoadable::LoggingLoadable(void) {
    stream = NULL;
@@ -49,7 +49,7 @@ bool LoggingLoadable::test_load() {
       if (!(*it).second->ok()) {
          error_message = "\nERROR: Did not load required tag '" + (*it).first + "'";
          stream->report_error(error_message + "\n");
-         LOG4CPLUS_FATAL(logger, error_message);
+         LOG4CPLUS_FATAL(m_logger, error_message);
          throw LoadError(error_message);
 
       } else {
@@ -102,7 +102,7 @@ bool LoggingLoadable::complete() {
             warning_message = "\nThe unexpected tag \"" + token +
                               "\" appeared in the run file. \nThis tag was not registered in the load function; it will be ignored.";
             stream->report_warning(warning_message + "\n");
-            LOG4CPLUS_WARN(logger, warning_message);
+            LOG4CPLUS_WARN(m_logger, warning_message);
             stream->get_next(); // skip over the next token also, assuming it is a value associated with the unknown tag
             continue;
          }
@@ -127,7 +127,7 @@ bool LoggingLoadable::complete() {
          }
 
          stream->report_warning(warning_message);
-         LOG4CPLUS_WARN(logger, warning_message);
+         LOG4CPLUS_WARN(m_logger, warning_message);
       }
 
 
@@ -135,7 +135,7 @@ bool LoggingLoadable::complete() {
       if (!f2) {
          string error_message = "\nERROR The tag \"" + token + "\" could not be loaded";
          stream->report_error(error_message);
-         LOG4CPLUS_FATAL(logger, error_message);
+         LOG4CPLUS_FATAL(m_logger, error_message);
          throw LoadError(error_message);
       }
    }
@@ -150,11 +150,11 @@ bool LoggingLoadable::complete() {
 
 void LoggingLoadable::report_error(string error_message) {
    stream->report_error(error_message);
-   LOG4CPLUS_FATAL(logger, error_message);
+   LOG4CPLUS_FATAL(m_logger, error_message);
    throw LoadError(error_message);
 }
 
 void LoggingLoadable::report_warning(string warning_message) {
    stream->report_error(warning_message);
-   LOG4CPLUS_WARN(logger, warning_message);
+   LOG4CPLUS_WARN(m_logger, warning_message);
 }

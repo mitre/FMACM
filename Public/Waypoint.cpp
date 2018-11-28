@@ -26,23 +26,23 @@ const Units::KnotsSpeed Waypoint::MIN_SPEED_CONSTRAINT(0);
 const Units::KnotsSpeed Waypoint::UNDEFINED_SPEED_CONSTRAINT(-999);
 
 Waypoint::Waypoint() {
-   name = "";
-   latitude = Units::ZERO_ANGLE;
-   longitude = Units::ZERO_ANGLE;
-   descent_angle = Units::ZERO_ANGLE;
-   altitude = Units::ZERO_LENGTH;
-   nominal_ias = Units::ZERO_SPEED;
-   mach = 0;
-   descent_rate = Units::Acceleration(0);
+   m_name = "";
+   m_latitude = Units::ZERO_ANGLE;
+   m_longitude = Units::ZERO_ANGLE;
+   m_descent_angle = Units::ZERO_ANGLE;
+   m_altitude = Units::ZERO_LENGTH;
+   m_nominal_ias = Units::ZERO_SPEED;
+   m_mach = 0;
+   m_descent_rate = Units::Acceleration(0);
 
-   altitude_constraint_high = Units::ZERO_LENGTH;
-   altitude_constraint_low = Units::ZERO_LENGTH;
-   speed_constraint_high = Units::ZERO_SPEED;
-   speed_constraint_low = Units::ZERO_SPEED;
+   m_altitude_constraint_high = Units::ZERO_LENGTH;
+   m_altitude_constraint_low = Units::ZERO_LENGTH;
+   m_speed_constraint_high = Units::ZERO_SPEED;
+   m_speed_constraint_low = Units::ZERO_SPEED;
 
-   rf_turn_center_latitude = Units::ZERO_ANGLE;
-   rf_turn_center_longitude = Units::ZERO_ANGLE;
-   rf_turn_arc_radius = Units::ZERO_LENGTH;
+   m_rf_turn_center_latitude = Units::ZERO_ANGLE;
+   m_rf_turn_center_longitude = Units::ZERO_ANGLE;
+   m_rf_turn_arc_radius = Units::ZERO_LENGTH;
 }
 
 Waypoint::Waypoint(const std::string &name_in,
@@ -53,14 +53,14 @@ Waypoint::Waypoint(const std::string &name_in,
                    Units::Speed speed_constraint_in,
                    Units::Length altitude_in,
                    Units::Speed nominal_ias_in) {
-   name = name_in;
-   latitude = latitude_in;
-   longitude = longitude_in;
-   altitude = altitude_in;
-   nominal_ias = nominal_ias_in;
+   m_name = name_in;
+   m_latitude = latitude_in;
+   m_longitude = longitude_in;
+   m_altitude = altitude_in;
+   m_nominal_ias = nominal_ias_in;
 
    std::cout << "----------------" << std::endl;
-   std::cout << name << std::endl;
+   std::cout << m_name << std::endl;
    if (std::isnan(Units::MetersLength(altitude_constraint_in).value())) {
       std::cout << "ALT 1 is NAN" << std::endl;
       altitude_constraint_in = UNDEFINED_ALTITUDE_CONSTRAINT;
@@ -73,61 +73,61 @@ Waypoint::Waypoint(const std::string &name_in,
       speed_constraint_in = UNDEFINED_SPEED_CONSTRAINT;
    }
 
-   processAltitudeConstraints(altitude_constraint_in,
+   ProcessAltitudeConstraints(altitude_constraint_in,
                               altitude_constraint_2_in);
 
-   processSpeedConstraints(speed_constraint_in);
+   ProcessSpeedConstraints(speed_constraint_in);
 
-   rf_turn_center_latitude = Units::ZERO_ANGLE;
-   rf_turn_center_longitude = Units::ZERO_ANGLE;
-   rf_turn_arc_radius = Units::ZERO_LENGTH;
+   m_rf_turn_center_latitude = Units::ZERO_ANGLE;
+   m_rf_turn_center_longitude = Units::ZERO_ANGLE;
+   m_rf_turn_arc_radius = Units::ZERO_LENGTH;
 
-   mach = 0;
-   descent_rate = Units::Acceleration(0);
-   descent_angle = Units::ZERO_ANGLE;
+   m_mach = 0;
+   m_descent_rate = Units::Acceleration(0);
+   m_descent_angle = Units::ZERO_ANGLE;
 }
 
 Waypoint::~Waypoint() {
 }
 
-void Waypoint::processAltitudeConstraints(Units::Length altitude_in,
+void Waypoint::ProcessAltitudeConstraints(Units::Length altitude_in,
                                           Units::Length altitude_2_in) {
    if (altitude_in == UNDEFINED_ALTITUDE_CONSTRAINT && altitude_2_in == UNDEFINED_ALTITUDE_CONSTRAINT) {
-      altitude_constraint_high = MAX_ALTITUDE_CONSTRAINT;
-      altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
+      m_altitude_constraint_high = MAX_ALTITUDE_CONSTRAINT;
+      m_altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
    } else if (altitude_in == UNDEFINED_ALTITUDE_CONSTRAINT || altitude_2_in == UNDEFINED_ALTITUDE_CONSTRAINT) {
       if (altitude_in > altitude_2_in) {
-         altitude_constraint_high = altitude_in;
+         m_altitude_constraint_high = altitude_in;
       } else {
-         altitude_constraint_high = altitude_2_in;
+         m_altitude_constraint_high = altitude_2_in;
       }
-      altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
+      m_altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
    } else {
       if (altitude_in > altitude_2_in) {
-         altitude_constraint_high = altitude_in;
-         altitude_constraint_low = altitude_2_in;
+         m_altitude_constraint_high = altitude_in;
+         m_altitude_constraint_low = altitude_2_in;
 
       } else {
-         altitude_constraint_high = altitude_2_in;
-         altitude_constraint_low = altitude_in;
+         m_altitude_constraint_high = altitude_2_in;
+         m_altitude_constraint_low = altitude_in;
       }
    }
 }
 
-void Waypoint::processSpeedConstraints(Units::Speed speed_in) {
+void Waypoint::ProcessSpeedConstraints(Units::Speed speed_in) {
    if (speed_in == UNDEFINED_SPEED_CONSTRAINT) {
-      speed_constraint_high = MAX_SPEED_CONSTRAINT;
-      speed_constraint_low = MIN_SPEED_CONSTRAINT;
+      m_speed_constraint_high = MAX_SPEED_CONSTRAINT;
+      m_speed_constraint_low = MIN_SPEED_CONSTRAINT;
    } else {
-      speed_constraint_high = speed_in;
-      speed_constraint_low = speed_in;
+      m_speed_constraint_high = speed_in;
+      m_speed_constraint_low = speed_in;
    }
 }
 
 bool Waypoint::load(DecodedStream *input) {
    set_stream(input);
 
-   bool f = load_datum(name);
+   bool f = load_datum(m_name);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_name");
@@ -137,7 +137,7 @@ bool Waypoint::load(DecodedStream *input) {
 
    //double lat_in_deg;
 
-   f = loadAngleDegrees(latitude);
+   f = loadAngleDegrees(m_latitude);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_Latitude");
@@ -149,7 +149,7 @@ bool Waypoint::load(DecodedStream *input) {
 
    //double lon_in_deg;
 
-   f = loadAngleDegrees(longitude);
+   f = loadAngleDegrees(m_longitude);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_Longitude");
@@ -158,14 +158,14 @@ bool Waypoint::load(DecodedStream *input) {
    //waypoint_Lon = lon_in_deg * DTORAD;
 
    //----------------------------------------------------
-   f = loadLengthFeet(altitude);
+   f = loadLengthFeet(m_altitude);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_altitude");
    }
 
    //----------------------------------------------------
-   f = loadAngleDegrees(descent_angle);
+   f = loadAngleDegrees(m_descent_angle);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_decent_angle");
@@ -175,7 +175,7 @@ bool Waypoint::load(DecodedStream *input) {
 
    //double nominal_IAS_in_knot;
 
-   f = loadSpeedKnots(nominal_ias);
+   f = loadSpeedKnots(m_nominal_ias);
 
 
    if (!f) {
@@ -185,82 +185,82 @@ bool Waypoint::load(DecodedStream *input) {
    //nominal_IAS_at_waypoint = nominal_IAS_in_knot * KT2FPS;
 
    //----------------------------------------------------
-   f = load_datum(mach);
+   f = load_datum(m_mach);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_MACH");
    }
 
    //----------------------------------------------------
-   f = loadAccelerationKnotsPerSecond(descent_rate);
+   f = loadAccelerationKnotsPerSecond(m_descent_rate);
 
    if (!f) {
       LoggingLoadable::report_error("could not load waypoint_decent_rate");
    }
 
-   f = loadLengthFeet(altitude_constraint_high);
+   f = loadLengthFeet(m_altitude_constraint_high);
 
    if (!f) {
       input->push_back();
-      altitude_constraint_high = Units::FeetLength(50000);
+      m_altitude_constraint_high = Units::FeetLength(50000);
    }
 
    // altHi *= FT_M;
 
-   f = loadLengthFeet(altitude_constraint_low);
+   f = loadLengthFeet(m_altitude_constraint_low);
 
    if (!f) {
       input->push_back();
-      altitude_constraint_low = Units::FeetLength(0);
+      m_altitude_constraint_low = Units::FeetLength(0);
    }
 
    //altLow *= FT_M;
 
-   f = loadSpeedKnots(speed_constraint_high);
+   f = loadSpeedKnots(m_speed_constraint_high);
 
    if (!f) {
       input->push_back();
-      speed_constraint_high = Units::KnotsSpeed(1000);
+      m_speed_constraint_high = Units::KnotsSpeed(1000);
    }
 
    //speedHi *= KTS_MPS;
 
-   f = loadSpeedKnots(speed_constraint_low);
+   f = loadSpeedKnots(m_speed_constraint_low);
 
    if (!f) {
       input->push_back();
-      speed_constraint_low = Units::KnotsSpeed(0);
+      m_speed_constraint_low = Units::KnotsSpeed(0);
    }
 
    //speedLow *= KTS_MPS;
 
    //----------------------------------------------------
    // double raius_in_nm
-   f = loadLengthNM(rf_turn_arc_radius);
+   f = loadLengthNM(m_rf_turn_arc_radius);
 
    if (!f) {
       input->push_back();
-      rf_turn_arc_radius = Units::NauticalMilesLength(0);
+      m_rf_turn_arc_radius = Units::NauticalMilesLength(0);
    }
 
    //----------------------------------------------------
    //double lat_in_deg;
 
-   f = loadAngleDegrees(rf_turn_center_latitude);
+   f = loadAngleDegrees(m_rf_turn_center_latitude);
 
    if (!f) {
       input->push_back();
-      rf_turn_center_latitude = Units::RadiansAngle(0);
+      m_rf_turn_center_latitude = Units::RadiansAngle(0);
    }
 
    //----------------------------------------------------
    //double lon_in_deg;
 
-   f = loadAngleDegrees(rf_turn_center_longitude);
+   f = loadAngleDegrees(m_rf_turn_center_longitude);
 
    if (!f) {
       input->push_back();
-      rf_turn_center_longitude = Units::RadiansAngle(0);
+      m_rf_turn_center_longitude = Units::RadiansAngle(0);
    }
 
    return true;
@@ -269,21 +269,21 @@ bool Waypoint::load(DecodedStream *input) {
 
 std::ostream &operator<<(std::ostream &out,
                          const Waypoint &waypoint) {
-   out << waypoint.getName() << " ";
-   out << Units::DegreesAngle(waypoint.getLatitude()).value() << " ";
-   out << Units::DegreesAngle(waypoint.getLongitude()).value() << " ";
-   out << Units::FeetLength(waypoint.getAltitude()).value() << " ";
-   out << Units::DegreesAngle(waypoint.getDescentAngle()).value() << " ";
-   out << Units::KnotsSpeed(waypoint.getNominalIas()).value() << " ";
-   out << waypoint.getMach() << " ";
-   out << Units::KnotsPerSecondAcceleration(waypoint.getDescentRate()).value() << " ";
-   out << Units::FeetLength(waypoint.getAltitudeConstraintHigh()).value() << " ";
-   out << Units::FeetLength(waypoint.getAltitudeConstraintLow()).value() << " ";
-   out << Units::KnotsSpeed(waypoint.getSpeedConstraintHigh()).value() << " ";
-   out << Units::KnotsSpeed(waypoint.getSpeedConstraintLow()).value() << " ";
-   out << Units::NauticalMilesLength(waypoint.getRfTurnArcRadius()).value() << " ";
-   out << Units::DegreesAngle(waypoint.getRfTurnCenterLatitude()).value() << " ";
-   out << Units::DegreesAngle(waypoint.getRfTurnCenterLongitude()).value() << " ";
+   out << waypoint.GetName() << " ";
+   out << Units::DegreesAngle(waypoint.GetLatitude()).value() << " ";
+   out << Units::DegreesAngle(waypoint.GetLongitude()).value() << " ";
+   out << Units::FeetLength(waypoint.GetAltitude()).value() << " ";
+   out << Units::DegreesAngle(waypoint.GetDescentAngle()).value() << " ";
+   out << Units::KnotsSpeed(waypoint.GetNominalIas()).value() << " ";
+   out << waypoint.GetMach() << " ";
+   out << Units::KnotsPerSecondAcceleration(waypoint.GetDescentRate()).value() << " ";
+   out << Units::FeetLength(waypoint.GetAltitudeConstraintHigh()).value() << " ";
+   out << Units::FeetLength(waypoint.GetAltitudeConstraintLow()).value() << " ";
+   out << Units::KnotsSpeed(waypoint.GetSpeedConstraintHigh()).value() << " ";
+   out << Units::KnotsSpeed(waypoint.GetSpeedConstraintLow()).value() << " ";
+   out << Units::NauticalMilesLength(waypoint.GetRfTurnArcRadius()).value() << " ";
+   out << Units::DegreesAngle(waypoint.GetRfTurnCenterLatitude()).value() << " ";
+   out << Units::DegreesAngle(waypoint.GetRfTurnCenterLongitude()).value() << " ";
    out << std::endl;
    return out;
 }

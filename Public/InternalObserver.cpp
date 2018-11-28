@@ -80,14 +80,14 @@ void InternalObserver::process(void) {
    vector<AircraftState>::iterator sv_report;
    for (sv_report = truth_state_vector_list.begin(); sv_report != truth_state_vector_list.end(); ++sv_report) {
       fprintf(fp, "%d,%f,%f,%f,%f,%f,%f,%f\n",
-              (*sv_report).id,
-              (*sv_report).time,
-              (*sv_report).x,
-              (*sv_report).y,
-              (*sv_report).z,
-              (*sv_report).xd,
-              (*sv_report).yd,
-              (*sv_report).zd
+              (*sv_report).m_id,
+              (*sv_report).m_time,
+              (*sv_report).m_x,
+              (*sv_report).m_y,
+              (*sv_report).m_z,
+              (*sv_report).m_xd,
+              (*sv_report).m_yd,
+              (*sv_report).m_zd
       );
    }
 
@@ -132,7 +132,7 @@ void InternalObserver::storeStateModel(AircraftState asv,
 
    // Add vector for current aircraft if needed.
 
-   while (asv.id >= (int) stateModelOutput[scenario_iter].size()) {
+   while (asv.m_id >= (int) stateModelOutput[scenario_iter].size()) {
       vector<string> strings;
       stateModelOutput[scenario_iter].push_back(strings);
    }
@@ -140,7 +140,7 @@ void InternalObserver::storeStateModel(AircraftState asv,
 
    // Store state model string.
 
-   stateModelOutput[scenario_iter][asv.id].push_back(stateModelString(asv, flapsConfig, speed_brake, ias));
+   stateModelOutput[scenario_iter][asv.m_id].push_back(stateModelString(asv, flapsConfig, speed_brake, ias));
 }
 
 
@@ -159,30 +159,30 @@ string InternalObserver::stateModelString(AircraftState asv,
 
    // get current speed in FPS
 
-   double currSpeed = sqrt(pow(asv.xd, 2) + pow(asv.yd, 2));
+   double currSpeed = sqrt(pow(asv.m_xd, 2) + pow(asv.m_yd, 2));
 
    strm << scenario_iter << ","; // iteration number
-   strm << asv.id << ","; // id
-   strm << asv.time << ","; // time
-   strm << asv.x << ","; // x value in feet
-   strm << asv.y << ","; // y value in feet
-   strm << asv.z << ","; // altitude value in feet
-   strm << asv.xd << ","; // x velocity in FPS
-   strm << asv.yd << ","; // y velocity in FPS
-   strm << asv.zd * 60 << ","; // altitude velocity int Feet per Minute
+   strm << asv.m_id << ","; // id
+   strm << asv.m_time << ","; // time
+   strm << asv.m_x << ","; // x value in feet
+   strm << asv.m_y << ","; // y value in feet
+   strm << asv.m_z << ","; // altitude value in feet
+   strm << asv.m_xd << ","; // x velocity in FPS
+   strm << asv.m_yd << ","; // y velocity in FPS
+   strm << asv.m_zd * 60 << ","; // altitude velocity int Feet per Minute
 
    // Note:These two are the exactly the same calculation except for a units conversion.
 
    strm << currSpeed << ","; // ground speed in FPS
-   strm << Units::KnotsSpeed(asv.getGroundSpeed()).value() << ",";
+   strm << Units::KnotsSpeed(asv.GetGroundSpeed()).value() << ",";
 
-   strm << asv.xdd << ","; // x acceleration FPS^2
-   strm << asv.ydd << ","; // y acceleration FPS^2
-   strm << asv.zdd * 60 << ","; // z acceleration in Feet per Minute per Second
-   strm << asv.Vwx << ","; // true wind Vwx in MPS
-   strm << asv.Vwy << ","; // true wind Vwy in MPS
-   strm << asv.Vw_para << ","; // true wind Vw_para in MPS
-   strm << asv.Vw_perp << ","; // true wind Vw_perp in MPS
+   strm << asv.m_xdd << ","; // x acceleration FPS^2
+   strm << asv.m_ydd << ","; // y acceleration FPS^2
+   strm << asv.m_zdd * 60 << ","; // z acceleration in Feet per Minute per Second
+   strm << asv.m_Vwx << ","; // true wind Vwx in MPS
+   strm << asv.m_Vwy << ","; // true wind Vwy in MPS
+   strm << asv.m_Vw_para << ","; // true wind Vw_para in MPS
+   strm << asv.m_Vw_perp << ","; // true wind Vw_perp in MPS
    strm << asv.m_distance_to_go << ","; // output distance to go in meters
    strm << flapsConfig << ","; // configuration for flaps (mainly debug)
    strm << speed_brake << ",";
@@ -255,7 +255,7 @@ void InternalObserver::IM_command_output(int id_in,
    new_command.iteration = this->scenario_iter;
    new_command.id = id_in;
    new_command.time = time_in;
-   new_command.state_altitude = state_alt * FT_M;
+   new_command.state_altitude = state_alt * FEET_TO_METERS;
    new_command.distance_to_go = fabs(predDistIn); // Distance is in meters
    new_command.state_TAS = state_TAS; // TAS is in MPS
    new_command.state_groundspeed = state_groundspeed_in; // Ground Speed is in meters
@@ -347,32 +347,32 @@ void InternalObserver::process_NM_aircraft() {
                   // output the report
                   out << loop << ",";
                   out << scenario_iter << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].predictedDistance / NM_M << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].trueDistance / NM_M << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS << ",";
                   out << aircraft_NM_list[loop].entry_list[index].time << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].acIAS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].acGS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].targetGS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].minIAS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].maxIAS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].minTAS / KTS_MPS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].maxTAS / KTS_MPS << endl;
+                  out << aircraft_NM_list[loop].entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].minTAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << aircraft_NM_list[loop].entry_list[index].maxTAS / KNOTS_TO_METERS_PER_SECOND << endl;
 
                   // add entries to Statistics class
                   aircraft_NM_list[loop].predictedDistance[index] =
-                        aircraft_NM_list[loop].entry_list[index].predictedDistance / NM_M;
+                        aircraft_NM_list[loop].entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS;
                   aircraft_NM_list[loop].trueDistance[index] =
-                        aircraft_NM_list[loop].entry_list[index].trueDistance / NM_M;
-                  aircraft_NM_list[loop].ac_IAS_stats[index].insert(
-                        aircraft_NM_list[loop].entry_list[index].acIAS / KTS_MPS);
-                  aircraft_NM_list[loop].ac_GS_stats[index].insert(
-                        aircraft_NM_list[loop].entry_list[index].acGS / KTS_MPS);
-                  aircraft_NM_list[loop].target_GS_stats[index].insert(
-                        aircraft_NM_list[loop].entry_list[index].targetGS / KTS_MPS);
-                  aircraft_NM_list[loop].min_IAS_stats[index].insert(
-                        aircraft_NM_list[loop].entry_list[index].minIAS / KTS_MPS);
-                  aircraft_NM_list[loop].max_IAS_stats[index].insert(
-                        aircraft_NM_list[loop].entry_list[index].maxIAS / KTS_MPS);
+                        aircraft_NM_list[loop].entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS;
+                  aircraft_NM_list[loop].ac_IAS_stats[index].Insert(
+                        aircraft_NM_list[loop].entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND);
+                  aircraft_NM_list[loop].ac_GS_stats[index].Insert(
+                        aircraft_NM_list[loop].entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND);
+                  aircraft_NM_list[loop].target_GS_stats[index].Insert(
+                        aircraft_NM_list[loop].entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND);
+                  aircraft_NM_list[loop].min_IAS_stats[index].Insert(
+                        aircraft_NM_list[loop].entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND);
+                  aircraft_NM_list[loop].max_IAS_stats[index].Insert(
+                        aircraft_NM_list[loop].entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND);
                }
 
                aircraft_NM_list[loop].entry_list.clear();
@@ -417,16 +417,16 @@ void InternalObserver::process_NM_stats() {
                for (unsigned int index = 0; index < aircraft_NM_list[loop].predictedDistance.size(); index++) {
                   out << aircraft_NM_list[loop].predictedDistance[index] << ",";
                   out << aircraft_NM_list[loop].trueDistance[index] << ",";
-                  out << aircraft_NM_list[loop].ac_IAS_stats[index].get_mean() << ",";
-                  out << aircraft_NM_list[loop].ac_IAS_stats[index].get_std() << ",";
-                  out << aircraft_NM_list[loop].ac_GS_stats[index].get_mean() << ",";
-                  out << aircraft_NM_list[loop].ac_GS_stats[index].get_std() << ",";
-                  out << aircraft_NM_list[loop].target_GS_stats[index].get_mean() << ",";
-                  out << aircraft_NM_list[loop].target_GS_stats[index].get_std() << ",";
-                  out << aircraft_NM_list[loop].min_IAS_stats[index].get_mean() << ",";
-                  out << aircraft_NM_list[loop].min_IAS_stats[index].get_std() << ",";
-                  out << aircraft_NM_list[loop].max_IAS_stats[index].get_mean() << ",";
-                  out << aircraft_NM_list[loop].max_IAS_stats[index].get_std() << endl;
+                  out << aircraft_NM_list[loop].ac_IAS_stats[index].GetMean() << ",";
+                  out << aircraft_NM_list[loop].ac_IAS_stats[index].ComputeStandardDeviation() << ",";
+                  out << aircraft_NM_list[loop].ac_GS_stats[index].GetMean() << ",";
+                  out << aircraft_NM_list[loop].ac_GS_stats[index].ComputeStandardDeviation() << ",";
+                  out << aircraft_NM_list[loop].target_GS_stats[index].GetMean() << ",";
+                  out << aircraft_NM_list[loop].target_GS_stats[index].ComputeStandardDeviation() << ",";
+                  out << aircraft_NM_list[loop].min_IAS_stats[index].GetMean() << ",";
+                  out << aircraft_NM_list[loop].min_IAS_stats[index].ComputeStandardDeviation() << ",";
+                  out << aircraft_NM_list[loop].max_IAS_stats[index].GetMean() << ",";
+                  out << aircraft_NM_list[loop].max_IAS_stats[index].ComputeStandardDeviation() << endl;
                }
 
                out.close();
@@ -846,7 +846,7 @@ void InternalObserver::process_ptis_b_reports() // process the ADS-B reports
    int max_id = -100;
    //loop through the receiver_id fields in ptis_b_ether_with_receiver_ID_list
    for (size_t i = 0; i < ptis_b_report_list.size(); i++) {
-      int this_id = ptis_b_report_list[i].getId();
+      int this_id = ptis_b_report_list[i].GetId();
       if (this_id > max_id) {
          max_id = this_id;
       }
@@ -872,29 +872,29 @@ void InternalObserver::process_ptis_b_reports() // process the ADS-B reports
          for (size_t i = 0; i < ptis_b_report_list.size(); i++) {
             Sensor::ADSB::ADSBSVReport return_report;
             return_report = ptis_b_report_list[i];
-            if (return_report.getId() == ac_id) {
+            if (return_report.GetId() == ac_id) {
                // print out current record
-               out << return_report.getTime().value() << ","; // outputs the TOA
-               out << return_report.getId() << ","; // output  id
+               out << return_report.GetTime().value() << ","; // outputs the TOA
+               out << return_report.GetId() << ","; // output  id
                Units::DegreesAngle lat_out, long_out;
                StereographicProjection::xy_to_ll(
-                     Units::FeetLength(return_report.getX()),
-                     Units::FeetLength(return_report.getY()),
+                     Units::FeetLength(return_report.GetX()),
+                     Units::FeetLength(return_report.GetY()),
                      lat_out, long_out); // call the Stereographic Projection to convert the aircraft X/Y to Lat/Long
                out.precision(10);
                out << lat_out.value() << ","; // output the  lat in degrees
                out << long_out.value() << ","; // output lon in degrees
-               out << return_report.getZ().value() << ","; // output the current altitude value in feet
-               out << Units::KnotsSpeed(return_report.getXd()).value() <<
+               out << return_report.GetZ().value() << ","; // output the current altitude value in feet
+               out << Units::KnotsSpeed(return_report.GetXd()).value() <<
                    ","; // output the current x velocity in knots; the unit of return_report.getxd is assumed to be feet/second
-               out << Units::KnotsSpeed(return_report.getYd()).value() <<
+               out << Units::KnotsSpeed(return_report.GetYd()).value() <<
                    ","; // output the current y velocity in knots; the unit of return_report.getyd is assumed to be feet/second
-               out << return_report.getNacp() << ","; // output the NACp
-               out << return_report.getNicp() << ","; // output the NICp
-               out << return_report.getNacv() << ","; // output the NACv
+               out << return_report.GetNacp() << ","; // output the NACp
+               out << return_report.GetNicp() << ","; // output the NICp
+               out << return_report.GetNacv() << ","; // output the NACv
                out << 2 << ","; // output the SIL (set at 2)
                out << 2 << ","; // output the SDA (set at 2)
-               out << Units::FeetPerMinuteSpeed(return_report.getZd()).value() <<
+               out << Units::FeetPerMinuteSpeed(return_report.GetZd()).value() <<
                    endl; // output the current vertical velocity feet per minute; the unit of return_report.zd is assumed to be feet/second
             }    //end if(return_report.id == ac_id)
          } //end for(int i = 0; i <  ptis_b_ether_with_receiver_ID_list.size(); i++)
@@ -1060,12 +1060,12 @@ void InternalObserver::dumpAchieveList() {
 
          // Header
          if (needHdr) {
-            out << mAchieveList[acIx][0].hdr().c_str() << endl;
+            out << mAchieveList[acIx][0].Hdr().c_str() << endl;
             needHdr = false;
          }
 
          for (size_t ix = 0; ix < mAchieveList[acIx].size(); ix++) {
-            out << mAchieveList[acIx][ix].toString().c_str() << endl;
+            out << mAchieveList[acIx][ix].ToString().c_str() << endl;
          }
       }
       out.close();
@@ -1081,7 +1081,7 @@ void InternalObserver::dumpAchieveList() {
 
 
 void InternalObserver::dumpOwnKinTraj(int id,
-                                      VerticalPath &fullTraj) {
+                                      const VerticalPath &fullTraj) {
    // Dumps own kinematic trajectory after ensuring file initialized.
    //
    // id:own aircarft id.
@@ -1112,7 +1112,7 @@ void InternalObserver::dumpOwnKinTraj(int id,
 
 
 void InternalObserver::dumpTargetKinTraj(int id,
-                                         VerticalPath &fullTraj) {
+                                         const VerticalPath &fullTraj) {
 
    // Dumps target kinematic trajectory after ensuring file initialized.
    //

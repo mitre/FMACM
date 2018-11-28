@@ -31,56 +31,56 @@ class Scenario : public LoggingLoadable
 public:
    static const Units::NauticalMilesLength DEFAULT_ADS_B_RECEPTION_RANGE_THRESHOLD;
 
-   Scenario(void);
+   Scenario();
 
-   ~Scenario(void);
+   ~Scenario();
 
-   virtual void process_one_scenario();
+   virtual void ProcessOneScenario();
 
    virtual bool load(DecodedStream *input);
 
    // Scenario name getter/setters. Putting default impl here for simplicity.
-   virtual std::string get_scenario_name() {
-      return mScenarioName;
+   virtual std::string GetScenarioName() {
+      return m_scenario_name;
    }
 
-   virtual void set_scenario_name(std::string in);
+   virtual void SetScenarioName(const std::string in);
 
-   static int getUniqueIdForAircraftId(std::string aircraftId) {
+   static int GetUniqueIdForAircraftId(const std::string aircraft_id) {
       // Note: implementation intentionally here in the header file because static method
-      bool isInMap = mAircraftStringIntMap.find(aircraftId) != mAircraftStringIntMap.end();
-      if (isInMap) {
-         return mAircraftStringIntMap[aircraftId];
+      bool is_in_map = m_aircraft_string_int_map.find(aircraft_id) != m_aircraft_string_int_map.end();
+      if (is_in_map) {
+         return m_aircraft_string_int_map[aircraft_id];
       }
       return AIRCRAFT_ID_NOT_IN_MAP; // not in map, return AIRCRAFT_ID_NOT_IN_MAP
    }
 
-   static int generateNewUniqueIdForAircraftId(std::string aircraftId) {
+   static int GenerateNewUniqueIdForAircraftId(const std::string aircraft_id) {
       // Note: implementation intentionally here in the header file because static method
-      int oldId = getUniqueIdForAircraftId(aircraftId);
+      int oldId = GetUniqueIdForAircraftId(aircraft_id);
       if (oldId == AIRCRAFT_ID_NOT_IN_MAP) {
-         int newid = mAircraftStringIntMap.size(); // zero-based, so the first aircraft will have uniqueid zero
-         mAircraftStringIntMap[aircraftId] = newid;
+         int newid = m_aircraft_string_int_map.size(); // zero-based, so the first aircraft will have uniqueid zero
+         m_aircraft_string_int_map[aircraft_id] = newid;
          return newid;
       } else {
          return oldId;
       }
    }
 
-   static void clearAircraftIdMap() {
-      mAircraftStringIntMap.clear();
+   static void ClearAircraftIdMap() {
+      m_aircraft_string_int_map.clear();
    }
 
    static const int AIRCRAFT_ID_NOT_IN_MAP;
 
-   static RandomGenerator mRand;
+   static RandomGenerator m_rand;
 
 protected:
-   WeatherTruth mWeather;
+   WeatherTruth m_weather;
 
 private:
 
-   std::string mScenarioName;
-   static std::map<std::string, int> mAircraftStringIntMap;
+   std::string m_scenario_name;
+   static std::map<std::string, int> m_aircraft_string_int_map;
 
 };

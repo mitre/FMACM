@@ -40,31 +40,31 @@ public:
       std::vector<double> mAlt; // meters
       std::vector<double> mIas; // mps
       std::vector<double> mDotAlt; // mps
-   } v_traj;
+   } m_vertical_trajectory;
 
-   TrajectoryFromFile(void);
+   TrajectoryFromFile();
 
-   ~TrajectoryFromFile(void);
+   ~TrajectoryFromFile();
 
    bool load(DecodedStream *input);
 
-   std::vector<HorizontalPath> getHorizontalData(void);
+   std::vector<HorizontalPath> GetHorizontalData();
 
-   VerticalData getVerticalData(void);
+   VerticalData GetVerticalData();
 
-   Guidance update(AircraftState state,
+   Guidance Update(AircraftState state,
                    Guidance guidance_in);
 
-   void calculateWaypoints(AircraftIntent &intent);
+   void CalculateWaypoints(AircraftIntent &intent);
 
-   bool is_loaded(void);
+   bool IsLoaded();
 
-   std::vector<HorizontalPath> h_traj;
+   std::vector<HorizontalPath> m_horizontal_trajectory;
 
-   Units::Length mAltAtFAF;
-   double mMassPercentile;
+   Units::Length m_altitude_at_final_approach_fix;
+   double m_mass_percentile;
 
-   std::vector<PrecalcWaypoint> waypoint_vector;
+   std::vector<PrecalcWaypoint> m_waypoint;
 
 
 private:
@@ -102,13 +102,13 @@ private:
    };
 
 
-   void readVerticalTrajectoryFile(void);
+   void ReadVerticalTrajectoryFile();
 
-   void readHorizontalTrajectoryFile(void);
+   void ReadHorizontalTrajectoryFile();
 
-   std::string mVerticalTrajectoryFile;
-   std::string mHorizontalTrajectoryFile;
+   std::string m_vertical_trajectory_file;
+   std::string m_horizontal_trajectory_file;
 
-   bool mLoaded;
+   bool m_loaded;
 
 };

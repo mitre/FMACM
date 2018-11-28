@@ -64,7 +64,7 @@ VerticalPathObserver::~VerticalPathObserver() {
 }
 
 void VerticalPathObserver::addTrajectory(int id,
-                                         VerticalPath &fullTraj) {
+                                         const VerticalPath &fullTraj) {
 
    // Adds (writes) input trajectory to the output file.
    //
@@ -72,36 +72,17 @@ void VerticalPathObserver::addTrajectory(int id,
    // fullTraj:full trajectory.
 
    if (strm.is_open()) {
-
-      // NOTE:This code is basically copied from
-      // Precalculate_Trajectory::output_precalculated_trajectory.
-      // The horizontal trajectory, (vector<Horizontal_Traj> h_traj),
-      // was output in output_precalculated_trajectory but is not
-      // output here.  If it is to be output, some other scheme
-      // will need to be developed, because just including it here
-      // will cause file output to be horizontal data, full trajectory
-      // data, more horizontal data, more full trajectory data, etc.
-      // What is more desirable is to have all the horizontal data
-      // grouped together and all the full trajectory data grouped
-      // together rather than having breaks.  One solution is to
-      // save both sets of data output in vector<string> and then
-      // output at the end.  Another solution is to put all the
-      // horizontal trajectory data in it's own file.
-
-
-      // Full trajectory
-
       for (unsigned int i = 0; i < fullTraj.x.size(); i++) {
          strm << iter << ",";
          strm << id << ",";
          strm << fullTraj.time[i] << ",";
-         strm << fullTraj.x[i] / FT_M << ",";
-         strm << fullTraj.h[i] / FT_M << ",";
-         strm << fullTraj.v[i] / KTS_MPS << ",";
+         strm << fullTraj.x[i] / FEET_TO_METERS << ",";
+         strm << fullTraj.h[i] / FEET_TO_METERS << ",";
+         strm << fullTraj.v[i] / KNOTS_TO_METERS_PER_SECOND << ",";
          strm << fullTraj.h_dot[i] << ",";
          strm << fullTraj.v_dot[i] << ",";
          strm << fullTraj.theta[i] << ",";
-         strm << fullTraj.gs[i] / KTS_MPS << ",";
+         strm << fullTraj.gs[i] / KNOTS_TO_METERS_PER_SECOND << ",";
          strm << fullTraj.mass[i] << endl;
       }
    }

@@ -99,7 +99,7 @@ double subtract_headings(double hd1,
    t = hd1 - hd2;
 
    if (t < 0.) {
-      t = TWOPI + t;
+      t = TWO_PI + t;
    }
 
    return (t);
@@ -133,7 +133,7 @@ double MachToTas(double mach,
 
    //before this point tas is in knots
    //gwang 2009-03
-   tas *= KT2FPS;
+   tas *= KNOTS_TO_FEET_PER_SECOND;
    //end gwang
 
    return (tas); //FPS
@@ -156,7 +156,7 @@ double MachToCas_MITRE(double mach,
                                             ((pow((1.0 + 0.2 * mach * mach), 3.5) - 1.0))),
                                      (2.0 / 7.0))) - 1.0));
 
-   cas *= KT2FPS;
+   cas *= KNOTS_TO_FEET_PER_SECOND;
 
    return (cas);
 
@@ -175,31 +175,31 @@ bool inverse(DMatrix &in,
    DMatrix a(1, n, 1, n);
 
    //copy the "in" matrix into the "a" matrix:
-   int in_min_row = in.get_min_row();
-   int in_min_column = in.get_min_colomn();
+   int in_min_row = in.GetMinRow();
+   int in_min_column = in.GetMinColumn();
    for (int i = 1; i <= n; i++) {
       for (int j = 1; j <= n; j++) {
-         a.set(i, j, in.get(i - 1 + in_min_row, j - 1 + in_min_column));
+         a.Set(i, j, in.Get(i - 1 + in_min_row, j - 1 + in_min_column));
       }
    }
 
 
    for (int j = 1; j <= n; j++) {
-      ipiv.set(j, 0.);
+      ipiv.Set(j, 0.);
    }
 
    for (int i = 1; i <= n; i++) {
       double big = 0.0;
       for (int j = 1; j <= n; j++) {
-         if (ipiv.get(j) != 1.) {
+         if (ipiv.Get(j) != 1.) {
             for (int k = 1; k <= n; k++) {
-               if (ipiv.get(k) == 0.0) {
-                  if (fabs(a.get(j, k)) >= big) {
-                     big = fabs(a.get(j, k));
+               if (ipiv.Get(k) == 0.0) {
+                  if (fabs(a.Get(j, k)) >= big) {
+                     big = fabs(a.Get(j, k));
                      irow = j;
                      icol = k;
                   }
-               } else if (ipiv.get(k) > 1.) {
+               } else if (ipiv.Get(k) > 1.) {
                   //singular matrix
                   printf("\nWarning: Inversion of a singular matrix in the inverse() function (> 1 val).\n");
                   return false;
@@ -207,35 +207,35 @@ bool inverse(DMatrix &in,
             } //end for(int k=1; k<=n; k++)
          } //end if(ipiv.get(j) != 1.)
       } //end for(int j=1; i<=n; j++)
-      ipiv.set(icol, ipiv.get(icol) + 1);
+      ipiv.Set(icol, ipiv.Get(icol) + 1);
       if (irow != icol) {
          //swap
          for (int l = 1; l <= n; l++) {
             double temp_swap;
-            temp_swap = a.get(irow, l);
-            a.set(irow, l, a.get(icol, l));
-            a.set(icol, l, temp_swap);
+            temp_swap = a.Get(irow, l);
+            a.Set(irow, l, a.Get(icol, l));
+            a.Set(icol, l, temp_swap);
          } //end for(int l=1; l<=n; l++)
       } //end if(irow != icol)
-      indxr.set(i, (double) irow);
-      indxc.set(i, (double) icol);
-      if (a.get(icol, icol) == 0.0) {
+      indxr.Set(i, (double) irow);
+      indxc.Set(i, (double) icol);
+      if (a.Get(icol, icol) == 0.0) {
          //singular matrix
          printf("\nWarning: Inversion of a singular matrix in the inverse() function (0 val).\n");
          return false;
       }
-      double pivinv = 1.0 / a.get(icol, icol);
-      a.set(icol, icol, 1.);
+      double pivinv = 1.0 / a.Get(icol, icol);
+      a.Set(icol, icol, 1.);
       for (int l = 1; l <= n; l++) {
-         a.set(icol, l, pivinv * a.get(icol, l));
+         a.Set(icol, l, pivinv * a.Get(icol, l));
       }//end for(int l=1; l<=n; l++)
 
       for (int ll = 1; ll <= n; ll++) {
          if (ll != icol) {
-            double dum = a.get(ll, icol);
-            a.set(ll, icol, 0.);
+            double dum = a.Get(ll, icol);
+            a.Set(ll, icol, 0.);
             for (int l = 1; l <= n; l++) {
-               a.set(ll, l, a.get(ll, l) - dum * a.get(icol, l));
+               a.Set(ll, l, a.Get(ll, l) - dum * a.Get(icol, l));
             } //end for(int l=1; l<=n; l++)
          } //end if(ll != icol)
       }//end for(int ll=1; ll<=n; ll++)
@@ -244,13 +244,13 @@ bool inverse(DMatrix &in,
 
 
    for (int l = n; l >= 1; l--) {
-      if (indxr.get(l) != indxc.get(l)) {
+      if (indxr.Get(l) != indxc.Get(l)) {
          for (int k = 1; k <= n; k++) {
             //swap:
             double temp;
-            temp = a.get(k, (int) indxr.get(l));
-            a.set(k, (int) indxr.get(l), a.get(k, (int) indxc.get(l)));
-            a.set(k, (int) indxc.get(l), temp);
+            temp = a.Get(k, (int) indxr.Get(l));
+            a.Set(k, (int) indxr.Get(l), a.Get(k, (int) indxc.Get(l)));
+            a.Set(k, (int) indxc.Get(l), temp);
          }
       }//end if(indxr.get(l) != indxc.get(l))
    }//end for(int l=n; l>=1; l--)
@@ -258,11 +258,11 @@ bool inverse(DMatrix &in,
 
 
    //copy the "a" matrix into the "out" matrix:
-   int out_min_row = out.get_min_row();
-   int out_min_column = out.get_min_colomn();
+   int out_min_row = out.GetMinRow();
+   int out_min_column = out.GetMinColumn();
    for (int i = 1; i <= n; i++) {
       for (int j = 1; j <= n; j++) {
-         out.set(i - 1 + out_min_row, j - 1 + out_min_column, a.get(i, j));
+         out.Set(i - 1 + out_min_row, j - 1 + out_min_column, a.Get(i, j));
       }
    }
    return true;
@@ -276,11 +276,11 @@ void matrix_times_vector(DMatrix &matrix_in,
 
 
    for (int i = 0; i < n; i++) {
-      int ii = i + vector_out.get_min();
+      int ii = i + vector_out.GetMin();
       vector_out[ii] = 0.0;
       for (int j = 0; j < n; j++) {
-         vector_out[ii] += matrix_in[i + matrix_in.get_min_row()][j + matrix_in.get_min_colomn()] *
-                           vector_in[j + vector_in.get_min()];
+         vector_out[ii] += matrix_in[i + matrix_in.GetMinRow()][j + matrix_in.GetMinColumn()] *
+                           vector_in[j + vector_in.GetMin()];
       }
    }
 }

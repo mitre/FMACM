@@ -19,11 +19,11 @@ public:
 
    virtual ~StandardAtmosphere();
 
-   Units::KelvinTemperature getTemp(const Units::Length h) const;
+   Units::KelvinTemperature GetTemp(const Units::Length h) const;
 
-   Units::Temperature getTemperatureOffset() const;
+   Units::Temperature GetTemperatureOffset() const;
 
 private:
-   const Units::Temperature mTemperatureOffset;
+   const Units::Temperature m_temperature_offset;
 };
 

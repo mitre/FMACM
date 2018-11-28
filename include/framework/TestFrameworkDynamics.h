@@ -31,32 +31,31 @@
 class TestFrameworkDynamics : public Loadable
 {
 public:
-   TestFrameworkDynamics(void);
+   TestFrameworkDynamics();
 
-   ~TestFrameworkDynamics(void);
+   ~TestFrameworkDynamics();
 
    // sets the Dynamics FMS
-   void setFms(TestFrameworkFMS *Fms_in);
+   void SetFms(TestFrameworkFMS *fms_in);
 
    // Aircraft update method that calculates the new aircraft state from the given command state
-   AircraftState update(AircraftState state_in,
+   AircraftState Update(AircraftState state_in,
                         Guidance guidance_in);
 
    // load method to read in the Dynamics values
    bool load(DecodedStream *input);
 
    // method to check if the model loaded properly
-   bool is_loaded();
+   bool IsLoaded();
 
-   // initializes 3DOF Dynamics
-   void init(double mass_percentile,
-             Units::Length altAtFAF_in,
-             Units::Length initialAltitude,
-             Units::Speed initialIas,
-             double initialMach,
-             double start_time);
+   void Init(double mass_percentile,
+         Units::Length altitude_at_final_approach_fix_in,
+         Units::Length initial_altitude,
+         Units::Speed initial_ias,
+         double initial_mach,
+         double start_time);
 
-   void setWeatherTruth(const WeatherTruth &weatherTruth);
+   void SetWeatherTruth(const WeatherTruth &weather_truth);
 
    //This structure, state, is not used at all within the EOM function. It only serves to
    //represent the state outside the EOM function. Within the EOM function, the state is
@@ -79,7 +78,7 @@ public:
       double xd; //ground speed x component (m/s)
       double yd; //ground speed y component (m/s)
       int flapConfig; // 0, 1, 2, or 3 for flaps speed.
-   } state;
+   } m_state;
 
    class Weather
    {
@@ -90,11 +89,11 @@ public:
    };
 
    /** Retrieves a weather record but does not set the weather field */
-   Weather getWeatherFromTime(double time);
+   Weather GetWeatherFromTime(double time);
 
-   const Units::Speed &getVwx() const;
+   const Units::Speed &GetWindVelocityX() const;
 
-   const Units::Speed &getVwy() const;
+   const Units::Speed &GetWindVelocityY() const;
 
 private:
 
@@ -113,7 +112,7 @@ private:
    X[7]: aircraft thrust (N)
    X[8]: aircraft roll angle (phi) (rad)
    X[9]: aircraft speed brake (% of deployment)
-   */
+    */
    class InternalAircraftState
    {
    public:
@@ -141,69 +140,68 @@ private:
       int flapConfig;            // [10] new flap configuration
    };
 
-   InternalAircraftState X;
+   InternalAircraftState m_internal_aircraft_state;
 
    // integrate method to integrate the command vector into the aircraft state
-   AircraftState integrate(Guidance guidance_in);
+   AircraftState Integrate(Guidance guidance_in);
 
    // EOM dynamics call to calculate the dX values
-   InternalAircraftStateD speed_on_thrust_control_dynamics(Guidance guidance_in);
+   InternalAircraftStateD SpeedOnThrustControlDynamics(Guidance guidance_in);
 
    // EOM new VNAV_speed_control dynamics model
-   InternalAircraftStateD speed_on_pitch_control_dynamics(Guidance guidance_in);
+   InternalAircraftStateD SpeedOnPitchControlDynamics(Guidance guidance_in);
 
    // helper method to add a new guidance command to the pilot delay buffer
-   void add_to_pilot_delay(Guidance guidance_in,
-                           double time);
+   void AddToPilotDelay(Guidance guidance_in,
+         double time);
 
    // helper method to get the current command from the delay buffer
-   Guidance get_pilot_delay_guidance(Guidance prev_guidance,
-                                     double time);
+   Guidance GetPilotDelayGuidance(Guidance prev_guidance,
+         double time);
 
-   void setWeatherFromTime(Units::Time time);
+   void SetWeatherFromTime(Units::Time time);
 
-   void load_env_file(std::string env_csv_file);
+   void LoadEnvFile(std::string env_csv_file);
 
-   TestFrameworkFMS *Fms;
+   TestFrameworkFMS *m_fms;
 
-   std::string ac_type_name; // Aircraft type.
+   std::string m_ac_type_name; // Aircraft type.
 
-   Units::Angle maxBankAngle; // Maximum bank angle for dynamics and VNAV_dynamics calculations (parameter max_bank_angle).
+   Units::Angle m_max_bank_angle; // Maximum bank angle for dynamics and VNAV_dynamics calculations (parameter max_bank_angle).
 
-   AircraftState state_vector;
-   bool model_loaded;
+   bool m_model_loaded;
 
-   BadaWithCalc mBadaWithCalc;
-   Guidance prev_guidance; // previous Guidance to be used if no new command
-   Units::Length alt_thresh; // (m)
-   Units::Speed speed_thresh; // (m/s)
-   std::string speed_management_type;
+   BadaWithCalc m_bada_with_calc;
+   Guidance m_prev_guidance; // previous Guidance to be used if no new command
+   Units::Length m_alt_thresh; // (m)
+   Units::Speed m_speed_thresh; // (m/s)
+   std::string m_speed_management_type;
 
-   double maxThrustPercent;
-   double minThrustPercent;
+   double m_max_thrust_percent;
+   double m_min_thrust_percent;
 
-   int modeLast;
+   int m_mode_last;
 
    // Speed brake members
 
-   double minThrustCounter;
-   double speedBrakeCounter;
-   bool speedBrakeOn;
+   double m_min_thrust_counter;
+   double m_speed_brake_counter;
+   bool m_speed_brake_on;
 
-   bool levelFlight;
+   bool m_level_flight;
 
-   std::map<int, Guidance> pilot_delay_buffer; // Pilot Delay Buffer keyed on command time
+   std::map<int, Guidance> m_pilot_delay_buffer; // Pilot Delay Buffer keyed on command time
 
-   //Units::Speed Vwx, Vwy;  // True wind direction values computed by dynamics and VNAV_dynamics (m/s).
-   Weather *weather;
-   Units::Speed Vw_para, Vw_perp; // True wind factors computed by dynamics and VNAV_dynamics (m/s).
+   Weather *m_weather;
+   Units::Speed m_wind_velocity_parallel;
+   Units::Speed m_wind_velocity_perpendicular;
 
-   Units::Length altAtFAF; // Alt at FAF (last waypoint) in meters.
+   Units::Length m_alt_at_faf; // Alt at FAF (last waypoint) in meters.
 
-   std::map<Units::Time, Weather *> weatherByTime;
-   std::map<Units::Length, Weather *> weatherByDistanceToGo;
+   std::map<Units::Time, Weather *> m_weather_by_time;
+   std::map<Units::Length, Weather *> m_weather_by_distance_to_go;
 
-   WeatherTruth mWeatherTruth;  // for Atmosphere
+   WeatherTruth m_weather_truth;  // for Atmosphere
 
-   Units::Speed Vwx, Vwy;  // True wind direction values computed by dynamics and speed_on_pitch_control_dynamics (m/s).
+   Units::Speed m_wind_velocity_x, m_wind_velocity_y;  // True wind direction values computed by dynamics and speed_on_pitch_control_dynamics (m/s).
 };

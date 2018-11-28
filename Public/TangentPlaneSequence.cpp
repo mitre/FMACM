@@ -65,8 +65,8 @@ void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
       //Waypoint *wp = (*it);
       EarthModel::GeodeticPosition geo;
       geo.altitude = Units::MetersLength(0);
-      geo.latitude = (*it).getLatitude();
-      geo.longitude = (*it).getLongitude();
+      geo.latitude = (*it).GetLatitude();
+      geo.longitude = (*it).GetLongitude();
 
       EarthModel::LocalPositionEnu enu;
       if (plane == NULL) {

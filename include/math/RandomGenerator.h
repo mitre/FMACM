@@ -14,47 +14,41 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #pragma once
 
 #include "utility/Logging.h"
 
-/**
- * Random sample generator class.
- */
-
 class RandomGenerator
 {
 public:
-
    RandomGenerator();
 
    RandomGenerator(const double seed);
 
-   ~RandomGenerator();
+   virtual ~RandomGenerator();
 
-   void setSeed(const double seed);
+   void SetSeed(const double seed);
 
-   const double getSeed(void);
+   const double GetSeed();
 
-   const double uniformSample();
+   const double UniformSample();
 
-   const double gaussianSample();
+   const double GaussianSample();
 
-   const double truncatedGaussianSample(const double maxstddev);
+   const double TruncatedGaussianSample(const double max_standard_deviation);
 
-   const double rayleighSample();
+   const double RayleighSample();
 
-   const double laplaceSample();
+   const double LaplaceSample();
 
    /**
     * Returns a random sample from Gaussian distribution
     * with average = mean and standard deviation = sigma.
     */
    template<typename T>
-   const T gaussianSample(const T mean,
+   const T GaussianSample(const T mean,
                           const T sigma) {
-      T v1 = mean + sigma * gaussianSample();
+      T v1 = mean + sigma * GaussianSample();
       return v1;
    }
 
@@ -64,17 +58,14 @@ public:
     * with the deviation not exceeding maxstddev * sigma.
     */
    template<typename T>
-   const T truncatedGaussianSample(const T mean,
+   const T TruncatedGaussianSample(const T mean,
                                    const T sigma,
-                                   const double maxstddev) {
-/*      Logging only works if T is a SpecificUnit or other streamable.
-    	LOG4CPLUS_TRACE(logger, "Params:  mean=" << mean
-    			<< ", sigma=" << sigma << ", maxstddev=" << maxstddev);*/
+                                   const double max_standard_deviation) {
       // check for zero standard deviation
       if (sigma * 0 == sigma) {
          return mean;
       }
-      T v1 = mean + sigma * truncatedGaussianSample(maxstddev);
+      T v1 = mean + sigma * TruncatedGaussianSample(max_standard_deviation);
       return v1;
    }
 
@@ -83,9 +74,9 @@ public:
     * the given mean and standard deviation.
     */
    template<typename T>
-   const T rayleighSample(const T mean,
+   const T RayleighSample(const T mean,
                           const T sigma) {
-      T v1 = mean + sigma * rayleighSample();
+      T v1 = mean + sigma * RayleighSample();
       return v1;
    }
 
@@ -94,21 +85,21 @@ public:
     * the given value of lambda.
     */
    template<typename T>
-   const T laplaceSample(const T lambda) {
-      T v1 = lambda * laplaceSample();
+   const T LaplaceSample(const T lambda) {
+      T v1 = lambda * LaplaceSample();
       return v1;
    }
 
 
 private:
-   static log4cplus::Logger logger;
+   static log4cplus::Logger m_logger;
 
-   static const double IA;
-   static const double IM;
-   static const double AM;
-   static const double IQ;
-   static const double IR;
+   static const double m_IA;
+   static const double m_IM;
+   static const double m_AM;
+   static const double m_IQ;
+   static const double m_IR;
 
-   double mSeed;
+   double m_seed;
 
 };

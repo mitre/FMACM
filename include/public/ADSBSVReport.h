@@ -28,9 +28,9 @@ namespace Sensor {
       class ADSBSVReport
       {
       public:
-         ADSBSVReport(void);
+         ADSBSVReport();
 
-         ~ADSBSVReport(void);
+         ~ADSBSVReport();
 
          // Copy constructor and overload operator
          ADSBSVReport(const ADSBSVReport &in);
@@ -39,73 +39,73 @@ namespace Sensor {
 
          bool operator==(const ADSBSVReport &in);
 
-         void clear(void);
+         void Clear();
 
-         bool isHasPosition() const;
+         bool IsHasPosition() const;
 
-         void setHasPosition(bool hasPosition);
+         void SetHasPosition(bool hasPosition);
 
-         bool isHasVelocity() const;
+         bool IsHasVelocity() const;
 
-         void setHasVelocity(bool hasVelocity);
+         void SetHasVelocity(bool hasVelocity);
 
-         Units::FeetLength getHorizontalPositionQuantum() const;
+         Units::FeetLength GetHorizontalPositionQuantum() const;
 
-         Units::FeetPerSecondSpeed getHorizontalVelocityQuantum() const;
+         Units::FeetPerSecondSpeed GetHorizontalVelocityQuantum() const;
 
-         int getId() const;
+         int GetId() const;
 
-         int getNacp() const;
+         int GetNacp() const;
 
-         int getNacv() const;
+         int GetNacv() const;
 
-         int getNicp() const;
+         int GetNicp() const;
 
-         int getNicv() const;
+         int GetNicv() const;
 
-         Units::SecondsTime getTime() const;
+         Units::SecondsTime GetTime() const;
 
-         Units::SecondsTime getTimeQuantum() const;
+         Units::SecondsTime GetTimeQuantum() const;
 
-         Units::FeetLength getVerticalPositionQuantum() const;
+         Units::FeetLength GetVerticalPositionQuantum() const;
 
-         Units::FeetPerSecondSpeed getVerticalVelocityQuantum() const;
+         Units::FeetPerSecondSpeed GetVerticalVelocityQuantum() const;
 
-         Units::FeetLength getX() const;
+         Units::FeetLength GetX() const;
 
-         Units::FeetPerSecondSpeed getXd() const;
+         Units::FeetPerSecondSpeed GetXd() const;
 
-         Units::FeetLength getY() const;
+         Units::FeetLength GetY() const;
 
-         Units::FeetPerSecondSpeed getYd() const;
+         Units::FeetPerSecondSpeed GetYd() const;
 
-         Units::FeetLength getZ() const;
+         Units::FeetLength GetZ() const;
 
-         Units::FeetPerSecondSpeed getZd() const;
+         Units::FeetPerSecondSpeed GetZd() const;
 
-         void setId(int id);
+         void SetId(const int id);
 
-         void setTime(Units::Time time);
+         void SetTime(const Units::Time time);
 
-         void setPosition(const Units::Length x,
+         void SetPosition(const Units::Length x,
                           const Units::Length y,
                           const Units::Length z,
                           const Units::Length horizontalQuantum,
                           const Units::Length verticalQuantum);
 
-         void setVelocity(const Units::Speed xd,
+         void SetVelocity(const Units::Speed xd,
                           const Units::Speed yd,
                           const Units::Speed zd,
                           const Units::Speed horizontalQuantum,
                           const Units::Speed verticalQuantum);
 
-         void setNacp(int nacp);
+         void SetNacp(const int nacp);
 
-         void setNacv(int nacv);
+         void SetNacv(const int nacv);
 
-         void setNicp(int nicp);
+         void SetNicp(const int nicp);
 
-         void setNicv(int nicv);
+         void SetNicv(const int nicv);
 
          static const ADSBSVReport blank_report;
 
@@ -115,15 +115,15 @@ namespace Sensor {
 
 //Other Data:
       private:
-         int id;
-         Units::SecondsTime time;
-         Units::FeetLength x, y, z;
-         Units::FeetPerSecondSpeed xd, yd, zd;
-         int nacp, nacv, nicp, nicv;
-         bool mHasPosition, mHasVelocity;
-         Units::FeetLength horizontalPositionQuantum, verticalPositionQuantum;
-         Units::FeetPerSecondSpeed horizontalVelocityQuantum, verticalVelocityQuantum;
-         Units::SecondsTime timeQuantum;
+         int m_id;
+         Units::SecondsTime m_time;
+         Units::FeetLength m_x, m_y, m_z;
+         Units::FeetPerSecondSpeed m_xd, m_yd, m_zd;
+         int m_nacp, m_nacv, m_nicp, m_nicv;
+         bool m_has_position, m_has_velocity;
+         Units::FeetLength m_horizontal_position_quantum, m_vertical_position_quantum;
+         Units::FeetPerSecondSpeed m_horizontal_velocity_quantum, m_vertical_velocity_quantum;
+         Units::SecondsTime m_time_quantum;
       };
 
    }

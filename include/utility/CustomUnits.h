@@ -14,17 +14,6 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
-/*
- * custom_units.h
- *
- *  Created on: Feb 2, 2015
- *      Author: klewis
- *
- * This header file contains definitions for unit types which are not
- * already defined in unitsLib.
- */
-
 #ifndef CUSTOM_UNITS_H_
 #define CUSTOM_UNITS_H_
 
@@ -41,13 +30,14 @@
 
 using namespace aaesim::constants;
 
+/*
+ * Definitions for unit types which are not already defined in unitsLib.
+ */
 namespace Units {
 
 // Acceleration
-   UNITS_DECLARE_SPECIFIC_UNIT(Acceleration, KnotsPerSecondAcceleration,
-                               "kts/s", 1852.0 / 3600.0);
-// acceleration constants
-   const Units::Acceleration ONE_G_ACCELERATION = MetersSecondAcceleration(GRAV_MPS);
+   UNITS_DECLARE_SPECIFIC_UNIT(Acceleration, KnotsPerSecondAcceleration, "kts/s", 1852.0 / 3600.0);
+   const Units::Acceleration ONE_G_ACCELERATION = MetersSecondAcceleration(GRAVITY_METERS_PER_SECOND);
 
 // angle constants
    const Units::Angle PI_RADIANS_ANGLE = DegreesAngle(180.0);
@@ -83,11 +73,8 @@ namespace Units {
 
 // inverted speed
 //
-//
 // 1 m/s  = 3.280839895 ft/s = 2.236936292 mi/hr
 // 1 knot = 1 nmi/hr = 1852 m/h
-//
-
    UNITS_DECLARE_BASE_UNIT(InvertedSpeed, 0, -1, 1, 0, 0, 0, 0, 0);
    UNITS_DECLARE_SPECIFIC_UNIT(InvertedSpeed, SecondsPerNauticalMileInvertedSpeed, "s/nmi", (1.0 / 1852.0));
    UNITS_DECLARE_SPECIFIC_UNIT(InvertedSpeed, KnotsInvertedSpeed, "1/kts", (3600.0 / 1852.0));
@@ -122,4 +109,4 @@ namespace Units {
    const InvertedSpeed ZERO_INVERTED_SPEED = Units::SecondsPerMeterInvertedSpeed(0.0);
 
 }
-#endif /* CUSTOM_UNITS_H_ */
+#endif

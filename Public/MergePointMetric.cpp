@@ -46,19 +46,19 @@ void MergePointMetric::determineMergePoint(const AircraftIntent &imintent,
    // imintent:intent of IM aircraft containing the list of waypoints.
    // targintent:intent of target aircraft containing the list of waypoints.
 
-   std::pair<const int, const int> indices = imintent.findCommonWaypoint(targintent);
+   std::pair<const int, const int> indices = imintent.FindCommonWaypoint(targintent);
    const int index = indices.first;
 
    if (index == -1) {
-      LOG4CPLUS_DEBUG(logger, "No merge point found for im acid " << imintent.getId() <<
-                                                                  " and target acid " << targintent.getId()
+      LOG4CPLUS_DEBUG(logger, "No merge point found for im acid " << imintent.GetId() <<
+                                                                  " and target acid " << targintent.GetId()
                                                                   << ". No merge metrics will be reported.");
       mReportMetrics = false; // do not report metrics...no merge point to report relative to
       mMergePointName = "";
    } else {
-      mMergePointName = imintent.getWaypointName(index);
-      mMergePointX = imintent.getWaypointX(index);
-      mMergePointY = imintent.getWaypointY(index);
+      mMergePointName = imintent.GetWaypointName(index);
+      mMergePointX = imintent.GetWaypointX(index);
+      mMergePointY = imintent.GetWaypointY(index);
       mReportMetrics = true;
    }
 
@@ -85,7 +85,7 @@ void MergePointMetric::update(double imXNew,
 
       mIMX = imXNew;
       mIMY = imYNew;
-      mIMDist = AircraftCalculations::ptToPtDist(
+      mIMDist = AircraftCalculations::PtToPtDist(
             mMergePointX,
             mMergePointY,
             Units::FeetLength(mIMX),
@@ -93,7 +93,7 @@ void MergePointMetric::update(double imXNew,
 
       mTargX = targXNew;
       mTargY = targYNew;
-      mMergeDist = AircraftCalculations::ptToPtDist(
+      mMergeDist = AircraftCalculations::PtToPtDist(
             Units::FeetLength(mIMX),
             Units::FeetLength(mIMY),
             Units::FeetLength(mTargX),
@@ -132,7 +132,7 @@ bool MergePointMetric::newPointCloser(double x,
    // returns true if the new closer to the merge point.
    //         else false.
 
-   return (AircraftCalculations::ptToPtDist(
+   return (AircraftCalculations::PtToPtDist(
          mMergePointX, mMergePointY,
          Units::FeetLength(x), Units::FeetLength(y))
            < mIMDist);
@@ -154,12 +154,12 @@ void MergePointMetric::determineMetricsLocation(const AircraftIntent &imintent,
                                                 const string &waypointName) {
 
    bool foundWaypointIm = false;
-   for (int i = 0; i < imintent.getNumberOfWaypoints(); ++i) {
-      foundWaypointIm = imintent.getWaypointName(i).compare(waypointName) == 0;
+   for (int i = 0; i < imintent.GetNumberOfWaypoints(); ++i) {
+      foundWaypointIm = imintent.GetWaypointName(i).compare(waypointName) == 0;
       if (foundWaypointIm) {
-         mMergePointName = imintent.getWaypointName(i);
-         mMergePointX = imintent.getWaypointX(i);
-         mMergePointY = imintent.getWaypointY(i);
+         mMergePointName = imintent.GetWaypointName(i);
+         mMergePointX = imintent.GetWaypointX(i);
+         mMergePointY = imintent.GetWaypointY(i);
          mReportMetrics = true;
          break;
       }

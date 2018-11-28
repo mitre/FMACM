@@ -44,7 +44,7 @@ public:
    inline bool open_file(const std::string &file_name) // this over load is needed to track relative directory referance
    {
       FilePath temp = FilePath(file_name);
-      local_path = temp.pop();
+      local_path = temp.Pop();
       return PARENT::open_file(file_name);
    }//----------------------------------------------------------------------------------------------
 
@@ -150,8 +150,8 @@ private:
          //the include file name may be relative or absolute
          while (true) {
             //if((included_file.get_Full_Path().find("..")!=string::npos) || (included_file.get_Num_Dir()>1 && included_file.get_Disk()=="" && included_file.get_Type()!=""))
-            bool has_mult_dirs = included_file.get_Num_Dir() > 1;
-            bool has_file_ext = included_file.get_Type() != "";
+            bool has_mult_dirs = included_file.GetNumberOfDirectories() > 1;
+            bool has_file_ext = included_file.GetType() != "";
 #ifdef _MSC_VER
             bool has_dotdot = included_file.get_Full_Path().find("..") != string::npos;
             bool has_drive = included_file.get_Disk() != "";
@@ -177,12 +177,12 @@ private:
                break;
             }
 
-            local_path = FilePath(local_path.get_Full_Path() + "/" + included_file.get_Full_Path());
+            local_path = FilePath(local_path.GetFullPath() + "/" + included_file.GetFullPath());
 #endif
             break;
          }
 
-         new_file_name = local_path.get_Full_Path();
+         new_file_name = local_path.GetFullPath();
 
          bool r = open_secondary(new_file_name);
 
@@ -235,9 +235,9 @@ private:
          return false;
       } else {
          FilePath fp = FilePath(file_name);
-         std::string name = fp.get_Name();
-         if (fp.get_Type() != "") {
-            name = name + "." + fp.get_Type();
+         std::string name = fp.GetName();
+         if (fp.GetType() != "") {
+            name = name + "." + fp.GetType();
          }
 
          //if(!archive_director->is_new_File(fp)) // need to make an archive copy
@@ -245,13 +245,13 @@ private:
          {
             std::string where_to_put_it = archive_director->get_Destination();
             FilePath loc = FilePath(where_to_put_it);
-            FilePath to_open = loc.push(FilePath(archive_director->get_New_Link_Name(file_name)));
-            loc = loc.push(FilePath(name));
+            FilePath to_open = loc.Push(FilePath(archive_director->get_New_Link_Name(file_name)));
+            loc = loc.Push(FilePath(name));
             std::string comment =
                   std::string("; This file is an archive copy of a file formerly called: \"") + file_name +
                   std::string("\"\n");
 
-            secondary->open_Archive(to_open.get_Full_Path(), comment);
+            secondary->open_Archive(to_open.GetFullPath(), comment);
          }
 
          // Now we need to rewrite the include statement in the archive of the primary

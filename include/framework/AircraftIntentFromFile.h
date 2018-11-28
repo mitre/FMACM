@@ -15,15 +15,7 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * AircraftIntentFromFile.h
- *
- *  Created on: Feb 24, 2015
- *      Author: SBOWMAN
- */
-
-#ifndef AIRCRAFTINTENTFROMFILE_H_
-#define AIRCRAFTINTENTFROMFILE_H_
+#pragma once
 
 #include "public/AircraftIntent.h"
 
@@ -45,11 +37,10 @@ private:
    /**
     * Implementation that takes the data from CSV and populates the parent's waypoint data sets.
     */
-   void populateWaypointsFromCsv(std::string csvFile);
+   void PopulateWaypointsFromCsv(std::string csvFile);
 
-   double localstod(std::string s);
+   double LocalStringToDouble(std::string s);
 
-   int localstoi(std::string s);
+   int LocalStringToInt(std::string s);
 };
 
-#endif /* AIRCRAFTINTENTFROMFILE_H_ */

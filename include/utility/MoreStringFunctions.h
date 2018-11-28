@@ -14,7 +14,6 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #pragma once
 
 #include <string>
@@ -22,17 +21,15 @@
 class MoreStringFunctions
 {
 public:
-   MoreStringFunctions(void) {
+   MoreStringFunctions() {
    }
 
-   ~MoreStringFunctions(void) {
+   virtual ~MoreStringFunctions() {
    }
 
-   // note data is passed by value so we can modify it and return the new copy
-
-   static std::string find_and_replace(std::string data,
-                                       const std::string &search,
-                                       const std::string &replace) {
+   static std::string FindAndReplace(std::string data,
+                                     const std::string &search,
+                                     const std::string &replace) {
       size_t pos = 0;
 
       while (true) {
@@ -45,7 +42,6 @@ public:
          data.replace(pos, search.length(), replace);
          pos += replace.length();
       }
-
       return data;
    }
 };

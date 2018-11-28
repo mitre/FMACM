@@ -52,7 +52,7 @@ protected:
 
    virtual ~WeatherEstimate();
 
-   std::shared_ptr<Wind> mWind;
-   std::shared_ptr<Atmosphere> mAtmosphere;
+   std::shared_ptr<Wind> m_wind;
+   std::shared_ptr<Atmosphere> m_atmosphere;
 };
 

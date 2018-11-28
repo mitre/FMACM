@@ -30,46 +30,46 @@ class TestFrameworkFMS
 public:
    static Units::DegreesAngle MAX_BANK_ANGLE;
 
-   TestFrameworkFMS(void);
+   TestFrameworkFMS();
 
-   ~TestFrameworkFMS(void);
+   ~TestFrameworkFMS();
 
-   int Mode;
-   double DeltaTrack;
-   double TurnRadius;
-   double RangeStartTurn;
-   double RangeToNextWpM1;
-   double RangeToNextWp;
+   int m_mode;
+   double m_delta_track;
+   double m_turn_radius;
+   double m_range_start_turn;
+   double m_previous_range_to_next_waypoint;
+   double m_range_to_next_waypoint;
 
-   double xWp[128];
-   double yWp[128];
-   double AltWp[128];
+   double m_waypoint_x[128];
+   double m_waypoint_y[128];
+   double m_waypoint_altitude[128];
 
-   double Track[127];
-   double psi[127];
-   double Length[127];
+   double m_track[127];
+   double m_psi[127];
+   double m_length[127];
 
-   int number_of_waypoints;
-   int NextWp;
-   double nominal_IAS_at_waypoint[128];
-   double MACH_at_waypoint[128];
-   PrecalcConstraint constraints[128];
+   int m_number_of_waypoints;
+   int m_next_waypoint_ix;
+   double m_nominal_ias_at_waypoint[128];
+   double m_mach_at_waypoint[128];
+   PrecalcConstraint m_constraints[128];
 
    // primary calculation method to update the FMS model
-   void update(AircraftState state,
-               std::vector<PrecalcWaypoint> &precalcWaypoints,
-               std::vector<HorizontalPath> &hTraj);
+   void Update(AircraftState state,
+               std::vector<PrecalcWaypoint> &precalc_waypoints,
+               std::vector<HorizontalPath> &horizontal_trajectory);
 
    // get the psi of the given index if in range, returns -999.9 if out of range
-   double get_psi(int index);
+   double GetPsi(int index);
 
    // init method to initialize the FMS data
-   void init();
+   void Init();
 
    // method to read in the waypoint information from an AircraftIntent
-   void copy_waypoints_from_intent(AircraftIntent intent_in);
+   void CopyWaypointsFromIntent(AircraftIntent intent_in);
 
-   bool is_finished();
+   bool IsFinished();
 
 };
 

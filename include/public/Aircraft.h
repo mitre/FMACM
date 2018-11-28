@@ -31,8 +31,8 @@ public:
 
    virtual Aircraft &operator=(const Aircraft &in);
 
-   virtual void init(Units::Length adsbReceptionRangeThreshold,
-                     const WeatherTruth &weather) = 0;
+   virtual void Initialize(const Units::Length adsb_reception_range_threshold,
+                           const WeatherTruth &weather_truth) = 0;
 
-   virtual bool update(const SimulationTime &time) = 0;
+   virtual bool Update(const SimulationTime &simulation_time) = 0;
 };

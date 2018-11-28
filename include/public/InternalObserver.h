@@ -132,10 +132,10 @@ public:
 
    // Kinematic trajectory output.
    void dumpOwnKinTraj(int id,
-                       VerticalPath &fullTraj);
+                       const VerticalPath &fullTraj);
 
    void dumpTargetKinTraj(int id,
-                          VerticalPath &fullTraj);
+                          const VerticalPath &fullTraj);
 
    // true wind debug data.
    bool debugTrueWind();

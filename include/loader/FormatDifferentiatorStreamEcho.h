@@ -44,8 +44,8 @@ public:
          std::string format = out.get_Format();
 
          dump_file.highlight_on("blue");
-         std::string enhanced_format = MoreStringFunctions::find_and_replace(format, "\n",
-                                                                             std::string("\n") + PARENT::get_Space());
+         std::string enhanced_format = MoreStringFunctions::FindAndReplace(format, "\n",
+                                                                           std::string("\n") + PARENT::get_Space());
          dump_file.dump(enhanced_format);
          dump_file.highlight_off();
 

@@ -33,14 +33,14 @@ Atmosphere::~Atmosphere() {
 //   air density, rho (kg/m^3)
 //   air pressure, P (N/m^2)
 
-void Atmosphere::airDensity(const Units::Length h,
+void Atmosphere::AirDensity(const Units::Length h,
                             Units::Density &rho,
                             Units::Pressure &P) const {
 
    //global h_trop G T0 RHO0 P0 R K_T rho_trop P_trop;
 
    // Find air temperature (Kelvin), density (kg/m^3), and pressure (kg/m^2)
-   Units::KelvinTemperature T = getTemp(h);
+   Units::KelvinTemperature T = GetTemp(h);
 
    if (h < H_TROP) {
       rho = RHO0 * pow((T / T0), (-Units::ONE_G_ACCELERATION / (K_T * R) - 1));
@@ -52,7 +52,7 @@ void Atmosphere::airDensity(const Units::Length h,
 
 }
 
-void Atmosphere::calcWindGrad(const Units::Length h_star_,
+void Atmosphere::CalcWindGrad(const Units::Length h_star_,
                               const WindStack &wind,
                               Units::Speed &w_dir,
                               Units::Frequency &w_dir_grad) const {
@@ -158,8 +158,8 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
    int rowIx = 1;
 
    for (int ix = lowIx; ix <= (lowIx + 4); ix++) {
-      alt.set(rowIx, wind.getAltitude(ix) / Units::FeetLength(1));
-      vel.set(rowIx, wind.getSpeed(ix) / Units::KnotsSpeed(1));
+      alt.Set(rowIx, wind.getAltitude(ix) / Units::FeetLength(1));
+      vel.Set(rowIx, wind.getSpeed(ix) / Units::KnotsSpeed(1));
       rowIx++;
    }
 
@@ -187,22 +187,22 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
    double h5 = alt[5] - alt[4];
 
    // 1st Row of A Matrix
-   A.set(1, 1, -1.0 / 2.0 * h2 - 1.0 / 3.0 * h3);
-   A.set(1, 2, -1.0 / 6.0 * h3);
-   A.set(1, 3, 0);
-   B.set(1, (vel[2] - vel[1]) / h2 - (vel[3] - vel[2]) / h3);
+   A.Set(1, 1, -1.0 / 2.0 * h2 - 1.0 / 3.0 * h3);
+   A.Set(1, 2, -1.0 / 6.0 * h3);
+   A.Set(1, 3, 0);
+   B.Set(1, (vel[2] - vel[1]) / h2 - (vel[3] - vel[2]) / h3);
 
    // 2nd Row of A Matrix
-   A.set(2, 1, -1.0 / 6.0 * h3);
-   A.set(2, 2, -1.0 / 3.0 * h3 - 1.0 / 3.0 * h4);
-   A.set(2, 3, -1.0 / 6.0 * h4);
-   B.set(2, (vel[3] - vel[2]) / h3 - (vel[4] - vel[3]) / h4);
+   A.Set(2, 1, -1.0 / 6.0 * h3);
+   A.Set(2, 2, -1.0 / 3.0 * h3 - 1.0 / 3.0 * h4);
+   A.Set(2, 3, -1.0 / 6.0 * h4);
+   B.Set(2, (vel[3] - vel[2]) / h3 - (vel[4] - vel[3]) / h4);
 
    // 3rd Row of A Matrix
-   A.set(3, 1, 0);
-   A.set(3, 2, -1.0 / 6.0 * h4);
-   A.set(3, 3, -1.0 / 3.0 * h4 - 1.0 / 2.0 * h5);
-   B.set(3, (vel[4] - vel[3]) / h4 - (vel[5] - vel[4]) / h5);
+   A.Set(3, 1, 0);
+   A.Set(3, 2, -1.0 / 6.0 * h4);
+   A.Set(3, 3, -1.0 / 3.0 * h4 - 1.0 / 2.0 * h5);
+   B.Set(3, (vel[4] - vel[3]) / h4 - (vel[5] - vel[4]) / h5);
 
    /*
    for(int loop = 2; loop < 5; loop++)
@@ -274,11 +274,11 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
 */
    //M is a 5x1 vector
    DVector M(1, 5); // M = [M_(1);M_;M_(end)];
-   M.set(1, M_[1]);
-   M.set(2, M_[1]);
-   M.set(3, M_[2]);
-   M.set(4, M_[3]);
-   M.set(5, M_[3]);
+   M.Set(1, M_[1]);
+   M.Set(2, M_[1]);
+   M.Set(3, M_[2]);
+   M.Set(4, M_[3]);
+   M.Set(5, M_[3]);
 
    //debug
 
@@ -302,16 +302,16 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
       //4x1 vectors
       double h = alt[ind1 + 1] - alt[ind1];
 
-      a.set(ind1, (M[ind1 + 1] - M[ind1]) / (6 * h));
+      a.Set(ind1, (M[ind1 + 1] - M[ind1]) / (6 * h));
 
-      b.set(ind1, M[ind1] / 2);
+      b.Set(ind1, M[ind1] / 2);
 
-      c.set(ind1, (vel[ind1 + 1] - vel[ind1]) / h - (M[ind1 + 1] + 2 * M[ind1]) / 6 * h);
+      c.Set(ind1, (vel[ind1 + 1] - vel[ind1]) / h - (M[ind1 + 1] + 2 * M[ind1]) / 6 * h);
 
       //double tmp = vel[ind1];
-      d.set(ind1, vel[ind1]);
+      d.Set(ind1, vel[ind1]);
 
-      x.set(ind1, alt[ind1]);
+      x.Set(ind1, alt[ind1]);
    }
 
    // Calculate gradient at h_star:
@@ -319,20 +319,20 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
 
 
    bool found = false;
-   DVector new_alt(alt.get_min(), alt.get_max() + 1);
-   for (int loop = alt.get_min(); loop <= alt.get_max(); loop++) {
+   DVector new_alt(alt.GetMin(), alt.GetMax() + 1);
+   for (int loop = alt.GetMin(); loop <= alt.GetMax(); loop++) {
       // if/else to add the h_star data in the correct place for the data to be sorted
       if (alt[loop] <= h_star.value()) {
-         new_alt.set(loop, alt[loop]);
+         new_alt.Set(loop, alt[loop]);
          /*
          printf("%d\t%f\n", loop, alt[loop]);
          */
       } else if (alt[loop] > h_star.value() && found == true) {
-         new_alt.set(loop, alt[loop - 1]);
+         new_alt.Set(loop, alt[loop - 1]);
          //printf("%d\t%f\n", loop, alt[loop-1]);
       } else {
          found = true;
-         new_alt.set(loop, h_star.value());
+         new_alt.Set(loop, h_star.value());
          //new_alt.set(loop+1,alt[loop]);
          //printf("%d\t%f\n", loop, h_star);
 //			printf("%d\t%f\n", loop+1, alt[loop]);
@@ -340,10 +340,10 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
       }
    }
    if (found == false) {
-      new_alt.set(new_alt.get_max(), h_star.value());
+      new_alt.Set(new_alt.GetMax(), h_star.value());
       //printf("%d\t%f\n", new_alt.get_max(), h_star);
    } else {
-      new_alt.set(new_alt.get_max(), alt[alt.get_max()]);
+      new_alt.Set(new_alt.GetMax(), alt[alt.GetMax()]);
       //printf("%d\t%f\n", new_alt.get_max(), new_alt[new_alt.get_max()]);
    }
 
@@ -371,10 +371,10 @@ void Atmosphere::calcWindGrad(const Units::Length h_star_,
    // loop to go through altitude list and find index that match
 
 
-   int index = new_alt.get_min();
+   int index = new_alt.GetMin();
    list<int> ind;
    ind.clear();
-   for (int loop = new_alt.get_min(); loop < new_alt.get_max(); loop++) {
+   for (int loop = new_alt.GetMin(); loop < new_alt.GetMax(); loop++) {
       if (new_alt[loop] == h_star.value()) {
          ind.push_back(index);
       }
@@ -436,7 +436,7 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
    Units::KilogramsMeterDensity rho;
    Units::Pressure p;
 
-   airDensity(alt, rho, p);
+   AirDensity(alt, rho, p);
 
    // Terms in the conversion
    double temp1 = 1 + MU / 2 * (RHO0.value() / P0.value()) * pow(Units::MetersPerSecondSpeed(vcas).value(), 2);
@@ -465,7 +465,7 @@ Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas,
    Units::KilogramsMeterDensity rho;
    Units::Pressure p;
 
-   airDensity(alt, rho, p);
+   AirDensity(alt, rho, p);
 
    // Terms in the conversion
    double temp1 = 1 + MU / 2 * (rho / p) * Units::sqr(vtas);
@@ -501,7 +501,7 @@ Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias,
    deltaTrans = temp2 / temp4;
 
    // calculate theta transition
-   thetaTrans = pow(deltaTrans, (-K_T.value() * R.value() / GRAV_MPS));
+   thetaTrans = pow(deltaTrans, (-K_T.value() * R.value() / GRAVITY_METERS_PER_SECOND));
 
    // calculates Mach IAS Transition (Transition Altitude)
 
@@ -510,7 +510,7 @@ Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias,
 
 }
 
-Units::Speed Atmosphere::machToIAS(const double mach,
+Units::Speed Atmosphere::MachToIAS(const double mach,
                                    const Units::Length alt) const {
    // Converts mach to ias.
    //
@@ -521,7 +521,7 @@ Units::Speed Atmosphere::machToIAS(const double mach,
 
 
    Units::Speed tas = Units::MetersPerSecondSpeed(mach *
-                                                  sqrt(GAMMA * R * getTemp(alt).value()));
+                                                  sqrt(GAMMA * R * GetTemp(alt).value()));
 
    return TAS2CAS(tas, alt);
 }

@@ -25,6 +25,7 @@
 #include <Length.h>
 #include <Time.h>
 #include <Speed.h>
+#include <Area.h>
 
 // Structure of distances in computing path length
 // from position.  Data inserted from smallest to
@@ -35,12 +36,8 @@ class AircraftCalculations
 {
 
 public:
-   AircraftCalculations(void);
-
-   ~AircraftCalculations(void);
-
    // method to get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
-   static bool getPosFromPathLength(const Units::Length &dist_in,
+   static bool GetPosFromPathLength(const Units::Length &dist_in,
                                     const std::vector<HorizontalPath> &traj_in,
                                     Units::Length &x_out,
                                     Units::Length &y_out,
@@ -48,15 +45,15 @@ public:
                                     int &traj_index);
 
    // method to get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
-   static void getPathLengthFromPos(const Units::Length x,
+   static void GetPathLengthFromPos(const Units::Length x,
                                     const Units::Length y,
                                     const std::vector<HorizontalPath> &hTraj,
                                     Units::Length &dist,
                                     Units::Angle &trk);
 
-   static Units::UnsignedRadiansAngle convert0to2Pi(Units::Angle course_in);
+   static Units::UnsignedRadiansAngle Convert0to2Pi(Units::Angle course_in);
 
-   static Units::SignedRadiansAngle convertPitoPi(Units::Angle course_in);
+   static Units::SignedRadiansAngle ConvertPitoPi(Units::Angle course_in);
 
    // method for calculating the Cas ESF
    static double ESFconstantCAS(const Units::Speed v_tas,
@@ -64,27 +61,27 @@ public:
                                 const Units::Temperature temp_in);
 
    // method to compute distance between two points given in feet.
-   static Units::NauticalMilesLength ptToPtDist(Units::Length x0,
+   static Units::NauticalMilesLength PtToPtDist(Units::Length x0,
                                                 Units::Length y0,
                                                 Units::Length x1,
                                                 Units::Length y1);
 
    // method to compute ground speed from an aircraft state.
-   static Units::Speed gsAtACS(AircraftState acs);
+   static Units::Speed GsAtACS(AircraftState acs);
 
-   static Units::SignedRadiansAngle computeAngleBetweenVectors(const Units::Length &xvertex,
+   static Units::SignedRadiansAngle ComputeAngleBetweenVectors(const Units::Length &xvertex,
                                                                const Units::Length &yvertex,
                                                                const Units::Length &x1,
                                                                const Units::Length &y1,
                                                                const Units::Length &x2,
                                                                const Units::Length &y2);
 
-   static double computeCrossProduct(const Units::Length &xvertex,
-                                     const Units::Length &yvertex,
-                                     const Units::Length &x1,
-                                     const Units::Length &y1,
-                                     const Units::Length &x2,
-                                     const Units::Length &y2);
+   static Units::Area ComputeCrossProduct(const Units::Length &xvertex,
+                                          const Units::Length &yvertex,
+                                          const Units::Length &x1,
+                                          const Units::Length &y1,
+                                          const Units::Length &x2,
+                                          const Units::Length &y2);
 
 private:
    static log4cplus::Logger logger;
@@ -95,15 +92,15 @@ private:
       Units::Length mDist;
    };
 
-   static std::vector<mPathDistance> computePathDistances(
+   static std::vector<mPathDistance> ComputePathDistances(
          const Units::Length x,
          const Units::Length y,
          const std::vector<HorizontalPath> &hTraj);
 
-   static void crossTrackError(Units::Length x,
-                               Units::Length y,
+   static void CrossTrackError(const Units::Length x,
+                               const Units::Length y,
                                int trajIx,
-                               std::vector<HorizontalPath> hTraj,
+                               const std::vector<HorizontalPath> hTraj,
                                int &nextTrajIx,
                                Units::Length &cte);
 

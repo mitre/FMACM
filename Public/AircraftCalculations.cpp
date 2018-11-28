@@ -23,27 +23,20 @@ using namespace std;
 
 log4cplus::Logger AircraftCalculations::logger = log4cplus::Logger::getInstance("AircraftCalculations");
 
-AircraftCalculations::AircraftCalculations(void) {
-}
-
-AircraftCalculations::~AircraftCalculations(void) {
-}
-
-
 // method to get the position and course of an Aircraft based on current distance (in meters) and precalculated Horizontal Trajectory
-bool AircraftCalculations::getPosFromPathLength(const Units::Length &dist_in,
+bool AircraftCalculations::GetPosFromPathLength(const Units::Length &dist_in,
                                                 const std::vector<HorizontalPath> &traj_in,
                                                 Units::Length &x_out,
                                                 Units::Length &y_out,
                                                 Units::UnsignedAngle &course_out,
                                                 int &traj_index) {
    int index = -1; // stores the index last position < current distance
-   const double metersIn = Units::MetersLength(dist_in).value();
+   const double meters_in = Units::MetersLength(dist_in).value();
 
    // loop to find the distance
    bool found = false;
    for (int loop = 0; loop < (int) traj_in.size() && !found; loop++) {
-      if (metersIn <= traj_in[loop].L) {
+      if (meters_in <= traj_in[loop].L) {
          found = true;
          index = loop - 1; // sets position to the last position that was less than the given distance
 
@@ -54,7 +47,7 @@ bool AircraftCalculations::getPosFromPathLength(const Units::Length &dist_in,
    }
 
    // See AAES-639 for explanation. In FAS scenario, metersIn is different from total pathlength in the 9th decimal place.
-   if (!found && (metersIn < (traj_in[traj_in.size() - 1].L + 0.0001))) {
+   if (!found && (meters_in < (traj_in[traj_in.size() - 1].L + 0.0001))) {
       found = true;
       index = traj_in.size() - 1;
    }
@@ -69,7 +62,7 @@ bool AircraftCalculations::getPosFromPathLength(const Units::Length &dist_in,
                  ((dist_in - Units::MetersLength(traj_in[index].L)) * cos(course));
          y_out = Units::MetersLength(traj_in[index].y) +
                  ((dist_in - Units::MetersLength(traj_in[index].L)) * sin(course));
-         course_out = AircraftCalculations::convert0to2Pi(course + Units::PI_RADIANS_ANGLE);
+         course_out = AircraftCalculations::Convert0to2Pi(course + Units::PI_RADIANS_ANGLE);
       } else if (traj_in[index].segment == "turn") {
          if ((dist_in - Units::MetersLength(traj_in[index].L)) < Units::MetersLength(3)) {
             x_out = Units::MetersLength(traj_in[index].x);
@@ -81,20 +74,20 @@ bool AircraftCalculations::getPosFromPathLength(const Units::Length &dist_in,
             Units::UnsignedAngle end = Units::UnsignedRadiansAngle(traj_in[index].turns.q_end);
 
             // calculate course change between the start and end of turn
-            Units::SignedRadiansAngle course_change = convertPitoPi(end - start);
+            Units::SignedRadiansAngle course_change = ConvertPitoPi(end - start);
 
             // calculate difference in distance
             Units::Angle delta = Units::RadiansAngle((dist_in - Units::MetersLength(traj_in[index].L)) / radius);
 
             // calculate the theta of the turn
-            Units::Angle theta = start + delta * CoreUtils::sign(course_change.value());
+            Units::Angle theta = start + delta * CoreUtils::SignOfValue(course_change.value());
 
             // calculate X and Y positions
             x_out = Units::MetersLength(traj_in[index].turns.x_turn) + radius * cos(theta);
             y_out = Units::MetersLength(traj_in[index].turns.y_turn) + radius * sin(theta);
 
-            course_out = AircraftCalculations::convert0to2Pi(
-                  theta - Units::PI_RADIANS_ANGLE / 2.0 * CoreUtils::sign(course_change.value()));
+            course_out = AircraftCalculations::Convert0to2Pi(
+                  theta - Units::PI_RADIANS_ANGLE / 2.0 * CoreUtils::SignOfValue(course_change.value()));
          }
       }
       traj_index = index;
@@ -106,7 +99,7 @@ bool AircraftCalculations::getPosFromPathLength(const Units::Length &dist_in,
 }
 
 
-void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
+void AircraftCalculations::GetPathLengthFromPos(const Units::Length x,
                                                 const Units::Length y,
                                                 const vector<HorizontalPath> &hTraj,
                                                 Units::Length &dist,
@@ -135,7 +128,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
    // and order in ascending sequence.
 
    vector<mPathDistance> distances =
-         AircraftCalculations::computePathDistances(x, y, hTraj);
+         AircraftCalculations::ComputePathDistances(x, y, hTraj);
 
 
    // Find smallest distance with an acceptable cross track error.
@@ -147,7 +140,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
 
       int computedNextIx;
 
-      AircraftCalculations::crossTrackError(x, y,
+      AircraftCalculations::CrossTrackError(x, y,
                                             distances[i].mIx, hTraj, computedNextIx, cte);
 
       if (cte <= cte_tolerance) {
@@ -192,7 +185,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
                              Units::sqr(y - Units::MetersLength(hTraj[nextTrajIx].y)));
 
       //trk = convert0to2Pi( Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
-      trk = AircraftCalculations::convert0to2Pi(
+      trk = AircraftCalculations::Convert0to2Pi(
             Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
 
       if (fabs(Units::MetersLength(d).value()) < 1E-5) {
@@ -202,7 +195,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
          Units::MetersLength dy = Units::MetersLength(hTraj[nextTrajIx].y) - y;
          theta = Units::RadiansAngle(atan2(dy.value(), dx.value()));
 
-         Units::SignedAngle deltaTheta = convertPitoPi(theta - trk);
+         Units::SignedAngle deltaTheta = ConvertPitoPi(theta - trk);
 
          dap = d * cos(deltaTheta);
       }
@@ -219,7 +212,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
 
       if (pow(lx - (hTraj[nextTrajIx]).x, 2) + pow(ly - (hTraj[nextTrajIx]).y, 2) < 9) {
          dist = Units::MetersLength(hTraj[nextTrajIx].L);
-         trk = AircraftCalculations::convert0to2Pi(
+         trk = AircraftCalculations::Convert0to2Pi(
                Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
          return;
       }
@@ -227,19 +220,19 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
       theta = Units::UnsignedRadiansAngle(atan2(dy.value(), dx.value()));
 
       Units::RadiansAngle deltaTheta =
-            AircraftCalculations::convertPitoPi(Units::UnsignedRadiansAngle(hTraj[nextTrajIx].turns.q_start) - theta);
+            AircraftCalculations::ConvertPitoPi(Units::UnsignedRadiansAngle(hTraj[nextTrajIx].turns.q_start) - theta);
 
       dap = Units::MetersLength(hTraj[nextTrajIx].turns.radius) * fabs(deltaTheta.value());
 
       //trk = convert0to2Pi(Units::RadiansAngle(hTraj[nextTrajIx-1].course)
       //                    + Units::PI_RADIANS_ANGLE - deltaTheta);
-      if (CoreUtils::sign(deltaTheta.value()) > 0) {
+      if (CoreUtils::SignOfValue(deltaTheta.value()) > 0) {
          trk = theta + Units::PI_RADIANS_ANGLE / 2;
       } else {
          trk = theta - Units::PI_RADIANS_ANGLE / 2;
       }
 
-      trk = convert0to2Pi(trk);
+      trk = Convert0to2Pi(trk);
    } else {
       throw logic_error("Non straight non turn segment in getPathLengthFromPos");
    }
@@ -248,7 +241,7 @@ void AircraftCalculations::getPathLengthFromPos(const Units::Length x,
 
 } // getPathLengthFromPos
 
-vector<AircraftCalculations::mPathDistance> AircraftCalculations::computePathDistances(
+vector<AircraftCalculations::mPathDistance> AircraftCalculations::ComputePathDistances(
       const Units::Length x,
       const Units::Length y,
       const vector<HorizontalPath> &hTraj) {
@@ -302,7 +295,7 @@ vector<AircraftCalculations::mPathDistance> AircraftCalculations::computePathDis
 
 
 // coverts angle into a range from 0 to 2PI (0 to 360 degrees)
-Units::UnsignedRadiansAngle AircraftCalculations::convert0to2Pi(Units::Angle course_in) {
+Units::UnsignedRadiansAngle AircraftCalculations::Convert0to2Pi(Units::Angle course_in) {
    Units::UnsignedRadiansAngle result = course_in;
    result.normalize();
 
@@ -310,7 +303,7 @@ Units::UnsignedRadiansAngle AircraftCalculations::convert0to2Pi(Units::Angle cou
 }
 
 // coverts angle into a range from -PI to PI (-180 to 180 degrees)
-Units::SignedRadiansAngle AircraftCalculations::convertPitoPi(Units::Angle course_in) {
+Units::SignedRadiansAngle AircraftCalculations::ConvertPitoPi(Units::Angle course_in) {
    Units::SignedRadiansAngle result = course_in;
    result.normalize();
 
@@ -344,7 +337,7 @@ double AircraftCalculations::ESFconstantCAS(const Units::Speed v_tas,
    return esf;
 }
 
-Units::NauticalMilesLength AircraftCalculations::ptToPtDist(Units::Length x0,
+Units::NauticalMilesLength AircraftCalculations::PtToPtDist(Units::Length x0,
                                                             Units::Length y0,
                                                             Units::Length x1,
                                                             Units::Length y1) {
@@ -362,20 +355,20 @@ Units::NauticalMilesLength AircraftCalculations::ptToPtDist(Units::Length x0,
    return dist;
 }
 
-Units::Speed AircraftCalculations::gsAtACS(AircraftState acs) {
+Units::Speed AircraftCalculations::GsAtACS(AircraftState acs) {
    // method to compute ground speed from the position at an aircraft state.
    //
    // acs:aircraft state containing position to compute for.
    //
    // returns:computed ground speed.
 
-   return Units::FeetPerSecondSpeed(sqrt(pow(acs.xd, 2) + pow(acs.yd, 2)));
+   return Units::FeetPerSecondSpeed(sqrt(pow(acs.m_xd, 2) + pow(acs.m_yd, 2)));
 }
 
-void AircraftCalculations::crossTrackError(Units::Length x,
-                                           Units::Length y,
+void AircraftCalculations::CrossTrackError(const Units::Length x,
+                                           const Units::Length y,
                                            int trajIx,
-                                           vector<HorizontalPath> hTraj,
+                                           const vector<HorizontalPath> hTraj,
                                            int &nextTrajIx,
                                            Units::Length &cte) {
 
@@ -595,7 +588,7 @@ void AircraftCalculations::crossTrackError(Units::Length x,
 } // crossTrackError()
 
 
-Units::SignedRadiansAngle AircraftCalculations::computeAngleBetweenVectors(const Units::Length &xvertex,
+Units::SignedRadiansAngle AircraftCalculations::ComputeAngleBetweenVectors(const Units::Length &xvertex,
                                                                            const Units::Length &yvertex,
                                                                            const Units::Length &x1,
                                                                            const Units::Length &y1,
@@ -614,25 +607,19 @@ Units::SignedRadiansAngle AircraftCalculations::computeAngleBetweenVectors(const
    // theta is acos(dot product)
    double dotp = dx1.value() / norm1 * dx2.value() / norm2 + dy1.value() / norm1 * dy2.value() / norm2;
    if (fabs(dotp) > 1) {
-      dotp = CoreUtils::sign(dotp) * 1.0;
+      dotp = CoreUtils::SignOfValue(dotp) * 1.0;
    }
    Units::SignedRadiansAngle theta(acos(dotp));  // acos is on [0,pi]
    return theta;
 }
 
-double AircraftCalculations::computeCrossProduct(const Units::Length &xvertex,
-                                                 const Units::Length &yvertex,
-                                                 const Units::Length &x1,
-                                                 const Units::Length &y1,
-                                                 const Units::Length &x2,
-                                                 const Units::Length &y2) {
-   double x0d = Units::MetersLength(xvertex).value();
-   double y0d = Units::MetersLength(yvertex).value();
-   double x1d = Units::MetersLength(x1).value();
-   double y1d = Units::MetersLength(y1).value();
-   double x2d = Units::MetersLength(x2).value();
-   double y2d = Units::MetersLength(y2).value();
-   return (y0d - y1d) * x2d +
-          (x1d - x0d) * y2d +
-          (x0d * y1d - x1d * y0d);
+Units::Area AircraftCalculations::ComputeCrossProduct(const Units::Length &xvertex,
+                                                      const Units::Length &yvertex,
+                                                      const Units::Length &x1,
+                                                      const Units::Length &y1,
+                                                      const Units::Length &x2,
+                                                      const Units::Length &y2) {
+   return (yvertex - y1) * x2 +
+          (x1 - xvertex) * y2 +
+          (xvertex * y1 - x1 * yvertex);
 }

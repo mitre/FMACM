@@ -117,191 +117,191 @@ Bada &Bada::operator=(const Bada &obj) {
 bool Bada::operator==(const Bada &obj) const {
    bool match(true);
 
-   if ((this->type_name == NULL) && (obj.type_name == NULL)) {
+   if ((type_name == NULL) && (obj.type_name == NULL)) {
       match = true;
-   } else if ((this->type_name == NULL) || (obj.type_name == NULL)) {
+   } else if ((type_name == NULL) || (obj.type_name == NULL)) {
       match = false;
    } else {
-      match = (strcmp(this->type_name, obj.type_name) == 0);
+      match = (strcmp(type_name, obj.type_name) == 0);
    }
 
-   match = match && (this->base_name == obj.base_name);
+   match = match && (base_name == obj.base_name);
 
 
    // aircraft type
 
-   match = match && (this->aircraft_type.n_eng == obj.aircraft_type.n_eng);
-   match = match && (this->aircraft_type.engine_type == obj.aircraft_type.engine_type);
-   match = match && (this->aircraft_type.wake_category == obj.aircraft_type.wake_category);
+   match = match && (aircraft_type.n_eng == obj.aircraft_type.n_eng);
+   match = match && (aircraft_type.engine_type == obj.aircraft_type.engine_type);
+   match = match && (aircraft_type.wake_category == obj.aircraft_type.wake_category);
 
 
    // mass
 
-   match = match && (this->mass.m_ref == obj.mass.m_ref);
-   match = match && (this->mass.m_min == obj.mass.m_min);
-   match = match && (this->mass.m_max == obj.mass.m_max);
-   match = match && (this->mass.m_pyld == obj.mass.m_pyld);
+   match = match && (mass.m_ref == obj.mass.m_ref);
+   match = match && (mass.m_min == obj.mass.m_min);
+   match = match && (mass.m_max == obj.mass.m_max);
+   match = match && (mass.m_pyld == obj.mass.m_pyld);
 
 
    // flight envelope
 
-   match = match && (this->flight_envelope.V_mo == obj.flight_envelope.V_mo);
-   match = match && (this->flight_envelope.M_mo == obj.flight_envelope.M_mo);
-   match = match && (this->flight_envelope.h_mo == obj.flight_envelope.h_mo);
-   match = match && (this->flight_envelope.h_max == obj.flight_envelope.h_max);
-   match = match && (this->flight_envelope.G_w == obj.flight_envelope.G_w);
+   match = match && (flight_envelope.V_mo == obj.flight_envelope.V_mo);
+   match = match && (flight_envelope.M_mo == obj.flight_envelope.M_mo);
+   match = match && (flight_envelope.h_mo == obj.flight_envelope.h_mo);
+   match = match && (flight_envelope.h_max == obj.flight_envelope.h_max);
+   match = match && (flight_envelope.G_w == obj.flight_envelope.G_w);
 
 
    // aerodynamics
 
-   match = match && (this->aerodynamics.S == obj.aerodynamics.S);
-   match = match && (this->aerodynamics.C_Lbo == obj.aerodynamics.C_Lbo);
-   match = match && (this->aerodynamics.K == obj.aerodynamics.K);
-   match = match && (this->aerodynamics.C_M16 == obj.aerodynamics.C_M16);
+   match = match && (aerodynamics.S == obj.aerodynamics.S);
+   match = match && (aerodynamics.C_Lbo == obj.aerodynamics.C_Lbo);
+   match = match && (aerodynamics.K == obj.aerodynamics.K);
+   match = match && (aerodynamics.C_M16 == obj.aerodynamics.C_M16);
 
-   match = match && (this->aerodynamics.cruise.V_stall == obj.aerodynamics.cruise.V_stall);
-   match = match && (this->aerodynamics.cruise.cd0 == obj.aerodynamics.cruise.cd0);
-   match = match && (this->aerodynamics.cruise.cd2 == obj.aerodynamics.cruise.cd2);
+   match = match && (aerodynamics.cruise.V_stall == obj.aerodynamics.cruise.V_stall);
+   match = match && (aerodynamics.cruise.cd0 == obj.aerodynamics.cruise.cd0);
+   match = match && (aerodynamics.cruise.cd2 == obj.aerodynamics.cruise.cd2);
 
-   match = match && (this->aerodynamics.initial_climb.V_stall == obj.aerodynamics.initial_climb.V_stall);
-   match = match && (this->aerodynamics.initial_climb.cd0 == obj.aerodynamics.initial_climb.cd0);
-   match = match && (this->aerodynamics.initial_climb.cd2 == obj.aerodynamics.initial_climb.cd2);
+   match = match && (aerodynamics.initial_climb.V_stall == obj.aerodynamics.initial_climb.V_stall);
+   match = match && (aerodynamics.initial_climb.cd0 == obj.aerodynamics.initial_climb.cd0);
+   match = match && (aerodynamics.initial_climb.cd2 == obj.aerodynamics.initial_climb.cd2);
 
-   match = match && (this->aerodynamics.take_off.V_stall == obj.aerodynamics.take_off.V_stall);
-   match = match && (this->aerodynamics.take_off.cd0 == obj.aerodynamics.take_off.cd0);
-   match = match && (this->aerodynamics.take_off.cd2 == obj.aerodynamics.take_off.cd2);
+   match = match && (aerodynamics.take_off.V_stall == obj.aerodynamics.take_off.V_stall);
+   match = match && (aerodynamics.take_off.cd0 == obj.aerodynamics.take_off.cd0);
+   match = match && (aerodynamics.take_off.cd2 == obj.aerodynamics.take_off.cd2);
 
-   match = match && (this->aerodynamics.approach.V_stall == obj.aerodynamics.approach.V_stall);
-   match = match && (this->aerodynamics.approach.cd0 == obj.aerodynamics.approach.cd0);
-   match = match && (this->aerodynamics.approach.cd2 == obj.aerodynamics.approach.cd2);
+   match = match && (aerodynamics.approach.V_stall == obj.aerodynamics.approach.V_stall);
+   match = match && (aerodynamics.approach.cd0 == obj.aerodynamics.approach.cd0);
+   match = match && (aerodynamics.approach.cd2 == obj.aerodynamics.approach.cd2);
 
-   match = match && (this->aerodynamics.landing.V_stall == obj.aerodynamics.landing.V_stall);
-   match = match && (this->aerodynamics.landing.cd0 == obj.aerodynamics.landing.cd0);
-   match = match && (this->aerodynamics.landing.cd2 == obj.aerodynamics.landing.cd2);
+   match = match && (aerodynamics.landing.V_stall == obj.aerodynamics.landing.V_stall);
+   match = match && (aerodynamics.landing.cd0 == obj.aerodynamics.landing.cd0);
+   match = match && (aerodynamics.landing.cd2 == obj.aerodynamics.landing.cd2);
 
-   match = match && (this->aerodynamics.landing_gear.cd0 == obj.aerodynamics.landing_gear.cd0);
+   match = match && (aerodynamics.landing_gear.cd0 == obj.aerodynamics.landing_gear.cd0);
 
 
    // engine thrust
 
-   match = match && (this->engine_thrust.max_climb.CT_c1 == obj.engine_thrust.max_climb.CT_c1);
-   match = match && (this->engine_thrust.max_climb.CT_c2 == obj.engine_thrust.max_climb.CT_c2);
-   match = match && (this->engine_thrust.max_climb.CT_c3 == obj.engine_thrust.max_climb.CT_c3);
-   match = match && (this->engine_thrust.max_climb.CT_c4 == obj.engine_thrust.max_climb.CT_c4);
-   match = match && (this->engine_thrust.max_climb.CT_c5 == obj.engine_thrust.max_climb.CT_c5);
+   match = match && (engine_thrust.max_climb.CT_c1 == obj.engine_thrust.max_climb.CT_c1);
+   match = match && (engine_thrust.max_climb.CT_c2 == obj.engine_thrust.max_climb.CT_c2);
+   match = match && (engine_thrust.max_climb.CT_c3 == obj.engine_thrust.max_climb.CT_c3);
+   match = match && (engine_thrust.max_climb.CT_c4 == obj.engine_thrust.max_climb.CT_c4);
+   match = match && (engine_thrust.max_climb.CT_c5 == obj.engine_thrust.max_climb.CT_c5);
 
-   match = match && (this->engine_thrust.descent.CT_low == obj.engine_thrust.descent.CT_low);
-   match = match && (this->engine_thrust.descent.CT_high == obj.engine_thrust.descent.CT_high);
-   match = match && (this->engine_thrust.descent.h == obj.engine_thrust.descent.h);
-   match = match && (this->engine_thrust.descent.CT_app == obj.engine_thrust.descent.CT_app);
-   match = match && (this->engine_thrust.descent.CT_ld == obj.engine_thrust.descent.CT_ld);
-   match = match && (this->engine_thrust.descent.V_ref == obj.engine_thrust.descent.V_ref);
-   match = match && (this->engine_thrust.descent.M_ref == obj.engine_thrust.descent.M_ref);
+   match = match && (engine_thrust.descent.CT_low == obj.engine_thrust.descent.CT_low);
+   match = match && (engine_thrust.descent.CT_high == obj.engine_thrust.descent.CT_high);
+   match = match && (engine_thrust.descent.h == obj.engine_thrust.descent.h);
+   match = match && (engine_thrust.descent.CT_app == obj.engine_thrust.descent.CT_app);
+   match = match && (engine_thrust.descent.CT_ld == obj.engine_thrust.descent.CT_ld);
+   match = match && (engine_thrust.descent.V_ref == obj.engine_thrust.descent.V_ref);
+   match = match && (engine_thrust.descent.M_ref == obj.engine_thrust.descent.M_ref);
 
 
    // fuel flow
 
-   match = match && (this->fuel_flow.C_f1 == obj.fuel_flow.C_f1);
-   match = match && (this->fuel_flow.C_f2 == obj.fuel_flow.C_f2);
-   match = match && (this->fuel_flow.C_f3 == obj.fuel_flow.C_f3);
-   match = match && (this->fuel_flow.C_f4 == obj.fuel_flow.C_f4);
-   match = match && (this->fuel_flow.C_fcr == obj.fuel_flow.C_fcr);
+   match = match && (fuel_flow.C_f1 == obj.fuel_flow.C_f1);
+   match = match && (fuel_flow.C_f2 == obj.fuel_flow.C_f2);
+   match = match && (fuel_flow.C_f3 == obj.fuel_flow.C_f3);
+   match = match && (fuel_flow.C_f4 == obj.fuel_flow.C_f4);
+   match = match && (fuel_flow.C_fcr == obj.fuel_flow.C_fcr);
 
 
    // ground movement
 
-   match = match && (this->ground_movement.TOL == obj.ground_movement.TOL);
-   match = match && (this->ground_movement.LDL == obj.ground_movement.LDL);
-   match = match && (this->ground_movement.span == obj.ground_movement.span);
-   match = match && (this->ground_movement.length == obj.ground_movement.length);
+   match = match && (ground_movement.TOL == obj.ground_movement.TOL);
+   match = match && (ground_movement.LDL == obj.ground_movement.LDL);
+   match = match && (ground_movement.span == obj.ground_movement.span);
+   match = match && (ground_movement.length == obj.ground_movement.length);
 
 
    // procedures
 
    for (auto ix = 0; match && (ix < 3); ix++) {
-      match = match && (this->procedures[ix].climb.V1 == obj.procedures[ix].climb.V1);
-      match = match && (this->procedures[ix].climb.V2 == obj.procedures[ix].climb.V2);
-      match = match && (this->procedures[ix].climb.M == obj.procedures[ix].climb.M);
+      match = match && (procedures[ix].climb.V1 == obj.procedures[ix].climb.V1);
+      match = match && (procedures[ix].climb.V2 == obj.procedures[ix].climb.V2);
+      match = match && (procedures[ix].climb.M == obj.procedures[ix].climb.M);
 
-      match = match && (this->procedures[ix].cruise.V1 == obj.procedures[ix].cruise.V1);
-      match = match && (this->procedures[ix].cruise.V2 == obj.procedures[ix].cruise.V2);
-      match = match && (this->procedures[ix].cruise.M == obj.procedures[ix].cruise.M);
+      match = match && (procedures[ix].cruise.V1 == obj.procedures[ix].cruise.V1);
+      match = match && (procedures[ix].cruise.V2 == obj.procedures[ix].cruise.V2);
+      match = match && (procedures[ix].cruise.M == obj.procedures[ix].cruise.M);
 
-      match = match && (this->procedures[ix].descent.V1 == obj.procedures[ix].descent.V1);
-      match = match && (this->procedures[ix].descent.V2 == obj.procedures[ix].descent.V2);
-      match = match && (this->procedures[ix].descent.M == obj.procedures[ix].descent.M);
+      match = match && (procedures[ix].descent.V1 == obj.procedures[ix].descent.V1);
+      match = match && (procedures[ix].descent.V2 == obj.procedures[ix].descent.V2);
+      match = match && (procedures[ix].descent.M == obj.procedures[ix].descent.M);
    }
 
 
    // performance
 
-   match = match && (this->performance.speed.climb.CAS.LO == obj.performance.speed.climb.CAS.LO);
-   match = match && (this->performance.speed.climb.CAS.HI == obj.performance.speed.climb.CAS.HI);
-   match = match && (this->performance.speed.climb.Mach == obj.performance.speed.climb.Mach);
+   match = match && (performance.speed.climb.CAS.LO == obj.performance.speed.climb.CAS.LO);
+   match = match && (performance.speed.climb.CAS.HI == obj.performance.speed.climb.CAS.HI);
+   match = match && (performance.speed.climb.Mach == obj.performance.speed.climb.Mach);
 
-   match = match && (this->performance.speed.cruise.CAS.LO == obj.performance.speed.cruise.CAS.LO);
-   match = match && (this->performance.speed.cruise.CAS.HI == obj.performance.speed.cruise.CAS.HI);
-   match = match && (this->performance.speed.cruise.Mach == obj.performance.speed.cruise.Mach);
+   match = match && (performance.speed.cruise.CAS.LO == obj.performance.speed.cruise.CAS.LO);
+   match = match && (performance.speed.cruise.CAS.HI == obj.performance.speed.cruise.CAS.HI);
+   match = match && (performance.speed.cruise.Mach == obj.performance.speed.cruise.Mach);
 
-   match = match && (this->performance.speed.descent.CAS.LO == obj.performance.speed.descent.CAS.LO);
-   match = match && (this->performance.speed.descent.CAS.HI == obj.performance.speed.descent.CAS.HI);
-   match = match && (this->performance.speed.descent.Mach == obj.performance.speed.descent.Mach);
+   match = match && (performance.speed.descent.CAS.LO == obj.performance.speed.descent.CAS.LO);
+   match = match && (performance.speed.descent.CAS.HI == obj.performance.speed.descent.CAS.HI);
+   match = match && (performance.speed.descent.Mach == obj.performance.speed.descent.Mach);
 
-   match = match && (this->performance.mass.low == obj.performance.mass.low);
-   match = match && (this->performance.mass.nominal == obj.performance.mass.nominal);
-   match = match && (this->performance.mass.high == obj.performance.mass.high);
+   match = match && (performance.mass.low == obj.performance.mass.low);
+   match = match && (performance.mass.nominal == obj.performance.mass.nominal);
+   match = match && (performance.mass.high == obj.performance.mass.high);
 
 
    for (auto ix = 0; match && (ix < FL_NMAX); ix++) {
-      match = match && (this->performance.cruise[ix].FL == obj.performance.cruise[ix].FL);
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.cruise[ix].TAS).value()) &&
+      match = match && (performance.cruise[ix].FL == obj.performance.cruise[ix].FL);
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.cruise[ix].TAS).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.cruise[ix].TAS).value())) ||
-                        (this->performance.cruise[ix].TAS == obj.performance.cruise[ix].TAS));
+                        (performance.cruise[ix].TAS == obj.performance.cruise[ix].TAS));
 
-      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(this->performance.cruise[ix].fuel.lo).value()) &&
+      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(performance.cruise[ix].fuel.lo).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.performance.cruise[ix].fuel.lo).value())) ||
-                        (this->performance.cruise[ix].fuel.lo == obj.performance.cruise[ix].fuel.lo));
-      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(this->performance.cruise[ix].fuel.nom).value()) &&
+                        (performance.cruise[ix].fuel.lo == obj.performance.cruise[ix].fuel.lo));
+      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(performance.cruise[ix].fuel.nom).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.performance.cruise[ix].fuel.nom).value())) ||
-                        (this->performance.cruise[ix].fuel.nom == obj.performance.cruise[ix].fuel.nom));
-      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(this->performance.cruise[ix].fuel.hi).value()) &&
+                        (performance.cruise[ix].fuel.nom == obj.performance.cruise[ix].fuel.nom));
+      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(performance.cruise[ix].fuel.hi).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.performance.cruise[ix].fuel.hi).value())) ||
-                        (this->performance.cruise[ix].fuel.hi == obj.performance.cruise[ix].fuel.hi));
+                        (performance.cruise[ix].fuel.hi == obj.performance.cruise[ix].fuel.hi));
 
 
-      match = match && (this->performance.climb[ix].FL == obj.performance.climb[ix].FL);
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.climb[ix].TAS).value()) &&
+      match = match && (performance.climb[ix].FL == obj.performance.climb[ix].FL);
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.climb[ix].TAS).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.climb[ix].TAS).value())) ||
-                        (this->performance.climb[ix].TAS == obj.performance.climb[ix].TAS));
+                        (performance.climb[ix].TAS == obj.performance.climb[ix].TAS));
 
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.climb[ix].ROCD.lo).value()) &&
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.climb[ix].ROCD.lo).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.climb[ix].ROCD.lo).value())) ||
-                        (this->performance.climb[ix].ROCD.lo == obj.performance.climb[ix].ROCD.lo));
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.climb[ix].ROCD.nom).value()) &&
+                        (performance.climb[ix].ROCD.lo == obj.performance.climb[ix].ROCD.lo));
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.climb[ix].ROCD.nom).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.climb[ix].ROCD.nom).value())) ||
-                        (this->performance.climb[ix].ROCD.nom == obj.performance.climb[ix].ROCD.nom));
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.climb[ix].ROCD.hi).value()) &&
+                        (performance.climb[ix].ROCD.nom == obj.performance.climb[ix].ROCD.nom));
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.climb[ix].ROCD.hi).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.climb[ix].ROCD.hi).value())) ||
-                        (this->performance.climb[ix].ROCD.hi == obj.performance.climb[ix].ROCD.hi));
+                        (performance.climb[ix].ROCD.hi == obj.performance.climb[ix].ROCD.hi));
 
-      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(this->performance.climb[ix].fuel).value()) &&
+      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(performance.climb[ix].fuel).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.performance.climb[ix].fuel).value())) ||
-                        (this->performance.climb[ix].fuel == obj.performance.climb[ix].fuel));
+                        (performance.climb[ix].fuel == obj.performance.climb[ix].fuel));
 
 
-      match = match && (this->performance.descent[ix].FL == obj.performance.descent[ix].FL);
+      match = match && (performance.descent[ix].FL == obj.performance.descent[ix].FL);
 
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.descent[ix].TAS).value()) &&
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.descent[ix].TAS).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.descent[ix].TAS).value())) ||
-                        (this->performance.descent[ix].TAS == obj.performance.descent[ix].TAS));
+                        (performance.descent[ix].TAS == obj.performance.descent[ix].TAS));
 
-      match = match && ((isnan(Units::MetersPerSecondSpeed(this->performance.descent[ix].ROCD).value()) &&
+      match = match && ((isnan(Units::MetersPerSecondSpeed(performance.descent[ix].ROCD).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.performance.descent[ix].ROCD).value())) ||
-                        (this->performance.descent[ix].ROCD == obj.performance.descent[ix].ROCD));
+                        (performance.descent[ix].ROCD == obj.performance.descent[ix].ROCD));
 
-      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(this->performance.descent[ix].fuel).value()) &&
+      match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(performance.descent[ix].fuel).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.performance.descent[ix].fuel).value())) ||
-                        (this->performance.descent[ix].fuel == obj.performance.descent[ix].fuel));
+                        (performance.descent[ix].fuel == obj.performance.descent[ix].fuel));
 
    }
 

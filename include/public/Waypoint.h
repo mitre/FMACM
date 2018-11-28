@@ -55,204 +55,204 @@ public:
 
    bool load(DecodedStream *input);
 
-   void processAltitudeConstraints(Units::Length altitude_in,
+   void ProcessAltitudeConstraints(Units::Length altitude_in,
                                    Units::Length altitude_2_in);
 
-   void processSpeedConstraints(Units::Speed speed_in);
+   void ProcessSpeedConstraints(Units::Speed speed_in);
 
-   const std::string &getName() const;
+   const std::string &GetName() const;
 
-   void setName(const std::string name_in);
+   void SetName(const std::string name_in);
 
-   Units::Angle getLatitude() const;
+   Units::Angle GetLatitude() const;
 
-   void setLatitude(const Units::Angle &latitude_in);
+   void SetLatitude(const Units::Angle &latitude_in);
 
-   Units::Angle getLongitude() const;
+   Units::Angle GetLongitude() const;
 
-   void setLongitude(const Units::Angle &longitude_in);
+   void SetLongitude(const Units::Angle &longitude_in);
 
-   void setWaypointLatLon(const Units::Angle &latitude_in,
+   void SetWaypointLatLon(const Units::Angle &latitude_in,
                           const Units::Angle &longitude_in);
 
-   Units::Length getAltitude() const;
+   Units::Length GetAltitude() const;
 
-   void setAltitude(const Units::Length &altitude_in);
+   void SetAltitude(const Units::Length &altitude_in);
 
-   Units::Angle getDescentAngle() const;
+   Units::Angle GetDescentAngle() const;
 
-   void setNominalIas(const Units::Speed &nominal_ias_in);
+   void SetNominalIas(const Units::Speed &nominal_ias_in);
 
-   Units::Speed getNominalIas() const;
+   Units::Speed GetNominalIas() const;
 
-   double getMach() const;
+   double GetMach() const;
 
-   Units::Acceleration getDescentRate() const;
+   Units::Acceleration GetDescentRate() const;
 
-   void setAltitudeConstraintHigh(const Units::Length &altitude_high_in);
+   void SetAltitudeConstraintHigh(const Units::Length &altitude_high_in);
 
-   Units::Length getAltitudeConstraintHigh() const;
+   Units::Length GetAltitudeConstraintHigh() const;
 
-   void setAltitudeConstraintLow(const Units::Length &altitude_low_in);
+   void SetAltitudeConstraintLow(const Units::Length &altitude_low_in);
 
-   Units::Length getAltitudeConstraintLow() const;
+   Units::Length GetAltitudeConstraintLow() const;
 
-   void setSpeedConstraintHigh(const Units::Speed &speed_high_in);
+   void SetSpeedConstraintHigh(const Units::Speed &speed_high_in);
 
-   Units::Speed getSpeedConstraintHigh() const;
+   Units::Speed GetSpeedConstraintHigh() const;
 
-   void setSpeedConstraintLow(const Units::Speed &speed_low_in);
+   void SetSpeedConstraintLow(const Units::Speed &speed_low_in);
 
-   Units::Speed getSpeedConstraintLow() const;
+   Units::Speed GetSpeedConstraintLow() const;
 
-   void setRfTurnCenterLatitude(const Units::Angle &rf_turn_center_latitude_in);
+   void SetRfTurnCenterLatitude(const Units::Angle &rf_turn_center_latitude_in);
 
-   Units::Angle getRfTurnCenterLatitude() const;
+   Units::Angle GetRfTurnCenterLatitude() const;
 
-   void setRfTurnCenterLongitude(const Units::Angle &rf_turn_center_longitude_in);
+   void SetRfTurnCenterLongitude(const Units::Angle &rf_turn_center_longitude_in);
 
-   Units::Angle getRfTurnCenterLongitude() const;
+   Units::Angle GetRfTurnCenterLongitude() const;
 
-   void setRfTurnArcRadius(const Units::Length &rf_turn_radius_in);
+   void SetRfTurnArcRadius(const Units::Length &rf_turn_radius_in);
 
-   Units::Length getRfTurnArcRadius() const;
+   Units::Length GetRfTurnArcRadius() const;
 
 private:
-   std::string name;
-   Units::Angle latitude;
-   Units::Angle longitude;
-   Units::Angle descent_angle;
-   Units::Length altitude;
-   Units::Speed nominal_ias;
-   Units::Acceleration descent_rate;
-   double mach;
+   std::string m_name;
+   Units::Angle m_latitude;
+   Units::Angle m_longitude;
+   Units::Angle m_descent_angle;
+   Units::Length m_altitude;
+   Units::Speed m_nominal_ias;
+   Units::Acceleration m_descent_rate;
+   double m_mach;
 
 
    // previously public data members which store the altitude and speed constraints
    // Getters are public.
-   Units::Length altitude_constraint_high;
-   Units::Length altitude_constraint_low;
-   Units::Speed speed_constraint_high;
-   Units::Speed speed_constraint_low;
+   Units::Length m_altitude_constraint_high;
+   Units::Length m_altitude_constraint_low;
+   Units::Speed m_speed_constraint_high;
+   Units::Speed m_speed_constraint_low;
 
    // Added data members for RF legs
-   Units::Angle rf_turn_center_latitude;
-   Units::Angle rf_turn_center_longitude;
-   Units::Length rf_turn_arc_radius;
+   Units::Angle m_rf_turn_center_latitude;
+   Units::Angle m_rf_turn_center_longitude;
+   Units::Length m_rf_turn_arc_radius;
 };
 
-inline const std::string &Waypoint::getName() const {
-   return name;
+inline const std::string &Waypoint::GetName() const {
+   return m_name;
 }
 
-inline void Waypoint::setName(const std::string name_in) {
-   name.assign(name_in);
+inline void Waypoint::SetName(const std::string name_in) {
+   m_name.assign(name_in);
 }
 
-inline Units::Angle Waypoint::getLatitude() const {
-   return latitude;
+inline Units::Angle Waypoint::GetLatitude() const {
+   return m_latitude;
 }
 
-inline void Waypoint::setLatitude(const Units::Angle &latitude_in) {
-   latitude = latitude_in;
+inline void Waypoint::SetLatitude(const Units::Angle &latitude_in) {
+   m_latitude = latitude_in;
 }
 
-inline Units::Angle Waypoint::getLongitude() const {
-   return longitude;
+inline Units::Angle Waypoint::GetLongitude() const {
+   return m_longitude;
 }
 
-inline void Waypoint::setLongitude(const Units::Angle &longitude_in) {
-   longitude = longitude_in;
+inline void Waypoint::SetLongitude(const Units::Angle &longitude_in) {
+   m_longitude = longitude_in;
 }
 
-inline void Waypoint::setWaypointLatLon(const Units::Angle &latitude_in,
+inline void Waypoint::SetWaypointLatLon(const Units::Angle &latitude_in,
                                         const Units::Angle &longitude_in) {
-   setLatitude(latitude_in);
-   setLongitude(longitude_in);
+   SetLatitude(latitude_in);
+   SetLongitude(longitude_in);
 }
 
-inline Units::Length Waypoint::getAltitude() const {
-   return altitude;
+inline Units::Length Waypoint::GetAltitude() const {
+   return m_altitude;
 }
 
-inline void Waypoint::setAltitude(const Units::Length &altitude_in) {
-   altitude = altitude_in;
+inline void Waypoint::SetAltitude(const Units::Length &altitude_in) {
+   m_altitude = altitude_in;
 }
 
-inline Units::Angle Waypoint::getDescentAngle() const {
-   return descent_angle;
+inline Units::Angle Waypoint::GetDescentAngle() const {
+   return m_descent_angle;
 }
 
-inline Units::Speed Waypoint::getNominalIas() const {
-   return nominal_ias;
+inline Units::Speed Waypoint::GetNominalIas() const {
+   return m_nominal_ias;
 }
 
-inline void Waypoint::setNominalIas(const Units::Speed &nominal_ias_in) {
-   nominal_ias = nominal_ias_in;
+inline void Waypoint::SetNominalIas(const Units::Speed &nominal_ias_in) {
+   m_nominal_ias = nominal_ias_in;
 }
 
-inline double Waypoint::getMach() const {
-   return mach;
+inline double Waypoint::GetMach() const {
+   return m_mach;
 }
 
-inline Units::Acceleration Waypoint::getDescentRate() const {
-   return descent_rate;
+inline Units::Acceleration Waypoint::GetDescentRate() const {
+   return m_descent_rate;
 }
 
-inline void Waypoint::setAltitudeConstraintHigh(const Units::Length &altitude_high_in) {
-   altitude_constraint_high = altitude_high_in;
+inline void Waypoint::SetAltitudeConstraintHigh(const Units::Length &altitude_high_in) {
+   m_altitude_constraint_high = altitude_high_in;
 }
 
-inline Units::Length Waypoint::getAltitudeConstraintHigh() const {
-   return altitude_constraint_high;
+inline Units::Length Waypoint::GetAltitudeConstraintHigh() const {
+   return m_altitude_constraint_high;
 }
 
-inline void Waypoint::setAltitudeConstraintLow(const Units::Length &altitude_low_in) {
-   altitude_constraint_low = altitude_low_in;
+inline void Waypoint::SetAltitudeConstraintLow(const Units::Length &altitude_low_in) {
+   m_altitude_constraint_low = altitude_low_in;
 }
 
-inline Units::Length Waypoint::getAltitudeConstraintLow() const {
-   return altitude_constraint_low;
+inline Units::Length Waypoint::GetAltitudeConstraintLow() const {
+   return m_altitude_constraint_low;
 }
 
-inline void Waypoint::setSpeedConstraintHigh(const Units::Speed &speed_high_in) {
-   speed_constraint_high = speed_high_in;
+inline void Waypoint::SetSpeedConstraintHigh(const Units::Speed &speed_high_in) {
+   m_speed_constraint_high = speed_high_in;
 }
 
-inline Units::Speed Waypoint::getSpeedConstraintHigh() const {
-   return speed_constraint_high;
+inline Units::Speed Waypoint::GetSpeedConstraintHigh() const {
+   return m_speed_constraint_high;
 }
 
-inline void Waypoint::setSpeedConstraintLow(const Units::Speed &speed_low_in) {
-   speed_constraint_low = speed_low_in;
+inline void Waypoint::SetSpeedConstraintLow(const Units::Speed &speed_low_in) {
+   m_speed_constraint_low = speed_low_in;
 }
 
-inline Units::Speed Waypoint::getSpeedConstraintLow() const {
-   return speed_constraint_low;
+inline Units::Speed Waypoint::GetSpeedConstraintLow() const {
+   return m_speed_constraint_low;
 }
 
-inline Units::Angle Waypoint::getRfTurnCenterLatitude() const {
-   return rf_turn_center_latitude;
+inline Units::Angle Waypoint::GetRfTurnCenterLatitude() const {
+   return m_rf_turn_center_latitude;
 }
 
-inline void Waypoint::setRfTurnCenterLatitude(const Units::Angle &rf_turn_center_latitude_in) {
-   rf_turn_center_latitude = rf_turn_center_latitude_in;
+inline void Waypoint::SetRfTurnCenterLatitude(const Units::Angle &rf_turn_center_latitude_in) {
+   m_rf_turn_center_latitude = rf_turn_center_latitude_in;
 }
 
-inline Units::Angle Waypoint::getRfTurnCenterLongitude() const {
-   return rf_turn_center_longitude;
+inline Units::Angle Waypoint::GetRfTurnCenterLongitude() const {
+   return m_rf_turn_center_longitude;
 }
 
-inline void Waypoint::setRfTurnCenterLongitude(const Units::Angle &rf_turn_center_longitude_in) {
-   rf_turn_center_longitude = rf_turn_center_longitude_in;
+inline void Waypoint::SetRfTurnCenterLongitude(const Units::Angle &rf_turn_center_longitude_in) {
+   m_rf_turn_center_longitude = rf_turn_center_longitude_in;
 }
 
-inline Units::Length Waypoint::getRfTurnArcRadius() const {
-   return rf_turn_arc_radius;
+inline Units::Length Waypoint::GetRfTurnArcRadius() const {
+   return m_rf_turn_arc_radius;
 }
 
-inline void Waypoint::setRfTurnArcRadius(const Units::Length &rf_turn_radius_in) {
-   rf_turn_arc_radius = rf_turn_radius_in;
+inline void Waypoint::SetRfTurnArcRadius(const Units::Length &rf_turn_radius_in) {
+   m_rf_turn_arc_radius = rf_turn_radius_in;
 }
 
 std::ostream &operator<<(std::ostream &out,

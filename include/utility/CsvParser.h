@@ -14,6 +14,7 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+#pragma once
 
 /*
  * Originally from http://stackoverflow.com/questions/1120140/how-can-i-read-and-parse-csv-files-in-c
@@ -27,7 +28,6 @@
     }
  *
  */
-#pragma once
 
 #include <iterator>
 #include <iostream>
@@ -45,11 +45,11 @@ namespace CsvParser {
          return m_data[index];
       }
 
-      std::size_t size() const {
+      std::size_t Size() const {
          return m_data.size();
       }
 
-      void readNextRow(std::istream &str) {
+      void ReadNextRow(std::istream &str) {
          std::string line;
          std::getline(str, line);
 
@@ -68,7 +68,7 @@ namespace CsvParser {
 
    inline std::istream &operator>>(std::istream &str,
                                    CsvRow &data) {
-      data.readNextRow(str);
+      data.ReadNextRow(str);
       return str;
    }
 
@@ -126,6 +126,5 @@ namespace CsvParser {
       std::istream *m_str;
       CsvRow m_row;
    };
-
-} // namespace CsvParser
+}
 

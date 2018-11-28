@@ -181,7 +181,7 @@ string InternalObserver::stateModelString(AircraftState asv, int flapsConfig, fl
     strm << asv.Vwy << ","; // true wind Vwy in MPS
     strm << asv.Vw_para << ","; // true wind Vw_para in MPS
     strm << asv.Vw_perp << ","; // true wind Vw_perp in MPS
-    strm << asv.distToGo << ","; // output distance to go in meters
+    strm << asv.m_distance_to_go << ","; // output distance to go in meters
     strm << flapsConfig << ","; // configuration for flaps (mainly debug)
     strm << speed_brake << ",";
     strm << ias;
@@ -303,9 +303,9 @@ void InternalObserver::dynamics_output(AircraftState dynamics_in,
 	new_dynamics.time = dynamics_in.time;
 	new_dynamics.achieved_groundspeed = Units::FeetPerSecondSpeed(dynamics_in.getGroundSpeed()).value();
 	new_dynamics.speed_command = Units::MetersPerSecondSpeed(
-            ATMOSPHERE()->CAS2TAS(Units::FeetPerSecondSpeed(guidance_in.indicated_airspeed),
+            ATMOSPHERE()->CAS2TAS(Units::FeetPerSecondSpeed(guidance_in.m_im_speed_command_ias),
 					  Units::FeetLength(dynamics_in.z))).value();
-	new_dynamics.IAS_command = guidance_in.indicated_airspeed*FT_M;
+	new_dynamics.IAS_command = guidance_in.m_im_speed_command_ias*FT_M;
 
     achieved_dynamics_list.push_back(new_dynamics);
 }

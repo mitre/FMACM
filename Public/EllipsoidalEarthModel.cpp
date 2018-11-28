@@ -27,7 +27,7 @@
 
 log4cplus::Logger EllipsoidalEarthModel::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("EllipsoidalEarthModel"));
 
-const Units::Length EllipsoidalEarthModel::mWGS84SemiMajorRadius = Units::MetersLength(6378137);
+const Units::Length EllipsoidalEarthModel::mWGS84SemiMajorRadius = Units::MetersLength(6378137.0);
 const double EllipsoidalEarthModel::mWGS84EccentricitySquared = 6.69437999014e-3;
 
 EllipsoidalEarthModel::EllipsoidalEarthModel() :

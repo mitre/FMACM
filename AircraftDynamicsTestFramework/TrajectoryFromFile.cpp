@@ -300,7 +300,7 @@ Guidance TrajectoryFromFile::update(AircraftState state, Guidance guidance_in) {
 
       result.reference_altitude = h_next / FT_M;
       result.altitude_rate = h_dot_next / FT_M;
-      result.indicated_airspeed = v_next / FT_M;
+      result.m_im_speed_command_ias = v_next / FT_M;
     }
   
   // Calculate Psi command and cross-track error if the aircraft is turning
@@ -427,6 +427,7 @@ void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
       PrecalcWaypoint new_waypoint;
       new_waypoint.leg_length = leg_length;
       new_waypoint.course_angle = Units::RadiansAngle(course);
+      new_waypoint.name = intent.getFms().Name[loop];
       new_waypoint.x_pos = intent.getFms().xWp[loop].value();
       new_waypoint.y_pos = intent.getFms().yWp[loop].value();
 
@@ -444,6 +445,7 @@ void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
 
   // add the final waypoint
   PrecalcWaypoint new_waypoint;
+  new_waypoint.name = intent.getFms().Name[0];
   new_waypoint.leg_length = 0;
   new_waypoint.course_angle = waypoint_vector.back().course_angle;//0;
   new_waypoint.x_pos = intent.getFms().xWp[0].value();

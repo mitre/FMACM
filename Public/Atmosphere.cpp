@@ -513,7 +513,7 @@ Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas, const Units::Length al
 
 
 // method to calculate the MACH to IAS transition.
-Units::Length Atmosphere::getMachIASTransition(const Units::Speed ias, const double mach) const
+Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias, const double &mach) const
 {
 
   // temp values to store the MACH IAS transition calculations

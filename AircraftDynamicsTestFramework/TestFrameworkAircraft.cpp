@@ -115,7 +115,7 @@ void TestFrameworkAircraft::init_truth_state_vector_old(void)
 {
 	this->truth_state_vector_old.id = this->id;
 	//Initialize this->truth_state_vector_old with info in first waypoint:
-	const AircraftIntent::Fms &fms(mAircraftIntent.getFms());
+	const AircraftIntent::RouteData &fms(mAircraftIntent.getFms());
 	this->truth_state_vector_old.x = Units::FeetLength(fms.xWp[0]).value();
 	this->truth_state_vector_old.y = Units::FeetLength(fms.yWp[0]).value();
 	this->truth_state_vector_old.z = mInitialAltitude.value();
@@ -128,7 +128,7 @@ void TestFrameworkAircraft::init_truth_state_vector_old(void)
         Units::FeetLength(truth_state_vector_old.y),
 		precalc_traj.h_traj,
 		distToGo, dummyCourse);
-	truth_state_vector_old.distToGo = distToGo.value();
+	truth_state_vector_old.m_distance_to_go = distToGo.value();
 
 	// copy groundspeed components from ThreeDOFDynamics
 	truth_state_vector_old.xd = mDynamics.state.xd / FT_M;
@@ -193,7 +193,7 @@ bool TestFrameworkAircraft::update(const SimulationTime& time)
 				current_guidance);
 
 		// check if guidance has valid data.
-		if ( guidancefromairborneapplication.is_valid() && guidancefromairborneapplication.indicated_airspeed > 0.0)
+		if ( guidancefromairborneapplication.is_valid() && guidancefromairborneapplication.m_im_speed_command_ias > 0.0)
 		{
 			// Use the guidance as modified by the airborne appliation
 			current_guidance = guidancefromairborneapplication;
@@ -216,7 +216,7 @@ bool TestFrameworkAircraft::update(const SimulationTime& time)
 			  Units::FeetLength(state_result.y),
 			  precalc_traj.getHorizontalData(),
 			  distToGo, dummyCourse);
-	state_result.distToGo = distToGo.value();
+	state_result.m_distance_to_go = distToGo.value();
 
 	InternalObserver::getInstance()->storeStateModel(state_result,
             mDynamics.state.flapConfig, mDynamics.state.speed_brake,

@@ -269,7 +269,7 @@ void TestFrameworkScenario::recordState(const AircraftState &aircraftState) cons
 
     fprintf(acstates, "%.0f,%.5f,%.3f,%.3f,%.5f,%.5f,%.5f\n",
             aircraftState.time,
-            aircraftState.distToGo,
+            aircraftState.m_distance_to_go,
             v,
             aircraftState.zd * FT_M,
             aircraftState.x * FT_M,

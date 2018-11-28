@@ -59,7 +59,7 @@ Guidance TestFrameworkApplication::update(const SimulationTime &simTime,
 
 //	Retrieve the IM speed from a test vector file.
 	imGuidance = mIMSpeedCommandFile.update(Units::SecondsTime(time));
-	guidance_out.indicated_airspeed = imGuidance.indicated_airspeed;
+	guidance_out.m_im_speed_command_ias = imGuidance.m_im_speed_command_ias;
 	guidance_out.setValid(imGuidance.is_valid());
 
 	return guidance_out;

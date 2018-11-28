@@ -44,8 +44,11 @@ AircraftState::AircraftState(void)
 
     Vw_para = 0.0; // meters/second
     Vw_perp = 0.0; // meters/second
+    Vwx_dh = Units::zero();
+    Vwy_dh = Units::zero();
 
-    distToGo = -99999.99999; // meters
+
+    m_distance_to_go = -99999.99999; // meters
 }
 AircraftState::~AircraftState(void)
 {
@@ -75,8 +78,10 @@ AircraftState::AircraftState (const AircraftState &in)
 
     Vw_para = in.Vw_para;
     Vw_perp = in.Vw_perp;
+    Vwy_dh = in.Vwy_dh;
+    Vwx_dh = in.Vwx_dh;
 
-    distToGo = in.distToGo;
+    m_distance_to_go = in.m_distance_to_go;
 }
 
 AircraftState& AircraftState::operator= (const AircraftState &in)
@@ -102,8 +107,10 @@ AircraftState& AircraftState::operator= (const AircraftState &in)
 
         Vw_para = in.Vw_para;
         Vw_perp = in.Vw_perp;
+        Vwx_dh = in.Vwx_dh;
+        Vwy_dh = in.Vwy_dh;
 
-        distToGo = in.distToGo;
+        m_distance_to_go = in.m_distance_to_go;
     }
 
     return *this;
@@ -121,7 +128,8 @@ bool AircraftState::operator== (const AircraftState &in) const
     same = same && (gamma == in.gamma);
     same = same && (Vwx == in.Vwx) && (Vwy == in.Vwy);
     same = same && (Vw_para == in.Vw_para) && (Vw_perp == in.Vw_perp);
-    same = same && (psi == in.psi) && (distToGo == in.distToGo);
+    same = same && (Vwx_dh == in.Vwx_dh) && (Vwy_dh == in.Vwy_dh);
+    same = same && (psi == in.psi) && (m_distance_to_go == in.m_distance_to_go);
 
     return same;
 }
@@ -211,10 +219,12 @@ void AircraftState::dumpParms(std::string str) const
     // str:Header string for output.
     LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "(Subset) Aircraft state parms for " << str.c_str());
 
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "time " << time << "  id " << id << "  distToGo " << distToGo);
+    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "time " << time << "  id " << id << "  distToGo " << m_distance_to_go);
     LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "position   x " << x << "  y " << y << "  z " << z);
     LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "speed      x " << xd << "  y " << yd << "  z " << zd);
     LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vw_para      " << Vw_para << "  Vw_perp " << Vw_perp);
+    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vwx      " << Vwx << "  Vwy " << Vwy);
+    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vwx_dh     " << Units::HertzFrequency(Vwx_dh) << "  Vwy_dh " << Units::HertzFrequency(Vwy_dh));
 
 }
 
@@ -225,12 +235,14 @@ void AircraftState::csvDataDump(std::string str) const
     // To use this, logger properties level must be set to DEBUG.
     //
     // str:Beginning of line string to output.
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << str.c_str() << ","
-                                                    << time << "," << id << "," << x << "," << y << ","
-                                                    << z << "," << xd << "," << yd << "," << zd << ","
-                                                    << xdd << "," << ydd << "," << zdd << "," << gamma << ","
-                                                    << Vwx << "," << Vwy << "," << Vw_para << "," << Vw_perp << ","
-                                                    << psi << "," << distToGo << "," << std::endl);
+    LOG4CPLUS_DEBUG(AircraftState::logger,
+                    std::endl << str.c_str() << ","
+                    << time << "," << id << "," << x << "," << y << ","
+                    << z << "," << xd << "," << yd << "," << zd << ","
+                    << xdd << "," << ydd << "," << zdd << "," << gamma << ","
+                    << Vwx << "," << Vwy << "," << Vw_para << "," << Vw_perp << ","
+                    << Units::HertzFrequency(Vwx_dh) << "," << Units::HertzFrequency(Vwy_dh) << ","
+                    << psi << "," << m_distance_to_go << "," << std::endl);
 
 }
 

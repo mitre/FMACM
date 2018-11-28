@@ -20,6 +20,7 @@
 
 PrecalcWaypoint::PrecalcWaypoint(void)
 {
+	name = "noname";
 	leg_length = 0.0; // in nautical miles
 	course_angle = Units::DegreesAngle(0.0); // in degrees
 	

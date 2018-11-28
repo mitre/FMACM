@@ -289,3 +289,31 @@ bool Waypoint::load(DecodedStream *input)
 
     return true;
 }
+
+
+std::ostream& operator<<(std::ostream &out, const Waypoint &waypoint) {
+	out << waypoint.getName() << " ";
+	out << Units::DegreesAngle(waypoint.getLatitude()).value() << " ";
+	out << Units::DegreesAngle(waypoint.getLongitude()).value() << " ";
+	out << Units::FeetLength(waypoint.getAltitude()).value() << " ";
+	out << Units::DegreesAngle(waypoint.getDescentAngle()).value() << " ";
+	out << Units::KnotsSpeed(waypoint.getNominalIas()).value() << " ";
+	out << waypoint.getMach() << " ";
+	out << Units::KnotsPerSecondAcceleration(waypoint.getDescentRate()).value() << " ";
+	out << Units::FeetLength(waypoint.getAltitudeConstraintHigh()).value() << " ";
+	out << Units::FeetLength(waypoint.getAltitudeConstraintLow()).value() << " ";
+	out << Units::KnotsSpeed(waypoint.getSpeedConstraintHigh()).value() << " ";
+	out << Units::KnotsSpeed(waypoint.getSpeedConstraintLow()).value() << " ";
+	out << Units::NauticalMilesLength(waypoint.getRfTurnArcRadius()).value() << " ";
+	out << Units::DegreesAngle(waypoint.getRfTurnCenterLatitude()).value() << " ";
+	out << Units::DegreesAngle(waypoint.getRfTurnCenterLongitude()).value() << " ";
+	out << std::endl;
+	return out;
+}
+
+std::ostream& operator<<(std::ostream &out, const std::list<Waypoint> &waypoints) {
+	for (std::list<Waypoint>::const_iterator i = waypoints.begin(); i != waypoints.end(); ++i) {
+		out << *i;
+	}
+	return out;
+}

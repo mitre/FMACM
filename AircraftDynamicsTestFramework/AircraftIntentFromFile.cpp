@@ -15,13 +15,6 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * AircraftIntentFromFile.cpp
- *
- *  Created on: Feb 24, 2015
- *      Author: SBOWMAN
- */
-
 #include "framework/AircraftIntentFromFile.h"
 
 #include "utility/CsvParser.h"
@@ -46,13 +39,13 @@ bool AircraftIntentFromFile::load(DecodedStream *input) {
    bool loaded = complete(); // perform the read operation to get the file name
 
    if (loaded) {
-      populateWaypointsFromCsv(csvfile);
+      PopulateWaypointsFromCsv(csvfile);
    }
 
    return loaded;
 }
 
-void AircraftIntentFromFile::populateWaypointsFromCsv(std::string csvfile) {
+void AircraftIntentFromFile::PopulateWaypointsFromCsv(std::string csvfile) {
 
    std::ifstream file(csvfile.c_str());
    if (!file.is_open()) {
@@ -84,53 +77,53 @@ void AircraftIntentFromFile::populateWaypointsFromCsv(std::string csvfile) {
 
       // Now iterate over each element in the row
       int rowindex = 0;
-      for (int rowElement = 0; rowElement < (*csvrow).size(); ++rowElement) {
+      for (int rowElement = 0; rowElement < (*csvrow).Size(); ++rowElement) {
          string s = (*csvrow)[rowElement]; // get the element as a string, it will be cast out of string as appropriate below
          switch (rowElement) {
             case 0:
-               rowindex = localstoi(s) - 1; // the value extracted from the CSV file is 1-based, we need 0-based
+               rowindex = LocalStringToInt(s) - 1; // the value extracted from the CSV file is 1-based, we need 0-based
                break;
             case 1:
-               xwptlocation[rowindex] = Units::MetersLength(localstod(s));
+               xwptlocation[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 2:
-               ywptlocation[rowindex] = Units::MetersLength(localstod(s));
+               ywptlocation[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 3:
-               disttogo[rowindex] = Units::MetersLength(localstod(s));
+               disttogo[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 4:
                segmenttype[rowindex] = s;
                break;
             case 5:
-               course[rowindex] = Units::RadiansAngle(localstod(s));
+               course[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
                break;
             case 6:
-               xturncenter[rowindex] = Units::MetersLength(localstod(s));
+               xturncenter[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 7:
-               yturncenter[rowindex] = Units::MetersLength(localstod(s));
+               yturncenter[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 8:
-               startofturn[rowindex] = Units::RadiansAngle(localstod(s));
+               startofturn[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
                break;
             case 9:
-               endofturn[rowindex] = Units::RadiansAngle(localstod(s));
+               endofturn[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
                break;
             case 10:
-               turnradius[rowindex] = Units::MetersLength(localstod(s));
+               turnradius[rowindex] = Units::MetersLength(LocalStringToDouble(s));
                break;
             case 11:
-               latwpt[rowindex] = Units::DegreesAngle(localstod(s));
+               latwpt[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
                break;
             case 12:
-               lonwpt[rowindex] = Units::DegreesAngle(localstod(s));
+               lonwpt[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
                break;
             case 13:
-               latturncenter[rowindex] = Units::DegreesAngle(localstod(s));
+               latturncenter[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
                break;
             case 14:
-               lonturncenter[rowindex] = Units::DegreesAngle(localstod(s));
+               lonturncenter[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
                break;
             default:
                // nothing to do
@@ -142,26 +135,26 @@ void AircraftIntentFromFile::populateWaypointsFromCsv(std::string csvfile) {
 
    // Now store all information into the public Fms struct in the appropriate order
    int numberofrowsofdata = irow - 1, forwardrow = 0;
-   this->setId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
-   this->setNumberOfWaypoints(numberofrowsofdata);
+   SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
+   SetNumberOfWaypoints(numberofrowsofdata);
    for (int reverserow = numberofrowsofdata - 1; reverserow >= 0; --reverserow) {
-      fms.LatWp[forwardrow] = latwpt[reverserow];
-      fms.LonWp[forwardrow] = lonwpt[reverserow];
-      fms.xWp[forwardrow] = xwptlocation[reverserow];
-      fms.yWp[forwardrow] = ywptlocation[reverserow];
+      m_fms.LatWp[forwardrow] = latwpt[reverserow];
+      m_fms.LonWp[forwardrow] = lonwpt[reverserow];
+      m_fms.xWp[forwardrow] = xwptlocation[reverserow];
+      m_fms.yWp[forwardrow] = ywptlocation[reverserow];
       forwardrow++;
    }
 
 }
 
-double AircraftIntentFromFile::localstod(string s) {
+double AircraftIntentFromFile::LocalStringToDouble(string s) {
    std::istringstream iss(s);
    double val = 0;
    iss >> val;
    return val;
 }
 
-int AircraftIntentFromFile::localstoi(string s) {
+int AircraftIntentFromFile::LocalStringToInt(string s) {
    std::istringstream iss(s);
    int val = 0;
    iss >> val;

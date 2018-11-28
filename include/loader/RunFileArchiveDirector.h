@@ -33,19 +33,19 @@ public:
    }//------------------------------------------------------------------------
 
    inline std::string get_Destination() {
-      return destination.get_Full_Path();
+      return destination.GetFullPath();
    }
 
    std::string get_Place_to_Write_Archive(const FilePath &source_file) {
-      if (destination.get_Full_Path() == "") {
+      if (destination.GetFullPath() == "") {
          return "";
       }
       std::string dest = get_New_Link_Name(source_file);
       if (dest == "") {
          return "";
       } else {
-         FilePath dest1 = destination.push(dest);
-         return dest1.get_Full_Path();
+         FilePath dest1 = destination.Push(dest);
+         return dest1.GetFullPath();
       }
    }//------------------------------------------------------------------------
 

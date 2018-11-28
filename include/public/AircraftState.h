@@ -31,17 +31,17 @@ class AircraftState
 {
 public:
    // Creational methods
-   static AircraftState createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
+   static AircraftState CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
 
-   AircraftState(void);
+   AircraftState();
 
-   ~AircraftState(void);
+   ~AircraftState();
 
    AircraftState(const AircraftState &in);
 
    AircraftState &operator=(const AircraftState &in);
 
-   bool is_turning() const;
+   const bool IsTurning() const;
 
    bool operator==(const AircraftState &in) const;
 
@@ -51,25 +51,25 @@ public:
    // heading methods
 
    // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
-   double get_heading() const;
+   const double GetHeading() const;
 
 
    // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-   Units::UnsignedRadiansAngle get_heading_in_radians_mathematical() const;
+   const Units::UnsignedRadiansAngle GetHeadingInRadiansMathematical() const;
 
    // psi getter/setters
-   void set_psi(double psi_in);
+   void SetPsi(const double psi_in);
 
    // speed methods
-   Units::Speed getGroundSpeed(void) const;
+   const Units::Speed GetGroundSpeed() const;
 
-   void dumpParms(std::string str) const;
+   void DumpParms(std::string str) const;
 
-   void csvHdrDump(std::string str) const;
+   void CsvHdrDump(std::string str) const;
 
-   void csvDataDump(std::string str) const;
+   void CsvDataDump(std::string str) const;
 
-   AircraftState &interpolate(const AircraftState &a,
+   AircraftState &Interpolate(const AircraftState &a,
                               const AircraftState &b,
                               const double time);
 
@@ -79,7 +79,7 @@ public:
     * @param time
     * @return
     */
-   AircraftState &extrapolate(const AircraftState &in,
+   AircraftState &Extrapolate(const AircraftState &in,
                               const double time); // deprecated!
 
    /**
@@ -88,27 +88,27 @@ public:
     * @param time
     * @return
     */
-   AircraftState &extrapolate(const AircraftState &in,
+   AircraftState &Extrapolate(const AircraftState &in,
                               const Units::SecondsTime &time);
 
-   double getZd() const;
+   inline double GetZd() const {
+      return m_zd;
+   };
 
-   void setZd(double zd);
+   void SetZd(const double zd);
 
 //Other Data:
-   int id;
-   double time;
-   double x, y, z; //position (ft)
-   double xd, yd, zd; //speed (ft/s)
-   double xdd, ydd, zdd; //acceleration (f/s^2)
-   double gamma;
-   double Vwx, Vwy; // true wind direction meters/second
-   double Vw_para, Vw_perp; // true wind factors meters/second
-   Units::Frequency Vwx_dh, Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
-
-   double psi; // aircraft psi measured from east counter-clockwise
-
+   int m_id;
+   double m_time;
+   double m_x, m_y, m_z; //position (ft)
+   double m_xd, m_yd, m_zd; //speed (ft/s)
+   double m_xdd, m_ydd, m_zdd; //acceleration (ft/s^2)
+   double m_gamma;
+   double m_Vwx, m_Vwy; // true wind direction meters/second
+   double m_Vw_para, m_Vw_perp; // true wind factors meters/second
+   double m_psi; // aircraft psi measured from east counter-clockwise
    double m_distance_to_go; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
+   Units::Frequency m_Vwx_dh, m_Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
 
 
 private:

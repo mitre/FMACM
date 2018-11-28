@@ -34,20 +34,28 @@ public:
    /**
     * Find the index of a value in a vector. Uses STL upper_bound(), but with one modified return.
     *
-    * @param ignored_parameter: UNUSED
     * @param value_to_find: value to search for
     * @param vector_to_search: vector to be searched
     * @return
     */
-   static int FindNearestIndex(int ignored_parameter,
-                               const double &value_to_find,
+   static int FindNearestIndex(const double &value_to_find,
                                const std::vector<double> &vector_to_search);
 
-   // Interpolates using a value into a value to compute an output value of a different kind.
-   static double interpolate(int upperIx,
-                             double v,
-                             const std::vector<double> &vVect,
-                             const std::vector<double> &oVect);
+   /**
+    * Linearly interpolate between items in vector. Caller must have already calcualted where the interpolation
+    * should start from.
+    *
+    * @param upper_index upper index for start of interpolation
+    * @param value value to interpolate to
+    * @param value_vector
+    * @param output_vector
+    * @throws if upper_index is not within the range of value_vector
+    * @return
+    */
+   static double LinearlyInterpolate(int upper_index,
+                                     double value,
+                                     const std::vector<double> &value_vector,
+                                     const std::vector<double> &output_vector);
 
    /**
     *
@@ -58,15 +66,29 @@ public:
    static const Units::Length CalculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
                                                          const std::pair<Units::Length, Units::Length> &xyLoc2);
 
-   static const double limit(double value,
-                             double low_limit = std::numeric_limits<double>::min(),
-                             double high_limit = std::numeric_limits<double>::max());
+   /**
+    * Limit value on the exclusive range of (low_limit, high_limit).
+    *
+    * @param value
+    * @param low_limit default is double min
+    * @param high_limit default is double max
+    * @return
+    */
+   static const double LimitOnInterval(double value,
+                                       double low_limit = std::numeric_limits<double>::min(),
+                                       double high_limit = std::numeric_limits<double>::max());
 
-   static const int sign(double value);
+   /**
+    * Get the sign of a double value.
+    *
+    * @param value
+    * @return 0 for zero input value, -1 for negative values, 1 for postive values
+    */
+   static const int SignOfValue(double value);
 
 private:
 
-   static log4cplus::Logger logger;
+   static log4cplus::Logger m_logger;
 };
 
 #endif

@@ -21,50 +21,30 @@ namespace aaesim {
       const int MAX_NUM_WAYPOINTS = 20;
       const double PI = 3.14159265358979323846;
 
-      const double DEG_PER_RAD = 180 / PI;
-      const double TWOPI = 2 * PI;
-      // const double PI_OVER_TWO = 0.5 * PI;
-      const double RADTOD = DEG_PER_RAD;
-      const double DTORAD = 1.0 / RADTOD;
+      const double DEGREES_PER_RADIAN = 180 / PI;
+      const double TWO_PI = 2 * PI;
+      const double RADIAN_TO_DEGREES = DEGREES_PER_RADIAN;
+      const double DEGREES_TO_RADIAN = 1.0 / RADIAN_TO_DEGREES;
 
       // exact conversion constants
-      const double NM_M = 1852.0;
-      const double FT_M = 0.3048;
-      const double KTS_MPS = (NM_M / 3600.0);
+      const double NAUTICAL_MILES_TO_METERS = 1852.0;
+      const double FEET_TO_METERS = 0.3048;
+      const double KNOTS_TO_METERS_PER_SECOND = (NAUTICAL_MILES_TO_METERS / 3600.0);
 
-      const double NM2FT = 6076.115486;
-      const double FPS2KT = 0.592483801;
-      const double KT2FPS = 1.687809857;
-//#define FPS2FPM (double)60.0
-//#define FPM2FPS (double)0.016666667
+      const double NAUTICAL_MILES_TO_FEET = 6076.115486;
+      const double FEET_PER_SECOND_TO_KNOTS = 0.592483801;
+      const double KNOTS_TO_FEET_PER_SECOND = 1.687809857;
       const double BIGNUM = 9.9E99;
-//#define BIGINTNUM (int)1000000
 // FIXME imprecise; METER2FOOT = 1/FT_M
-      const double METER2FOOT = 3.2808399;
-
-      // defines taken from trajectory_class_approach_forward
-//#define FPM_MPS (double)0.00508
-//#define KG_LB (double)2.204622
-//#define LAPSE_RATE (double)0.0065
-//#define LB_KG (double)0.453592
-//#define LB_NEW (double)4.4497375
-//#define NEW_LB (double)0.2247323
-//#define MPS_FPM (double)196.850394
-//#define REARTH_FT (double)20907363.55
-
-//#define EQUIT_RAD_NM (double)3443.918467
-//#define EQUIT_RAD_FT (double)20925646.33
-//#define ECCENTRICITY (double)0.081819191
+      const double METERS_TO_FEET = 3.2808399;
 
       const double BARO_ALT_SIG = 6.0;
       const double BARO_ALT_RATE_SIG = 2.5;
-
       const int BARO_ALT_ERR_STEPS = 121;
 
       const extern double BARO_ALT_ERR_GRAD[BARO_ALT_ERR_STEPS];
       const extern double BARO_ALT_ERR_ALTITUDES[BARO_ALT_ERR_STEPS];
       const extern double BARO_ALT_ERROR[BARO_ALT_ERR_STEPS];
-
 
       const double BARO_GRADIENT_ERR = 0;
       const double SA_NORTH_STD_DEV = 128.0;
@@ -78,17 +58,16 @@ namespace aaesim {
       const int TRACKING = 1;
       const int TURNING = 2;
 
-      //radian:
-      const double MAX_BANK_ANGLE = (25. * DTORAD);
-      //radian/second:
-      const double ROLL_RATE = (3.0 * DTORAD);
+
+      const double MAX_BANK_ANGLE_RADIAN = (25. * DEGREES_TO_RADIAN);
+      const double ROLL_RATE_RADIAN_PER_SECOND = (3.0 * DEGREES_TO_RADIAN);
 
       // Gravitational acceleration is defined by
       // International Committee on Weights and Measures (1901)
       // and International Bureau of Weights and Measures (current)
       // to be 9.80665 m/s^2
-      const double GRAV_MPS = 9.80665;
-      const double GRAV = GRAV_MPS / FT_M;
+      const double GRAVITY_METERS_PER_SECOND = 9.80665;
+      const double GRAVITY_FEET_PER_SECOND = GRAVITY_METERS_PER_SECOND / FEET_TO_METERS;
 
       /* The following constants are used for converting from geodetic to */
       /* conformal latitude.  They are found in NAS-MD-312 Appendix D. */

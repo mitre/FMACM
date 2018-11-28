@@ -14,12 +14,6 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
-/**
- * Include the appropriate log4cplus files as well as our own
- * initialization.
- */
-
 #pragma once
 
 #define LOG4CPLUS_STATIC // force static usage of log4cplus
@@ -27,4 +21,4 @@
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 
-void init_logging();
+void InitializeLogging();

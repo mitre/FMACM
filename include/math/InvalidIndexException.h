@@ -14,19 +14,17 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #ifndef INVALIDINDEXEXCEPTION_H
 #define INVALIDINDEXEXCEPTION_H
 
 #include <exception>
 
-// class to create an invalid index exception if a bad index is used
 class InvalidIndexException : public std::exception
 {
 public:
-   InvalidIndexException(const int invalid,
-                         const int lowValid,
-                         const int highValid);
+   InvalidIndexException(const int value,
+                         const int low_limit,
+                         const int high_limit);
 
    InvalidIndexException(char *);
 };

@@ -2,15 +2,15 @@
 
 StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset)
       :
-      mTemperatureOffset(temperatureOffset) {
+      m_temperature_offset(temperatureOffset) {
 }
 
 StandardAtmosphere::~StandardAtmosphere() {
    // nothing to do
 }
 
-Units::Temperature StandardAtmosphere::getTemperatureOffset() const {
-   return mTemperatureOffset;
+Units::Temperature StandardAtmosphere::GetTemperatureOffset() const {
+   return m_temperature_offset;
 }
 
 /**
@@ -19,12 +19,12 @@ Units::Temperature StandardAtmosphere::getTemperatureOffset() const {
  * Note:  Only the Troposphere and Tropopause layers are implemented.
  * Calculations above 65,000 feet would require adding Stratosphere.
  */
-Units::KelvinTemperature StandardAtmosphere::getTemp(const Units::Length h) const {
+Units::KelvinTemperature StandardAtmosphere::GetTemp(const Units::Length h) const {
    Units::KelvinTemperature T;
    if (h < H_TROP) {
-      T = T0 + mTemperatureOffset - Units::KelvinPerMeter(6.5 / 1000) * h;
+      T = T0 + m_temperature_offset - Units::KelvinPerMeter(6.5 / 1000) * h;
    } else {
-      T = T_TROP + mTemperatureOffset;
+      T = T_TROP + m_temperature_offset;
    }
 
    return T;

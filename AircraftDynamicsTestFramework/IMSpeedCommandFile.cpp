@@ -22,21 +22,21 @@
 #include "utility/CsvParser.h"
 
 
-IMSpeedCommandFile::IMSpeedCommandFile(void) {
+IMSpeedCommandFile::IMSpeedCommandFile() {
 
-   mLoaded = false;
-   mFilePath = "";
+   m_loaded = false;
+   m_file_path = "";
 
-   for (int i = 0; i < histLen; i++) {
-      iasHist[i] = 0.0;
+   for (int i = 0; i < m_hist_len; i++) {
+      m_ias_hist[i] = 0.0;
    }
 
-   historyIndexer = 0;
+   m_history_indexer = 0;
 
 }
 
 
-IMSpeedCommandFile::~IMSpeedCommandFile(void) {
+IMSpeedCommandFile::~IMSpeedCommandFile() {
 }
 
 
@@ -44,28 +44,28 @@ bool IMSpeedCommandFile::load(DecodedStream *strm) {
 
    set_stream(strm);
 
-   register_var("imspd_csv_file", &mFilePath, true);
-   register_var("use_pilot_delay", &mApplyPilotDelay, true);
-   register_var("pilot_delay_seconds", &mPilotDelaySeconds, true);
+   register_var("imspd_csv_file", &m_file_path, true);
+   register_var("use_pilot_delay", &m_apply_pilot_delay, true);
+   register_var("pilot_delay_seconds", &m_pilot_delay_seconds, true);
 
-   mLoaded = complete();
+   m_loaded = complete();
 
-   if (mLoaded) {
-      readData();
+   if (m_loaded) {
+      ReadData();
    }
 
-   return mLoaded;
+   return m_loaded;
 }
 
 
-void IMSpeedCommandFile::readData(void) {
+void IMSpeedCommandFile::ReadData() {
 
    // Parses speed file data and stores data.
 
-   std::ifstream file(mFilePath.c_str());
+   std::ifstream file(m_file_path.c_str());
 
    if (!file.is_open()) {
-      std::cout << "Speed file " << mFilePath.c_str() << " not found" << std::endl;
+      std::cout << "Speed file " << m_file_path.c_str() << " not found" << std::endl;
       exit(-46);
    }
 
@@ -80,22 +80,22 @@ void IMSpeedCommandFile::readData(void) {
 
       SpeedRecord spd;
 
-      mSpeedData.push_back(spd);
+      m_speed_data.push_back(spd);
 
-      int ix = mSpeedData.size() - 1;
+      int ix = m_speed_data.size() - 1;
 
-      for (int fieldix = 0; fieldix < (*csviter).size(); ++fieldix) {
+      for (int fieldix = 0; fieldix < (*csviter).Size(); ++fieldix) {
          std::string field = (*csviter)[fieldix];
 
          double val = atof(field.c_str());
 
          if (fieldix == 0) {
-            mSpeedData[ix].mTime = Units::SecondsTime(val);
+            m_speed_data[ix].mTime = Units::SecondsTime(val);
          } else if (fieldix == 1) {
-            mSpeedData[ix].mSpeed = Units::MetersPerSecondSpeed(val);
+            m_speed_data[ix].mSpeed = Units::MetersPerSecondSpeed(val);
          } else {
             std::cout << "Extra number of fields found in record "
-                      << (ix + 1) << " of " << mFilePath.c_str() << std::endl;
+                      << (ix + 1) << " of " << m_file_path.c_str() << std::endl;
             exit(-47);
          }
       }
@@ -106,7 +106,7 @@ void IMSpeedCommandFile::readData(void) {
 }
 
 
-Guidance IMSpeedCommandFile::update(Units::Time time) {
+Guidance IMSpeedCommandFile::Update(Units::Time time) {
 
    // update method to return guidance speed at the time or an interpolated
    // speed.  If time before first record's time, the first record's speed is
@@ -119,22 +119,22 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
    Guidance guidance;
 
    // delay code declarations
-   int hardcodeDelay = mPilotDelaySeconds.value();
+   int hardcodeDelay = m_pilot_delay_seconds.value();
 
    guidance.setValid(false);
 
-   if (mSpeedData[0].mTime >= time) {
+   if (m_speed_data[0].mTime >= time) {
 
       // First
 
-      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[0].mSpeed).value();
+      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[0].mSpeed).value();
       guidance.setValid(true);
 
-   } else if (mSpeedData[(mSpeedData.size() - 1)].mTime <= time) {
+   } else if (m_speed_data[(m_speed_data.size() - 1)].mTime <= time) {
 
       // Last
 
-      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[(mSpeedData.size() - 1)].mSpeed).value();
+      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[(m_speed_data.size() - 1)].mSpeed).value();
       guidance.setValid(true);
 
 
@@ -144,25 +144,25 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 
       int ix = 0;
 
-      while ((ix < (mSpeedData.size() - 1)) && (mSpeedData[(ix + 1)].mTime < time)) {
+      while ((ix < (m_speed_data.size() - 1)) && (m_speed_data[(ix + 1)].mTime < time)) {
          ix++;
       }
 
-      if (mSpeedData[(ix + 1)].mTime == time) {
+      if (m_speed_data[(ix + 1)].mTime == time) {
 
          // Exact match on next
 
-         guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(mSpeedData[(ix + 1)].mSpeed).value();
+         guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[(ix + 1)].mSpeed).value();
          guidance.setValid(true);
 
       } else {
 
          // Interpolate
 
-         double pct = Units::SecondsTime(time - mSpeedData[ix].mTime).value() /
-                      Units::SecondsTime(mSpeedData[(ix + 1)].mTime - mSpeedData[ix].mTime).value();
+         double pct = Units::SecondsTime(time - m_speed_data[ix].mTime).value() /
+                      Units::SecondsTime(m_speed_data[(ix + 1)].mTime - m_speed_data[ix].mTime).value();
 
-         Units::Speed interpolatedspeed = (1.0 - pct) * mSpeedData[ix].mSpeed + pct * mSpeedData[(ix + 1)].mSpeed;
+         Units::Speed interpolatedspeed = (1.0 - pct) * m_speed_data[ix].mSpeed + pct * m_speed_data[(ix + 1)].mSpeed;
 
          guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(interpolatedspeed).value();
          guidance.setValid(true);
@@ -172,20 +172,20 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
    }
 
    // Delay processing
-   if (mApplyPilotDelay) {
+   if (m_apply_pilot_delay) {
       // Update the ias history array
-      for (int i = histLen - 1; i > 0; i--) {
-         iasHist[i] = iasHist[i - 1];
+      for (int i = m_hist_len - 1; i > 0; i--) {
+         m_ias_hist[i] = m_ias_hist[i - 1];
       }
-      iasHist[0] = guidance.m_im_speed_command_ias;
+      m_ias_hist[0] = guidance.m_im_speed_command_ias;
 
-      if (historyIndexer < hardcodeDelay) {
+      if (m_history_indexer < hardcodeDelay) {
          // protect against not enough history for requested delay
-         guidance.m_im_speed_command_ias = iasHist[historyIndexer];
+         guidance.m_im_speed_command_ias = m_ias_hist[m_history_indexer];
       } else {
-         guidance.m_im_speed_command_ias = iasHist[hardcodeDelay];
+         guidance.m_im_speed_command_ias = m_ias_hist[hardcodeDelay];
       }
-      historyIndexer++;
+      m_history_indexer++;
    }//end delay processing
 
    return guidance;
@@ -193,22 +193,22 @@ Guidance IMSpeedCommandFile::update(Units::Time time) {
 }
 
 
-std::vector<IMSpeedCommandFile::SpeedRecord> IMSpeedCommandFile::getdata(void) {
+std::vector<IMSpeedCommandFile::SpeedRecord> IMSpeedCommandFile::GetData() {
 
    // A Get data method setup to aid unittesting.
 
-   return mSpeedData;
+   return m_speed_data;
 }
 
 
-void IMSpeedCommandFile::dump(void) {
+void IMSpeedCommandFile::dump() {
 
-   std::cout << "Dumping data read from " << mFilePath.c_str() << std::endl << std::endl;
-   std::cout << "Number of records " << mSpeedData.size() << std::endl << std::endl;
+   std::cout << "Dumping data read from " << m_file_path.c_str() << std::endl << std::endl;
+   std::cout << "Number of records " << m_speed_data.size() << std::endl << std::endl;
 
-   for (int ix = 0; ix < mSpeedData.size(); ix++) {
-      std::cout << (int) Units::SecondsTime(mSpeedData[ix].mTime).value() << ","
-                << Units::MetersPerSecondSpeed(mSpeedData[ix].mSpeed).value() << std::endl;
+   for (int ix = 0; ix < m_speed_data.size(); ix++) {
+      std::cout << (int) Units::SecondsTime(m_speed_data[ix].mTime).value() << ","
+                << Units::MetersPerSecondSpeed(m_speed_data[ix].mSpeed).value() << std::endl;
    }
 
 }

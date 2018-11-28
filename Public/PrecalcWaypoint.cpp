@@ -65,7 +65,7 @@ bool PrecalcWaypoint::load(DecodedStream *input) {
    if (!f) {
       LoggingLoadable::report_error("could not load leg length");
    }
-   leg_length *= NM_M; // converts nautical miles to meters
+   leg_length *= NAUTICAL_MILES_TO_METERS; // converts nautical miles to meters
 
    // Historically, course_angle was loaded in degrees but then
    // converted in place to radians.
@@ -80,19 +80,19 @@ bool PrecalcWaypoint::load(DecodedStream *input) {
    if (!f) {
       LoggingLoadable::report_error("could not load distance constraint");
    }
-   constraints.constraint_dist *= NM_M;
+   constraints.constraint_dist *= NAUTICAL_MILES_TO_METERS;
 
    f = load_datum(constraints.constraint_altHi);
    if (!f) {
       LoggingLoadable::report_error("could not load max altitude constraint");
    }
-   constraints.constraint_altHi *= FT_M;
+   constraints.constraint_altHi *= FEET_TO_METERS;
 
    f = load_datum(constraints.constraint_altLow);
    if (!f) {
       LoggingLoadable::report_error("could not load min altitude constraint");
    }
-   constraints.constraint_altLow *= FT_M;
+   constraints.constraint_altLow *= FEET_TO_METERS;
 
    loaded = true;
 

@@ -21,18 +21,18 @@
 
 using namespace std;
 
-TestFrameworkApplication::TestFrameworkApplication(void) {
-   loaded = false;
-   application_type = "speed_commands_from_file";
+TestFrameworkApplication::TestFrameworkApplication() {
+   m_loaded = false;
+   m_application_type = "speed_commands_from_file";
 }
 
-TestFrameworkApplication::~TestFrameworkApplication(void) {
+TestFrameworkApplication::~TestFrameworkApplication() {
 }
 
-Guidance TestFrameworkApplication::update(const SimulationTime &simTime,
-                                          TestFrameworkDynamics &dynamics,
-                                          AircraftState state_in,
-                                          Guidance guidance_in) {
+Guidance TestFrameworkApplication::Update(const SimulationTime &simTime,
+      TestFrameworkDynamics &dynamics,
+      AircraftState state_in,
+      Guidance guidance_in) {
    // Main update method computing guidance based on particular airborne application from runfile.
    // The Interval Management models have checks to ensure they are loaded properly and that
    // they have the correct trajectory data.
@@ -52,10 +52,10 @@ Guidance TestFrameworkApplication::update(const SimulationTime &simTime,
    Guidance guidance_out = guidance_in; // initialize output guidance to given guidance
    Guidance imGuidance;
 
-   double time = state_in.time; // sets the current time to the give state time
+   double time = state_in.m_time; // sets the current time to the give state time
 
-//	Retrieve the IM speed from a test vector file.
-   imGuidance = mIMSpeedCommandFile.update(Units::SecondsTime(time));
+   //	Retrieve the IM speed from a test vector file.
+   imGuidance = m_im_speed_command_file.Update(Units::SecondsTime(time));
    guidance_out.m_im_speed_command_ias = imGuidance.m_im_speed_command_ias;
    guidance_out.setValid(imGuidance.is_valid());
 
@@ -67,18 +67,18 @@ bool TestFrameworkApplication::load(DecodedStream *input) {
 
 
    //register variable for loading:
-   register_var("application_type", &application_type, false);
-   register_loadable_with_brackets("IM_speed_commands_from_file", &mIMSpeedCommandFile, true);
+   register_var("application_type", &m_application_type, false);
+   register_loadable_with_brackets("IM_speed_commands_from_file", &m_im_speed_command_file, true);
 
    //do the actual reading:
-   loaded = complete();
+   m_loaded = complete();
 
-   if (application_type != "speed_commands_from_file") {
-      cout << "invalid application_type value: " << application_type << ". Must be speed_commands_from_file." << endl;
+   if (m_application_type != "speed_commands_from_file") {
+      cout << "invalid application_type value: " << m_application_type << ". Must be speed_commands_from_file." << endl;
    }
-   return loaded;
+   return m_loaded;
 }
 
-bool TestFrameworkApplication::is_loaded() {
-   return loaded;
+bool TestFrameworkApplication::IsLoaded() {
+   return m_loaded;
 }

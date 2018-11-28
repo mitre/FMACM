@@ -14,14 +14,7 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #pragma once
-
-/*
-When you use this class you must specify both the type of the data you will be putting into it and the type you get when you multiply to objects of that type. 
-For instance you could instantiate it with double, double 
-Or Distance, Area 
-*/
 
 #include <vector>
 
@@ -30,39 +23,37 @@ using std::vector;
 class Statistics
 {
 public:
-   Statistics(void);
+   Statistics();
 
-   ~Statistics(void);
+   virtual ~Statistics();
 
-   virtual void insert(double value);
+   virtual void Insert(double value);
 
-   double get_std() const;
+   double ComputeStandardDeviation() const;
 
-   inline double get_mean() const {
-      return s1 / samples.size();
+   inline double GetMean() const {
+      return m_sum_of_samples / m_samples.size();
    }
 
-   inline long get_number_of_samples() const {
-      return samples.size();
+   inline long GetNumberOfSamples() const {
+      return m_samples.size();
    }
 
-   inline double get_max() const {
-      return max;
+   inline double GetMax() const {
+      return m_max;
    }
 
-   inline double get_min() const {
-      return min;
+   inline double GetMin() const {
+      return m_min;
    }
 
-   //gwang 2013-11-08
-   //input: pct is the percent (0 <= pct <= 1)
-   double get_percentile(double pct);
+   double GetPercentile(double percentage);
 
-   double get_bound95();
+   double Get95thBounds();
 
 private:
-   double s1;          // sum of all values seen so far
-   vector<double> samples;
-   double max;        // private data members
-   double min;        // private data members
+   double m_sum_of_samples;
+   vector<double> m_samples;
+   double m_max;
+   double m_min;
 };

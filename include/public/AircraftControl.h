@@ -34,36 +34,36 @@ class AircraftControl
 public:
    AircraftControl();
 
-   virtual void init(BadaWithCalc &aircraftPerformance,
-                     const Units::Length &altAtFAF,
-                     const Units::Angle &mMaxBankAngle,
-                     const PrecalcWaypoint &finalWaypoint);
+   virtual void Initialize(BadaWithCalc &aircraftPerformance,
+                           const Units::Length &altAtFAF,
+                           const Units::Angle &mMaxBankAngle,
+                           const PrecalcWaypoint &finalWaypoint);
 
    /**
    * This should be reimplemented in a subclass.
    */
-   virtual ControlCommands calculateControlCommands(const Guidance &guidance,
+   virtual ControlCommands CalculateControlCommands(const Guidance &guidance,
                                                     const EquationsOfMotionState &eqmState,
                                                     const WeatherTruth &wind);
 
    const Units::Frequency &getAltGain() const {
-      return altGain;
+      return m_alt_gain;
    }
 
    const Units::Frequency &getGammaGain() const {
-      return gammaGain;
+      return m_gamma_gain;
    }
 
    const Units::Frequency &getPhiGain() const {
-      return phiGain;
+      return m_phi_gain;
    }
 
    double getSpeedBrakeGain() const {
-      return speedBrakeGain;
+      return m_speed_brake_gain;
    }
 
    const Units::Frequency &getThrustGain() const {
-      return thrustGain;
+      return m_thrust_gain;
    }
 
 protected:
@@ -80,7 +80,7 @@ protected:
    virtual Units::Angle doLateralControl(const Guidance &guidance,
                                          const EquationsOfMotionState &eqmState);
 
-   virtual void doVerticalControl(const Guidance &guidance,
+   virtual void DoVerticalControl(const Guidance &guidance,
                                   const EquationsOfMotionState &eqmState,
                                   Units::Force &T_com,
                                   Units::Angle &gamma_com,
@@ -95,16 +95,16 @@ protected:
 
    Units::Frequency calculateThrustGain();
 
-   Units::Mass ac_mass;
-   Units::Area wing_area;
-   Units::Frequency altGain, gammaGain, phiGain, thrustGain, naturalFrequency;
-   Units::Speed Vwx, Vwy;
-   Units::Frequency dVwx_dh, dVwy_dh;
-   double speedBrakeGain;
-   Units::Angle mMaxBankAngle; // Maximum bank angle for dynamics and speed_on_pitch_control_dynamics calculations (parameter max_bank_angle)
-   Units::Length mAltAtFAF;
-   BadaWithCalc *mBadaWithCalc;
-   PrecalcWaypoint mFinalWaypoint; // the last waypoint on the planned route
+   Units::Mass m_ac_mass;
+   Units::Area m_wing_area;
+   Units::Frequency m_alt_gain, m_gamma_gain, m_phi_gain, m_thrust_gain, m_natural_frequency;
+   Units::Speed m_Vwx, m_Vwy;
+   Units::Frequency m_dVwx_dh, m_dVwy_dh;
+   double m_speed_brake_gain;
+   Units::Angle m_max_bank_angle; // Maximum bank angle for dynamics and speed_on_pitch_control_dynamics calculations (parameter max_bank_angle)
+   Units::Length m_alt_at_FAF;
+   BadaWithCalc *m_bada_calculator;
+   PrecalcWaypoint m_final_waypoint; // the last waypoint on the planned route
 
 private:
    static log4cplus::Logger logger;

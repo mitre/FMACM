@@ -50,10 +50,10 @@ const Units::PascalsPressure P0(101325.);          // Pa (  N/m^2)
 const Units::MetersPerSecondSpeed A0(340.29);         // meters/second
 
 // Isentropic expansion coefficient for air
-const double GAMMA = 1.4;
+constexpr double GAMMA = 1.4;
 
 // mu
-const double MU = ((GAMMA - 1) / (GAMMA));
+constexpr double MU = ((GAMMA - 1) / (GAMMA));
 
 // Real gas constant (m^2/K-s^2)
 const Units::MetersSecondsKelvinGasConstant R(287.05287);
@@ -69,13 +69,13 @@ public:
 
    virtual ~Atmosphere();
 
-   virtual Units::KelvinTemperature getTemp(const Units::Length h) const = 0;
+   virtual Units::KelvinTemperature GetTemp(const Units::Length h) const = 0;
 
-   void airDensity(const Units::Length h,
+   void AirDensity(const Units::Length h,
                    Units::Density &rho,
                    Units::Pressure &P) const;
 
-   void calcWindGrad(const Units::Length h_star,
+   void CalcWindGrad(const Units::Length h_star,
                      const WindStack &wind,
                      Units::Speed &w_dir,
                      Units::Frequency &w_dir_grad) const;
@@ -91,6 +91,6 @@ public:
                                       const double &mach) const;
 
    // method to convert mach to ias-ias in meters per second.
-   Units::Speed machToIAS(const double mach,
+   Units::Speed MachToIAS(const double mach,
                           const Units::Length alt) const;
 };

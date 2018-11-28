@@ -25,10 +25,9 @@
 using namespace std;
 
 
-log4cplus::Logger CoreUtils::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CoreUtils"));
+log4cplus::Logger CoreUtils::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CoreUtils"));
 
-int CoreUtils::FindNearestIndex(int ignored_parameter, // FIXME AAES-811
-                                const double &value_to_find,
+int CoreUtils::FindNearestIndex(const double &value_to_find,
                                 const vector<double> &vector_to_search) {
 
    int idx;
@@ -43,44 +42,31 @@ int CoreUtils::FindNearestIndex(int ignored_parameter, // FIXME AAES-811
    return idx;
 }
 
-double CoreUtils::interpolate(int upperIx,
-                              double v,
-                              const std::vector<double> &vVect,
-                              const std::vector<double> &oVect) {
-   // Interpolates using a value to compute an output value.
-   //
-   // **NOTE 27 Sep 13:In the IM_* classes::update, the distance values
-   // passed into this function start a high negative and go to positive.
-   // To get correct results for these, they should be sent as -distance.
-   //
-   // upperIx:high index into vectors.
-   // v:value to be interpolated with.
-   // vVect:vector with data the same type as val, (ie:if val is a distance, vVect contains distances.
-   //         this is the data we are interpolating from).
-   // oVect:vector with data that we want to compute to, (ie:will be velocities if we want velocity output).
-   //
-   // returns interpolated output value.
+double CoreUtils::LinearlyInterpolate(int upper_index,
+                                      double value,
+                                      const std::vector<double> &value_vector,
+                                      const std::vector<double> &output_vector) {
 
-   if (upperIx < 1 || upperIx >= vVect.size()) {
+   if (upper_index < 1 || upper_index >= value_vector.size()) {
       char msg[200];
-      sprintf(msg, "upperIx (%d) is not between 1 and %d", upperIx, static_cast<int>(vVect.size() - 1));
-      LOG4CPLUS_FATAL(logger, msg);
+      sprintf(msg, "upperIx (%d) is not between 1 and %d", upper_index, static_cast<int>(value_vector.size() - 1));
+      LOG4CPLUS_FATAL(m_logger, msg);
       throw out_of_range(msg);
    }
 
-   double v2 = vVect[upperIx];
-   double v1 = vVect[upperIx - 1];
-   double o2 = oVect[upperIx];
-   double o1 = oVect[upperIx - 1];
+   double v2 = value_vector[upper_index];
+   double v1 = value_vector[upper_index - 1];
+   double o2 = output_vector[upper_index];
+   double o1 = output_vector[upper_index - 1];
 
-   if ((v - v1) * (v - v2) > 0) {
+   if ((value - v1) * (value - v2) > 0) {
       char msg[200];
-      sprintf(msg, "v (%lf) is not between %lf and %lf.", v, v1, v2);
-      LOG4CPLUS_FATAL(logger, msg);
+      sprintf(msg, "v (%lf) is not between %lf and %lf.", value, v1, v2);
+      LOG4CPLUS_FATAL(m_logger, msg);
       throw domain_error(msg);
    }
 
-   return ((o2 - o1) / (v2 - v1)) * (v - v1) + o1;
+   return ((o2 - o1) / (v2 - v1)) * (value - v1) + o1;
 }
 
 const Units::Length CoreUtils::CalculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,
@@ -91,12 +77,12 @@ const Units::Length CoreUtils::CalculateEuclideanDistance(const std::pair<Units:
    return eucldist;
 }
 
-const double CoreUtils::limit(double value,
-                              double low_limit,
-                              double high_limit) {
+const double CoreUtils::LimitOnInterval(double value,
+                                        double low_limit,
+                                        double high_limit) {
    return (value < low_limit ? low_limit : (value > high_limit ? high_limit : value));
 }
 
-const int CoreUtils::sign(double value) {
+const int CoreUtils::SignOfValue(double value) {
    return (((value) == (0)) ? 0 : (((value) > (0)) ? (1) : (-1)));
 }

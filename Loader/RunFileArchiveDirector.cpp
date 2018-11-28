@@ -35,8 +35,8 @@ string RunFileArchiveDirector::get_New_Link_Name(const FilePath &source_file) {
 
    string out;
    bool not_in_while = false;;
-   string file = source_file.get_Name();//file of the source; so need to create a function in FilePath that returns the name of the file like foo.txt
-   string extension = source_file.get_Type();
+   string file = source_file.GetName();//file of the source; so need to create a function in FilePath that returns the name of the file like foo.txt
+   string extension = source_file.GetType();
    while (true) {
       if (!not_in_while) {
          if (extension == "") {
@@ -50,7 +50,7 @@ string RunFileArchiveDirector::get_New_Link_Name(const FilePath &source_file) {
       if (!is_Name_in_Archive(out)) {
          //add to the map
          pair<map<string, string>::iterator, bool> ret;
-         ret = mapper.insert(pair<string, string>(source_file.get_Full_Path(), out));
+         ret = mapper.insert(pair<string, string>(source_file.GetFullPath(), out));
          if (!ret.second) {
             return out;
          }
@@ -69,11 +69,11 @@ string RunFileArchiveDirector::get_New_Link_Name(const FilePath &source_file) {
 }//-----------------------------------------------------------------------------------
 
 bool RunFileArchiveDirector::is_new_File(const FilePath &source_file) const {
-   if (destination.get_Full_Path() == "") {
+   if (destination.GetFullPath() == "") {
       return false;
    }
 
-   return !(mapper.find(source_file.get_Full_Path()) == mapper.end());
+   return !(mapper.find(source_file.GetFullPath()) == mapper.end());
 }
 
 

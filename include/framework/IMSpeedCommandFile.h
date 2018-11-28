@@ -48,36 +48,36 @@ public:
       Units::Speed mSpeed;
    };
 
-   IMSpeedCommandFile(void);
+   IMSpeedCommandFile();
 
-   ~IMSpeedCommandFile(void);
+   ~IMSpeedCommandFile();
 
    bool load(DecodedStream *strm);
 
-   Guidance update(Units::Time time);
+   Guidance Update(Units::Time time);
 
-   std::vector<IMSpeedCommandFile::SpeedRecord> getdata(void);
+   std::vector<IMSpeedCommandFile::SpeedRecord> GetData();
 
-   void dump(void);
+   void dump();
 
 
 protected:
 
-   std::vector<SpeedRecord> mSpeedData;
+   std::vector<SpeedRecord> m_speed_data;
 
 
 private:
 
-   static const int histLen = 20;
-   double iasHist[histLen];
-   int historyIndexer;
+   static const int m_hist_len = 20;
+   double m_ias_hist[m_hist_len];
+   int m_history_indexer;
 
-   void readData(void);
+   void ReadData();
 
-   std::string mFilePath;
-   bool mApplyPilotDelay;
-   Units::SecondsTime mPilotDelaySeconds;
+   std::string m_file_path;
+   bool m_apply_pilot_delay;
+   Units::SecondsTime m_pilot_delay_seconds;
 
-   bool mLoaded;
+   bool m_loaded;
 
 };

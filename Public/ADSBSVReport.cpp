@@ -23,242 +23,241 @@ namespace Sensor {
    namespace ADSB {
       const ADSBSVReport ADSBSVReport::blank_report;
 
-      ADSBSVReport::ADSBSVReport(void) {
-         clear();
+      ADSBSVReport::ADSBSVReport() {
+         Clear();
       }
 
-      ADSBSVReport::~ADSBSVReport(void) {
+      ADSBSVReport::~ADSBSVReport() {
 
       }
 
       // Copy constructor
       ADSBSVReport::ADSBSVReport(const ADSBSVReport &in) {
-         id = in.id;
-         time = in.time;
-         x = in.x;
-         y = in.y;
-         z = in.z;
-         xd = in.xd;
-         yd = in.yd;
-         zd = in.zd;
-         nacp = in.nacp;
-         nacv = in.nacv;
-         nicp = in.nicp;
-         nicv = in.nicv;
-         mHasPosition = in.mHasPosition;
-         mHasVelocity = in.mHasVelocity;
-         horizontalPositionQuantum = in.horizontalPositionQuantum;
-         horizontalVelocityQuantum = in.horizontalVelocityQuantum;
-         verticalPositionQuantum = in.verticalPositionQuantum;
-         verticalVelocityQuantum = in.verticalVelocityQuantum;
-         timeQuantum = in.timeQuantum;
+         m_id = in.m_id;
+         m_time = in.m_time;
+         m_x = in.m_x;
+         m_y = in.m_y;
+         m_z = in.m_z;
+         m_xd = in.m_xd;
+         m_yd = in.m_yd;
+         m_zd = in.m_zd;
+         m_nacp = in.m_nacp;
+         m_nacv = in.m_nacv;
+         m_nicp = in.m_nicp;
+         m_nicv = in.m_nicv;
+         m_has_position = in.m_has_position;
+         m_has_velocity = in.m_has_velocity;
+         m_horizontal_position_quantum = in.m_horizontal_position_quantum;
+         m_horizontal_velocity_quantum = in.m_horizontal_velocity_quantum;
+         m_vertical_position_quantum = in.m_vertical_position_quantum;
+         m_vertical_velocity_quantum = in.m_vertical_velocity_quantum;
+         m_time_quantum = in.m_time_quantum;
       }
 
       // Assignment operator
       ADSBSVReport &ADSBSVReport::operator=(const ADSBSVReport &in) {
          if (this != &in) {
-            id = in.id;
-            time = in.time;
-            x = in.x;
-            y = in.y;
-            z = in.z;
-            xd = in.xd;
-            yd = in.yd;
-            zd = in.zd;
-            nacp = in.nacp;
-            nacv = in.nacv;
-            nicp = in.nicp;
-            nicv = in.nicv;
-            mHasPosition = in.mHasPosition;
-            mHasVelocity = in.mHasVelocity;
-            horizontalPositionQuantum = in.horizontalPositionQuantum;
-            horizontalVelocityQuantum = in.horizontalVelocityQuantum;
-            verticalPositionQuantum = in.verticalPositionQuantum;
-            verticalVelocityQuantum = in.verticalVelocityQuantum;
-            timeQuantum = in.timeQuantum;
+            m_id = in.m_id;
+            m_time = in.m_time;
+            m_x = in.m_x;
+            m_y = in.m_y;
+            m_z = in.m_z;
+            m_xd = in.m_xd;
+            m_yd = in.m_yd;
+            m_zd = in.m_zd;
+            m_nacp = in.m_nacp;
+            m_nacv = in.m_nacv;
+            m_nicp = in.m_nicp;
+            m_nicv = in.m_nicv;
+            m_has_position = in.m_has_position;
+            m_has_velocity = in.m_has_velocity;
+            m_horizontal_position_quantum = in.m_horizontal_position_quantum;
+            m_horizontal_velocity_quantum = in.m_horizontal_velocity_quantum;
+            m_vertical_position_quantum = in.m_vertical_position_quantum;
+            m_vertical_velocity_quantum = in.m_vertical_velocity_quantum;
+            m_time_quantum = in.m_time_quantum;
          }
          return *this;
       }
 
       // Clear
-      void ADSBSVReport::clear(void) {
+      void ADSBSVReport::Clear(void) {
          // Reset reports to original condition
-         id = -1;
-         time = Units::SecondsTime(-1);
-         x = y = z = Units::FeetLength(0);
-         xd = yd = zd = Units::FeetPerSecondSpeed(0);
-         nacp = nacv = nicp = nicv = 0;
-         mHasPosition = mHasVelocity = false;
-         horizontalPositionQuantum = verticalPositionQuantum = Units::FeetLength(-1);
-         horizontalVelocityQuantum = verticalVelocityQuantum = Units::FeetPerSecondSpeed(-1);
+         m_id = -1;
+         m_time = Units::SecondsTime(-1);
+         m_x = m_y = m_z = Units::FeetLength(0);
+         m_xd = m_yd = m_zd = Units::FeetPerSecondSpeed(0);
+         m_nacp = m_nacv = m_nicp = m_nicv = 0;
+         m_has_position = m_has_velocity = false;
+         m_horizontal_position_quantum = m_vertical_position_quantum = Units::FeetLength(-1);
+         m_horizontal_velocity_quantum = m_vertical_velocity_quantum = Units::FeetPerSecondSpeed(-1);
       }
 
       bool ADSBSVReport::operator==(const ADSBSVReport &in) {
          // rewritten 4/14/16 to ignore fields not included in message
 
          // fields which must always match
-         if (this->id != in.id || this->time != in.time ||
-             this->mHasPosition != in.mHasPosition ||
-             this->mHasVelocity != in.mHasVelocity) {
+         if (m_id != in.m_id || m_time != in.m_time ||
+               m_has_position != in.m_has_position ||
+               m_has_velocity != in.m_has_velocity) {
             return false;
          }
 
          // position fields
-         if (this->mHasPosition) {
-            if (this->x != in.x || this->y != in.y || this->z != in.z ||
-                this->nacp != in.nacp || this->nicp != in.nicp ||
-                this->horizontalPositionQuantum != in.horizontalPositionQuantum ||
-                this->verticalPositionQuantum != in.verticalPositionQuantum) {
+         if (m_has_position) {
+            if (m_x != in.m_x || m_y != in.m_y || m_z != in.m_z ||
+                  m_nacp != in.m_nacp || m_nicp != in.m_nicp ||
+                  m_horizontal_position_quantum != in.m_horizontal_position_quantum ||
+                  m_vertical_position_quantum != in.m_vertical_position_quantum) {
                return false;
             }
          }
 
          // velocity fields
-         if (this->mHasVelocity) {
-            if (this->xd != in.xd || this->yd != in.yd || this->zd != in.zd ||
-                this->nacv != in.nacv || this->nicv != in.nicv ||
-                this->horizontalVelocityQuantum != in.horizontalVelocityQuantum ||
-                this->verticalVelocityQuantum != in.verticalVelocityQuantum) {
+         if (this->m_has_velocity) {
+            if (m_xd != in.m_xd || m_yd != in.m_yd || m_zd != in.m_zd ||
+                m_nacv != in.m_nacv || m_nicv != in.m_nicv ||
+                m_horizontal_velocity_quantum != in.m_horizontal_velocity_quantum ||
+                m_vertical_velocity_quantum != in.m_vertical_velocity_quantum) {
                return false;
             }
          }
 
-         // everything matches that needs to
          return true;
       }
 
 
-      bool ADSBSVReport::isHasPosition() const {
-         return mHasPosition;
+      bool ADSBSVReport::IsHasPosition() const {
+         return m_has_position;
       }
 
-      void ADSBSVReport::setHasPosition(bool hasPosition) {
-         mHasPosition = hasPosition;
+      void ADSBSVReport::SetHasPosition(const bool has_position) {
+         m_has_position = has_position;
       }
 
-      bool ADSBSVReport::isHasVelocity() const {
-         return mHasVelocity;
+      bool ADSBSVReport::IsHasVelocity() const {
+         return m_has_velocity;
       }
 
-      void ADSBSVReport::setHasVelocity(bool hasVelocity) {
-         mHasVelocity = hasVelocity;
+      void ADSBSVReport::SetHasVelocity(const bool has_velocity) {
+         m_has_velocity = has_velocity;
       }
 
-      Units::FeetLength ADSBSVReport::getHorizontalPositionQuantum() const {
-         return horizontalPositionQuantum;
+      Units::FeetLength ADSBSVReport::GetHorizontalPositionQuantum() const {
+         return m_horizontal_position_quantum;
       }
 
-      Units::FeetPerSecondSpeed ADSBSVReport::getHorizontalVelocityQuantum() const {
-         return horizontalVelocityQuantum;
+      Units::FeetPerSecondSpeed ADSBSVReport::GetHorizontalVelocityQuantum() const {
+         return m_horizontal_velocity_quantum;
       }
 
 
-      void ADSBSVReport::setId(int id) {
-         this->id = id;
+      void ADSBSVReport::SetId(int id) {
+         m_id = id;
       }
 
-      void ADSBSVReport::setTime(Units::Time time) {
-         this->time = time;
+      void ADSBSVReport::SetTime(Units::Time time) {
+         m_time = time;
       }
 
-      int ADSBSVReport::getId() const {
-         return id;
+      int ADSBSVReport::GetId() const {
+         return m_id;
       }
 
-      int ADSBSVReport::getNacp() const {
-         return nacp;
+      int ADSBSVReport::GetNacp() const {
+         return m_nacp;
       }
 
-      int ADSBSVReport::getNacv() const {
-         return nacv;
+      int ADSBSVReport::GetNacv() const {
+         return m_nacv;
       }
 
-      int ADSBSVReport::getNicp() const {
-         return nicp;
+      int ADSBSVReport::GetNicp() const {
+         return m_nicp;
       }
 
-      int ADSBSVReport::getNicv() const {
-         return nicv;
+      int ADSBSVReport::GetNicv() const {
+         return m_nicv;
       }
 
-      Units::SecondsTime ADSBSVReport::getTime() const {
-         return time;
+      Units::SecondsTime ADSBSVReport::GetTime() const {
+         return m_time;
       }
 
-      Units::SecondsTime ADSBSVReport::getTimeQuantum() const {
-         return timeQuantum;
+      Units::SecondsTime ADSBSVReport::GetTimeQuantum() const {
+         return m_time_quantum;
       }
 
-      Units::FeetLength ADSBSVReport::getVerticalPositionQuantum() const {
-         return verticalPositionQuantum;
+      Units::FeetLength ADSBSVReport::GetVerticalPositionQuantum() const {
+         return m_vertical_position_quantum;
       }
 
-      Units::FeetPerSecondSpeed ADSBSVReport::getVerticalVelocityQuantum() const {
-         return verticalVelocityQuantum;
+      Units::FeetPerSecondSpeed ADSBSVReport::GetVerticalVelocityQuantum() const {
+         return m_vertical_velocity_quantum;
       }
 
-      Units::FeetLength ADSBSVReport::getX() const {
-         return x;
+      Units::FeetLength ADSBSVReport::GetX() const {
+         return m_x;
       }
 
-      Units::FeetPerSecondSpeed ADSBSVReport::getXd() const {
-         return xd;
+      Units::FeetPerSecondSpeed ADSBSVReport::GetXd() const {
+         return m_xd;
       }
 
-      Units::FeetLength ADSBSVReport::getY() const {
-         return y;
+      Units::FeetLength ADSBSVReport::GetY() const {
+         return m_y;
       }
 
-      Units::FeetPerSecondSpeed ADSBSVReport::getYd() const {
-         return yd;
+      Units::FeetPerSecondSpeed ADSBSVReport::GetYd() const {
+         return m_yd;
       }
 
-      Units::FeetLength ADSBSVReport::getZ() const {
-         return z;
+      Units::FeetLength ADSBSVReport::GetZ() const {
+         return m_z;
       }
 
-      Units::FeetPerSecondSpeed ADSBSVReport::getZd() const {
-         return zd;
+      Units::FeetPerSecondSpeed ADSBSVReport::GetZd() const {
+         return m_zd;
       }
 
-      void ADSBSVReport::setNacp(int nacp) {
-         this->nacp = nacp;
+      void ADSBSVReport::SetNacp(int nacp) {
+         m_nacp = nacp;
       }
 
-      void ADSBSVReport::setNacv(int nacv) {
-         this->nacv = nacv;
+      void ADSBSVReport::SetNacv(int nacv) {
+         m_nacv = nacv;
       }
 
-      void ADSBSVReport::setNicp(int nicp) {
-         this->nicp = nicp;
+      void ADSBSVReport::SetNicp(int nicp) {
+         m_nicp = nicp;
       }
 
-      void ADSBSVReport::setNicv(int nicv) {
-         this->nicv = nicv;
+      void ADSBSVReport::SetNicv(int nicv) {
+         nicv = nicv;
       }
 
-      void ADSBSVReport::setPosition(const Units::Length x,
+      void ADSBSVReport::SetPosition(const Units::Length x,
                                      const Units::Length y,
                                      const Units::Length z,
                                      const Units::Length horizontalQuantum,
                                      const Units::Length verticalQuantum) {
-         this->horizontalPositionQuantum = horizontalQuantum;
-         this->x = quantize(x, horizontalPositionQuantum);
-         this->y = quantize(y, horizontalPositionQuantum);
-         this->verticalPositionQuantum = verticalQuantum;
-         this->z = quantize(z, verticalPositionQuantum);
+         m_horizontal_position_quantum = horizontalQuantum;
+         m_x = quantize(x, m_horizontal_position_quantum);
+         m_y = quantize(y, m_horizontal_position_quantum);
+         m_vertical_position_quantum = verticalQuantum;
+         m_z = quantize(z, m_vertical_position_quantum);
       }
 
-      void ADSBSVReport::setVelocity(const Units::Speed xd,
+      void ADSBSVReport::SetVelocity(const Units::Speed xd,
                                      const Units::Speed yd,
                                      const Units::Speed zd,
                                      const Units::Speed horizontalQuantum,
                                      const Units::Speed verticalQuantum) {
-         this->horizontalVelocityQuantum = horizontalQuantum;
-         this->xd = quantize(xd, horizontalVelocityQuantum);
-         this->yd = quantize(yd, horizontalVelocityQuantum);
-         this->verticalVelocityQuantum = verticalQuantum;
-         this->zd = quantize(zd, verticalVelocityQuantum);
+         m_horizontal_velocity_quantum = horizontalQuantum;
+         m_xd = quantize(xd, m_horizontal_velocity_quantum);
+         m_yd = quantize(yd, m_horizontal_velocity_quantum);
+         m_vertical_velocity_quantum = verticalQuantum;
+         m_zd = quantize(zd, m_vertical_velocity_quantum);
       }
    }
 }

@@ -14,7 +14,6 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #pragma once
 
 #ifndef DVECTOR_H
@@ -22,50 +21,42 @@
 
 class DVector
 {
-private:
-   int minIndex;
-   int maxIndex;
-   double *vector;
-
 public:
-   // constructor/destructors
-   DVector(void);
+   DVector();
 
    DVector(int min,
            int max);
 
    DVector(const DVector &in);
 
-   ~DVector(void);
+   virtual ~DVector();
+   
+   double Get(int index);
 
-   // get/set methods
-   double get(int index);
-
-   void set(int index,
+   void Set(int index,
             double value);
-
-   // method to set the bouds of the Vector
-   void setBounds(int min,
+   
+   void SetBounds(int min,
                   int max);
+   
+   bool IsIndexInRange(int index) const;
+   
+   int GetMin();
 
-   // method to check if a given index is in the array
-   bool inRange(int index) const;
-
-   // getter methods
-   int get_min();
-
-   int get_max();
-
-   // overloads the array index operator
+   int GetMax();
+   
    double &operator[](int);
 
    const double &operator[](int) const;
-
-   // overloads the equals operator
+   
    DVector &operator=(const DVector &in);
-
-   // overloads less than opertor for sort
+   
    bool operator<(const DVector &other) const;
-};
 
+
+private:
+   int m_min_index;
+   int m_max_index;
+   double *m_vector;
+};
 #endif

@@ -42,7 +42,7 @@ void MaintainMetric::addErr(double err) {
    //
    // err:input spacing error.
 
-   spacingError.insert(err);
+   spacingError.Insert(err);
 
    // TODO:Need to include time step in this if.
 
@@ -90,7 +90,7 @@ double MaintainMetric::getMeanErr() {
    //
    // returns mean error.
 
-   return spacingError.get_mean();
+   return spacingError.GetMean();
 }
 
 
@@ -100,7 +100,7 @@ double MaintainMetric::getStdErr() {
    //
    // returns standard deviation of error.
 
-   return spacingError.get_std();
+   return spacingError.ComputeStandardDeviation();
 }
 
 
@@ -110,7 +110,7 @@ double MaintainMetric::getBound95() {
    //
    // returns 95th bound of spacing error.
 
-   return spacingError.get_bound95();
+   return spacingError.Get95thBounds();
 }
 
 
@@ -141,5 +141,5 @@ bool MaintainMetric::hasSamples() {
    // returns true if there are samples
    //		   else false.
 
-   return (spacingError.get_number_of_samples() > 0);
+   return (spacingError.GetNumberOfSamples() > 0);
 }

@@ -14,7 +14,6 @@
 //
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #include "math/RandomGenerator.h"
 #include <math.h>
 #include <time.h>
@@ -22,95 +21,83 @@
 #include "utility/constants.h"
 
 
-const double RandomGenerator::IA = 16807;
-const double RandomGenerator::IM = 2147483647;
-const double RandomGenerator::AM = 1.0 / IM;
-const double RandomGenerator::IQ = 127773.0;
-const double RandomGenerator::IR = 2836.0;
+const double RandomGenerator::m_IA = 16807;
+const double RandomGenerator::m_IM = 2147483647;
+const double RandomGenerator::m_AM = 1.0 / m_IM;
+const double RandomGenerator::m_IQ = 127773.0;
+const double RandomGenerator::m_IR = 2836.0;
 
-log4cplus::Logger RandomGenerator::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RandomGenerator"));
+log4cplus::Logger RandomGenerator::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("RandomGenerator"));
 
 
 RandomGenerator::RandomGenerator() {
-   // should never initialize to zero
    double seed = time(NULL);
-   long k = seed / IM;
-   mSeed = seed - (k * IM);
+   long k = seed / m_IM;
+   m_seed = seed - (k * m_IM);
 }
 
 RandomGenerator::RandomGenerator(const double seed) {
    assert(seed != 0.0);
-   long k = seed / IM;
-   mSeed = seed - (k * IM);
+   long k = seed / m_IM;
+   m_seed = seed - (k * m_IM);
 }
 
 RandomGenerator::~RandomGenerator() {
 }
 
-//generate a uniform random number between 0 and 1
-//From "Numerical Recipe"
-const double RandomGenerator::uniformSample() {
-   long k = mSeed / IQ;
+const double RandomGenerator::UniformSample() {
+   long k = m_seed / m_IQ;
 
-   mSeed = IA * (mSeed - k * IQ) - IR * k;
+   m_seed = m_IA * (m_seed - k * m_IQ) - m_IR * k;
 
-   if (mSeed < 0.0) {
-      mSeed += IM;
+   if (m_seed < 0.0) {
+      m_seed += m_IM;
    }
 
-   double sample = AM * mSeed;
+   double sample = m_AM * m_seed;
 
-   LOG4CPLUS_TRACE(logger, mSeed << "," << sample);
+   LOG4CPLUS_TRACE(m_logger, m_seed << "," << sample);
 
    return sample;
 }
 
-// returns gaussian distributed random variable with mean 0 and standard
-// deviation 1.
-// usage example:  x = gauss(0., 32.);
-const double RandomGenerator::gaussianSample() {
-   double u1 = uniformSample();
-   double u2 = uniformSample();
+const double RandomGenerator::GaussianSample() {
+   double u1 = UniformSample();
+   double u2 = UniformSample();
 
-   double eln = -2.0 * log(u1);     // ALOG(U1)
+   double eln = -2.0 * log(u1);
    double ang = 2.0 * M_PI * u2;
 
    double v1 = sqrt(eln) * cos(ang);
 
-   LOG4CPLUS_TRACE(logger, mSeed);
+   LOG4CPLUS_TRACE(m_logger, m_seed);
 
    return v1;
 }
 
-// returns truncated gaussian random varialbe with mean 0, standard
-// deviation 1, and maximum standard deviation max_std_dev
-const double RandomGenerator::truncatedGaussianSample(
-      const double maxstddev) {
-   double val = maxstddev + 1.0;
+const double RandomGenerator::TruncatedGaussianSample(
+      const double max_standard_deviation) {
+   double val = max_standard_deviation + 1.0;
 
-   while (val > (maxstddev) || val < (-maxstddev)) {
-      val = gaussianSample();
+   while (val > (max_standard_deviation) || val < (-max_standard_deviation)) {
+      val = GaussianSample();
    }
-   LOG4CPLUS_TRACE(logger, mSeed);
+   LOG4CPLUS_TRACE(m_logger, m_seed);
 
    return val;
 }
 
-// returns Rayleigh distributed random variable with mean 0 and standard
-// deviation 1.
-// usage example:  x = Rayleigh(0., 32.);
-const double RandomGenerator::rayleighSample() {
-   double u1 = uniformSample();
+const double RandomGenerator::RayleighSample() {
+   double u1 = UniformSample();
    double v1 = (sqrt(-2.0 * log(u1)) - 1.253) / sqrt(0.429);
 
    return v1;
 }
 
-// returns laplacian r.v. with lambda=1.
-const double RandomGenerator::laplaceSample() {
-   double uni = uniformSample();
+const double RandomGenerator::LaplaceSample() {
+   double uni = UniformSample();
    double err = -log(uni);
-   uni = uniformSample();
+   uni = UniformSample();
 
    if (uni < 0.5) {
       err = -err;
@@ -119,12 +106,11 @@ const double RandomGenerator::laplaceSample() {
    return err;
 }
 
-void RandomGenerator::setSeed(const double seed) {
-   // not allowed to set seed to zero
+void RandomGenerator::SetSeed(const double seed) {
    assert(seed != 0.0);
-   mSeed = seed;
+   m_seed = seed;
 }
 
-const double RandomGenerator::getSeed(void) {
-   return mSeed;
+const double RandomGenerator::GetSeed(void) {
+   return m_seed;
 }

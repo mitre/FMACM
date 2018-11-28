@@ -45,7 +45,7 @@ public:
 
    // Adds a new trajectory to file.
    void addTrajectory(int id,
-                      VerticalPath &fullTraj);
+                      const VerticalPath &fullTraj);
 
    // Sets iteration.
    void setIter(int iterIn);

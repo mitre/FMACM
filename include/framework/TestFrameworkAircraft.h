@@ -15,15 +15,7 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * TestFrameworkAircraft.h
- *
- *  Created on: Mar 2, 2015
- *      Author: sbowman
- */
-
-#ifndef TESTFRAMEWORKAIRCRAFT_H_
-#define TESTFRAMEWORKAIRCRAFT_H_
+#pragma once
 
 #include "public/Aircraft.h"
 #include "TestFrameworkApplication.h"
@@ -61,53 +53,51 @@ public:
     */
    bool load(DecodedStream *input);
 
-   bool update(const SimulationTime &time);
+   bool Update(const SimulationTime &time);
 
-   void post_load(Units::Time simulation_time_step,
-                  int predictedWindOpt,
-                  bool blendWind);
+   void PostLoad(Units::Time simulation_time_step,
+                  int predicted_wind_opt,
+                  bool blend_wind);
 
-   void init(Units::Length adsbReceptionRangeThreshold,
-             const WeatherTruth &weather);
+   void Initialize(Units::Length adsbReceptionRangeThreshold,
+		   const WeatherTruth &weather);
 
    //Other Member Data:
-   int start_time;
-   int id;
-   AircraftState truth_state_vector_old;
-   //StateModel state_model;
-   AircraftIntentFromFile mAircraftIntent;
-   TestFrameworkDynamics mDynamics;
-   AircraftIntent mTargetIntentNotUsed; // NOT USED, but some signatures require it still
-   TrajectoryFromFile precalc_traj;
-   TestFrameworkApplication airborne_app;
-   TestFrameworkFMS mFms;
-   AircraftControl mAircraftControl;   // for FMS
+   int m_start_time;
+   int m_id;
+   AircraftState m_truth_state_vector_old;
+   AircraftIntentFromFile m_aircraft_intent;
+   TestFrameworkDynamics m_dynamics;
+   AircraftIntent m_target_intent_not_used; // NOT USED, but some signatures require it still
+   TrajectoryFromFile m_precalc_traj;
+   TestFrameworkApplication m_airborne_app;
+   TestFrameworkFMS m_fms;
+   AircraftControl m_aircraft_control;   // for FMS
 
 private:
-   void init_truth_state_vector_old(void);
+   void InitTruthStateVectorOld();
 
    // helper method to calculate the end time of the aircraft
-   double calculate_end_time(AircraftState vector_in);
+   double CalculateEndTime(AircraftState state_in);
 
-   void copy(const TestFrameworkAircraft &in);
+   void Copy(const TestFrameworkAircraft &in);
 
    // Data Members
-   bool mIsFinished;
+   bool m_is_finished;
 
    // Wind data, setup as 5x2 matrices.
    // 1st Column:altitudes in feet.
    // 2nd Column:wind speed in feet/sec.
-//	DMatrix mPredictedWindX;
-//	DMatrix mPredictedWindY;
+   //	DMatrix mPredictedWindX;
+   //	DMatrix mPredictedWindY;
    // WeatherPrediction mPredictedWind;
 
    // Initialization loadables
-   Units::FeetLength mInitialAltitude;
-   Units::KnotsSpeed mInitialIas;
-   double mInitialMach; // default 0.78
+   Units::FeetLength m_initial_altitude;
+   Units::KnotsSpeed m_initial_ias;
+   double m_initial_mach; // default 0.78
 
    // std::shared_ptr<AircraftControl> mAircraftControl;
-//	static FILE *mGuidanceOut;
+   //	static FILE *mGuidanceOut;
 };
 
-#endif /* TESTFRAMEWORKAIRCRAFT_H_ */

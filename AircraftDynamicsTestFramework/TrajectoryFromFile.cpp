@@ -21,53 +21,53 @@
 #include "utility/CsvParser.h"
 
 
-TrajectoryFromFile::TrajectoryFromFile(void) {
+TrajectoryFromFile::TrajectoryFromFile() {
 
-   v_traj.mTimeToGo.clear();
-   v_traj.mDistToGo.clear();
-   v_traj.mAlt.clear();
-   v_traj.mIas.clear();
-   v_traj.mDotAlt.clear();
+   m_vertical_trajectory.mTimeToGo.clear();
+   m_vertical_trajectory.mDistToGo.clear();
+   m_vertical_trajectory.mAlt.clear();
+   m_vertical_trajectory.mIas.clear();
+   m_vertical_trajectory.mDotAlt.clear();
 
-   h_traj.clear();
+   m_horizontal_trajectory.clear();
 
-   mVerticalTrajectoryFile = "";
-   mHorizontalTrajectoryFile = "";
+   m_vertical_trajectory_file = "";
+   m_horizontal_trajectory_file = "";
 
-   mMassPercentile = 0.5; // Dave Elliott says we can hard-code this for the tests
-   mAltAtFAF = Units::FeetLength(-50.0);
+   m_mass_percentile = 0.5; // Dave Elliott says we can hard-code this for the tests
+   m_altitude_at_final_approach_fix = Units::FeetLength(-50.0);
 
-   mLoaded = false;
+   m_loaded = false;
 }
 
-TrajectoryFromFile::~TrajectoryFromFile(void) {
+TrajectoryFromFile::~TrajectoryFromFile() {
 }
 
 bool TrajectoryFromFile::load(DecodedStream *input) {
 
    set_stream(input);
 
-   register_var("vfp_csv_file", &mVerticalTrajectoryFile);
-   register_var("hfp_csv_file", &mHorizontalTrajectoryFile);
+   register_var("vfp_csv_file", &m_vertical_trajectory_file);
+   register_var("hfp_csv_file", &m_horizontal_trajectory_file);
 
-   mLoaded = complete();
+   m_loaded = complete();
 
-   if (mLoaded) {
-      readVerticalTrajectoryFile();
-      readHorizontalTrajectoryFile();
+   if (m_loaded) {
+      ReadVerticalTrajectoryFile();
+      ReadHorizontalTrajectoryFile();
    }
 
-   return mLoaded;
+   return m_loaded;
 
 }
 
 
-void TrajectoryFromFile::readVerticalTrajectoryFile(void) {
+void TrajectoryFromFile::ReadVerticalTrajectoryFile() {
 
-   std::ifstream file(mVerticalTrajectoryFile.c_str());
+   std::ifstream file(m_vertical_trajectory_file.c_str());
 
    if (!file.is_open()) {
-      std::cout << "Vertical trajectory file " << mVerticalTrajectoryFile.c_str() << " not found" << std::endl;
+      std::cout << "Vertical trajectory file " << m_vertical_trajectory_file.c_str() << " not found" << std::endl;
       exit(-20);
    }
 
@@ -80,9 +80,9 @@ void TrajectoryFromFile::readVerticalTrajectoryFile(void) {
          continue;
       }
 
-      if ((int) (*csviter).size() != NUM_VERTICAL_TRAJ_FIELDS) {
-         std::cout << "Bad number of fields found in " << mVerticalTrajectoryFile.c_str()
-                   << std::endl << "vertical trajectory file.  Found " << (int) (*csviter).size()
+      if ((int) (*csviter).Size() != NUM_VERTICAL_TRAJ_FIELDS) {
+         std::cout << "Bad number of fields found in " << m_vertical_trajectory_file.c_str()
+                   << std::endl << "vertical trajectory file.  Found " << (int) (*csviter).Size()
                    << " fields expected " << (int) NUM_VERTICAL_TRAJ_FIELDS << " fields." << std::endl;
          exit(-21);
       }
@@ -95,23 +95,23 @@ void TrajectoryFromFile::readVerticalTrajectoryFile(void) {
          switch (static_cast<VerticalFields>(vfield)) {
 
             case TIME_TO_GO_SEC:
-               v_traj.mTimeToGo.push_back(val);
+               m_vertical_trajectory.mTimeToGo.push_back(val);
                break;
 
             case DISTANCE_TO_GO_VERT_M:
-               v_traj.mDistToGo.push_back(val);
+               m_vertical_trajectory.mDistToGo.push_back(val);
                break;
 
             case ALTITUDE_M:
-               v_traj.mAlt.push_back(val);
+               m_vertical_trajectory.mAlt.push_back(val);
                break;
 
             case IAS_MPS:
-               v_traj.mIas.push_back(val);
+               m_vertical_trajectory.mIas.push_back(val);
                break;
 
             case DOT_ALTITUDE_MPS:
-               v_traj.mDotAlt.push_back(val);
+               m_vertical_trajectory.mDotAlt.push_back(val);
                break;
          }
       }
@@ -122,12 +122,12 @@ void TrajectoryFromFile::readVerticalTrajectoryFile(void) {
 }
 
 
-void TrajectoryFromFile::readHorizontalTrajectoryFile(void) {
+void TrajectoryFromFile::ReadHorizontalTrajectoryFile() {
 
-   std::ifstream file(mHorizontalTrajectoryFile.c_str());
+   std::ifstream file(m_horizontal_trajectory_file.c_str());
 
    if (!file.is_open()) {
-      std::cout << "Horizontal trajectory file " << mHorizontalTrajectoryFile.c_str() << " not found" << std::endl;
+      std::cout << "Horizontal trajectory file " << m_horizontal_trajectory_file.c_str() << " not found" << std::endl;
       exit(-22);
    }
 
@@ -140,9 +140,9 @@ void TrajectoryFromFile::readHorizontalTrajectoryFile(void) {
          continue;
       }
 
-      if ((int) (*csviter).size() != (int) NUM_HORIZONTAL_TRAJ_FIELDS) {
-         std::cout << "Bad number of fields found in " << mHorizontalTrajectoryFile.c_str()
-                   << std::endl << "vertical trajectory file.  Found " << (int) (*csviter).size()
+      if ((int) (*csviter).Size() != (int) NUM_HORIZONTAL_TRAJ_FIELDS) {
+         std::cout << "Bad number of fields found in " << m_horizontal_trajectory_file.c_str()
+                   << std::endl << "vertical trajectory file.  Found " << (int) (*csviter).Size()
                    << " fields expected " << (int) NUM_HORIZONTAL_TRAJ_FIELDS << " fields." << std::endl;
          exit(-38);
       }
@@ -218,7 +218,7 @@ void TrajectoryFromFile::readHorizontalTrajectoryFile(void) {
 
          }
       }
-      h_traj.push_back(htrajseg);
+      m_horizontal_trajectory.push_back(htrajseg);
    }
 
    file.close();
@@ -226,7 +226,7 @@ void TrajectoryFromFile::readHorizontalTrajectoryFile(void) {
 }
 
 
-Guidance TrajectoryFromFile::update(AircraftState state,
+Guidance TrajectoryFromFile::Update(AircraftState state,
                                     Guidance guidance_in) {
 
    // Sets guidance information based on input guidance and aircraft state.
@@ -251,19 +251,19 @@ Guidance TrajectoryFromFile::update(AircraftState state,
 
    int curr_index = 0;
 
-   AircraftCalculations::getPathLengthFromPos(
-         Units::FeetLength(state.x),
-         Units::FeetLength(state.y),
-         h_traj,
+   AircraftCalculations::GetPathLengthFromPos(
+         Units::FeetLength(state.m_x),
+         Units::FeetLength(state.m_y),
+         m_horizontal_trajectory,
          hdtg,
          temp_course); // calls the distance to end helper method to calculate the distance to the end of the track
 
    // if the check if the distance left is <= the start of the precalculated descent distance
 
-   if (hdtg.value() <= fabs(v_traj.mDistToGo.back())) {
+   if (hdtg.value() <= fabs(m_vertical_trajectory.mDistToGo.back())) {
       // Get index.
 
-      curr_index = CoreUtils::FindNearestIndex(curr_index, hdtg.value(), v_traj.mDistToGo);
+      curr_index = CoreUtils::FindNearestIndex(hdtg.value(), m_vertical_trajectory.mDistToGo);
 
 
       // Set _next values.
@@ -271,32 +271,35 @@ Guidance TrajectoryFromFile::update(AircraftState state,
       if (curr_index == 0) {
          // Below lowest distance-take values at end of route.
 
-         h_next = v_traj.mAlt[curr_index];
-         v_next = v_traj.mIas[curr_index];
-         h_dot_next = v_traj.mDotAlt[curr_index];
+         h_next = m_vertical_trajectory.mAlt[curr_index];
+         v_next = m_vertical_trajectory.mIas[curr_index];
+         h_dot_next = m_vertical_trajectory.mDotAlt[curr_index];
 
-      } else if (curr_index == v_traj.mDistToGo.size()) {
+      } else if (curr_index == m_vertical_trajectory.mDistToGo.size()) {
          // Higher than furthest distance-take values at beginning of route.
 
          // NOTE:this should never occur because of if with hdtg above.
 
-         h_next = v_traj.mAlt[(v_traj.mAlt.size() - 1)];
-         v_next = v_traj.mIas[(v_traj.mIas.size() - 1)];
-         h_dot_next = v_traj.mDotAlt[(v_traj.mDotAlt.size() - 1)];
+         h_next = m_vertical_trajectory.mAlt[(m_vertical_trajectory.mAlt.size() - 1)];
+         v_next = m_vertical_trajectory.mIas[(m_vertical_trajectory.mIas.size() - 1)];
+         h_dot_next = m_vertical_trajectory.mDotAlt[(m_vertical_trajectory.mDotAlt.size() - 1)];
       } else {
          // Interpolate values using distance.
 
-         h_next = CoreUtils::interpolate(curr_index, hdtg.value(), v_traj.mDistToGo, v_traj.mAlt);
-         v_next = CoreUtils::interpolate(curr_index, hdtg.value(), v_traj.mDistToGo, v_traj.mIas);
-         h_dot_next = CoreUtils::interpolate(curr_index, hdtg.value(), v_traj.mDistToGo, v_traj.mDotAlt);
+         h_next = CoreUtils::LinearlyInterpolate(curr_index, hdtg.value(), m_vertical_trajectory.mDistToGo,
+                                                 m_vertical_trajectory.mAlt);
+         v_next = CoreUtils::LinearlyInterpolate(curr_index, hdtg.value(), m_vertical_trajectory.mDistToGo,
+                                                 m_vertical_trajectory.mIas);
+         h_dot_next = CoreUtils::LinearlyInterpolate(curr_index, hdtg.value(), m_vertical_trajectory.mDistToGo,
+                                                     m_vertical_trajectory.mDotAlt);
       }
 
 
       // Set result
 
-      result.reference_altitude = h_next / FT_M;
-      result.altitude_rate = h_dot_next / FT_M;
-      result.m_im_speed_command_ias = v_next / FT_M;
+      result.reference_altitude = h_next / FEET_TO_METERS;
+      result.altitude_rate = h_dot_next / FEET_TO_METERS;
+      result.m_im_speed_command_ias = v_next / FEET_TO_METERS;
    }
 
    // Calculate Psi command and cross-track error if the aircraft is turning
@@ -304,10 +307,10 @@ Guidance TrajectoryFromFile::update(AircraftState state,
 
    Units::MetersLength dist_out(0);
    Units::RadiansAngle course_out(0);
-   AircraftCalculations::getPathLengthFromPos(
-         Units::FeetLength(state.x),
-         Units::FeetLength(state.y),
-         h_traj, dist_out, course_out);
+   AircraftCalculations::GetPathLengthFromPos(
+         Units::FeetLength(state.m_x),
+         Units::FeetLength(state.m_y),
+         m_horizontal_trajectory, dist_out, course_out);
 
 
    // get aircraft position based on that calculated distance
@@ -315,36 +318,36 @@ Guidance TrajectoryFromFile::update(AircraftState state,
    Units::MetersLength x_pos(0);
    Units::MetersLength y_pos(0);
    int traj_index = 0;
-   AircraftCalculations::getPosFromPathLength(dist_out, h_traj, x_pos, y_pos, temp_course, traj_index);
+   AircraftCalculations::GetPosFromPathLength(dist_out, m_horizontal_trajectory, x_pos, y_pos, temp_course, traj_index);
 
    result.psi = course_out.value(); // set the course command result
 
 
    // calculate cross track as difference between actual and precalculated position
 
-   double cross_track = sqrt(pow(state.x * FT_M - x_pos.value(), 2) + pow(state.y * FT_M - y_pos.value(), 2));
+   double cross_track = sqrt(pow(state.m_x * FEET_TO_METERS - x_pos.value(), 2) + pow(state.m_y * FEET_TO_METERS - y_pos.value(), 2));
 
 
    // generate cross-track sign based on distance from turn center and change in course
 
-   double center_dist = sqrt(pow(state.x * FT_M - h_traj[traj_index].turns.x_turn, 2) +
-                             pow(state.y * FT_M - h_traj[traj_index].turns.y_turn, 2));
+   double center_dist = sqrt(pow(state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index].turns.x_turn, 2) +
+                             pow(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index].turns.y_turn, 2));
 
 
    // calculate the cross track error based on distance from center point and course change if turning
 
-   if (h_traj[traj_index].segment == "turn") {
+   if (m_horizontal_trajectory[traj_index].segment == "turn") {
 
-      if (center_dist > Units::MetersLength(h_traj[traj_index].turns.radius).value()) {
+      if (center_dist > Units::MetersLength(m_horizontal_trajectory[traj_index].turns.radius).value()) {
 
-         if (course_out > state.get_heading_in_radians_mathematical()) {
+         if (course_out > state.GetHeadingInRadiansMathematical()) {
             result.cross_track = cross_track;
          } else {
             result.cross_track = -cross_track;
          }
 
       } else {
-         if (course_out > state.get_heading_in_radians_mathematical()) {
+         if (course_out > state.GetHeadingInRadiansMathematical()) {
             result.cross_track = -cross_track;
          } else {
             result.cross_track = cross_track;
@@ -355,8 +358,8 @@ Guidance TrajectoryFromFile::update(AircraftState state,
 
       // else do straight track trajectory cross-track calculation
 
-      result.cross_track = -(state.y * FT_M - h_traj[traj_index + 1].y) * cos(course_out) +
-                           (state.x * FT_M - h_traj[traj_index + 1].x) * sin(course_out);
+      result.cross_track = -(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index + 1].y) * cos(course_out) +
+                           (state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index + 1].x) * sin(course_out);
    }
 
    result.use_cross_track = true;
@@ -365,34 +368,34 @@ Guidance TrajectoryFromFile::update(AircraftState state,
 }
 
 
-std::vector<HorizontalPath> TrajectoryFromFile::getHorizontalData(void) {
+std::vector<HorizontalPath> TrajectoryFromFile::GetHorizontalData() {
 
    // Gets horizontal trajectory data.
    //
    // Returns horizontal trajectory data.
 
-   return this->h_traj;
+   return m_horizontal_trajectory;
 
 }
 
 
-TrajectoryFromFile::VerticalData TrajectoryFromFile::getVerticalData(void) {
+TrajectoryFromFile::VerticalData TrajectoryFromFile::GetVerticalData() {
 
    // Gets vertical trajectory data.
    //
    // Returns vertical trajectory data.
 
-   return this->v_traj;
+   return m_vertical_trajectory;
 
 }
 
 
-bool TrajectoryFromFile::is_loaded(void) {
-   return mLoaded;
+bool TrajectoryFromFile::IsLoaded() {
+   return m_loaded;
 }
 
 
-void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
+void TrajectoryFromFile::CalculateWaypoints(AircraftIntent &intent) {
 
    // Sets waypoints and altitude at FAF (final) waypoint based on intent.
    //
@@ -401,19 +404,19 @@ void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
 
    // set altitude at FAF.
 
-   mAltAtFAF = Units::MetersLength(intent.getFms().AltWp[(intent.getNumberOfWaypoints() - 1)]);
+   m_altitude_at_final_approach_fix = Units::MetersLength(intent.GetFms().AltWp[(intent.GetNumberOfWaypoints() - 1)]);
 
 
    // Set waypoints.
 
-   waypoint_vector.clear(); // empties the waypoint vector for Aircraft Intent Waypoints
+   m_waypoint.clear(); // empties the waypoint vector for Aircraft Intent Waypoints
 
    double prev_dist = 0;
 
    //loop to translate all of the intent waypoints into Precalc Waypoints, works from back to front since precalc starts from the endpoint
-   for (int loop = intent.getNumberOfWaypoints() - 1; loop > 0; loop--) {
-      double delta_x = intent.getFms().xWp[loop - 1].value() - intent.getFms().xWp[loop].value();
-      double delta_y = intent.getFms().yWp[loop - 1].value() - intent.getFms().yWp[loop].value();
+   for (int loop = intent.GetNumberOfWaypoints() - 1; loop > 0; loop--) {
+      double delta_x = intent.GetFms().xWp[loop - 1].value() - intent.GetFms().xWp[loop].value();
+      double delta_y = intent.GetFms().yWp[loop - 1].value() - intent.GetFms().yWp[loop].value();
 
       // calculate leg distance in meters
       double leg_length = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
@@ -424,34 +427,34 @@ void TrajectoryFromFile::calculateWaypoints(AircraftIntent &intent) {
       PrecalcWaypoint new_waypoint;
       new_waypoint.leg_length = leg_length;
       new_waypoint.course_angle = Units::RadiansAngle(course);
-      new_waypoint.name = intent.getFms().Name[loop];
-      new_waypoint.x_pos = intent.getFms().xWp[loop].value();
-      new_waypoint.y_pos = intent.getFms().yWp[loop].value();
+      new_waypoint.name = intent.GetFms().Name[loop];
+      new_waypoint.x_pos = intent.GetFms().xWp[loop].value();
+      new_waypoint.y_pos = intent.GetFms().yWp[loop].value();
 
       // add new constraints
       new_waypoint.constraints.constraint_dist = leg_length + prev_dist;
-      new_waypoint.constraints.constraint_altHi = intent.getFms().altHi[loop - 1].value();
-      new_waypoint.constraints.constraint_altLow = intent.getFms().altLow[loop - 1].value();
-      new_waypoint.constraints.constraint_speedHi = intent.getFms().speedHi[loop - 1].value();
-      new_waypoint.constraints.constraint_speedLow = intent.getFms().speedLow[loop - 1].value();
+      new_waypoint.constraints.constraint_altHi = intent.GetFms().altHi[loop - 1].value();
+      new_waypoint.constraints.constraint_altLow = intent.GetFms().altLow[loop - 1].value();
+      new_waypoint.constraints.constraint_speedHi = intent.GetFms().speedHi[loop - 1].value();
+      new_waypoint.constraints.constraint_speedLow = intent.GetFms().speedLow[loop - 1].value();
 
       prev_dist += leg_length;
 
-      waypoint_vector.push_back(new_waypoint);
+      m_waypoint.push_back(new_waypoint);
    }
 
    // add the final waypoint
    PrecalcWaypoint new_waypoint;
-   new_waypoint.name = intent.getFms().Name[0];
+   new_waypoint.name = intent.GetFms().Name[0];
    new_waypoint.leg_length = 0;
-   new_waypoint.course_angle = waypoint_vector.back().course_angle;//0;
-   new_waypoint.x_pos = intent.getFms().xWp[0].value();
-   new_waypoint.y_pos = intent.getFms().yWp[0].value();
+   new_waypoint.course_angle = m_waypoint.back().course_angle;//0;
+   new_waypoint.x_pos = intent.GetFms().xWp[0].value();
+   new_waypoint.y_pos = intent.GetFms().yWp[0].value();
    new_waypoint.constraints.constraint_dist = prev_dist;
-   new_waypoint.constraints.constraint_altHi = intent.getFms().altHi[0].value();
-   new_waypoint.constraints.constraint_altLow = intent.getFms().altLow[0].value();
-   new_waypoint.constraints.constraint_speedHi = intent.getFms().speedHi[0].value();
-   new_waypoint.constraints.constraint_speedLow = intent.getFms().speedLow[0].value();
-   waypoint_vector.push_back(new_waypoint);
+   new_waypoint.constraints.constraint_altHi = intent.GetFms().altHi[0].value();
+   new_waypoint.constraints.constraint_altLow = intent.GetFms().altLow[0].value();
+   new_waypoint.constraints.constraint_speedHi = intent.GetFms().speedHi[0].value();
+   new_waypoint.constraints.constraint_speedLow = intent.GetFms().speedLow[0].value();
+   m_waypoint.push_back(new_waypoint);
 
 }

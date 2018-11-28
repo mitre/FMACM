@@ -22,7 +22,7 @@
 
 static bool Logging_initialized = false;
 
-void init_logging() {
+void InitializeLogging() {
    if (Logging_initialized) {
       return;
    }

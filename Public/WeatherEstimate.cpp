@@ -20,23 +20,23 @@
 
 WeatherEstimate::WeatherEstimate()
       :
-      mAtmosphere(std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0)))) {
+      m_atmosphere(std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0)))) {
 }
 
 WeatherEstimate::WeatherEstimate(
       std::shared_ptr<Wind> wind,
       std::shared_ptr<Atmosphere> atmosphere)
       :
-      mWind(wind),
-      mAtmosphere(atmosphere) {
+      m_wind(wind),
+      m_atmosphere(atmosphere) {
 }
 
 std::shared_ptr<Wind> WeatherEstimate::getWind() const {
-   return mWind;
+   return m_wind;
 }
 
 std::shared_ptr<Atmosphere> WeatherEstimate::getAtmosphere() const {
-   return mAtmosphere;
+   return m_atmosphere;
 }
 
 WeatherEstimate::~WeatherEstimate() {

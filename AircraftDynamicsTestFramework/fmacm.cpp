@@ -54,7 +54,7 @@ const std::string buildinfoFlag("--buildinfo");
 
 int main(int argc,
          char *argv[]) {
-   init_logging();
+   InitializeLogging();
    string version = "aaesim version " + aaesim::getVersion();
    LOG4CPLUS_INFO(logger, "running " << version);
    HTMLDump::SetSoftwareVersion(version);
@@ -211,7 +211,7 @@ void process_scenarios(RunFile &run_file) {
       stream.set_Archive_Director(rfad);
 
       // Set scenario name here, before load, for time to go output.
-      citr->second->set_scenario_name(sFileName); // sets the scenario name
+      citr->second->SetScenarioName(sFileName); // sets the scenario name
 
       // So user can tell which scenario is being processed during regression testing
       LOG4CPLUS_INFO(logger, "Processing Scenario File: " << sFileName << std::endl);
@@ -220,10 +220,10 @@ void process_scenarios(RunFile &run_file) {
       citr->second->load(&stream);
 
       // Process the loaded scenario
-      citr->second->process_one_scenario();
+      citr->second->ProcessOneScenario();
 
       // Clear out the aircraft id map
-      citr->second->clearAircraftIdMap();
+      citr->second->ClearAircraftIdMap();
    }
 }
 

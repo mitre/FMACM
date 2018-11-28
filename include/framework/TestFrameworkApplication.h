@@ -31,11 +31,11 @@
 class TestFrameworkApplication : public Loadable
 {
 public:
-   TestFrameworkApplication(void);
+   TestFrameworkApplication();
 
-   ~TestFrameworkApplication(void);
+   ~TestFrameworkApplication();
 
-   Guidance update(const SimulationTime &simTime,
+   Guidance Update(const SimulationTime &simTime,
                    TestFrameworkDynamics &dynamics,
                    AircraftState state_in,
                    Guidance guidance_in);
@@ -43,16 +43,16 @@ public:
    bool load(DecodedStream *input);
 
    // Conditionals
-   bool is_loaded();
+   bool IsLoaded();
 
 private:
 
    // Interval Management classes
-   IMSpeedCommandFile mIMSpeedCommandFile;
+   IMSpeedCommandFile m_im_speed_command_file;
 
    //Input Data
-   std::string application_type;
+   std::string m_application_type;
 
-   bool loaded;
+   bool m_loaded;
 
 };

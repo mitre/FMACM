@@ -22,28 +22,30 @@
 class MoreStringFunctions
 {
 public:
-  MoreStringFunctions(void) {}
-  ~MoreStringFunctions(void) {}
+   MoreStringFunctions(void) {
+   }
 
-	// note data is passed by value so we can modify it and return the new copy 
+   ~MoreStringFunctions(void) {
+   }
 
-	static std::string find_and_replace(std::string data,const std::string &search, const std::string &replace)
-	{
-		size_t pos = 0;
+   // note data is passed by value so we can modify it and return the new copy
 
-		while(true)
-		{
-			pos = data.find(search, pos);
-			
-			if(pos == std::string::npos)
-			{
-				break;
-			}
+   static std::string find_and_replace(std::string data,
+                                       const std::string &search,
+                                       const std::string &replace) {
+      size_t pos = 0;
 
-			data.replace(pos, search.length(), replace);
-			pos += replace.length();
-		}
+      while (true) {
+         pos = data.find(search, pos);
 
-		return data;
-	}
+         if (pos == std::string::npos) {
+            break;
+         }
+
+         data.replace(pos, search.length(), replace);
+         pos += replace.length();
+      }
+
+      return data;
+   }
 };

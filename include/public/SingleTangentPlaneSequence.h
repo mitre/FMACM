@@ -19,20 +19,22 @@
 
 #include "public/TangentPlaneSequence.h"
 
-class SingleTangentPlaneSequence : public TangentPlaneSequence {
+class SingleTangentPlaneSequence : public TangentPlaneSequence
+{
 
 public:
-    static void clearStaticMembers();
-    SingleTangentPlaneSequence(std::list<Waypoint> &waypoint_list);
+   static void clearStaticMembers();
 
-    void dump(std::ofstream& file_out) const;
+   SingleTangentPlaneSequence(std::list<Waypoint> &waypoint_list);
+
+   void dump(std::ofstream &file_out) const;
 
 protected:
-    virtual void initialize(std::list<Waypoint> &waypoint_list);
+   virtual void initialize(std::list<Waypoint> &waypoint_list);
 
 private:
-    static std::list<Waypoint> mMasterWaypointSequence;
-    static log4cplus::Logger logger;
+   static std::list<Waypoint> mMasterWaypointSequence;
+   static log4cplus::Logger logger;
 
 };
 

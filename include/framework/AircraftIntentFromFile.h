@@ -27,26 +27,29 @@
 
 #include "public/AircraftIntent.h"
 
-class AircraftIntentFromFile: public AircraftIntent {
+class AircraftIntentFromFile : public AircraftIntent
+{
 public:
-	AircraftIntentFromFile();
-	virtual ~AircraftIntentFromFile();
+   AircraftIntentFromFile();
 
-	// override method inherited from parent as we don't want any of that in this implementation
-	bool load(DecodedStream *input);
+   virtual ~AircraftIntentFromFile();
 
-	// override method inherited from parent as we don't want nay of the base class implementation
-	void update_xy_from_latlon();
+   // override method inherited from parent as we don't want any of that in this implementation
+   bool load(DecodedStream *input);
+
+   // override method inherited from parent as we don't want nay of the base class implementation
+   void update_xy_from_latlon();
 
 private:
 
-	/**
-	 * Implementation that takes the data from CSV and populates the parent's waypoint data sets.
-	 */
-	void populateWaypointsFromCsv(std::string csvFile);
+   /**
+    * Implementation that takes the data from CSV and populates the parent's waypoint data sets.
+    */
+   void populateWaypointsFromCsv(std::string csvFile);
 
-	double localstod(std::string s);
-	int localstoi(std::string s);
+   double localstod(std::string s);
+
+   int localstoi(std::string s);
 };
 
 #endif /* AIRCRAFTINTENTFROMFILE_H_ */

@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "utility/FilePath.h"
 #include <iostream>
 #include <map>
@@ -23,71 +24,61 @@
 class RunFileArchiveDirector
 {
 public:
-	RunFileArchiveDirector(void);
-	~RunFileArchiveDirector(void); 
+   RunFileArchiveDirector(void);
 
-	inline void set_Destination_Directory(const FilePath &destination_file_path)
-	{
-		destination = destination_file_path;
-	}//------------------------------------------------------------------------
+   ~RunFileArchiveDirector(void);
 
-	inline std::string get_Destination()
-	{
-		return destination.get_Full_Path();
-	}
+   inline void set_Destination_Directory(const FilePath &destination_file_path) {
+      destination = destination_file_path;
+   }//------------------------------------------------------------------------
 
-	std::string get_Place_to_Write_Archive(const FilePath &source_file)
-	{
-		if(destination.get_Full_Path() == "")
-		{
-			return "";
-		}
-		std::string dest = get_New_Link_Name(source_file);
-		if(dest=="")
-		{
-			return "";
-		}
-		else
-		{
-			FilePath dest1 = destination.push(dest);
-			return dest1.get_Full_Path();
-		}
-	}//------------------------------------------------------------------------
+   inline std::string get_Destination() {
+      return destination.get_Full_Path();
+   }
 
-	std::string get_New_Link_Name(const FilePath &source_file); //returns the file name that should be written into the archive copy of the file
-	
-	bool is_new_File(const FilePath &source_file) const;
+   std::string get_Place_to_Write_Archive(const FilePath &source_file) {
+      if (destination.get_Full_Path() == "") {
+         return "";
+      }
+      std::string dest = get_New_Link_Name(source_file);
+      if (dest == "") {
+         return "";
+      } else {
+         FilePath dest1 = destination.push(dest);
+         return dest1.get_Full_Path();
+      }
+   }//------------------------------------------------------------------------
 
-	bool is_Name_in_Archive(const std::string &name) const
-	{
-		std::map<std::string,std::string>::const_iterator it;
-		for(it=mapper.begin(); it!= mapper.end(); it++)
-		{
-			std::string value = (*it).second;
-			if(name==value)
-			{
-				return true;
-			}
-		}
-		return false;
-	}//look for name in the value column of the map and return true if found
-	//------------------------------------------------------------------------
+   std::string
+   get_New_Link_Name(const FilePath &source_file); //returns the file name that should be written into the archive copy of the file
 
-	//mainly for debug purposes
-	void print_Map() 
-	{
-		std::map<std::string, std::string>::iterator it;
-		for ( it=mapper.begin() ; it != mapper.end(); it++ )
-		{
-			std::cout << (*it).first << " => " << (*it).second << std::endl;
-		}
-	}
-	//------------------------------------------------------------------------
+   bool is_new_File(const FilePath &source_file) const;
+
+   bool is_Name_in_Archive(const std::string &name) const {
+      std::map<std::string, std::string>::const_iterator it;
+      for (it = mapper.begin(); it != mapper.end(); it++) {
+         std::string value = (*it).second;
+         if (name == value) {
+            return true;
+         }
+      }
+      return false;
+   }//look for name in the value column of the map and return true if found
+   //------------------------------------------------------------------------
+
+   //mainly for debug purposes
+   void print_Map() {
+      std::map<std::string, std::string>::iterator it;
+      for (it = mapper.begin(); it != mapper.end(); it++) {
+         std::cout << (*it).first << " => " << (*it).second << std::endl;
+      }
+   }
+   //------------------------------------------------------------------------
 
 private:
 
-	FilePath destination;
-	std::map<std::string, std::string> mapper;
-	
+   FilePath destination;
+   std::map<std::string, std::string> mapper;
+
 
 };

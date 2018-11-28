@@ -16,14 +16,16 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <string>
 
 class LoaderSupport
 {
 public:
-	LoaderSupport(void);
-	virtual ~LoaderSupport(void);
+   LoaderSupport(void);
 
-	std::string clean_token(const std::string &token);
-	
+   virtual ~LoaderSupport(void);
+
+   std::string clean_token(const std::string &token);
+
 };

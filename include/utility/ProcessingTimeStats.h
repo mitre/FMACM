@@ -58,34 +58,37 @@
 // all the collected stats will be dumped.
 
 
-class ProcessingTimeStats {
+class ProcessingTimeStats
+{
 public:
 
-	ProcessingTimeStats(void);
-	ProcessingTimeStats(std::string str);
-	~ProcessingTimeStats(void);
+   ProcessingTimeStats(void);
 
-	// Sets header for dump.
-	void setHdr(std::string str);
+   ProcessingTimeStats(std::string str);
 
-	// Gets time at start point in code.
-	void start(void);
+   ~ProcessingTimeStats(void);
 
-	// Collects processing time in ms between start point and this point.
-	void stop(void);
+   // Sets header for dump.
+   void setHdr(std::string str);
+
+   // Gets time at start point in code.
+   void start(void);
+
+   // Collects processing time in ms between start point and this point.
+   void stop(void);
 
 private:
-	// Gathers stats between start and stop point.
-	void gather(void);
+   // Gathers stats between start and stop point.
+   void gather(void);
 
-	// Dumps stats.
-	void dump(void);
+   // Dumps stats.
+   void dump(void);
 
-	clock_t t0;
-	clock_t t1;
+   clock_t t0;
+   clock_t t1;
 
-	double ms;
-	int entries;
+   double ms;
+   int entries;
 
-	std::string hdr;
+   std::string hdr;
 };

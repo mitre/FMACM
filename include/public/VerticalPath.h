@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <vector>
 #include <iostream>
 #include "Speed.h"
@@ -23,35 +24,39 @@
 class VerticalPath
 {
 public:
-	VerticalPath(void);
-	~VerticalPath(void);
+   VerticalPath(void);
 
-	VerticalPath(const VerticalPath &in);
+   ~VerticalPath(void);
 
-	void append(const VerticalPath &in);
+   VerticalPath(const VerticalPath &in);
 
-	VerticalPath& operator=(const VerticalPath &in);
-	void operator+=(const VerticalPath &in);
-	bool operator==(const VerticalPath &obj) const;
+   void append(const VerticalPath &in);
 
-	// Since you can't send a vector of Units::XXX over SDDF, these methods will convert to doubles and return a
-    // new vector that we can send. This is lab related only.
-	std::vector<double> getWindVelocityEast();
-    std::vector<double> getWindVelocityNorth();
+   VerticalPath &operator=(const VerticalPath &in);
 
-	// data member lists for the vertical path.  NOTE that the values are normally in METERS from descent predictors.
-	std::vector<double> x;
-	std::vector<double> h;
-	std::vector<double> v;
-	std::vector<double> h_dot;
-	std::vector<double> v_dot;
-	std::vector<double> theta;
-	std::vector<double> gs;
-	std::vector<double> time;
-	std::vector<double> mass;
-	std::vector<Units::MetersPerSecondSpeed> vwe, vwn;
+   void operator+=(const VerticalPath &in);
+
+   bool operator==(const VerticalPath &obj) const;
+
+   // Since you can't send a vector of Units::XXX over SDDF, these methods will convert to doubles and return a
+   // new vector that we can send. This is lab related only.
+   std::vector<double> getWindVelocityEast();
+
+   std::vector<double> getWindVelocityNorth();
+
+   // data member lists for the vertical path.  NOTE that the values are normally in METERS from descent predictors.
+   std::vector<double> x;
+   std::vector<double> h;
+   std::vector<double> v;
+   std::vector<double> h_dot;
+   std::vector<double> v_dot;
+   std::vector<double> theta;
+   std::vector<double> gs;
+   std::vector<double> time;
+   std::vector<double> mass;
+   std::vector<Units::MetersPerSecondSpeed> vwe, vwn;
 
 private:
-	// helper method for copy and assignment operations
-	void copy(const VerticalPath &in);
+   // helper method for copy and assignment operations
+   void copy(const VerticalPath &in);
 };

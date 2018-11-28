@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -35,83 +36,125 @@
 class InternalObserver
 {
 public:
-	static InternalObserver *getInstance();
-	static void clearInstance();
-	void reset(void);
-	void process(void);
+   static InternalObserver *getInstance();
 
-	// stores and output the state-model report.
+   static void clearInstance();
 
-	void storeStateModel(AircraftState asv, int flapsConfig, float speed_brake, double ias);
-	void outputStateModel();
+   void reset(void);
 
-	//gwang 2014-05-12: write ADS-B reports into  files
-	void collect_ptis_b_report(Sensor::ADSB::ADSBSVReport adsb_sv_report);
-	void process_ptis_b_reports();
+   void process(void);
 
-	// output the IM commands (UNITS ARE IN METERS)
-	void IM_command_output(int id_in, double time_in, double state_alt,
-						   double state_TAS, double state_groundspeed_in, double ias_command_in,
-						   double unmod_ias, double tas_command_in, double ref_vel_in,
-						   double ref_dist_in, double curr_dist_in, double true_dist_in); // add an entry to the command list
-	void process_IM_command(); // process the IM report
+   // stores and output the state-model report.
 
-	// output the Dynamics results and given guidance
-	void dynamics_output(AircraftState dynamics_in, Guidance guidance_in); // add an entry to the dynamics list
-	void process_dynamics(); // process the dynamics report
+   void storeStateModel(AircraftState asv,
+                        int flapsConfig,
+                        float speed_brake,
+                        double ias);
 
-	// TODO: is this part of 'output the PSEB spacing algorithm values'?
-	void process_NM_aircraft();
-	void process_NM_stats();
+   void outputStateModel();
 
-	// output number of speed commands per aircraft
-	void speed_command_count_output(vector<int> speed_change_list);
+   //gwang 2014-05-12: write ADS-B reports into  files
+   void collect_ptis_b_report(Sensor::ADSB::ADSBSVReport adsb_sv_report);
 
-	void process_speed_command_count();
+   void process_ptis_b_reports();
 
-	// output maintain metrics 
-	void outputMaintainMetrics();
-	void processMaintainMetrics();
+   // output the IM commands (UNITS ARE IN METERS)
+   void IM_command_output(int id_in,
+                          double time_in,
+                          double state_alt,
+                          double state_TAS,
+                          double state_groundspeed_in,
+                          double ias_command_in,
+                          double unmod_ias,
+                          double tas_command_in,
+                          double ref_vel_in,
+                          double ref_dist_in,
+                          double curr_dist_in,
+                          double true_dist_in); // add an entry to the command list
+   void process_IM_command(); // process the IM report
 
-	// output final groundspeed
-	void updateFinalGS(int id, double gs);
-	void outputFinalGS();
-	void processFinalGS();
+   // TODO: is this part of 'output the PSEB spacing algorithm values'?
+   void process_NM_aircraft();
 
-	// output merge point metric
-	void outputMergePointMetric();
-	void processMergePointMetric();
+   void process_NM_stats();
 
-	// output closest point metric
-	void outputClosestPointMetric();
-	void processClosestPointMetric();
+   // output number of speed commands per aircraft
+   void speed_command_count_output(vector<int> speed_change_list);
 
-	// predicted wind matrix metric
-	void addPredictedWind(int id, const WindStack &predWindX, const WindStack &predWindY);
-	void dumpPredictedWind();
-	std::string predWindsHeading(int lastIx);
-	std::string predWindsData(int id,int row,std::string field, const WindStack &mat);
+   void process_speed_command_count();
 
-	// time to go metric
-	void addAchieveRcd(size_t aircraftId,double tm,double target_ttg_to_ach,double own_ttg_to_ach,
-				double curr_distance,double reference_distance);
-	void dumpAchieveList();
+   // output maintain metrics
+   void outputMaintainMetrics();
 
-	// Kinematic trajectory output.
-	void dumpOwnKinTraj(int id,VerticalPath &fullTraj);
-	void dumpTargetKinTraj(int id,VerticalPath &fullTraj);
+   void processMaintainMetrics();
 
-	// true wind debug data.
-	bool debugTrueWind();
-	void writeTrueWind(std::string str);
-	void setTrueWindHdrVals(double time, int id);
+   // output final groundspeed
+   void updateFinalGS(int id,
+                      double gs);
 
-	// TEST OUTPUT for cross-track output per second
-	void cross_output(double x_in, double y_in, double dynamic_cross, double commanded_cross, double psi_command, double phi, double limited_phi);
+   void outputFinalGS();
 
-	void process_cross();
+   void processFinalGS();
 
-	void report();
+   // output merge point metric
+   void outputMergePointMetric();
+
+   void processMergePointMetric();
+
+   // output closest point metric
+   void outputClosestPointMetric();
+
+   void processClosestPointMetric();
+
+   // predicted wind matrix metric
+   void addPredictedWind(int id,
+                         const WindStack &predWindX,
+                         const WindStack &predWindY);
+
+   void dumpPredictedWind();
+
+   std::string predWindsHeading(int lastIx);
+
+   std::string predWindsData(int id,
+                             int row,
+                             std::string field,
+                             const WindStack &mat);
+
+   // time to go metric
+   void addAchieveRcd(size_t aircraftId,
+                      double tm,
+                      double target_ttg_to_ach,
+                      double own_ttg_to_ach,
+                      double curr_distance,
+                      double reference_distance);
+
+   void dumpAchieveList();
+
+   // Kinematic trajectory output.
+   void dumpOwnKinTraj(int id,
+                       VerticalPath &fullTraj);
+
+   void dumpTargetKinTraj(int id,
+                          VerticalPath &fullTraj);
+
+   // true wind debug data.
+   bool debugTrueWind();
+
+   void writeTrueWind(std::string str);
+
+   void setTrueWindHdrVals(double time,
+                           int id);
+
+   // TEST OUTPUT for cross-track output per second
+   void cross_output(double x_in,
+                     double y_in,
+                     double dynamic_cross,
+                     double commanded_cross,
+                     double psi_command,
+                     double phi,
+                     double limited_phi);
+
+   void process_cross();
 
 	static void FatalError(const char *str)
 	{
@@ -121,104 +164,93 @@ public:
 		throw std::logic_error(str);
 	} // FatalError
 
-	//reporters:
+   typedef std::vector<AircraftState> listlist;
+   listlist isa;
+   std::vector<AircraftState> truth_state_vector_list;
+   // output data vectors
 
-	//Data:
-	double duration_adsb_transmit, duration_nav_sensor, duration_dynamics, duration_application, duration_adsb_receive;
-	double adsb_receiver_1st, adsb_receiver_2nd, adsb_receiver_3rd, adsb_receiver_total;
+   std::vector<std::vector<std::vector<std::string> > > stateModelOutput;
+   std::vector<IMCommandObserver> im_commands;
+   std::vector<DynamicsObserver> achieved_dynamics_list;
+   std::vector<NMObserver> aircraft_NM_list;
+   std::vector<std::vector<int> > aircraft_speed_count_list;
+   CrossTrackObserver cross_entry;
 
-	typedef std::vector<AircraftState> listlist;
-	listlist  isa;
-	std::vector<AircraftState> truth_state_vector_list;
-	std::vector<AircraftState> navigation_measurement_state_vector_list;
-	std::vector<double> range_to_next_waypoint;
+   std::vector<MaintainMetric> maintainStats;
+   std::vector<std::string> maintainOutput;
 
-	// output data vectors
+   std::vector<double> finalGS;
+   std::vector<std::string> finalGSOutput;
 
-	std::vector<std::vector <std::vector <std::string> > > stateModelOutput;
-	std::vector<IMCommandObserver> im_commands;
-	std::vector<DynamicsObserver> achieved_dynamics_list;
-	std::vector<NMObserver> aircraft_NM_list;
-	std::vector<std::vector <int> > aircraft_speed_count_list;
-	CrossTrackObserver cross_entry;
+   std::vector<MergePointMetric> mergePointStats;
+   std::vector<std::string> mergePointOutput;
 
-	std::vector<MaintainMetric> maintainStats;
-	std::vector<std::string> maintainOutput;
+   std::vector<ClosestPointMetric> closestPointStats;
+   std::vector<std::string> closestPointOutput;
+   std::vector<Sensor::ADSB::ADSBSVReport> ptis_b_report_list;
 
-	std::vector<double> finalGS;
-	std::vector<std::string> finalGSOutput;
+   int cycle[6000];
+   double IAS[6000];
 
-	std::vector<MergePointMetric> mergePointStats;
-	std::vector<std::string> mergePointOutput;
+   std::vector<std::vector<AchieveObserver> > mAchieveList; // Organized by aircraft id.
 
-	std::vector<ClosestPointMetric> closestPointStats;
-	std::vector<std::string> closestPointOutput;
-	std::vector<Sensor::ADSB::ADSBSVReport> ptis_b_report_list;
+   // Kinematic trajectory output objects.  Each dumps kinematic trajectories
+   // over a whole scenario, for all iterations for all aircraft into a single
+   // file.
 
+   VerticalPathObserver *mOwnKinVertPathObs;   // Outputs own kinematic predicted vertical paths.
+   VerticalPathObserver *mTargKinVertPathObs;  // Outputs target kinematic predicted vertical paths.
 
-	int	mode_merge_spacing[6000];
-	int cycle[6000];
-	double IAS[6000];
-	double time_spacing_error[6000];
-	double correction_term[6000];
-	double speed_command_kt[6000];
-	double speed_command_KIAS[6000];
-	double total_duration_update_aircraft;
+   // Some debug for winds from dynamics and speed_on_pitch_control_dynamics.
+   double trueTime;
+   int trueId;
+   bool debuggingTrueWind;
 
-	std::vector<std::vector <AchieveObserver> > mAchieveList; // Organized by aircraft id.
+   int scenario_iter; // variable to store the current scenario iteration
 
-	// Kinematic trajectory output objects.  Each dumps kinematic trajectories
-	// over a whole scenario, for all iterations for all aircraft into a single
-	// file.
+   void set_scenario_name(std::string in);
 
-	VerticalPathObserver *mOwnKinVertPathObs;   // Outputs own kinematic predicted vertical paths.
-	VerticalPathObserver *mTargKinVertPathObs;  // Outputs target kinematic predicted vertical paths.
+   // Initializes metrics where necessary.
+   void initializeIteration(int number_of_aircraft_in_scenario);
 
-	// Some debug for winds from dynamics and speed_on_pitch_control_dynamics.
-	double trueTime;
-	int trueId;
-	bool debuggingTrueWind;
+   // Sets NM file output flag.
+   void setNMOutput(bool NMflag);
 
-	int scenario_iter; // variable to store the current scenario iteration
+   // Determines whether to output NM data or not.
+   bool outputNM(void);
 
-	// getter/setters for the scenario name
-	std::string get_scenario_name();
-	void set_scenario_name(std::string in);
+   void SetRecordMaintainMetrics(bool new_value);
 
-	// method to set the current radar data iterator position based on given radar name
-	void set_radar_data_it(std::string radar_name);
-
-	// Initializes metrics where necessary.
-	void initializeIteration(int number_of_aircraft);
-
-	// Sets NM file output flag.
-	void setNMOutput(bool NMflag);
-
-	// Determines whether to output NM data or not.
-	bool outputNM(void);
+   const bool GetRecordMaintainMetrics() const;
 
 private:
 
-	InternalObserver(void);
-	~InternalObserver(void);
+   InternalObserver(void);
 
-	// Formats state model report data.
-	std::string stateModelString(AircraftState asv, int flapsConfig, float speed_brake, double ias);
+   ~InternalObserver(void);
 
-	// Returns header for state model report.
-	std::string stateModelHdr();
+   // Formats state model report data.
+   std::string stateModelString(AircraftState asv,
+                                int flapsConfig,
+                                float speed_brake,
+                                double ias);
 
-	//Data for individual aircraft
+   // Returns header for state model report.
+   std::string stateModelHdr();
 
-	//Data for aggregate
-	std::string scenario_name;
+   //Data for individual aircraft
 
-	//NM output flag
-	bool outputNMFiles;
+   //Data for aggregate
+   std::string scenario_name;
 
-	std::vector<std::string> predWinds;
+   //NM output flag
+   bool outputNMFiles;
 
-	static InternalObserver* mInstance;
-    static log4cplus::Logger logger;
+   bool m_save_maintain_metrics;
+
+   std::vector<std::string> predWinds;
+
+   static InternalObserver *mInstance;
+   static log4cplus::Logger logger;
 
 };

@@ -18,25 +18,24 @@
 #include "public/HorizontalPath.h"
 
 
-HorizontalPath::HorizontalPath(void) : segment("")
-{
-	x = 0; // in meters
-	y = 0; // in meters
-	L = 0; // leg length in meters
-	course = 0;
+HorizontalPath::HorizontalPath(void)
+      : segment("") {
+   x = 0; // in meters
+   y = 0; // in meters
+   L = 0; // leg length in meters
+   course = 0;
 }
 
 bool HorizontalPath::operator==(const HorizontalPath &that) const {
-	return ((this->x == that.x) &&
-			(this->y == that.y) &&
-			(this->segment == that.segment) &&
-			(this->L == that.L) &&
-			(this->course == that.course) &&
-			((this->segment == "straight") ||
-			 (this->turns == that.turns)));
+   return ((this->x == that.x) &&
+           (this->y == that.y) &&
+           (this->segment == that.segment) &&
+           (this->L == that.L) &&
+           (this->course == that.course) &&
+           ((this->segment == "straight") ||
+            (this->turns == that.turns)));
 }
 
 
-HorizontalPath::~HorizontalPath(void)
-{
+HorizontalPath::~HorizontalPath(void) {
 }

@@ -35,18 +35,22 @@ InvalidIndexException::InvalidIndexException(char* value) : exception(value)
 {
 }
 #else
+
 // default constructor, calls super constructor
-InvalidIndexException::InvalidIndexException(const int invalid, const int lowValid, const int highValid) : exception()
-{
-	log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("InvalidIndexException"));
-	LOG4CPLUS_ERROR(logger, "attempted to access index " << invalid
-			<< " between " << lowValid << " and " << highValid);
-  //cout << "attempted to access an invalid index" << endl;
+InvalidIndexException::InvalidIndexException(const int invalid,
+                                             const int lowValid,
+                                             const int highValid)
+      : exception() {
+   log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("InvalidIndexException"));
+   LOG4CPLUS_ERROR(logger, "attempted to access index " << invalid
+                                                        << " between " << lowValid << " and " << highValid);
+   //cout << "attempted to access an invalid index" << endl;
 }
 
 // cosntructor that takes a string error message argument and passes message to superconstructor
-InvalidIndexException::InvalidIndexException(char* value) : exception()
-{
-  cout << value << endl;
+InvalidIndexException::InvalidIndexException(char *value)
+      : exception() {
+   cout << value << endl;
 }
+
 #endif

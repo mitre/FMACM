@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "loader/TokenStream.h"
 #include "loader/SinglePushBackStream.h"
 #include "loader/IncludeStream.h"
@@ -33,21 +34,21 @@
 #include <MassFlowRate.h>
 #include "utility/CustomUnits.h"
 
-class DecodedStream:  
-   public SinglePushBackStream<
-      FormatDifferentiatorStreamEcho<
-         EchoStream<
-               IncludeStream<
-                  ArchiveStreamEcho<
-                     CommentStream<
-                        TokenStream> > > > > >
+class DecodedStream :
+      public SinglePushBackStream<
+            FormatDifferentiatorStreamEcho<
+                  EchoStream<
+                        IncludeStream<
+                              ArchiveStreamEcho<
+                                    CommentStream<
+                                          TokenStream> > > > > >
 {
 public:
    DecodedStream(void);
+
    ~DecodedStream(void);
 
-   bool set_html_output_file(const std::string& dump_file_name)
-   {
+   bool set_html_output_file(const std::string &dump_file_name) {
       return set_output_file(dump_file_name, 0);
    }
 
@@ -55,37 +56,63 @@ public:
     * Primitive Declarations
     */
    bool get_datum(std::string &s);
+
    bool get_datum(short &s);
+
    bool get_datum(unsigned short &s);
+
    bool get_datum(int &s);
+
    bool get_datum(unsigned int &s);
+
    bool get_datum(long &s);
+
    bool get_datum(double &s);
+
    bool get_datum(float &s);
+
    bool get_datum(bool &s);
 
-	/*
-	 * Unitized declarations
-	 */
-	bool get_datum(Units::MetersLength &s);
-	bool get_datum(Units::NauticalMilesLength &s);
-	bool get_datum(Units::FeetLength &s);
-	bool get_datum(Units::KilometersLength &s);
-	bool get_datum(Units::MetersPerSecondSpeed &s);
-	bool get_datum(Units::KnotsSpeed &s);
-	bool get_datum(Units::SecondsTime &s);
-	bool get_datum(Units::DegreesAngle &s);
-	bool get_datum(Units::RadiansAngle &s);
-	bool get_datum(Units::KilogramsMass &s);
-	bool get_datum(Units::PoundsMass &s);
-	bool get_datum(Units::KilogramsPerHourMassFlowRate &s);
-	bool get_datum(Units::PoundsPerHourMassFlowRate &s);
-	bool get_datum(Units::FeetArea &s);
-	bool get_datum(Units::MetersArea &s);
-	bool get_datum(Units::FeetPerMinuteSpeed &s);
-	bool get_datum(Units::SecondsPerNauticalMileInvertedSpeed &s);
-	bool get_datum(Units::HertzFrequency &s);
-	bool get_datum(Units::MetersPerSecondSquaredLengthGain &s);
+   /*
+    * Unitized declarations
+    */
+   bool get_datum(Units::MetersLength &s);
+
+   bool get_datum(Units::NauticalMilesLength &s);
+
+   bool get_datum(Units::FeetLength &s);
+
+   bool get_datum(Units::KilometersLength &s);
+
+   bool get_datum(Units::MetersPerSecondSpeed &s);
+
+   bool get_datum(Units::KnotsSpeed &s);
+
+   bool get_datum(Units::SecondsTime &s);
+
+   bool get_datum(Units::DegreesAngle &s);
+
+   bool get_datum(Units::RadiansAngle &s);
+
+   bool get_datum(Units::KilogramsMass &s);
+
+   bool get_datum(Units::PoundsMass &s);
+
+   bool get_datum(Units::KilogramsPerHourMassFlowRate &s);
+
+   bool get_datum(Units::PoundsPerHourMassFlowRate &s);
+
+   bool get_datum(Units::FeetArea &s);
+
+   bool get_datum(Units::MetersArea &s);
+
+   bool get_datum(Units::FeetPerMinuteSpeed &s);
+
+   bool get_datum(Units::SecondsPerNauticalMileInvertedSpeed &s);
+
+   bool get_datum(Units::HertzFrequency &s);
+
+   bool get_datum(Units::MetersPerSecondSquaredLengthGain &s);
 
 
 };

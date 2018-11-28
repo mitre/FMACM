@@ -22,71 +22,62 @@ using namespace std;
 
 string HTMLDump::SoftwareVersion("unset");
 
-void HTMLDump::SetSoftwareVersion(const string& softwareVersion) {
-	SoftwareVersion = softwareVersion;
+void HTMLDump::SetSoftwareVersion(const string &softwareVersion) {
+   SoftwareVersion = softwareVersion;
 }
 
-HTMLDump::HTMLDump(void)
-{
-}
-
-//-----------------------------------------------------------
-
-HTMLDump::~HTMLDump(void)
-{
-	if(dump_file_name.is_open())
-	{
-		close();
-	}
+HTMLDump::HTMLDump(void) {
 }
 
 //-----------------------------------------------------------
 
-bool HTMLDump::open(const string &file_name)
-{
-	dump_file_name.open(file_name.c_str());
-
-	if(dump_file_name.is_open())
-	{
-		dump_file_name << "<html>\n<body bgcolor=dddddd>\n<pre>\n";
-		dump_file_name << "running " << SoftwareVersion << endl;
-	}
-
-	return dump_file_name.is_open();
+HTMLDump::~HTMLDump(void) {
+   if (dump_file_name.is_open()) {
+      close();
+   }
 }
 
 //-----------------------------------------------------------
 
-void HTMLDump::close()
-{
-	assert(dump_file_name != NULL);
-	assert(dump_file_name.is_open());
-	
-	dump_file_name << "\n</pre>\n</body>\n </html>";
+bool HTMLDump::open(const string &file_name) {
+   dump_file_name.open(file_name.c_str());
 
-	dump_file_name.close();
+   if (dump_file_name.is_open()) {
+      dump_file_name << "<html>\n<body bgcolor=dddddd>\n<pre>\n";
+      dump_file_name << "running " << SoftwareVersion << endl;
+   }
+
+   return dump_file_name.is_open();
 }
 
 //-----------------------------------------------------------
 
-void HTMLDump::dump(const string &data)
-{
-	dump_file_name << data;
+void HTMLDump::close() {
+   assert(dump_file_name != NULL);
+   assert(dump_file_name.is_open());
+
+   dump_file_name << "\n</pre>\n</body>\n </html>";
+
+   dump_file_name.close();
 }
 
 //-----------------------------------------------------------
 
-void HTMLDump::highlight_on(const string& color)
-{
-	string first = "<FONT style=\"BACKGROUND-COLOR: ";
-	string last = "\"\\>";
-	 dump_file_name << first + color + last ; 
+void HTMLDump::dump(const string &data) {
+   dump_file_name << data;
 }
 
 //-----------------------------------------------------------
 
-void HTMLDump::highlight_off()
-{
-	dump_file_name << "</FONT>";
+void HTMLDump::highlight_on(const string &color) {
+   string first = "<FONT style=\"BACKGROUND-COLOR: ";
+   string last = "\"\\>";
+   dump_file_name << first + color + last;
+}
+
+//-----------------------------------------------------------
+
+void HTMLDump::highlight_off() {
+   dump_file_name << "</FONT>";
 }
 

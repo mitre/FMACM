@@ -22,52 +22,55 @@
 #include <Force.h>
 #include <Speed.h>
 
-class ControlCommands {
+class ControlCommands
+{
 public:
-    ControlCommands(const Units::Angle &phi,
-                    const Units::Force &thrust,
-                    const Units::Angle &gamma,
-                    const Units::Speed &trueAirspeed,
-                    const double speedBrake,
-                    const int flapMode) : phi(phi),
-                                        thrust(thrust),
-                                        gamma(gamma),
-                                        trueAirspeed(trueAirspeed),
-                                        speedBrake(speedBrake),
-                                        flapMode(flapMode){ }
+   ControlCommands(const Units::Angle &phi,
+                   const Units::Force &thrust,
+                   const Units::Angle &gamma,
+                   const Units::Speed &trueAirspeed,
+                   const double speedBrake,
+                   const int flapMode)
+         : phi(phi),
+           thrust(thrust),
+           gamma(gamma),
+           trueAirspeed(trueAirspeed),
+           speedBrake(speedBrake),
+           flapMode(flapMode) {
+   }
 
-    const Units::Angle &getPhi() const {
-        return phi;
-    }
+   const Units::Angle &getPhi() const {
+      return phi;
+   }
 
-    const Units::Force &getThrust() const {
-        return thrust;
-    }
+   const Units::Force &getThrust() const {
+      return thrust;
+   }
 
-    const Units::Angle &getGamma() const {
-        return gamma;
-    }
+   const Units::Angle &getGamma() const {
+      return gamma;
+   }
 
-    const Units::Speed &getTrueAirspeed() const {
-        return trueAirspeed;
-    }
+   const Units::Speed &getTrueAirspeed() const {
+      return trueAirspeed;
+   }
 
 
-    double getSpeedBrake() const {
-        return speedBrake;
-    }
+   double getSpeedBrake() const {
+      return speedBrake;
+   }
 
-    int getFlapMode() const {
-        return flapMode;
-    }
+   int getFlapMode() const {
+      return flapMode;
+   }
 
 private:
-    Units::Angle phi;
-    Units::Force thrust;
-    Units::Angle gamma;
-    Units::Speed trueAirspeed;
-    double speedBrake;
-    int flapMode;
+   Units::Angle phi;
+   Units::Force thrust;
+   Units::Angle gamma;
+   Units::Speed trueAirspeed;
+   double speedBrake;
+   int flapMode;
 };
 
 

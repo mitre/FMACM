@@ -19,6 +19,7 @@
 
 
 #pragma once
+
 #include <Angle.h>
 #include <Length.h>
 #include <Speed.h>
@@ -27,7 +28,8 @@
 #include "math/DVector.h"
 
 // TODO move global C-style math functions into the class
-class CustomMath {
+class CustomMath
+{
 public:
 
 };
@@ -36,19 +38,40 @@ public:
 int roundToInt(double d); /* rounds double to int-away from 0 for 0.5 values */
 #endif
 
-double atan3(double x, double y); // arc tangent from 0 - 2pi
-double quantize(double value, double lsb);  // quantizes value to lsb
-Units::Length quantize(Units::Length value, Units::Length lsb);
-Units::Speed quantize(Units::Speed value, Units::Speed lsb);
-Units::Time quantize(Units::Time value, Units::Time lsb);
-double MachToCas_MITRE(double mach, double alt);
-double subtract_headings(double hd1, double hd2);
-double MachToTas(double mach, double altitude);
+double atan3(double x,
+             double y); // arc tangent from 0 - 2pi
+double quantize(double value,
+                double lsb);  // quantizes value to lsb
+Units::Length quantize(Units::Length value,
+                       Units::Length lsb);
+
+Units::Speed quantize(Units::Speed value,
+                      Units::Speed lsb);
+
+Units::Time quantize(Units::Time value,
+                     Units::Time lsb);
+
+double MachToCas_MITRE(double mach,
+                       double alt);
+
+double subtract_headings(double hd1,
+                         double hd2);
+
+double MachToTas(double mach,
+                 double altitude);
 
 //for stereographic convertion:
 
-bool inverse( DMatrix &in, int n, DMatrix &inverse);
-void matrix_times_vector( DMatrix &matrix_in, DVector &vector_in, int n, DVector &vector_out);
+bool inverse(DMatrix &in,
+             int n,
+             DMatrix &inverse);
 
-DMatrix& createRotationMatrix(double l, double m, double n,
-		const Units::Angle theta);
+void matrix_times_vector(DMatrix &matrix_in,
+                         DVector &vector_in,
+                         int n,
+                         DVector &vector_out);
+
+DMatrix &createRotationMatrix(double l,
+                              double m,
+                              double n,
+                              const Units::Angle theta);

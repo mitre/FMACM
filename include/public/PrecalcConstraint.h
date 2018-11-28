@@ -18,43 +18,48 @@
 #pragma once
 
 // enum for active_flag  values from original code
-enum class ActiveFlagType {
-    UNSET = 0,
-    BELOW_ALT_ON_SPEED = 1,
-    AT_ALT_ON_SPEED,
-    BELOW_ALT_SLOW,
-    SEG_END_LOW_ALT,
-    SEG_END_MID_ALT,
-    AT_ALT_SLOW,
-    SEG_END_AT_ALT = 2
+enum class ActiveFlagType
+{
+   UNSET = 0,
+   BELOW_ALT_ON_SPEED = 1,
+   AT_ALT_ON_SPEED,
+   BELOW_ALT_SLOW,
+   SEG_END_LOW_ALT,
+   SEG_END_MID_ALT,
+   AT_ALT_SLOW,
+   SEG_END_AT_ALT = 2
 };
 
 
-bool operator<= (ActiveFlagType l, ActiveFlagType r);
+bool operator<=(ActiveFlagType l,
+                ActiveFlagType r);
 
 
 class PrecalcConstraint
 {
 
- public:
+public:
 
-  PrecalcConstraint(void);
-  ~PrecalcConstraint(void);
+   PrecalcConstraint(void);
 
-  PrecalcConstraint& operator=(const PrecalcConstraint &obj);
+   ~PrecalcConstraint(void);
 
-  bool operator<(const PrecalcConstraint &obj) const;
-  bool operator!=(const PrecalcConstraint &obj) const;
-  bool operator==(const PrecalcConstraint &obj) const;
+   PrecalcConstraint &operator=(const PrecalcConstraint &obj);
 
-  double constraint_dist; // distance constraints-meters.
-  double constraint_altHi; // altitude max constraints-meters.
-  double constraint_altLow; // altitude min constraints-meters.
-  double constraint_speedHi; // speed max contraint-meters per second.
-  double constraint_speedLow; // speed min contraint-meters per second.
-  double index; 
-  ActiveFlagType active_flag;
-  bool violation_flag;
+   bool operator<(const PrecalcConstraint &obj) const;
+
+   bool operator!=(const PrecalcConstraint &obj) const;
+
+   bool operator==(const PrecalcConstraint &obj) const;
+
+   double constraint_dist; // distance constraints-meters.
+   double constraint_altHi; // altitude max constraints-meters.
+   double constraint_altLow; // altitude min constraints-meters.
+   double constraint_speedHi; // speed max contraint-meters per second.
+   double constraint_speedLow; // speed min contraint-meters per second.
+   double index;
+   ActiveFlagType active_flag;
+   bool violation_flag;
 
 };
 

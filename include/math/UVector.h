@@ -19,158 +19,143 @@
 
 #include "math/InvalidIndexException.h"
 
-template <class T>
+template<class T>
 class UVector
 {
 private:
-	int minIndex;
-	int maxIndex;
-	T *vector;
+   int minIndex;
+   int maxIndex;
+   T *vector;
 
 public:
-	// constructor/destructors
-	UVector(void)
-    {
-		minIndex = 0;
-		maxIndex = -1;
-		vector = NULL;
-	}
-	UVector(const int min, const int max)
-	{
-		// gets the size of the vector
-		int size = max - min + 1;
+   // constructor/destructors
+   UVector(void) {
+      minIndex = 0;
+      maxIndex = -1;
+      vector = NULL;
+   }
 
-		// set the min/max index
-		minIndex = min;
-		maxIndex = max;
+   UVector(const int min,
+           const int max) {
+      // gets the size of the vector
+      int size = max - min + 1;
 
-		// allocate the array
-		vector = new T[size];
-	}
-	UVector(const UVector<T>& in)
-	{
-		int size = in.maxIndex - in.minIndex + 1;
-		minIndex = in.minIndex;
-		maxIndex = in.maxIndex;
-		vector = new T[size];
+      // set the min/max index
+      minIndex = min;
+      maxIndex = max;
 
-		//loop to copy the values of the given DVector
-		for(int loop = 0; loop < size; loop++)
-		{
-			vector[loop] = in.vector[loop];
-		}
-	}
-	~UVector(void)
-	{
-		delete[] vector;
-		vector = NULL;
-	}
+      // allocate the array
+      vector = new T[size];
+   }
 
-	// get/set methods
-	// method to get the value at a given index
-	T get(const int index) const
-	{
-		if(inRange(index))
-		{
-			return vector[index-minIndex];
-		}
+   UVector(const UVector<T> &in) {
+      int size = in.maxIndex - in.minIndex + 1;
+      minIndex = in.minIndex;
+      maxIndex = in.maxIndex;
+      vector = new T[size];
 
-		throw InvalidIndexException(index, minIndex, maxIndex);
-	}
+      //loop to copy the values of the given DVector
+      for (int loop = 0; loop < size; loop++) {
+         vector[loop] = in.vector[loop];
+      }
+   }
 
-	// method to set the value at a given index
-	void set(const int index, const T value) {
-		if( inRange(index))
-		{
-			vector[index-minIndex]= value;
-		}
-		else
-		{
-			throw InvalidIndexException(index, minIndex, maxIndex);
-		}
-	}
+   ~UVector(void) {
+      delete[] vector;
+      vector = NULL;
+   }
 
-	// method to set the bounds of the Vector
-	void setBounds(const int min, const int max)
-	{
-		int size0 = this->maxIndex - this->minIndex + 1;
-		minIndex = min;
-		maxIndex = max;
+   // get/set methods
+   // method to get the value at a given index
+   T get(const int index) const {
+      if (inRange(index)) {
+         return vector[index - minIndex];
+      }
 
-		int size = max - min +1;
+      throw InvalidIndexException(index, minIndex, maxIndex);
+   }
 
-		if (size != size0) {
-			delete[] vector;
-			vector = new T[size];
-		}
-	}
+   // method to set the value at a given index
+   void set(const int index,
+            const T value) {
+      if (inRange(index)) {
+         vector[index - minIndex] = value;
+      } else {
+         throw InvalidIndexException(index, minIndex, maxIndex);
+      }
+   }
 
-	// method to check if a given index is in the array
-	bool inRange(const int index) const
-	{
-		bool result = false;
+   // method to set the bounds of the Vector
+   void setBounds(const int min,
+                  const int max) {
+      int size0 = this->maxIndex - this->minIndex + 1;
+      minIndex = min;
+      maxIndex = max;
 
-		if( index >= minIndex && index <= maxIndex)
-		{
-			result = true;
-		}
+      int size = max - min + 1;
 
-		return result;
-	}
+      if (size != size0) {
+         delete[] vector;
+         vector = new T[size];
+      }
+   }
 
-	// getter methods
-	const int get_min() const
-	{
-		return minIndex;
-	}
-	const int get_max() const
-	{
-		return maxIndex;
-	}
+   // method to check if a given index is in the array
+   bool inRange(const int index) const {
+      bool result = false;
 
-	// overloads the array index operator
-	T& operator[](const int index)
-	{
-		// if index is in valid range get the value
-		if(inRange(index))
-		{
-			return vector[index-minIndex];
-		}
+      if (index >= minIndex && index <= maxIndex) {
+         result = true;
+      }
 
-		throw InvalidIndexException(index, minIndex, maxIndex);
-	}
+      return result;
+   }
 
-	const T& operator[](const int index) const
-	{
-		// if index is in valid range get the value
-		if(inRange(index))
-		{
-			return vector[index-minIndex];
-		}
+   // getter methods
+   const int get_min() const {
+      return minIndex;
+   }
 
-		throw InvalidIndexException(index, minIndex, maxIndex);
-	}
+   const int get_max() const {
+      return maxIndex;
+   }
 
-	// overloads the equals operator
-	UVector<T>& operator=(const UVector<T> &in)
-	{
-	  if (this != &in) {
-		setBounds(in.minIndex, in.maxIndex);
-	    int size = maxIndex - minIndex + 1;
-	    //loop to copy the values of the given DVector
-	    for(int loop = 0; loop < size; loop++)
-	    {
-	      vector[loop] = in.vector[loop];
-	    }
-	  }
+   // overloads the array index operator
+   T &operator[](const int index) {
+      // if index is in valid range get the value
+      if (inRange(index)) {
+         return vector[index - minIndex];
+      }
 
-	  return *this;
-	}
-	
-	// overloads less than opertor for sort
-	bool operator<(const UVector<T> &other) const
-	{
-		return vector[0] < other.vector[0];
-	}
+      throw InvalidIndexException(index, minIndex, maxIndex);
+   }
+
+   const T &operator[](const int index) const {
+      // if index is in valid range get the value
+      if (inRange(index)) {
+         return vector[index - minIndex];
+      }
+
+      throw InvalidIndexException(index, minIndex, maxIndex);
+   }
+
+   // overloads the equals operator
+   UVector<T> &operator=(const UVector<T> &in) {
+      if (this != &in) {
+         setBounds(in.minIndex, in.maxIndex);
+         int size = maxIndex - minIndex + 1;
+         //loop to copy the values of the given DVector
+         for (int loop = 0; loop < size; loop++) {
+            vector[loop] = in.vector[loop];
+         }
+      }
+
+      return *this;
+   }
+
+   // overloads less than opertor for sort
+   bool operator<(const UVector<T> &other) const {
+      return vector[0] < other.vector[0];
+   }
 };
 

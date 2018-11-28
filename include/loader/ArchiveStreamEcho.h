@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "public/Token.h"
 
 template<class PARENT>
@@ -24,68 +25,58 @@ class ArchiveStreamEcho : public PARENT
 {
 public:
 
-	ArchiveStreamEcho(void)
-	{
-	}
+   ArchiveStreamEcho(void) {
+   }
 
-	~ArchiveStreamEcho(void)
-	{
-		if(archive_file.is_open())
-		{
-			archive_file.close();
-		}
-	}
+   ~ArchiveStreamEcho(void) {
+      if (archive_file.is_open()) {
+         archive_file.close();
+      }
+   }
 
-	//opens the archive file and writes a header comment at the top
-	bool open_Archive(const std::string &new_file_name, const std::string &header_comment)
-	{
-		archive_file.open(new_file_name.c_str());
-		if(archive_file.is_open())
-		{
-			archive_file << ";";
-			archive_file << header_comment;
-			archive_file << "\n";
-			return true;
-		}
-		return false;
-	}
+   //opens the archive file and writes a header comment at the top
+   bool open_Archive(const std::string &new_file_name,
+                     const std::string &header_comment) {
+      archive_file.open(new_file_name.c_str());
+      if (archive_file.is_open()) {
+         archive_file << ";";
+         archive_file << header_comment;
+         archive_file << "\n";
+         return true;
+      }
+      return false;
+   }
 
-	//rewrites the include statement in the archive of the primary file
-	void rewrite_Last_in_Archive(const std::string &s)
-	{
-		old_token.set_data(s);
-	}
+   //rewrites the include statement in the archive of the primary file
+   void rewrite_Last_in_Archive(const std::string &s) {
+      old_token.set_data(s);
+   }
 
-	//writes the tokens into the archive file that is open and calls get next
-	Token get_next()
-	{
-		if(archive_file.is_open())
-		{
-			archive_file << old_token.get_All();
-		}
-		old_token = PARENT::get_next();
-		return old_token;
-	}//--------------------------------------------
+   //writes the tokens into the archive file that is open and calls get next
+   Token get_next() {
+      if (archive_file.is_open()) {
+         archive_file << old_token.get_All();
+      }
+      old_token = PARENT::get_next();
+      return old_token;
+   }//--------------------------------------------
 
-	ArchiveStreamEcho& operator=(const ArchiveStreamEcho& rhs)
-	{
-		PARENT::operator=(rhs);
+   ArchiveStreamEcho &operator=(const ArchiveStreamEcho &rhs) {
+      PARENT::operator=(rhs);
 
-		return *this;
-	}//--------------------------------------------
+      return *this;
+   }//--------------------------------------------
 
-	//makes sure that the old_token is still written into the secondary open archive file
-	//before it is closed
-	void write_Last_Token(std::string old_token)
-	{
-		if(archive_file.is_open())
-		{
-			archive_file << old_token;
-		}
-	}
+   //makes sure that the old_token is still written into the secondary open archive file
+   //before it is closed
+   void write_Last_Token(std::string old_token) {
+      if (archive_file.is_open()) {
+         archive_file << old_token;
+      }
+   }
 
 protected:
 
-	std::ofstream archive_file;
-	Token old_token;
+   std::ofstream archive_file;
+   Token old_token;
 };

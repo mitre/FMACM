@@ -26,19 +26,23 @@
 class ClosestPointMetric
 {
 public:
-  ClosestPointMetric(void);
-  ~ClosestPointMetric(void);
+   ClosestPointMetric(void);
 
-  // Computes distance for input position and updates minimum
-  // position if less than minimum distance.
-  void update(double imx,double imy,double targx,double targy);
+   ~ClosestPointMetric(void);
 
-  Units::Length getMinDist();
+   // Computes distance for input position and updates minimum
+   // position if less than minimum distance.
+   void update(double imx,
+               double imy,
+               double targx,
+               double targy);
+
+   Units::Length getMinDist();
 
 
 private:
 
-  // Minimum distance between IM and target aircraft.
-  Units::Length mMinDist;
+   // Minimum distance between IM and target aircraft.
+   Units::Length mMinDist;
 
 };

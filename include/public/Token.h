@@ -16,68 +16,57 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <string>
 
 class Token
 {
 public:
-	Token(void)
-	{
-	}//--------------------------------------------------------------
+   Token(void) {
+   }//--------------------------------------------------------------
 
-	inline void add_Data(char c)
-	{
-		data += c;
-	} //--------------------------------------------------------------
-	inline void add_Data(const std::string &s)
-	{
-		data += s;
-	} //--------------------------------------------------------------
+   inline void add_Data(char c) {
+      data += c;
+   } //--------------------------------------------------------------
+   inline void add_Data(const std::string &s) {
+      data += s;
+   } //--------------------------------------------------------------
 
 
-	inline void add_Format(char c)
-	{
-		format += c;
-	}//--------------------------------------------------------------
-	inline void add_Format(const std::string &s)
-	{
-		format += s;
-	}//--------------------------------------------------------------
-	inline void add_Format(const Token &t)
-	{
-		add_Format(t.get_Format());
-		add_Format(t.get_Data());
-	}//--------------------------------------------------------------
-	inline void merge_data_into_format()
-	{
-		format += data;
-		data = "";
-	}//--------------------------------------------------------------
-	inline std::string get_Data()const
-	{
-		return data;
-	}//--------------------------------------------------------------
-	inline std::string get_Format()const
-	{
-		return format;
-	}//--------------------------------------------------------------
+   inline void add_Format(char c) {
+      format += c;
+   }//--------------------------------------------------------------
+   inline void add_Format(const std::string &s) {
+      format += s;
+   }//--------------------------------------------------------------
+   inline void add_Format(const Token &t) {
+      add_Format(t.get_Format());
+      add_Format(t.get_Data());
+   }//--------------------------------------------------------------
+   inline void merge_data_into_format() {
+      format += data;
+      data = "";
+   }//--------------------------------------------------------------
+   inline std::string get_Data() const {
+      return data;
+   }//--------------------------------------------------------------
+   inline std::string get_Format() const {
+      return format;
+   }//--------------------------------------------------------------
 
-	inline std::string get_All()const
-	{
-		return format + data;
-	}//--------------------------------------------------------------
+   inline std::string get_All() const {
+      return format + data;
+   }//--------------------------------------------------------------
 
-	inline void set_data(std::string const &nd)
-	{
-		data = nd;
-	}//--------------------------------------------------------------
-	inline void set_format(std::string const &nf)
-	{
-		format = nf;
-	}//--------------------------------------------------------------
+   inline void set_data(std::string const &nd) {
+      data = nd;
+   }//--------------------------------------------------------------
+   inline void set_format(std::string const &nf) {
+      format = nf;
+   }//--------------------------------------------------------------
 
 private:
-	std::string data;
-	std::string format;
+   std::string data;
+   std::string format;
 
 };

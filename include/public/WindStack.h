@@ -15,40 +15,51 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * WindStack.h
- *
- *  Created on: Nov 4, 2015
- *      Author: klewis
- */
-
 #pragma once
 
 #include "Length.h"
 #include "Speed.h"
 #include "math/UVector.h"
 
-class WindStack {
+class WindStack
+{
 public:
-	WindStack();
-	WindStack(const int min, const int max);
-	virtual ~WindStack();
-	bool operator==(const WindStack &obj) const;
-	bool operator!=(const WindStack &obj) const;
-	//WindStack(const DMatrix &dMatrix);
-	//void load(const DMatrix &dMatrix);
-	UVector<Units::FeetLength> getAltitudeVector();
-	UVector<Units::KnotsSpeed> getSpeedVector();
-	Units::FeetLength getAltitude(const int index) const;
-	Units::KnotsSpeed getSpeed(const int index) const;
-	int get_min_row() const;
-	int get_max_row() const;
-	void setBounds(const int min, const int max);
-	void set(const int index, const Units::Length altitude, const Units::Speed speed);
-	void ascendSort();
+   WindStack();
+
+   WindStack(const int min,
+             const int max);
+
+   virtual ~WindStack();
+
+   bool operator==(const WindStack &obj) const;
+
+   bool operator!=(const WindStack &obj) const;
+
+   //WindStack(const DMatrix &dMatrix);
+   //void load(const DMatrix &dMatrix);
+   UVector<Units::FeetLength> getAltitudeVector();
+
+   UVector<Units::KnotsSpeed> getSpeedVector();
+
+   Units::FeetLength getAltitude(const int index) const;
+
+   Units::KnotsSpeed getSpeed(const int index) const;
+
+   int get_min_row() const;
+
+   int get_max_row() const;
+
+   void setBounds(const int min,
+                  const int max);
+
+   void set(const int index,
+            const Units::Length altitude,
+            const Units::Speed speed);
+
+   void ascendSort();
 
 private:
-	UVector<Units::FeetLength> altitude;
-	UVector<Units::KnotsSpeed> speed;
+   UVector<Units::FeetLength> altitude;
+   UVector<Units::KnotsSpeed> speed;
 };
 

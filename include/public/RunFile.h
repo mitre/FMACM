@@ -16,14 +16,16 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <string>
 #include "public/Scenario.h"
 
 class RunFile
 {
 public:
-	RunFile(void);
-	~RunFile(void);
+   RunFile(void);
 
-	std::vector<std::pair<std::string,std::shared_ptr<Scenario> > > scenariosToRun;
+   ~RunFile(void);
+
+   std::vector<std::pair<std::string, std::shared_ptr<Scenario> > > scenariosToRun;
 };

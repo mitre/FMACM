@@ -15,13 +15,6 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * Atmosphere.h
- *
- *  Created on: Jul 4, 2015
- *      Author: klewis
- */
-
 #pragma once
 
 #include "Length.h"
@@ -31,7 +24,7 @@
 #include "utility/CustomUnits.h"
 #include "public/WindStack.h"
 
-// atmophere constants
+// atmosphere constants
 // Standard Temperature at Sea Level
 const Units::KelvinTemperature T0(288.15);          // Kelvin
 
@@ -60,7 +53,7 @@ const Units::MetersPerSecondSpeed A0(340.29);         // meters/second
 const double GAMMA = 1.4;
 
 // mu
-const double MU  = ( (GAMMA-1)/(GAMMA) );
+const double MU = ((GAMMA - 1) / (GAMMA));
 
 // Real gas constant (m^2/K-s^2)
 const Units::MetersSecondsKelvinGasConstant R(287.05287);
@@ -69,20 +62,35 @@ const Units::MetersSecondsKelvinGasConstant R(287.05287);
 const Units::KelvinPerMeter K_T(-0.0065);
 
 
-class Atmosphere {
+class Atmosphere
+{
 public:
-	Atmosphere();
-	virtual ~Atmosphere();
+   Atmosphere();
 
-	Units::KelvinTemperature getTemp(const Units::Length h) const;
-	void airDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const;
-	void calcWindGrad(const Units::Length h_star, const WindStack &wind, Units::Speed &w_dir, Units::Frequency &w_dir_grad) const;
-	Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Length alt) const;
-	Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Length alt) const;
+   virtual ~Atmosphere();
 
-	// method to calculate the MACH to IAS transition
-	Units::Length GetMachIASTransition(const Units::Speed &ias, const double &mach) const;
+   virtual Units::KelvinTemperature getTemp(const Units::Length h) const = 0;
 
-	// method to convert mach to ias-ias in meters per second.
-	Units::Speed machToIAS(const double mach, const Units::Length alt) const;
+   void airDensity(const Units::Length h,
+                   Units::Density &rho,
+                   Units::Pressure &P) const;
+
+   void calcWindGrad(const Units::Length h_star,
+                     const WindStack &wind,
+                     Units::Speed &w_dir,
+                     Units::Frequency &w_dir_grad) const;
+
+   Units::Speed CAS2TAS(const Units::Speed vcas,
+                        const Units::Length alt) const;
+
+   Units::Speed TAS2CAS(const Units::Speed vtas,
+                        const Units::Length alt) const;
+
+   // method to calculate the MACH to IAS transition
+   Units::Length GetMachIASTransition(const Units::Speed &ias,
+                                      const double &mach) const;
+
+   // method to convert mach to ias-ias in meters per second.
+   Units::Speed machToIAS(const double mach,
+                          const Units::Length alt) const;
 };

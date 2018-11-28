@@ -16,21 +16,23 @@
 // ****************************************************************************
 
 #pragma once
+
 class NMObserverEntry
 {
 public:
-	NMObserverEntry(void);
-	~NMObserverEntry(void);
+   NMObserverEntry(void);
 
-	double predictedDistance;
-	double trueDistance;
-	double time;
-	double acIAS;
-	double acGS;
-	double targetGS;
-	double minIAS;
-	double maxIAS;
-	double minTAS;
-	double maxTAS;
+   ~NMObserverEntry(void);
+
+   double predictedDistance;
+   double trueDistance;
+   double time;
+   double acIAS;
+   double acGS;
+   double targetGS;
+   double minIAS;
+   double maxIAS;
+   double minTAS;
+   double maxTAS;
 };
 

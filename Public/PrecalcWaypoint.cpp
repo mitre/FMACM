@@ -18,98 +18,88 @@
 #include "public/PrecalcWaypoint.h"
 
 
-PrecalcWaypoint::PrecalcWaypoint(void)
-{
-	name = "noname";
-	leg_length = 0.0; // in nautical miles
-	course_angle = Units::DegreesAngle(0.0); // in degrees
-	
-	x_pos = 0.0; // in nautical miles (.h file says meters)
-	y_pos = 0.0; // in nautical miles (.h file says meters)
+PrecalcWaypoint::PrecalcWaypoint(void) {
+   name = "noname";
+   leg_length = 0.0; // in nautical miles
+   course_angle = Units::DegreesAngle(0.0); // in degrees
 
-    x_cp = 0.0;
-    y_cp = 0.0;
-    radius_cp = 0.0;
+   x_pos = 0.0; // in nautical miles (.h file says meters)
+   y_pos = 0.0; // in nautical miles (.h file says meters)
 
-	constraints.constraint_dist = 0.0; // distance constraints
-	constraints.constraint_altHi = 0.0; // altitude max constraints
-	constraints.constraint_altLow = 0.0; // altitude min constraints
+   x_cp = 0.0;
+   y_cp = 0.0;
+   radius_cp = 0.0;
 
-	bankAngle = Units::RadiansAngle(0);
-	groundspeed = Units::MetersPerSecondSpeed(0.0);
+   constraints.constraint_dist = 0.0; // distance constraints
+   constraints.constraint_altHi = 0.0; // altitude max constraints
+   constraints.constraint_altLow = 0.0; // altitude min constraints
 
-	loaded = false;
+   bankAngle = Units::RadiansAngle(0);
+   groundspeed = Units::MetersPerSecondSpeed(0.0);
+
+   loaded = false;
 }
 
-PrecalcWaypoint::~PrecalcWaypoint(void)
-{
+PrecalcWaypoint::~PrecalcWaypoint(void) {
 }
 
 // equals operator
-bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const
-{
-        bool match = (this->leg_length == obj.leg_length);
-	match = match && (this->course_angle == obj.course_angle);
-	match = match && (this->x_pos == obj.x_pos);
-	match = match && (this->y_pos == obj.y_pos);
-	match = match && (this->constraints == obj.constraints);
-    match = match && (this->x_cp == obj.x_cp);
-    match = match && (this->y_cp == obj.y_cp);
-    match = match && (this->radius_cp == obj.radius_cp);
+bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
+   bool match = (this->leg_length == obj.leg_length);
+   match = match && (this->course_angle == obj.course_angle);
+   match = match && (this->x_pos == obj.x_pos);
+   match = match && (this->y_pos == obj.y_pos);
+   match = match && (this->constraints == obj.constraints);
+   match = match && (this->x_cp == obj.x_cp);
+   match = match && (this->y_cp == obj.y_cp);
+   match = match && (this->radius_cp == obj.radius_cp);
 
-	return match;
+   return match;
 }
 
 // load method to read in the Dynamics values
-bool PrecalcWaypoint::load(DecodedStream *input)
-{
-	set_stream(input);
+bool PrecalcWaypoint::load(DecodedStream *input) {
+   set_stream(input);
 
-	bool f = load_datum(leg_length); // loads in Nautical Miles
-	if(!f)
-	{
-		LoggingLoadable::report_error("could not load leg length");
-	}
-	leg_length *= NM_M; // converts nautical miles to meters
+   bool f = load_datum(leg_length); // loads in Nautical Miles
+   if (!f) {
+      LoggingLoadable::report_error("could not load leg length");
+   }
+   leg_length *= NM_M; // converts nautical miles to meters
 
-	// Historically, course_angle was loaded in degrees but then
-	// converted in place to radians.
-	Units::DegreesAngle course_angle1;
-	f = load_datum(course_angle1);
-	if(!f)
-	{
-		LoggingLoadable::report_error("could not load course angle");
-	}
-	course_angle = course_angle1;
+   // Historically, course_angle was loaded in degrees but then
+   // converted in place to radians.
+   Units::DegreesAngle course_angle1;
+   f = load_datum(course_angle1);
+   if (!f) {
+      LoggingLoadable::report_error("could not load course angle");
+   }
+   course_angle = course_angle1;
 
-	f = load_datum(constraints.constraint_dist);
-	if(!f)
-	{
-		LoggingLoadable::report_error("could not load distance constraint");
-	}
-	constraints.constraint_dist *= NM_M;
+   f = load_datum(constraints.constraint_dist);
+   if (!f) {
+      LoggingLoadable::report_error("could not load distance constraint");
+   }
+   constraints.constraint_dist *= NM_M;
 
-	f = load_datum(constraints.constraint_altHi);
-	if(!f)
-	{
-		LoggingLoadable::report_error("could not load max altitude constraint");
-	}
-	constraints.constraint_altHi *= FT_M;
+   f = load_datum(constraints.constraint_altHi);
+   if (!f) {
+      LoggingLoadable::report_error("could not load max altitude constraint");
+   }
+   constraints.constraint_altHi *= FT_M;
 
-	f = load_datum(constraints.constraint_altLow);
-	if(!f)
-	{
-		LoggingLoadable::report_error("could not load min altitude constraint");
-	}
-	constraints.constraint_altLow *= FT_M;
+   f = load_datum(constraints.constraint_altLow);
+   if (!f) {
+      LoggingLoadable::report_error("could not load min altitude constraint");
+   }
+   constraints.constraint_altLow *= FT_M;
 
-	loaded = true;
+   loaded = true;
 
-	return loaded;
+   return loaded;
 }
 
 // method to check if the model loaded properly
-bool PrecalcWaypoint::is_loaded()
-{
-	return loaded;
+bool PrecalcWaypoint::is_loaded() {
+   return loaded;
 }

@@ -24,7 +24,7 @@
 
 #pragma once
 
-class TangentPlaneSequence;	// avoid dependency loop
+class TangentPlaneSequence;   // avoid dependency loop
 
 #include <list>
 #include <vector>
@@ -36,69 +36,79 @@ class TangentPlaneSequence;	// avoid dependency loop
  * This class takes a series of waypoints and creates a LocalTangentPlane
  * for each, using the waypoint as the point of tangency.
  */
-class TangentPlaneSequence {
+class TangentPlaneSequence
+{
 public:
-    TangentPlaneSequence();
-    /**
-     * Constructs a sequence of LocalTangentPlane objects, one
-     * for each waypoint.  The final waypoint in the list maps
-     * to the origin in ENU coordinates, and each of the other
-     * waypoints maps to the same coordinates in its own plane
-     * as it does in its successor's plane.  The altitudes of
-     * the waypoints are ignored and treated as zero (sea level);
-     * only the latitudes and longitudes are used.
-     */
-	TangentPlaneSequence(std::list<Waypoint> &waypoint_list);
-	~TangentPlaneSequence();
-    TangentPlaneSequence(const TangentPlaneSequence &in); // copy constructor
+   TangentPlaneSequence();
 
-	/**
-	 * Converts a local ENU point to geodetic coordinates
-	 * using the default EarthModel and the nearest
-	 * point of tangency in the sequence.
-	 *
-	 * Note that altitude is intentionally ignored (treated as
-	 * zero) by EllipsoidalEarthModel.
-	 *
-	 * @param localPosition
-	 * @param waypoint
-	 */
-	void convertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
-			EarthModel::GeodeticPosition &geoPosition) const;
-	/**
-	 * Converts a geodetic point to local ENU coordinates
-	 * using the default EarthModel and the nearest
-	 * point of tangency in the sequence.
-	 *
-	 * Note that returned altitude is reset to zero by EllipsoidalEarthModel.
-	 *
-	 * @param localPosition
-	 * @param waypoint
-	 */
-	void convertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
-			EarthModel::LocalPositionEnu &localPosition) const;
-	/**
-	 * Returns the ENU coordinates of each of the waypoints
-	 * supplied during construction.
-	 */
-	const std::vector<EarthModel::LocalPositionEnu> &getLocalPositionsFromInitialization() const;
-	/**
-	 * Returns copies of the waypoints used during construction.
-	 */
-	const std::vector<Waypoint> &getWaypointsFromInitialization() const;
-	/**
-	 * Returns tangent planes for each of the waypoints used during
-	 * construction.
-	 */
-    const std::vector<std::shared_ptr<LocalTangentPlane> > &getTangentPlanesFromInitialization() const;
+   /**
+    * Constructs a sequence of LocalTangentPlane objects, one
+    * for each waypoint.  The final waypoint in the list maps
+    * to the origin in ENU coordinates, and each of the other
+    * waypoints maps to the same coordinates in its own plane
+    * as it does in its successor's plane.  The altitudes of
+    * the waypoints are ignored and treated as zero (sea level);
+    * only the latitudes and longitudes are used.
+    */
+   TangentPlaneSequence(std::list<Waypoint> &waypoint_list);
+
+   ~TangentPlaneSequence();
+
+   TangentPlaneSequence(const TangentPlaneSequence &in); // copy constructor
+
+   /**
+    * Converts a local ENU point to geodetic coordinates
+    * using the default EarthModel and the nearest
+    * point of tangency in the sequence.
+    *
+    * Note that altitude is intentionally ignored (treated as
+    * zero) by EllipsoidalEarthModel.
+    *
+    * @param localPosition
+    * @param waypoint
+    */
+   void convertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
+                               EarthModel::GeodeticPosition &geoPosition) const;
+
+   /**
+    * Converts a geodetic point to local ENU coordinates
+    * using the default EarthModel and the nearest
+    * point of tangency in the sequence.
+    *
+    * Note that returned altitude is reset to zero by EllipsoidalEarthModel.
+    *
+    * @param localPosition
+    * @param waypoint
+    */
+   void convertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
+                               EarthModel::LocalPositionEnu &localPosition) const;
+
+   /**
+    * Returns the ENU coordinates of each of the waypoints
+    * supplied during construction.
+    */
+   const std::vector<EarthModel::LocalPositionEnu> &getLocalPositionsFromInitialization() const;
+
+   /**
+    * Returns copies of the waypoints used during construction.
+    */
+   const std::vector<Waypoint> &getWaypointsFromInitialization() const;
+
+   /**
+    * Returns tangent planes for each of the waypoints used during
+    * construction.
+    */
+   const std::vector<std::shared_ptr<LocalTangentPlane> > &getTangentPlanesFromInitialization() const;
 
 private:
-    static log4cplus::Logger logger;
-    void copy(const TangentPlaneSequence &in); // helper method for copy constructor and assignment operator
+   static log4cplus::Logger logger;
+
+   void copy(const TangentPlaneSequence &in); // helper method for copy constructor and assignment operator
 
 protected:
-    virtual void initialize(std::list<Waypoint> &waypoint_list);
-    std::vector<Waypoint> waypointsFromInitialization;
-    std::vector<std::shared_ptr<LocalTangentPlane> > tangentPlanesFromInitialization;
-    std::vector<EarthModel::LocalPositionEnu> localPositionsFromInitialization;
+   virtual void initialize(std::list<Waypoint> &waypoint_list);
+
+   std::vector<Waypoint> waypointsFromInitialization;
+   std::vector<std::shared_ptr<LocalTangentPlane> > tangentPlanesFromInitialization;
+   std::vector<EarthModel::LocalPositionEnu> localPositionsFromInitialization;
 };

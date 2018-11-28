@@ -15,62 +15,38 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * Environment.cpp
- *
- *  Created on: Jun 25, 2015
- *      Author: klewis
- */
-
 #include "public/Environment.h"
 #include "public/EllipsoidalEarthModel.h"
 
 Environment *Environment::mInstance = NULL;
 
-Environment::Environment() :
-		// wind(new Wind()),
-		earthModel(new EllipsoidalEarthModel()),
-		atmosphere(new Atmosphere())
-{
+Environment::Environment()
+      :
+      earthModel(new EllipsoidalEarthModel()) {
 }
-Environment::~Environment()
-{
+
+Environment::~Environment() {
    //delete wind;
    delete earthModel;
-   delete atmosphere;
+   //delete atmosphere;
 }
-Environment *Environment::getInstance()
-{
-   if(mInstance == NULL)
+
+Environment *Environment::getInstance() {
+   if (mInstance == NULL) {
       mInstance = new Environment();
+   }
    return mInstance;
 }
 
-Wind *Environment::getWind() const
-{
-   return wind;
-}
-
-EarthModel *Environment::getEarthModel() const  {
-	return earthModel;
-}
-
-Atmosphere *Environment::getAtmosphere() const {
-	return atmosphere;
+EarthModel *Environment::getEarthModel() const {
+   return earthModel;
 }
 
 Environment *ENVIRONMENT() {
-	return Environment::getInstance();
+   return Environment::getInstance();
 }
 
 EarthModel *EARTH_MODEL() {
-	return Environment::getInstance()->getEarthModel();
+   return Environment::getInstance()->getEarthModel();
 }
 
-Wind *WIND() {
-	return Environment::getInstance()->getWind();
-}
-
-Atmosphere *ATMOSPHERE() {
-	return Environment::getInstance()->getAtmosphere();
-}

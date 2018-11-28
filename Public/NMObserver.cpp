@@ -18,61 +18,63 @@
 #include "public/NMObserver.h"
 
 
-NMObserver::NMObserver(void)
-{
-	curr_NM = -2;
+NMObserver::NMObserver(void) {
+   curr_NM = -2;
 }
 
 
-NMObserver::~NMObserver(void)
-{
+NMObserver::~NMObserver(void) {
 }
 
-void NMObserver::output_NM_values(double predictedDistance, double trueDistance, double time,
-	double currIAS, double currGS, double targetGS,
-	double minIAS, double maxIAS, double minTAS, double maxTAS)
-{
-	// Creates and adds a new entry to the nautical mile observer report.
-	//
-	// predictedDistance:predicted distance (current distance from IM algorithms).
-	// trueDistance:true distance.
-	// time:time.
-	// currIAS:current aircraft indicated airspeed.
-	// currGS:current aircraft ground speed.
-	// targetGS:target aircraft ground speed.
-	// minIAS:minimum aircraft indicated airspeed.
-	// maxIAS:maximum aircraft indicated airspeed.
-	// minTAS:mininum aircraft true airspeed.
-	// maxTAS:maximum aircraft true airspeed.
+void NMObserver::output_NM_values(double predictedDistance,
+                                  double trueDistance,
+                                  double time,
+                                  double currIAS,
+                                  double currGS,
+                                  double targetGS,
+                                  double minIAS,
+                                  double maxIAS,
+                                  double minTAS,
+                                  double maxTAS) {
+   // Creates and adds a new entry to the nautical mile observer report.
+   //
+   // predictedDistance:predicted distance (current distance from IM algorithms).
+   // trueDistance:true distance.
+   // time:time.
+   // currIAS:current aircraft indicated airspeed.
+   // currGS:current aircraft ground speed.
+   // targetGS:target aircraft ground speed.
+   // minIAS:minimum aircraft indicated airspeed.
+   // maxIAS:maximum aircraft indicated airspeed.
+   // minTAS:mininum aircraft true airspeed.
+   // maxTAS:maximum aircraft true airspeed.
 
-	NMObserverEntry new_entry;
-	
-	new_entry.predictedDistance = predictedDistance;
-	new_entry.trueDistance = trueDistance;
-	new_entry.time = time;
-	new_entry.acIAS = currIAS;
-	new_entry.acGS = currGS;
-	new_entry.targetGS = targetGS;
-	new_entry.minIAS = minIAS;
-	new_entry.maxIAS = maxIAS;
-	new_entry.minTAS = minTAS;
-	new_entry.maxTAS = maxTAS;
+   NMObserverEntry new_entry;
 
-	entry_list.push_back(new_entry);
+   new_entry.predictedDistance = predictedDistance;
+   new_entry.trueDistance = trueDistance;
+   new_entry.time = time;
+   new_entry.acIAS = currIAS;
+   new_entry.acGS = currGS;
+   new_entry.targetGS = targetGS;
+   new_entry.minIAS = minIAS;
+   new_entry.maxIAS = maxIAS;
+   new_entry.minTAS = minTAS;
+   new_entry.maxTAS = maxTAS;
+
+   entry_list.push_back(new_entry);
 }
 
-void NMObserver::initialize_stats()
-{
-	// sets the stats size
-	while( predictedDistance.size() < entry_list.size() )
-	{
-		Statistics temp_value;
-		predictedDistance.push_back(0.0);
-		trueDistance.push_back(0.0);
-		ac_IAS_stats.push_back(temp_value);
-		ac_GS_stats.push_back(temp_value);
-		target_GS_stats.push_back(temp_value);
-		min_IAS_stats.push_back(temp_value);
-		max_IAS_stats.push_back(temp_value);
-	}
+void NMObserver::initialize_stats() {
+   // sets the stats size
+   while (predictedDistance.size() < entry_list.size()) {
+      Statistics temp_value;
+      predictedDistance.push_back(0.0);
+      trueDistance.push_back(0.0);
+      ac_IAS_stats.push_back(temp_value);
+      ac_GS_stats.push_back(temp_value);
+      target_GS_stats.push_back(temp_value);
+      min_IAS_stats.push_back(temp_value);
+      max_IAS_stats.push_back(temp_value);
+   }
 }

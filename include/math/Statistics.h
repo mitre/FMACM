@@ -29,41 +29,40 @@ using std::vector;
 
 class Statistics
 {
-	public:
-		Statistics(void);
+public:
+   Statistics(void);
 
-		~Statistics(void);
+   ~Statistics(void);
 
-		virtual void insert(double value);
-		double get_std()const;
-		inline double get_mean()const
-		{
-			return s1 / samples.size();
-		}
+   virtual void insert(double value);
 
-		inline long get_number_of_samples()const
-		{
-			return samples.size();
-		}
+   double get_std() const;
 
-		inline double get_max()const
-		{
-			return max;
-		}
+   inline double get_mean() const {
+      return s1 / samples.size();
+   }
 
-		inline double get_min()const
-		{
-			return min;
-		}
-		//gwang 2013-11-08
-		//input: pct is the percent (0 <= pct <= 1)
-		double get_percentile(double pct);
+   inline long get_number_of_samples() const {
+      return samples.size();
+   }
 
-		double get_bound95();
+   inline double get_max() const {
+      return max;
+   }
 
-	private:
-		double s1;          // sum of all values seen so far 
-		vector<double> samples;
-		double max;		  // private data members
-		double min;		  // private data members
+   inline double get_min() const {
+      return min;
+   }
+
+   //gwang 2013-11-08
+   //input: pct is the percent (0 <= pct <= 1)
+   double get_percentile(double pct);
+
+   double get_bound95();
+
+private:
+   double s1;          // sum of all values seen so far
+   vector<double> samples;
+   double max;        // private data members
+   double min;        // private data members
 };

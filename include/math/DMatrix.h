@@ -23,66 +23,92 @@
 class DMatrix
 {
 private:
-	static char *MULTIPLICATION_DIMENSIONS_MESSAGE;
-	DVector *rows; 
-	int minRow;
-	int maxRow;
+   static char *MULTIPLICATION_DIMENSIONS_MESSAGE;
+   DVector *rows;
+   int minRow;
+   int maxRow;
 
 public:
-	class IncompatibleDimensionsException : public std::exception
-	{
-	public:
-		IncompatibleDimensionsException(char *explanation);
-		virtual ~IncompatibleDimensionsException() throw();
-		virtual const char* what() const throw();
-	private:
-		const char *explanation;
-	};
+   class IncompatibleDimensionsException : public std::exception
+   {
+   public:
+      IncompatibleDimensionsException(char *explanation);
 
-	// default Constructor/Destructors
-	DMatrix(void);
-	~DMatrix(void);
-	// Copy Constructor
-	DMatrix(const DMatrix &in); 
-	DMatrix(double **array_in, int inRowMin, int inRowMax, int inColMin, int inColMax);
+      virtual ~IncompatibleDimensionsException() throw();
 
-	// Constructor that takes row and colomn min/max values
-	DMatrix(int inRowMin, int inRowMax, int inColMin, int inColMax);
+      virtual const char *what() const throw();
 
-	//DMatrix(const WindStack &windStack);
-	//void load(const WindStack &windStack);
+   private:
+      const char *explanation;
+   };
 
-	// get/set methods
-	double get(const int row, const int colomn) const;
-	void set(const int row, const int colomn, const double value);
+   // default Constructor/Destructors
+   DMatrix(void);
 
-	void ascendSort();
+   ~DMatrix(void);
 
-	// method to set the bounds of the Matrix
-	void setBounds(int inRowMin, int inRowMax, int inColMin, int inColMax);
+   // Copy Constructor
+   DMatrix(const DMatrix &in);
 
-	// method to check if a given index is in the array
-	bool inRange(const int row, const int colomn) const;
-	bool inRange(const int row) const;
+   DMatrix(double **array_in,
+           int inRowMin,
+           int inRowMax,
+           int inColMin,
+           int inColMax);
 
-	// overloads the array index operator
-	DVector& operator[](const int);
-	const DVector& operator[](const int) const;
+   // Constructor that takes row and colomn min/max values
+   DMatrix(int inRowMin,
+           int inRowMax,
+           int inColMin,
+           int inColMax);
 
-	// overloads the equals operator
-	DMatrix& operator=(const DMatrix &in);
+   //DMatrix(const WindStack &windStack);
+   //void load(const WindStack &windStack);
 
-	DMatrix& operator*(const DMatrix &that) const;
+   // get/set methods
+   double get(const int row,
+              const int colomn) const;
 
-	/**
-	 * Appends a new row to the matrix.
-	 * @param newRow
-	 */
+   void set(const int row,
+            const int colomn,
+            const double value);
+
+   void ascendSort();
+
+   // method to set the bounds of the Matrix
+   void setBounds(int inRowMin,
+                  int inRowMax,
+                  int inColMin,
+                  int inColMax);
+
+   // method to check if a given index is in the array
+   bool inRange(const int row,
+                const int colomn) const;
+
+   bool inRange(const int row) const;
+
+   // overloads the array index operator
+   DVector &operator[](const int);
+
+   const DVector &operator[](const int) const;
+
+   // overloads the equals operator
+   DMatrix &operator=(const DMatrix &in);
+
+   DMatrix &operator*(const DMatrix &that) const;
+
+   /**
+    * Appends a new row to the matrix.
+    * @param newRow
+    */
 //	void append(DVector& newRow); // TODO Complete append operation
 
-	// getters
-	int get_min_row() const;
-	int get_max_row() const;
-	int get_min_colomn() const;
-	int get_max_colomn() const;
+   // getters
+   int get_min_row() const;
+
+   int get_max_row() const;
+
+   int get_min_colomn() const;
+
+   int get_max_colomn() const;
 };

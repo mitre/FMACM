@@ -23,28 +23,29 @@
  */
 
 #pragma once
-class Wind;
-#include "public/EarthModel.h"
-#include "public/Atmosphere.h"
 
-class Environment {
+class Wind;
+
+#include "public/EarthModel.h"
+
+class Environment
+{
 public:
-	static Environment *getInstance();
-	Wind *getWind() const;
-	EarthModel *getEarthModel() const;
-	Atmosphere *getAtmosphere() const;
+   static Environment *getInstance();
+
+   EarthModel *getEarthModel() const;
 
 private:
-	static Environment *mInstance;
-	Wind *wind;
-	EarthModel *earthModel;
-	Atmosphere *atmosphere;
-	Environment();
-	virtual ~Environment();
+   static Environment *mInstance;
+   EarthModel *earthModel;
+
+   Environment();
+
+   virtual ~Environment();
 };
 
 // external C functions with short names
 Environment *ENVIRONMENT();
+
 EarthModel *EARTH_MODEL();
-Wind *WIND();
-Atmosphere *ATMOSPHERE();
+

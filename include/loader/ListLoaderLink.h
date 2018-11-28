@@ -16,77 +16,69 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "loader/LoaderLink.h"
 
-template <class DATA>
-class ListLoaderLink: public LoaderLink
+template<class DATA>
+class ListLoaderLink : public LoaderLink
 {
 public:
 
-	ListLoaderLink(std::list<DATA> *address)
-	{
-		var_address = address;
-		must_load_only_once = false;
-		is_a_list = true;
-	}
+   ListLoaderLink(std::list<DATA> *address) {
+      var_address = address;
+      must_load_only_once = false;
+      is_a_list = true;
+   }
 
-	//-------------------------------------------------
+   //-------------------------------------------------
 
-	bool load_s(DecodedStream *ds)
-	{
-		DATA temp;
-		std::string token;
-		bool f;
+   bool load_s(DecodedStream *ds) {
+      DATA temp;
+      std::string token;
+      bool f;
 
-		f = ds->get_datum(token);
-		
-		if(!f)
-		{
-			return false;
-		}
+      f = ds->get_datum(token);
 
-		if(token.compare("{") != 0)
-		{
-			return false;  
-		}
+      if (!f) {
+         return false;
+      }
 
-		while(true)
-		{
-			f = ds->get_datum(token);
+      if (token.compare("{") != 0) {
+         return false;
+      }
 
-			if(!f)
-			{
-				return false;
-			}
-			
-			if(token.compare("}") == 0) // look for the } at the end of the list 
-			{
-				return true; // dun 
-			}
-			else
-			{
-				ds->push_back(); // need to put the token back 
-			}
+      while (true) {
+         f = ds->get_datum(token);
 
-			// load the entry 
+         if (!f) {
+            return false;
+         }
 
-			f = temp.load(ds);
+         if (token.compare("}") == 0) // look for the } at the end of the list
+         {
+            return true; // dun
+         } else {
+            ds->push_back(); // need to put the token back
+         }
 
-			if(!f)
-			{
-				return false;
-			}
+         // load the entry
 
-			// add it to the list 
+         f = temp.load(ds);
 
-			var_address->push_back(temp);
+         if (!f) {
+            return false;
+         }
 
-		}
-			
-		return true;
-	}
+         // add it to the list
+
+         var_address->push_back(temp);
+
+      }
+
+      return true;
+   }
 
 private:
 
-	std::list<DATA> *var_address;
+   std::list<DATA> *var_address;
 };

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "Environment.h"
+#include "Atmosphere.h"
 #include "AircraftState.h"
 #include "HorizontalPath.h"
 #include <vector>
@@ -35,47 +35,76 @@ class AircraftCalculations
 {
 
 public:
-	AircraftCalculations(void);
-	~AircraftCalculations(void);
+   AircraftCalculations(void);
 
-	// method to get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
-	static bool getPosFromPathLength(const Units::Length &dist_in, const std::vector<HorizontalPath> &traj_in,
-			Units::Length &x_out, Units::Length &y_out, Units::UnsignedAngle &course_out, int &traj_index);
+   ~AircraftCalculations(void);
 
-	// method to get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
-	static void getPathLengthFromPos(const Units::Length x, const Units::Length y,
-			const std::vector<HorizontalPath> &hTraj, Units::Length &dist, Units::Angle &trk);
+   // method to get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
+   static bool getPosFromPathLength(const Units::Length &dist_in,
+                                    const std::vector<HorizontalPath> &traj_in,
+                                    Units::Length &x_out,
+                                    Units::Length &y_out,
+                                    Units::UnsignedAngle &course_out,
+                                    int &traj_index);
 
-	static Units::UnsignedRadiansAngle convert0to2Pi(Units::Angle course_in);
-	static Units::SignedRadiansAngle convertPitoPi(Units::Angle course_in);
+   // method to get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
+   static void getPathLengthFromPos(const Units::Length x,
+                                    const Units::Length y,
+                                    const std::vector<HorizontalPath> &hTraj,
+                                    Units::Length &dist,
+                                    Units::Angle &trk);
 
-	// method for calculating the Cas ESF
-	static double ESFconstantCAS(const Units::Speed v_tas, const Units::Length alt);
+   static Units::UnsignedRadiansAngle convert0to2Pi(Units::Angle course_in);
 
-	// method to compute distance between two points given in feet.
-	static Units::NauticalMilesLength ptToPtDist(Units::Length x0,
-			Units::Length y0, Units::Length x1, Units::Length y1);
+   static Units::SignedRadiansAngle convertPitoPi(Units::Angle course_in);
 
-	// method to compute ground speed from an aircraft state.
-	static Units::Speed gsAtACS(AircraftState acs);
+   // method for calculating the Cas ESF
+   static double ESFconstantCAS(const Units::Speed v_tas,
+                                const Units::Length alt,
+                                const Units::Temperature temp_in);
 
-    static Units::SignedRadiansAngle computeAngleBetweenVectors(const Units::Length &xvertex, const Units::Length &yvertex, const Units::Length &x1, const Units::Length &y1, const Units::Length &x2, const Units::Length &y2);
+   // method to compute distance between two points given in feet.
+   static Units::NauticalMilesLength ptToPtDist(Units::Length x0,
+                                                Units::Length y0,
+                                                Units::Length x1,
+                                                Units::Length y1);
 
-    static double computeCrossProduct(const Units::Length &xvertex, const Units::Length &yvertex, const Units::Length &x1, const Units::Length &y1, const Units::Length &x2, const Units::Length &y2);
+   // method to compute ground speed from an aircraft state.
+   static Units::Speed gsAtACS(AircraftState acs);
 
- private:
-    static log4cplus::Logger logger;
+   static Units::SignedRadiansAngle computeAngleBetweenVectors(const Units::Length &xvertex,
+                                                               const Units::Length &yvertex,
+                                                               const Units::Length &x1,
+                                                               const Units::Length &y1,
+                                                               const Units::Length &x2,
+                                                               const Units::Length &y2);
 
-	struct mPathDistance {
-	  int mIx; // Index to point in horizontal trajectory.
-	  Units::Length mDist;
-	};
+   static double computeCrossProduct(const Units::Length &xvertex,
+                                     const Units::Length &yvertex,
+                                     const Units::Length &x1,
+                                     const Units::Length &y1,
+                                     const Units::Length &x2,
+                                     const Units::Length &y2);
 
-	static std::vector<mPathDistance> computePathDistances(
-	    const Units::Length x, const Units::Length y, const std::vector<HorizontalPath> &hTraj);
+private:
+   static log4cplus::Logger logger;
 
-	static void crossTrackError(Units::Length x, Units::Length y,
-	       int trajIx, std::vector<HorizontalPath> hTraj,
-	       int &nextTrajIx, Units::Length &cte);
+   struct mPathDistance
+   {
+      int mIx; // Index to point in horizontal trajectory.
+      Units::Length mDist;
+   };
+
+   static std::vector<mPathDistance> computePathDistances(
+         const Units::Length x,
+         const Units::Length y,
+         const std::vector<HorizontalPath> &hTraj);
+
+   static void crossTrackError(Units::Length x,
+                               Units::Length y,
+                               int trajIx,
+                               std::vector<HorizontalPath> hTraj,
+                               int &nextTrajIx,
+                               Units::Length &cte);
 
 };

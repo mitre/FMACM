@@ -28,46 +28,48 @@
 class TestFrameworkFMS
 {
 public:
-	static Units::DegreesAngle MAX_BANK_ANGLE;
+   static Units::DegreesAngle MAX_BANK_ANGLE;
 
-	TestFrameworkFMS(void);
-	~TestFrameworkFMS(void);
+   TestFrameworkFMS(void);
 
-	int Mode;
-	double DeltaTrack;
-	double TurnRadius;
-	double RangeStartTurn;
-	double RangeToNextWpM1;
-	double RangeToNextWp;
+   ~TestFrameworkFMS(void);
 
-	double xWp[128];
-	double yWp[128];
-	double AltWp[128];
+   int Mode;
+   double DeltaTrack;
+   double TurnRadius;
+   double RangeStartTurn;
+   double RangeToNextWpM1;
+   double RangeToNextWp;
 
-	double Track[127];
-	double psi[127];
-	double Length[127];
+   double xWp[128];
+   double yWp[128];
+   double AltWp[128];
 
-	int number_of_waypoints;
-	int NextWp;
-	double nominal_IAS_at_waypoint[128];
-	double MACH_at_waypoint[128];
-	PrecalcConstraint constraints[128];
+   double Track[127];
+   double psi[127];
+   double Length[127];
 
-	// primary calculation method to update the FMS model
-	void update(AircraftState state, std::vector<PrecalcWaypoint> &precalcWaypoints,
-		    std::vector<HorizontalPath> &hTraj);
+   int number_of_waypoints;
+   int NextWp;
+   double nominal_IAS_at_waypoint[128];
+   double MACH_at_waypoint[128];
+   PrecalcConstraint constraints[128];
 
-	// get the psi of the given index if in range, returns -999.9 if out of range
-	double get_psi(int index); 
+   // primary calculation method to update the FMS model
+   void update(AircraftState state,
+               std::vector<PrecalcWaypoint> &precalcWaypoints,
+               std::vector<HorizontalPath> &hTraj);
 
-	// init method to initialize the FMS data
-	void init();
-	
-	// method to read in the waypoint information from an AircraftIntent
-	void copy_waypoints_from_intent(AircraftIntent intent_in);
+   // get the psi of the given index if in range, returns -999.9 if out of range
+   double get_psi(int index);
 
-	bool is_finished();
+   // init method to initialize the FMS data
+   void init();
+
+   // method to read in the waypoint information from an AircraftIntent
+   void copy_waypoints_from_intent(AircraftIntent intent_in);
+
+   bool is_finished();
 
 };
 

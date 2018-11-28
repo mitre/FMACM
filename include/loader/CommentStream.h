@@ -24,102 +24,90 @@ class CommentStream : public PARENT
 {
 public:
 
-	CommentStream(void)
-	{
-	}
+   CommentStream(void) {
+   }
 
-	~CommentStream(void)
-	{
-	}
+   ~CommentStream(void) {
+   }
 
-	Token get_next()
-	{
-		Token out;
-		char first;
-		std::string comm;
-		char next_ch;
-		bool maybe = false;
-		bool yes_comm = false;
-		
+   Token get_next() {
+      Token out;
+      char first;
+      std::string comm;
+      char next_ch;
+      bool maybe = false;
+      bool yes_comm = false;
 
-		//iterate through characters to look for delimiters before a block comment
-		//add delimiters to the format part of token. if you find a / then check to see if the next is
-		// a *. If it is then you have a block comment and go through the comment stream, else put back 
-		// the characters / and whatever was next and call get_next
-		first = PARENT::get_char();
 
-		if(PARENT::is_delimiter(first))
-		{
-			while(PARENT::is_delimiter(first))
-			{
-			  if(PARENT::file.eof()) break;
-				out.add_Format(first);
-				first = PARENT::get_char();
-			}
-		}
-		if(first == '/')
-		{
-			char second = PARENT::get_char();
-			if(second == '*')
-			{
-				yes_comm = true;
-			}
-			else 
-			{
-				PARENT::file.putback(second);
-				PARENT::file.putback(first);
-			}
-		}
-		else if (!PARENT::file.eof()) PARENT::file.putback(first);
+      //iterate through characters to look for delimiters before a block comment
+      //add delimiters to the format part of token. if you find a / then check to see if the next is
+      // a *. If it is then you have a block comment and go through the comment stream, else put back
+      // the characters / and whatever was next and call get_next
+      first = PARENT::get_char();
 
-		if(!yes_comm)
-		{
-			Token out1 = PARENT::get_next();
-			out.add_Format(out1.get_Format());
-			out.add_Data(out1.get_Data());
+      if (PARENT::is_delimiter(first)) {
+         while (PARENT::is_delimiter(first)) {
+            if (PARENT::file.eof()) {
+               break;
+            }
+            out.add_Format(first);
+            first = PARENT::get_char();
+         }
+      }
+      if (first == '/') {
+         char second = PARENT::get_char();
+         if (second == '*') {
+            yes_comm = true;
+         } else {
+            PARENT::file.putback(second);
+            PARENT::file.putback(first);
+         }
+      } else if (!PARENT::file.eof()) {
+         PARENT::file.putback(first);
+      }
 
-			return out;
-		}
+      if (!yes_comm) {
+         Token out1 = PARENT::get_next();
+         out.add_Format(out1.get_Format());
+         out.add_Data(out1.get_Data());
 
-		else //look for long comment delimiter
-		{
-			PARENT::comment_not_end = true;
-			out.add_Format('/');
-			out.add_Format('*');
+         return out;
+      } else //look for long comment delimiter
+      {
+         PARENT::comment_not_end = true;
+         out.add_Format('/');
+         out.add_Format('*');
 
-			while(true)
-			{
-				next_ch = PARENT::get_char(); //get the next character
+         while (true) {
+            next_ch = PARENT::get_char(); //get the next character
 
-				if(maybe) //if the last character was a * then look for / to end comment
-				{
-					if(next_ch == '/')
-					{
-						out.add_Format(next_ch);
-						break;
-					}
-					else //no / was found so reset maybe to false and loop through again.
-					{
-						out.add_Format(next_ch);
-						maybe = false;
-					}
-				}
+            if (maybe) //if the last character was a * then look for / to end comment
+            {
+               if (next_ch == '/') {
+                  out.add_Format(next_ch);
+                  break;
+               } else //no / was found so reset maybe to false and loop through again.
+               {
+                  out.add_Format(next_ch);
+                  maybe = false;
+               }
+            }
 
-				if(next_ch == '*') //look for potential beginning of end comment delimiter
-				{
-					maybe = true;
-				}
-				out.add_Format(next_ch);
-			}
-			
-			Token out2 = PARENT::get_next();
-			out.add_Format(out2.get_Format());
-			out.add_Data(out2.get_Data());
+            if (next_ch == '*') //look for potential beginning of end comment delimiter
+            {
+               maybe = true;
+            }
+            out.add_Format(next_ch);
+         }
 
-			return out;
+         Token out2 = PARENT::get_next();
+         out.add_Format(out2.get_Format());
+         out.add_Data(out2.get_Data());
 
-		}
+         return out;
 
-		//not a comment so get next
-	}
+      }
+
+      //not a comment so get next
+   }
 };

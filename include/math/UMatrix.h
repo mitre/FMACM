@@ -24,251 +24,246 @@
 
 #pragma once
 
-template <class T>
+template<class T>
 class UMatrix
 {
 private:
-	static char *MULTIPLICATION_DIMENSIONS_MESSAGE;
-	UVector<T> *rows;
-	int minRow;
-	int maxRow;
+   static char *MULTIPLICATION_DIMENSIONS_MESSAGE;
+   UVector <T> *rows;
+   int minRow;
+   int maxRow;
 
 public:
-	class IncompatibleDimensionsException : public std::exception
-	{
-	public:
-		IncompatibleDimensionsException(char *explanation);
-		virtual ~IncompatibleDimensionsException() throw();
-		virtual const char* what() const throw();
-	private:
-		const char *explanation;
-	};
+   class IncompatibleDimensionsException : public std::exception
+   {
+   public:
+      IncompatibleDimensionsException(char *explanation);
 
-	// default Constructor/Destructors
-	UMatrix(void) {
-		minRow = 0;
-		maxRow = -1;
-		rows = NULL;
-	}
+      virtual ~IncompatibleDimensionsException() throw();
 
-	~UMatrix(void) {
-		delete [] rows;
-		rows = NULL;
-	}
+      virtual const char *what() const throw();
 
-	// Copy Constructor
-	UMatrix(const UMatrix<T> &in) {
-		// calculates size of Matrix
-		int size = in.maxRow - in.minRow + 1;
+   private:
+      const char *explanation;
+   };
 
-		// sets row min/max
-		maxRow = in.maxRow;
-		minRow = in.minRow;
+   // default Constructor/Destructors
+   UMatrix(void) {
+      minRow = 0;
+      maxRow = -1;
+      rows = NULL;
+   }
 
-		// allocates the new UMatrix (array of UVector<T>s)
-		rows = new UVector<T>[size];
+   ~UMatrix(void) {
+      delete[] rows;
+      rows = NULL;
+   }
 
-		// loop to copy the values of the given UMatrix
-		for(int loop = 0; loop < size; loop++)
-		{
-			rows[loop] = in.rows[loop];
-		}
-	}
+   // Copy Constructor
+   UMatrix(const UMatrix<T> &in) {
+      // calculates size of Matrix
+      int size = in.maxRow - in.minRow + 1;
 
-	// Constructor that takes row and column min/max values
-	UMatrix(int inRowMin, int inRowMax, int inColMin, int inColMax)
-	{
-		// calculates the size of the UMatrix
-		int size = inRowMax - inRowMin + 1;
+      // sets row min/max
+      maxRow = in.maxRow;
+      minRow = in.minRow;
 
-		// sets row min/max
-		maxRow = inRowMax;
-		minRow = inRowMin;
+      // allocates the new UMatrix (array of UVector<T>s)
+      rows = new UVector<T>[size];
 
-		// allocates the new UMatrix (array of UVector<T>s)
-		rows = new UVector<T>[size];
+      // loop to copy the values of the given UMatrix
+      for (int loop = 0; loop < size; loop++) {
+         rows[loop] = in.rows[loop];
+      }
+   }
 
-		// loop to set the column size (UVector<T> min/max)
-		for(int loop = 0; loop < size; loop++)
-		{
-			rows[loop].setBounds(inColMin, inColMax);
-		}
-	}
+   // Constructor that takes row and column min/max values
+   UMatrix(int inRowMin,
+           int inRowMax,
+           int inColMin,
+           int inColMax) {
+      // calculates the size of the UMatrix
+      int size = inRowMax - inRowMin + 1;
 
-	// Constructor that takes a 2D array
-	UMatrix(T **array_in, int inRowMin, int inRowMax, int inColMin, int inColMax)
-	{
-		// calculates the size of the UMatrix
-		int size = inRowMax - inRowMin + 1;
+      // sets row min/max
+      maxRow = inRowMax;
+      minRow = inRowMin;
 
-		// sets row min/max
-		maxRow = inRowMax;
-		minRow = inRowMin;
+      // allocates the new UMatrix (array of UVector<T>s)
+      rows = new UVector<T>[size];
 
-		// allocates the new UMatrix (array of UVector<T>s)
-		rows = new UVector<T>[size];
+      // loop to set the column size (UVector<T> min/max)
+      for (int loop = 0; loop < size; loop++) {
+         rows[loop].setBounds(inColMin, inColMax);
+      }
+   }
 
-		// loop to set the column size (UVector<T> min/max)
-		for(int loop = 0; loop < size; loop++)
-		{
-			rows[loop].setBounds(inColMin, inColMax);
-		}
+   // Constructor that takes a 2D array
+   UMatrix(T **array_in,
+           int inRowMin,
+           int inRowMax,
+           int inColMin,
+           int inColMax) {
+      // calculates the size of the UMatrix
+      int size = inRowMax - inRowMin + 1;
 
-		// get row and column sizes
-		//int column_size = inColMax-inColMin;
-		//int row_size = inRowMax-inRowMin;
+      // sets row min/max
+      maxRow = inRowMax;
+      minRow = inRowMin;
 
-		// NOTE this is dangerous code, the array MUST be the same size as the given row/column information
-		// failure to match the bounds given will cause dangerous memory access!!!
-		// this only works because 2d arrays are stored in sequential memory addresses
-		// if the array is dynamically allocated this WILL cause dangerous memory access!!!
-		T *memory_pointer; // pointer to point to the memory address of the 2d array
-		memory_pointer = (T *)array_in; // accesses the the memory address of the first element
-		for(int outer = 0; outer < size; outer++)
-		{
-			for(int inner = inColMin; inner <= inColMax; inner++)
-			{
-				rows[outer].set(inner,(*memory_pointer));
-				memory_pointer++; // iterates the memory address
-			}
-		}
-	}
+      // allocates the new UMatrix (array of UVector<T>s)
+      rows = new UVector<T>[size];
 
-	// get/set methods
-	T get(int row, int column) const
-	{
-		// check if in valid range of UMatrix
-		if( inRange(row))
-		{
-			// uses the UVector<T>s overloaded array operator to get the value
-			return rows[row - minRow][column];
-		}
+      // loop to set the column size (UVector<T> min/max)
+      for (int loop = 0; loop < size; loop++) {
+         rows[loop].setBounds(inColMin, inColMax);
+      }
 
-		// if not in valid range throw Invalid Index Exception
-		throw InvalidIndexException();
-	}
-	void set(int row, int column, T value)
-	{
-		// check if in valid range of UMatrix
-		if( inRange(row))
-		{
-			// uses the UVector<T> overloaded array operator to set the value
-			rows[row-minRow][column] = value;
-		}
-		else
-		{
-			// else not in range throw Invalid Index Exception
-			throw InvalidIndexException();
-		}
-	}
+      // get row and column sizes
+      //int column_size = inColMax-inColMin;
+      //int row_size = inRowMax-inRowMin;
 
-	// method to set the bounds of the Matrix
-	void setBounds(int inRowMin, int inRowMax, int inColMin, int inColMax)
-	{
-		// calculates the size of the UMatrix
-		int size = inRowMax - inRowMin + 1;
+      // NOTE this is dangerous code, the array MUST be the same size as the given row/column information
+      // failure to match the bounds given will cause dangerous memory access!!!
+      // this only works because 2d arrays are stored in sequential memory addresses
+      // if the array is dynamically allocated this WILL cause dangerous memory access!!!
+      T *memory_pointer; // pointer to point to the memory address of the 2d array
+      memory_pointer = (T *) array_in; // accesses the the memory address of the first element
+      for (int outer = 0; outer < size; outer++) {
+         for (int inner = inColMin; inner <= inColMax; inner++) {
+            rows[outer].set(inner, (*memory_pointer));
+            memory_pointer++; // iterates the memory address
+         }
+      }
+   }
 
-		// sets row min/max
-		maxRow = inRowMax;
-		minRow = inRowMin;
+   // get/set methods
+   T get(int row,
+         int column) const {
+      // check if in valid range of UMatrix
+      if (inRange(row)) {
+         // uses the UVector<T>s overloaded array operator to get the value
+         return rows[row - minRow][column];
+      }
 
-		// allocates the new UMatrix (array of UVector<T>s)
-		delete[] rows;
-		rows = new UVector<T>[size];
+      // if not in valid range throw Invalid Index Exception
+      throw InvalidIndexException();
+   }
 
-		// loop to set the column size (UVector<T> min/max)
-		for(int loop = 0; loop < size; loop++)
-		{
-			rows[loop].setBounds(inColMin, inColMax);
-		}
-	}
+   void set(int row,
+            int column,
+            T value) {
+      // check if in valid range of UMatrix
+      if (inRange(row)) {
+         // uses the UVector<T> overloaded array operator to set the value
+         rows[row - minRow][column] = value;
+      } else {
+         // else not in range throw Invalid Index Exception
+         throw InvalidIndexException();
+      }
+   }
 
-	// method to check if a given index is in the array
-	bool inRange(int row, int column) const
-	{
-		// initializes results to false
-		bool results = false;
+   // method to set the bounds of the Matrix
+   void setBounds(int inRowMin,
+                  int inRowMax,
+                  int inColMin,
+                  int inColMax) {
+      // calculates the size of the UMatrix
+      int size = inRowMax - inRowMin + 1;
 
-		// check if row is in the range of [min,max] inclusive
-		if( row >= minRow && row <= maxRow )
-		{
-			// if in rows range call the UVector<T> of that row and check range
-			results = rows[row].inRange(column);
-		}
+      // sets row min/max
+      maxRow = inRowMax;
+      minRow = inRowMin;
 
-		return results;
-	}
+      // allocates the new UMatrix (array of UVector<T>s)
+      delete[] rows;
+      rows = new UVector<T>[size];
 
-	// method to check if a given index is in the array
-	bool inRange(int row) const
-	{
-		// initializes results to false
-		bool results = false;
+      // loop to set the column size (UVector<T> min/max)
+      for (int loop = 0; loop < size; loop++) {
+         rows[loop].setBounds(inColMin, inColMax);
+      }
+   }
 
-		// check if row is in the range of [min,max] inclusive
-		if( row >= minRow && row <= maxRow )
-		{
-			// if in rows range then results is true
-			results = true;
-		}
+   // method to check if a given index is in the array
+   bool inRange(int row,
+                int column) const {
+      // initializes results to false
+      bool results = false;
 
-		return results;
-	}
+      // check if row is in the range of [min,max] inclusive
+      if (row >= minRow && row <= maxRow) {
+         // if in rows range call the UVector<T> of that row and check range
+         results = rows[row].inRange(column);
+      }
 
-	// overloads the array index operator
-	UVector<T>& operator[](int row)
-	{
-		// check if in valid range of UMatrix
-		if( inRange(row))
-		{
-			// returns the UVector<T> of the given row
-			return rows[row - minRow];
-		}
+      return results;
+   }
 
-		// if not in valid range throw Invalid Index Exception
-		throw InvalidIndexException();
-	}
-	const UVector<T>& operator[](int row) const
-	{
-		// check if in valid range of UMatrix
-		if( inRange(row))
-		{
-			// returns the UVector<T> of the given row
-			return rows[row - minRow];
-		}
+   // method to check if a given index is in the array
+   bool inRange(int row) const {
+      // initializes results to false
+      bool results = false;
 
-		// if not in valid range throw Invalid Index Exception
-		throw InvalidIndexException();
-	}
+      // check if row is in the range of [min,max] inclusive
+      if (row >= minRow && row <= maxRow) {
+         // if in rows range then results is true
+         results = true;
+      }
 
-	// overloads the equals operator
-	UMatrix& operator=(const UMatrix &in)
-	{
-	  if (this != &in) {
-	    // calculates size of Matrix
-	    int size = in.maxRow - in.minRow + 1;
+      return results;
+   }
 
-	    // sets row min/max
-	    maxRow = in.maxRow;
-	    minRow = in.minRow;
+   // overloads the array index operator
+   UVector <T> &operator[](int row) {
+      // check if in valid range of UMatrix
+      if (inRange(row)) {
+         // returns the UVector<T> of the given row
+         return rows[row - minRow];
+      }
 
-	    delete [] rows;
+      // if not in valid range throw Invalid Index Exception
+      throw InvalidIndexException();
+   }
 
-	    // allocates the new UMatrix (array of UVector<T>s)
-	    rows = new UVector<T>[size];
+   const UVector <T> &operator[](int row) const {
+      // check if in valid range of UMatrix
+      if (inRange(row)) {
+         // returns the UVector<T> of the given row
+         return rows[row - minRow];
+      }
 
-	    // loop to copy the values of the given UMatrix
-	    for(int loop = 0; loop < size; loop++) {
-	      rows[loop] = in.rows[loop];
-	    }
-	  }
+      // if not in valid range throw Invalid Index Exception
+      throw InvalidIndexException();
+   }
 
-	  return *this;
-	}
+   // overloads the equals operator
+   UMatrix &operator=(const UMatrix &in) {
+      if (this != &in) {
+         // calculates size of Matrix
+         int size = in.maxRow - in.minRow + 1;
 
-	/**
-	 * Matrix multiplication
-	 */
+         // sets row min/max
+         maxRow = in.maxRow;
+         minRow = in.minRow;
+
+         delete[] rows;
+
+         // allocates the new UMatrix (array of UVector<T>s)
+         rows = new UVector<T>[size];
+
+         // loop to copy the values of the given UMatrix
+         for (int loop = 0; loop < size; loop++) {
+            rows[loop] = in.rows[loop];
+         }
+      }
+
+      return *this;
+   }
+
+   /**
+    * Matrix multiplication
+    */
 /*	UMatrix& operator*(const UMatrix &that) const {
 		int rowStart1 = get_min_row();
 		int rowEnd1 = get_max_row();
@@ -296,28 +291,27 @@ public:
 		return *result;
 	}*/
 
-	void ascendSort() {
-		//std::sort(&rows[0],&rows[maxRow-minRow+1],&rowsComparator);
-		std::sort(&rows[0],&rows[maxRow-minRow+1]);
-	}
+   void ascendSort() {
+      //std::sort(&rows[0],&rows[maxRow-minRow+1],&rowsComparator);
+      std::sort(&rows[0], &rows[maxRow - minRow + 1]);
+   }
 
-	// getters
-	int get_min_row() const
-	{
-		return minRow;
-	}
-	int get_max_row() const
-	{
-		return maxRow;
-	}
-	int get_min_column() const
-	{
-		return rows[0].get_min();
-	}
-	int get_max_column() const
-	{
-		return rows[0].get_max();
-	}
+   // getters
+   int get_min_row() const {
+      return minRow;
+   }
+
+   int get_max_row() const {
+      return maxRow;
+   }
+
+   int get_min_column() const {
+      return rows[0].get_min();
+   }
+
+   int get_max_column() const {
+      return rows[0].get_max();
+   }
 
 };
 

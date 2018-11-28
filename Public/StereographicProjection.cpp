@@ -24,50 +24,57 @@ Units::RadiansAngle StereographicProjection::latTPT(0);  /* North latitude of ta
 Units::RadiansAngle StereographicProjection::lonTPT(0);  /* **WEST** longitude of tangency point (radians) */
 
 Units::FeetLength StereographicProjection::eRadius(0); //earth radius at tangent point (lon1, lat1), feet
-   /* Convienience parameters calculated from raw parameters */
+/* Convienience parameters calculated from raw parameters */
 double StereographicProjection::sin_latTPT = 0; /* sin of latitude of tangency point */
 double StereographicProjection::sin_clatTPT = 0; /* sin of conformal latitude of tangency point */
 double StereographicProjection::cos_clatTPT = 0; /* cos of conformal latitude of tangency point */
 
-   /* Convienience parameters used only for the reverse NAS projection */
+/* Convienience parameters used only for the reverse NAS projection */
 double StereographicProjection::cos_gamma = 0;
 double StereographicProjection::sin_gamma = 0;
 
 
-StereographicProjection::StereographicProjection(void)
-{
+StereographicProjection::StereographicProjection(void) {
 }
 
-StereographicProjection::~StereographicProjection(void)
-{
+StereographicProjection::~StereographicProjection(void) {
 }
 
-void StereographicProjection::init(Units::Angle lat, Units::Angle lon, Units::Length earthRadius)
-{
-  latTPT = lat;
-  lonTPT = -lon;
+void StereographicProjection::init(Units::Angle lat,
+                                   Units::Angle lon,
+                                   Units::Length earthRadius) {
+   latTPT = lat;
+   lonTPT = -lon;
 
-  eRadius = earthRadius;
+   eRadius = earthRadius;
 
-  //beginning of init
-  double gamma;
+   //beginning of init
+   double gamma;
 
-  sin_latTPT   = sin(latTPT);
+   sin_latTPT = sin(latTPT);
 
-  /* Calculate sin and cos of conformal latitude instead of geodetic    */
-  sin_clatTPT = toConformalSin(sin_latTPT);
-  if (sin_clatTPT > 1.0) sin_clatTPT = 1.0;
-  else if (sin_clatTPT < -1.0) sin_clatTPT = -1.0;
+   /* Calculate sin and cos of conformal latitude instead of geodetic    */
+   sin_clatTPT = toConformalSin(sin_latTPT);
+   if (sin_clatTPT > 1.0) {
+      sin_clatTPT = 1.0;
+   } else if (sin_clatTPT < -1.0) {
+      sin_clatTPT = -1.0;
+   }
 
-  cos_clatTPT = 1 - sin_clatTPT*sin_clatTPT;
-  if (cos_clatTPT > 0.0) cos_clatTPT = sqrt(cos_clatTPT);
-  else cos_clatTPT = 0.0;
-  /* ** ADDED FOR SOUTHERN HEMISPHERE */
-  if (latTPT.value() < 0.0) cos_clatTPT = -cos_clatTPT;
+   cos_clatTPT = 1 - sin_clatTPT * sin_clatTPT;
+   if (cos_clatTPT > 0.0) {
+      cos_clatTPT = sqrt(cos_clatTPT);
+   } else {
+      cos_clatTPT = 0.0;
+   }
+   /* ** ADDED FOR SOUTHERN HEMISPHERE */
+   if (latTPT.value() < 0.0) {
+      cos_clatTPT = -cos_clatTPT;
+   }
 
-  gamma = PI/2.0 - asin(sin_clatTPT);
-  sin_gamma = sin(gamma);
-  cos_gamma = cos(gamma);
+   gamma = PI / 2.0 - asin(sin_clatTPT);
+   sin_gamma = sin(gamma);
+   cos_gamma = cos(gamma);
 
 }
 
@@ -83,8 +90,10 @@ void StereographicProjection::init(Units::Angle lat, Units::Angle lon, Units::Le
 //A typical value of eRadius is 3440.1344*NM2FT (feet)
 
 void StereographicProjection::xy_to_ll(
-		const Units::Length x, const Units::Length y,
-		Units::Angle &lat2, Units::Angle &lon2)
+      const Units::Length x,
+      const Units::Length y,
+      Units::Angle &lat2,
+      Units::Angle &lon2)
 
 /* Here is the real reverse conversion from NAS coordinates to lat,long. */
 /* Based on the routine CNV_XYLL in the AERA PL1 software, written by David */
@@ -95,136 +104,144 @@ void StereographicProjection::xy_to_ll(
 /* iterative algorithms and the equations in NAS-MD-312 in that it works */
 /* over a much larger area of the globe. */
 {
-  Units::RadiansAngle alpha;  /* The angle between the point of tangency, the
+   Units::RadiansAngle alpha;  /* The angle between the point of tangency, the
                     XY position, and the center of the earth.*/
-  Units::RadiansAngle beta;  /* The angle between the point of tangency, the
+   Units::RadiansAngle beta;  /* The angle between the point of tangency, the
                    XY position, and the Longitudinal line at the
                    point of tangency.*/
-  Units::RadiansAngle delta;  /* The latitude component measured from the
+   Units::RadiansAngle delta;  /* The latitude component measured from the
                     North Pole.*/
-  Units::RadiansAngle epsilon;  /* The longitude component measured from the
+   Units::RadiansAngle epsilon;  /* The longitude component measured from the
                       point of tangency.*/
-  double sin_eps;  /* Used in calculating Epsilon.*/
-  double cos_eps;  /* Used in calculating Epsilon.*/
-  double sin_alpha;
-  double cos_alpha;
-  double sin_delta;
-  double cos_delta;
-  double dlatc;	// it's an angle, but used in some other calculations too
+   double sin_eps;  /* Used in calculating Epsilon.*/
+   double cos_eps;  /* Used in calculating Epsilon.*/
+   double sin_alpha;
+   double cos_alpha;
+   double sin_delta;
+   double cos_delta;
+   double dlatc;   // it's an angle, but used in some other calculations too
 
-  double sin_phi;
+   double sin_phi;
 
 
-  /* Find alpha - the angle between the point of tangency,
-     the specified (X,Y) position, and the center of the earth.*/
+   /* Find alpha - the angle between the point of tangency,
+      the specified (X,Y) position, and the center of the earth.*/
 
-  /* First find the angle between point of tangency,
-     the specified position, and the point opposite the point
-     of tangency on the globe.*/
+   /* First find the angle between point of tangency,
+      the specified position, and the point opposite the point
+      of tangency on the globe.*/
 
-  alpha = Units::RadiansAngle(asin(sqrt(x * x + y * y)/
-                    (sqrt(x * x + y * y + (4.*eRadius*eRadius) ))));
+   alpha = Units::RadiansAngle(asin(sqrt(x * x + y * y) /
+                                    (sqrt(x * x + y * y + (4. * eRadius * eRadius)))));
 
-  /* Now convert to what we originally wanted (angle with center
-     of earth) by multiplying by two.*/
+   /* Now convert to what we originally wanted (angle with center
+      of earth) by multiplying by two.*/
 
-  alpha = alpha * 2.0;
+   alpha = alpha * 2.0;
 
-  cos_alpha = cos(alpha);
-  sin_alpha = sin(alpha);
+   cos_alpha = cos(alpha);
+   sin_alpha = sin(alpha);
 
-  /* Now find Beta, the angle between the point of tangency,
-     the XY position, and the Longitudinal line at the point
-     of tangency.*/
+   /* Now find Beta, the angle between the point of tangency,
+      the XY position, and the Longitudinal line at the point
+      of tangency.*/
 
-  if (x == Units::FeetLength(0.0) && y == Units::FeetLength(0.0))
-    beta = Units::RadiansAngle(0.0);
-  else
-    beta = Units::arctan2(Units::FeetLength(x).value(), Units::FeetLength(y).value());
+   if (x == Units::FeetLength(0.0) && y == Units::FeetLength(0.0)) {
+      beta = Units::RadiansAngle(0.0);
+   } else {
+      beta = Units::arctan2(Units::FeetLength(x).value(), Units::FeetLength(y).value());
+   }
 
-  /* Find Delta, the latitude component measured from the
-     North Pole.*/
+   /* Find Delta, the latitude component measured from the
+      North Pole.*/
 
-  cos_delta = cos_alpha*cos_gamma + sin_alpha*sin_gamma*cos(beta);
+   cos_delta = cos_alpha * cos_gamma + sin_alpha * sin_gamma * cos(beta);
 
-  /* Be sure that roundoffs haven't gotten you slightly larger or
-     smaller than allowable limits.*/
+   /* Be sure that roundoffs haven't gotten you slightly larger or
+      smaller than allowable limits.*/
 
-  if (cos_delta > 1.0)
-    cos_delta = 1.0;
+   if (cos_delta > 1.0) {
+      cos_delta = 1.0;
+   }
 
-  if (cos_delta < -1.0)
-    cos_delta = -1.0;
+   if (cos_delta < -1.0) {
+      cos_delta = -1.0;
+   }
 
-  delta = Units::RadiansAngle(acos(cos_delta));
-  sin_delta = sin(delta);
+   delta = Units::RadiansAngle(acos(cos_delta));
+   sin_delta = sin(delta);
 
-  dlatc = PI/2. - delta.value();  /* The conformal latitude of the X,Y point*/
+   dlatc = PI / 2. - delta.value();  /* The conformal latitude of the X,Y point*/
 
-  /* Find Epsilon, The longitude component measured from the
-     point of tangency.*/
+   /* Find Epsilon, The longitude component measured from the
+      point of tangency.*/
 
-  sin_eps = sin_delta;   /* Catches both 0. and Pi case*/
+   sin_eps = sin_delta;   /* Catches both 0. and Pi case*/
 
-  if (sin_delta != 0.0)
-    sin_eps = sin_alpha * sin(beta) / sin_delta;
+   if (sin_delta != 0.0) {
+      sin_eps = sin_alpha * sin(beta) / sin_delta;
+   }
 
-  /*Again make sure that we are within allowable limits. Must do
-    this because of roundoff errors*/
+   /*Again make sure that we are within allowable limits. Must do
+     this because of roundoff errors*/
 
-  if (sin_eps > 1.0)
-    sin_eps = 1.0;
-  else if (sin_eps < -1.0)
-    sin_eps = -1.0;
+   if (sin_eps > 1.0) {
+      sin_eps = 1.0;
+   } else if (sin_eps < -1.0) {
+      sin_eps = -1.0;
+   }
 
-  /* Note: The following can fail in a couple of cases. If the
-     point of tangency is at one of the poles or if the XY position
-     to be converted is at one of the poles it will fail. The case
-     where the XY location is at one of the poles is tested here.
-     Point of tangency at the pole should be avoided.*/
+   /* Note: The following can fail in a couple of cases. If the
+      point of tangency is at one of the poles or if the XY position
+      to be converted is at one of the poles it will fail. The case
+      where the XY location is at one of the poles is tested here.
+      Point of tangency at the pole should be avoided.*/
 
-  if (sin_delta > 0.0)
-    cos_eps = (cos_alpha - cos_gamma*cos_delta)/
-      (sin_gamma*sin_delta);
-  else
-    cos_eps = 0.0;
+   if (sin_delta > 0.0) {
+      cos_eps = (cos_alpha - cos_gamma * cos_delta) /
+                (sin_gamma * sin_delta);
+   } else {
+      cos_eps = 0.0;
+   }
 
-  /*Again make sure that roundoff doesn't bite you.*/
+   /*Again make sure that roundoff doesn't bite you.*/
 
-  if (cos_eps < -1.0)
-    cos_eps = -1.0;
-  else if (cos_eps > 1.0)
-    cos_eps = 1.0;
+   if (cos_eps < -1.0) {
+      cos_eps = -1.0;
+   } else if (cos_eps > 1.0) {
+      cos_eps = 1.0;
+   }
 
-  epsilon = Units::arctan2(sin_eps, cos_eps);
+   epsilon = Units::arctan2(sin_eps, cos_eps);
 
-  /*Now find the actual longitude*/
+   /*Now find the actual longitude*/
 
-  lon2 = lonTPT - epsilon;
+   lon2 = lonTPT - epsilon;
 
-  /* Now, convert the latitude which is in conformal coordinates
-     to geodetic coordinates. This method of doing that is not the
-     method used by Chaloux, but uses a technique outlined by
-     NAS-MD-312.  However, the calculation is performed twice.
-     First to derive an initial estimate, then second to refine the 
-     estimate.  This technique was found to have the lowest worst
-     case errors. */
+   /* Now, convert the latitude which is in conformal coordinates
+      to geodetic coordinates. This method of doing that is not the
+      method used by Chaloux, but uses a technique outlined by
+      NAS-MD-312.  However, the calculation is performed twice.
+      First to derive an initial estimate, then second to refine the
+      estimate.  This technique was found to have the lowest worst
+      case errors. */
 
-  sin_phi = sin(dlatc);
+   sin_phi = sin(dlatc);
 
-  dlatc = sin_phi / (GEOD_CONST_A + GEOD_CONST_B * sin_phi * sin_phi);
+   dlatc = sin_phi / (GEOD_CONST_A + GEOD_CONST_B * sin_phi * sin_phi);
 
-  /*Perform the calculation 1 more time for more accuracy*/
+   /*Perform the calculation 1 more time for more accuracy*/
 
-  dlatc = sin_phi / (GEOD_CONST_A + GEOD_CONST_B * dlatc * dlatc);
+   dlatc = sin_phi / (GEOD_CONST_A + GEOD_CONST_B * dlatc * dlatc);
 
-  if (dlatc > 1.0)
-    dlatc = 1.0;
-  else if (dlatc < -1.0)
-    dlatc = -1.0;
-   
-  lat2 = Units::RadiansAngle(asin(dlatc)); /* WILL NOT WORK FOR THE SOUTHERN HEMISPHERE!!! */
-  lon2 = -lon2; /* Convert back to east longitude */
+   if (dlatc > 1.0) {
+      dlatc = 1.0;
+   } else if (dlatc < -1.0) {
+      dlatc = -1.0;
+   }
+
+   lat2 = Units::RadiansAngle(asin(dlatc)); /* WILL NOT WORK FOR THE SOUTHERN HEMISPHERE!!! */
+   lon2 = -lon2; /* Convert back to east longitude */
 }
 
 
@@ -241,49 +258,59 @@ void StereographicProjection::xy_to_ll(
 //Use position1 as the tangent point and convert position2 to Vector.
 //A typical value of eRadius is 3440.1344*NM2FT (feet)
 void StereographicProjection::ll_to_xy(
-		const Units::Angle lat2, Units::Angle lon2,
-		Units::Length &x, Units::Length &y)
+      const Units::Angle lat2,
+      Units::Angle lon2,
+      Units::Length &x,
+      Units::Length &y)
 
 /* Here is the real conversion to NAS coordinates.*/
 /* Based on the routine CNV_LLXY from the AERA PL1 software and*/
 /* NAS-MD-312 Appendix D.*/
 {
-  double sin_lat;
-  Units::RadiansAngle dlong;
-  double cos_dlong, sin_dlong;
-  double sin_PHI, cos_PHI;
-  double denom;
+   double sin_lat;
+   Units::RadiansAngle dlong;
+   double cos_dlong, sin_dlong;
+   double sin_PHI, cos_PHI;
+   double denom;
 
 
-  lon2 = -lon2; /* Convert from east longitude to west longitude*/
+   lon2 = -lon2; /* Convert from east longitude to west longitude*/
 
-  sin_lat = sin(lat2);
-  dlong = lonTPT - lon2;  /* delta longitude from point of tangency.*/
-  cos_dlong = cos(dlong);
-  sin_dlong = sin(dlong);
+   sin_lat = sin(lat2);
+   dlong = lonTPT - lon2;  /* delta longitude from point of tangency.*/
+   cos_dlong = cos(dlong);
+   sin_dlong = sin(dlong);
 
-  /* Convert to conformal latitude instead of geodetic*/
-  sin_PHI  = toConformalSin(sin_lat);
+   /* Convert to conformal latitude instead of geodetic*/
+   sin_PHI = toConformalSin(sin_lat);
 
-  if (sin_PHI > 1.0) sin_PHI = 1.0;
-  else if (sin_PHI < -1.) sin_PHI = -1.0;
+   if (sin_PHI > 1.0) {
+      sin_PHI = 1.0;
+   } else if (sin_PHI < -1.) {
+      sin_PHI = -1.0;
+   }
 
-  /* Determine the cos_PHI. This is a faster and more accurate*/
-  /* method than cos_PHI = cos(Asin(sin_PHI)).*/
-  cos_PHI = 1 - sin_PHI*sin_PHI;
-  if (cos_PHI > 0.0) cos_PHI = sqrt(cos_PHI);
-  else cos_PHI = 0.0;
-  /* ADDED FOR THE SOUTHERN HEMISPHERE*/
-  if (lat2 < Units::RadiansAngle(0.0)) cos_PHI = -cos_PHI;
+   /* Determine the cos_PHI. This is a faster and more accurate*/
+   /* method than cos_PHI = cos(Asin(sin_PHI)).*/
+   cos_PHI = 1 - sin_PHI * sin_PHI;
+   if (cos_PHI > 0.0) {
+      cos_PHI = sqrt(cos_PHI);
+   } else {
+      cos_PHI = 0.0;
+   }
+   /* ADDED FOR THE SOUTHERN HEMISPHERE*/
+   if (lat2 < Units::RadiansAngle(0.0)) {
+      cos_PHI = -cos_PHI;
+   }
 
-  denom = 1 + sin_PHI*sin_clatTPT + 
-    cos_PHI*cos_clatTPT*cos_dlong;
+   denom = 1 + sin_PHI * sin_clatTPT +
+           cos_PHI * cos_clatTPT * cos_dlong;
 
-  x = 2.0*eRadius*sin_dlong*cos_PHI/denom;
-  y = 2.0*eRadius*(sin_PHI*cos_clatTPT - cos_PHI*sin_clatTPT*cos_dlong)/denom;
+   x = 2.0 * eRadius * sin_dlong * cos_PHI / denom;
+   y = 2.0 * eRadius * (sin_PHI * cos_clatTPT - cos_PHI * sin_clatTPT * cos_dlong) / denom;
 
 }
 
 double StereographicProjection::toConformalSin(double x) {
-  return x * (GEOD_CONST_A  + GEOD_CONST_B *(x)*(x));
+   return x * (GEOD_CONST_A + GEOD_CONST_B * (x) * (x));
 }

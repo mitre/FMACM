@@ -29,52 +29,57 @@
 // kinematic trajectories for target aircraft.
 
 
-class VerticalPathObserver {
+class VerticalPathObserver
+{
 
 public:
-    // Basic constructor.  Do not used; included for completeness only.
-    VerticalPathObserver(void);
+   // Basic constructor.  Do not used; included for completeness only.
+   VerticalPathObserver(void);
 
-    // Setup constructor.
-    VerticalPathObserver(std::string inScenName,std::string inFileName, bool inIsTargetData);
+   // Setup constructor.
+   VerticalPathObserver(std::string inScenName,
+                        std::string inFileName,
+                        bool inIsTargetData);
 
-    virtual ~VerticalPathObserver();
+   virtual ~VerticalPathObserver();
 
-    // Adds a new trajectory to file.
-    void addTrajectory(int id, VerticalPath &fullTraj);
+   // Adds a new trajectory to file.
+   void addTrajectory(int id,
+                      VerticalPath &fullTraj);
 
-    // Sets iteration.
-    void setIter(int iterIn);
+   // Sets iteration.
+   void setIter(int iterIn);
 
-    // Gets iteration.
-    int getIter(void);
+   // Gets iteration.
+   int getIter(void);
 
-    void writeData();
+   void writeData();
 
 
 protected:
 
-    // Initializes class.
-    void initialize(void);
+   // Initializes class.
+   void initialize(void);
 
-    // Makes full file name from scenario name and file name.
-    std::string createFullFileName(std::string scenName, std::string fileName);
+   // Makes full file name from scenario name and file name.
+   std::string createFullFileName(std::string scenName,
+                                  std::string fileName);
 
-    std::string scenName; // Name of scenario being run.
-    std::string fileName; // Individual file name.
-    std::string header; // File line header.
+   std::string scenName; // Name of scenario being run.
+   std::string fileName; // Individual file name.
+   std::string header; // File line header.
 
-    std::ofstream strm; // Output stream of file.
+   std::ofstream strm; // Output stream of file.
 
 
 private:
 
 
-    // Gets header.
-    virtual std::string getHeader(void);
+   // Gets header.
+   virtual std::string getHeader(void);
 
-    int iter; // Current iteration.
+   int iter; // Current iteration.
 
-    bool isTargetData; // Determines whether data is for target or own ship.
+   bool isTargetData; // Determines whether data is for target or own ship.
 
 };

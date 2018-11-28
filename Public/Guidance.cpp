@@ -17,31 +17,27 @@
 
 #include "public/Guidance.h"
 
-Guidance::Guidance(void)
-{
-	m_im_speed_command_ias = 0;
-	gs = Units::ZERO_SPEED;
-	heading = 0;
-	reference_altitude = 0;
-	altitude_rate = 0; 
-	psi = 0;
-	cross_track = 0; 
-	use_cross_track = false; 
-	level = true;
-	setValid(true);
-	reference_phi = Units::ZERO_ANGLE;
+Guidance::Guidance(void) {
+   m_im_speed_command_ias = 0;
+   gs = Units::ZERO_SPEED;
+   heading = 0;
+   reference_altitude = 0;
+   altitude_rate = 0;
+   psi = 0;
+   cross_track = 0;
+   use_cross_track = false;
+   level = true;
+   setValid(true);
+   reference_phi = Units::ZERO_ANGLE;
 }
 
-Guidance::~Guidance(void)
-{
+Guidance::~Guidance(void) {
 }
 
-void Guidance::setValid(bool validIn)
-{
-	valid = validIn;
+void Guidance::setValid(bool validIn) {
+   valid = validIn;
 }
 
-bool Guidance::is_valid()
-{
-	return valid;
+bool Guidance::is_valid() {
+   return valid;
 }

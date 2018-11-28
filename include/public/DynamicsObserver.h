@@ -20,15 +20,16 @@
 class DynamicsObserver
 {
 public:
-	DynamicsObserver(void);
-	~DynamicsObserver(void);
+   DynamicsObserver(void);
 
-	bool operator<(const DynamicsObserver &dyn_in) const;
+   ~DynamicsObserver(void);
 
-	int iter;
-	int id;
-	double time;
-	double achieved_groundspeed;
-	double speed_command;
-	double IAS_command;
+   bool operator<(const DynamicsObserver &dyn_in) const;
+
+   int iter;
+   int id;
+   double time;
+   double achieved_groundspeed;
+   double speed_command;
+   double IAS_command;
 };

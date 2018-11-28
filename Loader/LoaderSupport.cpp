@@ -19,30 +19,27 @@
 
 using namespace std;
 
-LoaderSupport::LoaderSupport(void)
-{
+LoaderSupport::LoaderSupport(void) {
 }
 
-LoaderSupport::~LoaderSupport(void)
-{
+LoaderSupport::~LoaderSupport(void) {
 }
 
-string LoaderSupport::clean_token(const string &token)
-{
-	string out = token;
+string LoaderSupport::clean_token(const string &token) {
+   string out = token;
 
-	for(unsigned int i = 0; i < token.size(); i++) //turning string to lower case
-	{
-		out[i] = tolower(token[i]);
-	}
+   for (unsigned int i = 0; i < token.size(); i++) //turning string to lower case
+   {
+      out[i] = tolower(token[i]);
+   }
 
-	int pos = out.find(":");
-	int size = out.size();
+   int pos = out.find(":");
+   int size = out.size();
 
-	if(pos == size -1) //cut the : off the end of a token 
-	{
-		out.resize(size -1);
-	}
+   if (pos == size - 1) //cut the : off the end of a token
+   {
+      out.resize(size - 1);
+   }
 
-	return out;
+   return out;
 }

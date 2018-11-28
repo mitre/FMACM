@@ -23,55 +23,62 @@
 // Class to compute distance between IM aircraft and target aircraft when
 // IM aircraft is at the merge point of the IM and target route.
 
-class MergePointMetric {
+class MergePointMetric
+{
 
 
 public:
-    MergePointMetric(void);
+   MergePointMetric(void);
 
-    ~MergePointMetric(void);
+   ~MergePointMetric(void);
 
-    // Determines and stores the merge point.
-    void determineMergePoint(const AircraftIntent &IMIntent, const AircraftIntent &targIntent);
+   // Determines and stores the merge point.
+   void determineMergePoint(const AircraftIntent &IMIntent,
+                            const AircraftIntent &targIntent);
 
-    void determineMetricsLocation(const AircraftIntent &IMIntent, const AircraftIntent &targIntent,
-                                  const std::string &waypointName);
+   void determineMetricsLocation(const AircraftIntent &IMIntent,
+                                 const AircraftIntent &targIntent,
+                                 const std::string &waypointName);
 
-    // Updates IM and target position.
-    void update(double imXNew, double imYNew, double targXNew, double targYNew);
+   // Updates IM and target position.
+   void update(double imXNew,
+               double imYNew,
+               double targXNew,
+               double targYNew);
 
-    // Gets merge point (waypoint name).
-    std::string getMergePoint();
+   // Gets merge point (waypoint name).
+   std::string getMergePoint();
 
-    // Gets computed distance.
-    Units::Length getDist();
+   // Gets computed distance.
+   Units::Length getDist();
 
-    // Returns whether merge point is set or not.
-    bool mergePointFound();
+   // Returns whether merge point is set or not.
+   bool mergePointFound();
 
-    bool willReportMetrics() const;
+   bool willReportMetrics() const;
 
 
 private:
-    static log4cplus::Logger logger;
+   static log4cplus::Logger logger;
 
-    // Checks if newest IM position closer to waypoint than the stored IM position.
-    bool newPointCloser(double x, double y);
+   // Checks if newest IM position closer to waypoint than the stored IM position.
+   bool newPointCloser(double x,
+                       double y);
 
-    std::string mMergePointName;
-    Units::Length mMergePointX;
-    Units::Length mMergePointY;
+   std::string mMergePointName;
+   Units::Length mMergePointX;
+   Units::Length mMergePointY;
 
-    double mIMX;  // ft
-    double mIMY;  // ft
+   double mIMX;  // ft
+   double mIMY;  // ft
 
-    Units::Length mIMDist;
+   Units::Length mIMDist;
 
-    double mTargX;  // ft
-    double mTargY;  // ft
+   double mTargX;  // ft
+   double mTargY;  // ft
 
-    Units::Length mMergeDist;
+   Units::Length mMergeDist;
 
-    bool mReportMetrics;
+   bool mReportMetrics;
 
 };

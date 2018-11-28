@@ -16,36 +16,36 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "loader/LoaderLink.h"
 
-template <class DATA>
+template<class DATA>
 class LoadableLoaderLink : public LoaderLink
 {
 public:
 
-	LoadableLoaderLink(DATA *address)
-	{
-		var_address = address;
-	}
-	
-	//-------------------------------------------------
-	
-	LoadableLoaderLink(DATA *address, bool required, bool no_reset)
-	{
-		var_address = address;
-		must_load = required;
-		must_load_only_once = no_reset;
-	}
+   LoadableLoaderLink(DATA *address) {
+      var_address = address;
+   }
 
-	//-------------------------------------------
+   //-------------------------------------------------
 
-	bool load_s(DecodedStream *ds)
-	{
-		return var_address->load(ds);
-	}
+   LoadableLoaderLink(DATA *address,
+                      bool required,
+                      bool no_reset) {
+      var_address = address;
+      must_load = required;
+      must_load_only_once = no_reset;
+   }
+
+   //-------------------------------------------
+
+   bool load_s(DecodedStream *ds) {
+      return var_address->load(ds);
+   }
 
 
 private:
-	DATA *var_address;
+   DATA *var_address;
 
 };

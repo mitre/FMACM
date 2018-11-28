@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include "public/Token.h"
 #include "loader/HTMLDump.h"
 #include <stdexcept>
@@ -25,111 +26,94 @@ class EchoStream : public PARENT
 {
 public:
 
-	EchoStream(void)
-	{
-	}
+   EchoStream(void) {
+   }
 
-	~EchoStream(void)
-	{
-	}
+   ~EchoStream(void) {
+   }
 
-	Token get_next()
-	{
-		Token out;
+   Token get_next() {
+      Token out;
 
-		while(true)
-		{
-			out = PARENT::get_next();
-			
-			if(out.get_Data() == "#echo_on")
-			{
-				PARENT::set_echo(true);
-				continue;
-			}
+      while (true) {
+         out = PARENT::get_next();
 
-			if(out.get_Data() == "#echo_off")
-			{
-				PARENT::set_echo(false);
-				continue;
-			}
-			if(out.get_Data() == "#echo_file")
-			{
-				std::string echo_file_name = PARENT::get_next().get_Data();
+         if (out.get_Data() == "#echo_on") {
+            PARENT::set_echo(true);
+            continue;
+         }
 
-				// TODO fix this 
+         if (out.get_Data() == "#echo_off") {
+            PARENT::set_echo(false);
+            continue;
+         }
+         if (out.get_Data() == "#echo_file") {
+            std::string echo_file_name = PARENT::get_next().get_Data();
 
-				bool out1 = open_echo_file(echo_file_name);
-				if(!out1)
-				{
-					std::string msg = "Could not open specified dump file: " + echo_file_name;
-					report_error(msg);
-					throw std::runtime_error(msg);
-				}
-				continue;
-			}
-			if(out.get_Data() == "#end_echo_file")
-			{
-				close_echo_file();
-				continue;
-			}
+            // TODO fix this
 
-			break;
-		}
-		
-		// if echo is on and open write the echo
-		if( echo_file.is_open() )
-		{
-			// logic for the output goes here.
-			echo_file.dump(out.get_All());
-		}
+            bool out1 = open_echo_file(echo_file_name);
+            if (!out1) {
+               std::string msg = "Could not open specified dump file: " + echo_file_name;
+               report_error(msg);
+               throw std::runtime_error(msg);
+            }
+            continue;
+         }
+         if (out.get_Data() == "#end_echo_file") {
+            close_echo_file();
+            continue;
+         }
 
-		return out;
-	}
+         break;
+      }
+
+      // if echo is on and open write the echo
+      if (echo_file.is_open()) {
+         // logic for the output goes here.
+         echo_file.dump(out.get_All());
+      }
+
+      return out;
+   }
 
 
-	bool open_echo_file(const std::string &my_echo_file)
-	{
-		echo_file.open(my_echo_file.c_str());
+   bool open_echo_file(const std::string &my_echo_file) {
+      echo_file.open(my_echo_file.c_str());
 
-		if(echo_file.is_open())
-		{
-			return true;
-		}
-		return false;
-	}
+      if (echo_file.is_open()) {
+         return true;
+      }
+      return false;
+   }
 
-	void close_echo_file()
-	{
-		echo_file.close();
-	}
+   void close_echo_file() {
+      echo_file.close();
+   }
 
-	void report_error(std::string message)
-	{
-		PARENT::report_error(message); // reports the error to the parent class
+   void report_error(std::string message) {
+      PARENT::report_error(message); // reports the error to the parent class
 
-		if( echo_file.is_open() )
-		{
-			// outputs the error to the echo_file if open
-			echo_file.highlight_on("yellow");
-			echo_file.dump(message);
-			echo_file.highlight_off();
-		}
-	}
+      if (echo_file.is_open()) {
+         // outputs the error to the echo_file if open
+         echo_file.highlight_on("yellow");
+         echo_file.dump(message);
+         echo_file.highlight_off();
+      }
+   }
 
-	void report_warning(std::string message)
-	{
-		PARENT::report_warning(message); // reports the warning to the parent class
+   void report_warning(std::string message) {
+      PARENT::report_warning(message); // reports the warning to the parent class
 
-		if( echo_file.is_open() )
-		{
-			// outputs the error to the echo_file if open
-			echo_file.highlight_on("yellow");
-			echo_file.dump(message);
-			echo_file.highlight_off();
-		}
-	}
+      if (echo_file.is_open()) {
+         // outputs the error to the echo_file if open
+         echo_file.highlight_on("yellow");
+         echo_file.dump(message);
+         echo_file.highlight_off();
+      }
+   }
 
 private:
-	HTMLDump echo_file;
+   HTMLDump echo_file;
 
 };

@@ -24,43 +24,48 @@
 class SimulationTime
 {
 public:
-	//Data:
+   //Data:
 
 
-	//Methods:
-	SimulationTime(void);
-	~SimulationTime(void);
-	SimulationTime(const SimulationTime &in);
-	SimulationTime& operator=(const SimulationTime &in);
+   //Methods:
+   SimulationTime(void);
 
-	static const SimulationTime make(const Units::SecondsTime time);
+   ~SimulationTime(void);
 
-	void init(void);
-	void increment(void);
-	Units::SecondsTime get_current_simulation_time() const;
-	std::string getCurrentSimulationTimeAsString() const;
+   SimulationTime(const SimulationTime &in);
 
-	static Units::SecondsTime get_simulation_time_step()
-	{
-		return simulation_time_step;		
-	}
-	static void set_simulation_time_step(Units::Time in)
-	{
-		simulation_time_step = in;;		
-	}
+   SimulationTime &operator=(const SimulationTime &in);
 
-	int get_sim_cycle() const;
+   static const SimulationTime make(const Units::SecondsTime time);
 
-	void set_cycle(int cycle_in);
+   void init(void);
+
+   void increment(void);
+
+   Units::SecondsTime get_current_simulation_time() const;
+
+   std::string getCurrentSimulationTimeAsString() const;
+
+   static Units::SecondsTime get_simulation_time_step() {
+      return simulation_time_step;
+   }
+
+   static void set_simulation_time_step(Units::Time in) {
+      simulation_time_step = in;;
+   }
+
+   int get_sim_cycle() const;
+
+   void set_cycle(int cycle_in);
 
 
 private:
-	void copy(SimulationTime const &in);
+   void copy(SimulationTime const &in);
 
-	//Data:
-	int cycle;
-	Units::SecondsTime current_time;
-	static Units::SecondsTime simulation_time_step;
+   //Data:
+   int cycle;
+   Units::SecondsTime current_time;
+   static Units::SecondsTime simulation_time_step;
 
-	static log4cplus::Logger logger;
+   static log4cplus::Logger logger;
 };

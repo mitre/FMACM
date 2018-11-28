@@ -20,25 +20,26 @@
 class IMCommandObserver
 {
 public:
-	IMCommandObserver(void);
-	~IMCommandObserver(void);
+   IMCommandObserver(void);
 
-	// operator < for sort algorithm
-	bool operator<(const IMCommandObserver & im_in) const;
+   ~IMCommandObserver(void);
 
-    int iteration;
-	double id;
-	double time;
-	double distance_to_go;
-	double state_altitude;
-	double state_TAS;
-	double state_groundspeed;
-	double IAS_command;
-	double unmodified_IAS;
-	double TAS_command;
-	double reference_velocity;
-	double reference_distance;
-	double predictedDistance;
-	double distance_difference;
-	double trueDistance;
+   // operator < for sort algorithm
+   bool operator<(const IMCommandObserver &im_in) const;
+
+   int iteration;
+   double id;
+   double time;
+   double distance_to_go;
+   double state_altitude;
+   double state_TAS;
+   double state_groundspeed;
+   double IAS_command;
+   double unmodified_IAS;
+   double TAS_command;
+   double reference_velocity;
+   double reference_distance;
+   double predictedDistance;
+   double distance_difference;
+   double trueDistance;
 };

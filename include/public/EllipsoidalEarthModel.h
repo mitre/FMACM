@@ -29,26 +29,32 @@
 #include "public/LocalTangentPlane.h"
 #include "utility/Logging.h"
 
-class EllipsoidalEarthModel: public EarthModel {
+class EllipsoidalEarthModel : public EarthModel
+{
 public:
-	static const Units::Length mWGS84SemiMajorRadius;
-	static const double mWGS84EccentricitySquared;
+   static const Units::Length mWGS84SemiMajorRadius;
+   static const double mWGS84EccentricitySquared;
 
-	EllipsoidalEarthModel();
-	virtual ~EllipsoidalEarthModel();
+   EllipsoidalEarthModel();
 
-	virtual void convertGeodeticToAbsolute(
-			const EarthModel::GeodeticPosition &geo, EarthModel::AbsolutePositionEcef &ecef) const;
-	virtual void convertAbsoluteToGeodetic(
-			const EarthModel::AbsolutePositionEcef &ecef, EarthModel::GeodeticPosition &geo) const;
-	virtual std::shared_ptr<LocalTangentPlane> makeEnuConverter(const GeodeticPosition &pointOfTangencyGeo,
-			const LocalPositionEnu &pointOfTangencyEnu) const;
+   virtual ~EllipsoidalEarthModel();
+
+   virtual void convertGeodeticToAbsolute(
+         const EarthModel::GeodeticPosition &geo,
+         EarthModel::AbsolutePositionEcef &ecef) const;
+
+   virtual void convertAbsoluteToGeodetic(
+         const EarthModel::AbsolutePositionEcef &ecef,
+         EarthModel::GeodeticPosition &geo) const;
+
+   virtual std::shared_ptr<LocalTangentPlane> makeEnuConverter(const GeodeticPosition &pointOfTangencyGeo,
+                                                               const LocalPositionEnu &pointOfTangencyEnu) const;
 
 private:
-	static log4cplus::Logger logger;
-	const Units::Length semiMajorRadius;
-	const Units::Area semiMajorRadius2;
-	const double eccentricity2;
-	const double eccentricity4;
+   static log4cplus::Logger logger;
+   const Units::Length semiMajorRadius;
+   const Units::Area semiMajorRadius2;
+   const double eccentricity2;
+   const double eccentricity4;
 };
 

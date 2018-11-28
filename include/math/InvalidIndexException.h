@@ -24,8 +24,11 @@
 class InvalidIndexException : public std::exception
 {
 public:
-	InvalidIndexException(const int invalid, const int lowValid, const int highValid);
-	InvalidIndexException(char*);
+   InvalidIndexException(const int invalid,
+                         const int lowValid,
+                         const int highValid);
+
+   InvalidIndexException(char *);
 };
 
 #endif

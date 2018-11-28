@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #pragma once
+
 #include <vector>
 #include "public/NMObserverEntry.h"
 #include "math/Statistics.h"
@@ -23,27 +24,35 @@
 class NMObserver
 {
 public:
-	NMObserver(void);
-	~NMObserver(void);
+   NMObserver(void);
 
-	// adds a new output entry to the Nautical Mile Observer 
-	void output_NM_values(double predictedDistance, double trueDistance, double time,
-		double currIAS, double currGS, double targetGS,
-		double minIAS, double maxIAS, double minTAS, double maxTAS);
+   ~NMObserver(void);
 
-	std::vector<NMObserverEntry> entry_list;
+   // adds a new output entry to the Nautical Mile Observer
+   void output_NM_values(double predictedDistance,
+                         double trueDistance,
+                         double time,
+                         double currIAS,
+                         double currGS,
+                         double targetGS,
+                         double minIAS,
+                         double maxIAS,
+                         double minTAS,
+                         double maxTAS);
 
-	std::vector<double> predictedDistance;
-	std::vector<double> trueDistance;
-	std::vector<double> time;
-	std::vector<Statistics> ac_IAS_stats;
-	std::vector<Statistics> ac_GS_stats;
-	std::vector<Statistics> target_GS_stats;
-	std::vector<Statistics> min_IAS_stats;
-	std::vector<Statistics> max_IAS_stats;
+   std::vector<NMObserverEntry> entry_list;
 
-	int curr_NM; 
+   std::vector<double> predictedDistance;
+   std::vector<double> trueDistance;
+   std::vector<double> time;
+   std::vector<Statistics> ac_IAS_stats;
+   std::vector<Statistics> ac_GS_stats;
+   std::vector<Statistics> target_GS_stats;
+   std::vector<Statistics> min_IAS_stats;
+   std::vector<Statistics> max_IAS_stats;
 
-	void initialize_stats();
+   int curr_NM;
+
+   void initialize_stats();
 };
 

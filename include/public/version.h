@@ -15,7 +15,7 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#if ! defined (AAESIM_VERSION_H)
+#if !defined (AAESIM_VERSION_H)
 #define AAESIM_VERSION_H
 
 #if defined (AAESIM_HAVE_PRAGMA_ONCE)
@@ -38,20 +38,20 @@
 // #define AAESIM_VERSION_STR AAESIM_MAKE_VERSION_STR(1, 4, 4, SNAPSHOT)
 
 namespace aaesim {
-    static std::string getVersion() {
-        std::string verStr(AAESIM_VERSION_STR);
-        bool stripLastChar = verStr.find("-") == verStr.length()-1;
-        if (stripLastChar) {
-            // dump the last char
-            verStr.resize(verStr.find("-"));
-        }
-        return verStr;
-    }
+   static std::string getVersion() {
+      std::string verStr(AAESIM_VERSION_STR);
+      bool stripLastChar = verStr.find("-") == verStr.length() - 1;
+      if (stripLastChar) {
+         // dump the last char
+         verStr.resize(verStr.find("-"));
+      }
+      return verStr;
+   }
 }
 #endif
 
 
-#if ! defined (CPPMANIFEST_VERSION_H)
+#if !defined (CPPMANIFEST_VERSION_H)
 #define CPPMANIFEST_VERSION_H
 
 #if defined (CPPMANIFEST_HAVE_PRAGMA_ONCE)

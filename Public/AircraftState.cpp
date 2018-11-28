@@ -21,243 +21,233 @@
 log4cplus::Logger AircraftState::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftState"));
 
 
-AircraftState::AircraftState(void)
-{
-    id = -1;
-    time = -1;
-    x = 0; // assumed to be in feet
-    y = 0; // assumed to be in feet
-    z = 0; // assumed to be in feet
-    xd = 0; // assumed to be in FPS
-    yd = 0; // assumed to be in FPS
-    setZd(0);	// assumed to be in FPS
-    xdd = 0; // assumed to be in FPSS
-    ydd = 0; // assumed to be in FPSS
-    zdd = 0; // assumed to be in FPSS
+AircraftState::AircraftState(void) {
+   id = -1;
+   time = -1;
+   x = 0; // assumed to be in feet
+   y = 0; // assumed to be in feet
+   z = 0; // assumed to be in feet
+   xd = 0; // assumed to be in FPS
+   yd = 0; // assumed to be in FPS
+   setZd(0);   // assumed to be in FPS
+   xdd = 0; // assumed to be in FPSS
+   ydd = 0; // assumed to be in FPSS
+   zdd = 0; // assumed to be in FPSS
 
 
-    gamma = 0.0;
-    psi							   = 0.0;
+   gamma = 0.0;
+   psi = 0.0;
 
-    Vwx = 0.0; // meters/second
-    Vwy = 0.0; // meters/second
+   Vwx = 0.0; // meters/second
+   Vwy = 0.0; // meters/second
 
-    Vw_para = 0.0; // meters/second
-    Vw_perp = 0.0; // meters/second
-    Vwx_dh = Units::zero();
-    Vwy_dh = Units::zero();
+   Vw_para = 0.0; // meters/second
+   Vw_perp = 0.0; // meters/second
+   Vwx_dh = Units::zero();
+   Vwy_dh = Units::zero();
 
 
-    m_distance_to_go = -99999.99999; // meters
-}
-AircraftState::~AircraftState(void)
-{
-
+   m_distance_to_go = -99999.99999; // meters
 }
 
-AircraftState::AircraftState (const AircraftState &in)
-{
-    id   = in.id;
-    time = in.time;
-    x    = in.x;
-    y    = in.y;
-    z    = in.z;
-    xd   = in.xd;
-    yd   = in.yd;
-    setZd(in.zd);
-    xdd  = in.xdd;
-    ydd  = in.ydd;
-    zdd  = in.zdd;
+AircraftState::~AircraftState(void) {
 
-
-    gamma = in.gamma;
-    psi							 = in.psi;
-
-    Vwx = in.Vwx;
-    Vwy = in.Vwy;
-
-    Vw_para = in.Vw_para;
-    Vw_perp = in.Vw_perp;
-    Vwy_dh = in.Vwy_dh;
-    Vwx_dh = in.Vwx_dh;
-
-    m_distance_to_go = in.m_distance_to_go;
 }
 
-AircraftState& AircraftState::operator= (const AircraftState &in)
-{
-    if (this != &in) {
-        id   = in.id;
-        time = in.time;
-        x    = in.x;
-        y    = in.y;
-        z    = in.z;
-        xd   = in.xd;
-        yd   = in.yd;
-        setZd(in.zd);
-        xdd  = in.xdd;
-        ydd  = in.ydd;
-        zdd  = in.zdd;
+AircraftState::AircraftState(const AircraftState &in) {
+   id = in.id;
+   time = in.time;
+   x = in.x;
+   y = in.y;
+   z = in.z;
+   xd = in.xd;
+   yd = in.yd;
+   setZd(in.zd);
+   xdd = in.xdd;
+   ydd = in.ydd;
+   zdd = in.zdd;
 
-        gamma = in.gamma;
-        psi							   = in.psi;
 
-        Vwx = in.Vwx;
-        Vwy = in.Vwy;
+   gamma = in.gamma;
+   psi = in.psi;
 
-        Vw_para = in.Vw_para;
-        Vw_perp = in.Vw_perp;
-        Vwx_dh = in.Vwx_dh;
-        Vwy_dh = in.Vwy_dh;
+   Vwx = in.Vwx;
+   Vwy = in.Vwy;
 
-        m_distance_to_go = in.m_distance_to_go;
-    }
+   Vw_para = in.Vw_para;
+   Vw_perp = in.Vw_perp;
+   Vwy_dh = in.Vwy_dh;
+   Vwx_dh = in.Vwx_dh;
 
-    return *this;
+   m_distance_to_go = in.m_distance_to_go;
 }
 
-bool AircraftState::operator== (const AircraftState &in) const
-{
+AircraftState &AircraftState::operator=(const AircraftState &in) {
+   if (this != &in) {
+      id = in.id;
+      time = in.time;
+      x = in.x;
+      y = in.y;
+      z = in.z;
+      xd = in.xd;
+      yd = in.yd;
+      setZd(in.zd);
+      xdd = in.xdd;
+      ydd = in.ydd;
+      zdd = in.zdd;
 
-    bool same = true;
+      gamma = in.gamma;
+      psi = in.psi;
 
-    same = same && (id == in.id) && (time == in.time);
-    same = same && (x == in.x) && (y == in.y) && (z == in.z);
-    same = same && (xd == in.xd) && (yd == in.yd) && (zd == in.zd);
-    same = same && (xdd == in.xdd) && (ydd == in.ydd) && (zdd == in.zdd);
-    same = same && (gamma == in.gamma);
-    same = same && (Vwx == in.Vwx) && (Vwy == in.Vwy);
-    same = same && (Vw_para == in.Vw_para) && (Vw_perp == in.Vw_perp);
-    same = same && (Vwx_dh == in.Vwx_dh) && (Vwy_dh == in.Vwy_dh);
-    same = same && (psi == in.psi) && (m_distance_to_go == in.m_distance_to_go);
+      Vwx = in.Vwx;
+      Vwy = in.Vwy;
 
-    return same;
+      Vw_para = in.Vw_para;
+      Vw_perp = in.Vw_perp;
+      Vwx_dh = in.Vwx_dh;
+      Vwy_dh = in.Vwy_dh;
+
+      m_distance_to_go = in.m_distance_to_go;
+   }
+
+   return *this;
 }
 
-bool AircraftState::is_turning() const
-{
-    //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
+bool AircraftState::operator==(const AircraftState &in) const {
 
-    double spd = sqrt(pow(xd, 2) + pow(yd, 2));
-    double turn_rate = (xd*ydd - yd*xdd) / spd;
+   bool same = true;
 
-    return ((std::fabs(turn_rate) > 1.5));
+   same = same && (id == in.id) && (time == in.time);
+   same = same && (x == in.x) && (y == in.y) && (z == in.z);
+   same = same && (xd == in.xd) && (yd == in.yd) && (zd == in.zd);
+   same = same && (xdd == in.xdd) && (ydd == in.ydd) && (zdd == in.zdd);
+   same = same && (gamma == in.gamma);
+   same = same && (Vwx == in.Vwx) && (Vwy == in.Vwy);
+   same = same && (Vw_para == in.Vw_para) && (Vw_perp == in.Vw_perp);
+   same = same && (Vwx_dh == in.Vwx_dh) && (Vwy_dh == in.Vwy_dh);
+   same = same && (psi == in.psi) && (m_distance_to_go == in.m_distance_to_go);
+
+   return same;
+}
+
+bool AircraftState::is_turning() const {
+   //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
+
+   double spd = sqrt(pow(xd, 2) + pow(yd, 2));
+   double turn_rate = (xd * ydd - yd * xdd) / spd;
+
+   return ((std::fabs(turn_rate) > 1.5));
 }
 
 // operator < to allow sorting
 
-bool AircraftState::operator<(const AircraftState &in) const
-{
-    bool result = false; // return value initialized to false
+bool AircraftState::operator<(const AircraftState &in) const {
+   bool result = false; // return value initialized to false
 
-    // check if id is less, or if matching the time is less
-    if( this->id < in.id || ( this->id == in.id && this->time < in.time ))
-    {
-        result = true; // sets return value to true
-    }
+   // check if id is less, or if matching the time is less
+   if (this->id < in.id || (this->id == in.id && this->time < in.time)) {
+      result = true; // sets return value to true
+   }
 
-    return result;
+   return result;
 }
 
 
 // heading methods
 // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
 //gwang 2013-10: the function name should be get_ground_track, because xd and yd are ground speeds
-double AircraftState::get_heading() const
-{
-    double result = 0.0;
+double AircraftState::get_heading() const {
+   double result = 0.0;
 
-    result = atan3(xd, yd); // takes the atan of x/y instead of y/x to find the angle from North clockwise, the result is in radians
+   result = atan3(xd,
+                  yd); // takes the atan of x/y instead of y/x to find the angle from North clockwise, the result is in radians
 
-    return result;
+   return result;
 }
 
 // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-Units::UnsignedRadiansAngle AircraftState::get_heading_in_radians_mathematical() const
-{
-    // gets mathematical 0 degrees counterclockwise position in radians
+Units::UnsignedRadiansAngle AircraftState::get_heading_in_radians_mathematical() const {
+   // gets mathematical 0 degrees counterclockwise position in radians
 
-    double result = 0.0;
+   double result = 0.0;
 
-    result = atan3(yd, xd);
+   result = atan3(yd, xd);
 
-    return Units::UnsignedRadiansAngle(result);
+   return Units::UnsignedRadiansAngle(result);
 }
 
 // speed methods
-Units::Speed AircraftState::getGroundSpeed(void) const
-{
-    return Units::FeetPerSecondSpeed(sqrt(pow(xd, 2) + pow(yd, 2)));
+Units::Speed AircraftState::getGroundSpeed(void) const {
+   return Units::FeetPerSecondSpeed(sqrt(pow(xd, 2) + pow(yd, 2)));
 }
 
 // psi getter/setters
-void AircraftState::set_psi(double psi_in)
-{
-    psi = psi_in;
+void AircraftState::set_psi(double psi_in) {
+   psi = psi_in;
 }
 
 AircraftState AircraftState::createFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport) {
-    AircraftState result;
-    result.id = adsbsvReport.getId();
-    result.time = adsbsvReport.getTime().value();
-    result.x = adsbsvReport.getX().value();
-    result.xd = adsbsvReport.getXd().value();
-    result.y = adsbsvReport.getY().value();
-    result.yd = adsbsvReport.getYd().value();
-    result.z = adsbsvReport.getZ().value();
-    result.setZd(adsbsvReport.getZd().value());
+   AircraftState result;
+   result.id = adsbsvReport.getId();
+   result.time = adsbsvReport.getTime().value();
+   result.x = adsbsvReport.getX().value();
+   result.xd = adsbsvReport.getXd().value();
+   result.y = adsbsvReport.getY().value();
+   result.yd = adsbsvReport.getYd().value();
+   result.z = adsbsvReport.getZ().value();
+   result.setZd(adsbsvReport.getZd().value());
 
-    return result;
+   return result;
 }
 
-void AircraftState::dumpParms(std::string str) const
-{
+void AircraftState::dumpParms(std::string str) const {
 
-    // Dumps selected AircraftState objects.
-    // To use this, logger properties level must be set to DEBUG.
-    //
-    // str:Header string for output.
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "(Subset) Aircraft state parms for " << str.c_str());
+   // Dumps selected AircraftState objects.
+   // To use this, logger properties level must be set to DEBUG.
+   //
+   // str:Header string for output.
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "(Subset) Aircraft state parms for " << str.c_str());
 
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "time " << time << "  id " << id << "  distToGo " << m_distance_to_go);
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "position   x " << x << "  y " << y << "  z " << z);
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "speed      x " << xd << "  y " << yd << "  z " << zd);
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vw_para      " << Vw_para << "  Vw_perp " << Vw_perp);
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vwx      " << Vwx << "  Vwy " << Vwy);
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl << "Vwx_dh     " << Units::HertzFrequency(Vwx_dh) << "  Vwy_dh " << Units::HertzFrequency(Vwy_dh));
-
-}
-
-void AircraftState::csvDataDump(std::string str) const
-{
-
-    // Dumps AircraftState data in csv format.
-    // To use this, logger properties level must be set to DEBUG.
-    //
-    // str:Beginning of line string to output.
-    LOG4CPLUS_DEBUG(AircraftState::logger,
-                    std::endl << str.c_str() << ","
-                    << time << "," << id << "," << x << "," << y << ","
-                    << z << "," << xd << "," << yd << "," << zd << ","
-                    << xdd << "," << ydd << "," << zdd << "," << gamma << ","
-                    << Vwx << "," << Vwy << "," << Vw_para << "," << Vw_perp << ","
-                    << Units::HertzFrequency(Vwx_dh) << "," << Units::HertzFrequency(Vwy_dh) << ","
-                    << psi << "," << m_distance_to_go << "," << std::endl);
+   LOG4CPLUS_DEBUG(AircraftState::logger,
+                   std::endl << "time " << time << "  id " << id << "  distToGo " << m_distance_to_go);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "position   x " << x << "  y " << y << "  z " << z);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "speed      x " << xd << "  y " << yd << "  z " << zd);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vw_para      " << Vw_para << "  Vw_perp " << Vw_perp);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vwx      " << Vwx << "  Vwy " << Vwy);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vwx_dh     " << Units::HertzFrequency(Vwx_dh) << "  Vwy_dh "
+                                                    << Units::HertzFrequency(Vwy_dh));
 
 }
 
-void AircraftState::csvHdrDump(std::string str) const
-{
+void AircraftState::csvDataDump(std::string str) const {
 
-    // Dumps AircraftState header in csv format, based on
-    // csvDataDump.  To use this, logger properties level
-    // must be set to DEBUG.
-    //
-    // str:Beginning of line string to output.
+   // Dumps AircraftState data in csv format.
+   // To use this, logger properties level must be set to DEBUG.
+   //
+   // str:Beginning of line string to output.
+   LOG4CPLUS_DEBUG(AircraftState::logger,
+                   std::endl << str.c_str() << ","
+                             << time << "," << id << "," << x << "," << y << ","
+                             << z << "," << xd << "," << yd << "," << zd << ","
+                             << xdd << "," << ydd << "," << zdd << "," << gamma << ","
+                             << Vwx << "," << Vwy << "," << Vw_para << "," << Vw_perp << ","
+                             << Units::HertzFrequency(Vwx_dh) << "," << Units::HertzFrequency(Vwy_dh) << ","
+                             << psi << "," << m_distance_to_go << "," << std::endl);
 
-    LOG4CPLUS_DEBUG(AircraftState::logger,std::endl
-            << str.c_str() << ",time,id,x,y,z,x_Speed,y_Speed,z_Speed,x_Accel,y_Accel,z_Accel,gamma,Vwx,Vwy,Vw_para,Vw_perp,psi,distToGo"
-            << std::endl);
+}
+
+void AircraftState::csvHdrDump(std::string str) const {
+
+   // Dumps AircraftState header in csv format, based on
+   // csvDataDump.  To use this, logger properties level
+   // must be set to DEBUG.
+   //
+   // str:Beginning of line string to output.
+
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl
+         << str.c_str()
+         << ",time,id,x,y,z,x_Speed,y_Speed,z_Speed,x_Accel,y_Accel,z_Accel,gamma,Vwx,Vwy,Vw_para,Vw_perp,psi,distToGo"
+         << std::endl);
 
 }
 
@@ -269,36 +259,36 @@ void AircraftState::csvHdrDump(std::string str) const
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState& AircraftState::interpolate(const AircraftState& a,
-                                          const AircraftState& b, const double time) {
+AircraftState &AircraftState::interpolate(const AircraftState &a,
+                                          const AircraftState &b,
+                                          const double time) {
 
-    if (a.id != b.id) {
-        LOG4CPLUS_ERROR(logger, "Interpolating between states that have different ids:  "
-                << a.id + " and " << b.id << ".");
-    }
+   if (a.id != b.id) {
+      LOG4CPLUS_ERROR(logger, "Interpolating between states that have different ids:  "
+            << a.id + " and " << b.id << ".");
+   }
 
-    const double baTimeDiff = b.time - a.time;
-    double aWeight, bWeight;
-    if (baTimeDiff == 0) {
-        // avoid divide by zero
-        aWeight = 1;
-        bWeight = 0;
-        LOG4CPLUS_ERROR(logger, "Attempt to interpolate between two states for the same time.");
-    }
-    else {
-        aWeight = (b.time - time) / baTimeDiff;
-        bWeight = 1 - aWeight;
-    }
-    this->id = a.id;
-    this->time = time;
-    this->x = a.x * aWeight + b.x * bWeight;
-    this->y = a.y * aWeight + b.y * bWeight;
-    this->z = a.z * aWeight + b.z * bWeight;
-    this->xd = a.xd * aWeight + b.xd * bWeight;
-    this->yd = a.yd * aWeight + b.yd * bWeight;
-    this->setZd(a.zd * aWeight + b.zd * bWeight);
+   const double baTimeDiff = b.time - a.time;
+   double aWeight, bWeight;
+   if (baTimeDiff == 0) {
+      // avoid divide by zero
+      aWeight = 1;
+      bWeight = 0;
+      LOG4CPLUS_ERROR(logger, "Attempt to interpolate between two states for the same time.");
+   } else {
+      aWeight = (b.time - time) / baTimeDiff;
+      bWeight = 1 - aWeight;
+   }
+   this->id = a.id;
+   this->time = time;
+   this->x = a.x * aWeight + b.x * bWeight;
+   this->y = a.y * aWeight + b.y * bWeight;
+   this->z = a.z * aWeight + b.z * bWeight;
+   this->xd = a.xd * aWeight + b.xd * bWeight;
+   this->yd = a.yd * aWeight + b.yd * bWeight;
+   this->setZd(a.zd * aWeight + b.zd * bWeight);
 
-    return *this;
+   return *this;
 }
 
 /**
@@ -307,34 +297,35 @@ AircraftState& AircraftState::interpolate(const AircraftState& a,
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState& AircraftState::extrapolate(const AircraftState &in, const double time_in)
-{
-    double dt = time_in - in.time;
+AircraftState &AircraftState::extrapolate(const AircraftState &in,
+                                          const double time_in) {
+   double dt = time_in - in.time;
 
-    time = Units::SecondsTime(time_in).value();
-    id = in.id;
-    x = in.x + in.xd * dt;
-    y = in.y + in.yd * dt;
-    z = in.z + in.zd * dt;
-    xd = in.xd;
-    yd = in.yd;
-    setZd(in.zd);
+   time = Units::SecondsTime(time_in).value();
+   id = in.id;
+   x = in.x + in.xd * dt;
+   y = in.y + in.yd * dt;
+   z = in.z + in.zd * dt;
+   xd = in.xd;
+   yd = in.yd;
+   setZd(in.zd);
 
-    return *this;
+   return *this;
 }
 
-AircraftState &AircraftState::extrapolate(const AircraftState &in, const Units::SecondsTime &time) {
-    extrapolate(in, time.value());
-    return *this;
+AircraftState &AircraftState::extrapolate(const AircraftState &in,
+                                          const Units::SecondsTime &time) {
+   extrapolate(in, time.value());
+   return *this;
 }
 
 double AircraftState::getZd() const {
-    return zd;
+   return zd;
 }
 
 void AircraftState::setZd(double zd) {
-    if (abs(zd) > 200) {
-        LOG4CPLUS_ERROR(logger, "zd out of range:  " << zd);
-    }
-    this->zd = zd;
+   if (abs(zd) > 200) {
+      LOG4CPLUS_ERROR(logger, "zd out of range:  " << zd);
+   }
+   this->zd = zd;
 }

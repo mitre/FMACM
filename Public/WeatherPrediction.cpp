@@ -15,58 +15,57 @@
 // Copyright 2018 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * WeatherPrediction.cpp
- *
- *  Created on: Sep 11, 2017
- *      Author: klewis
- */
-
 #include "public/WeatherPrediction.h"
+#include "public/StandardAtmosphere.h"
 
-WeatherPrediction::WeatherPrediction() :
-updateCount(0),
-mPredictedWindOption(PWOValues[0])
-{
+WeatherPrediction::WeatherPrediction()
+      :
+      WeatherEstimate(),
+      updateCount(0) {
 }
 
 WeatherPrediction::WeatherPrediction(PredictedWindOption option,
-		std::shared_ptr<Wind> wind) :
-				updateCount(0),
-				mPredictedWindOption(option),
-				mForecastWind(wind)
-{
-}
-
-std::shared_ptr<Wind> WeatherPrediction::getForecastWind() const {
-	return mForecastWind;
+                                     std::shared_ptr<Wind> wind,
+                                     std::shared_ptr<Atmosphere> atmosphere)
+      :
+      WeatherEstimate(wind, atmosphere),
+      updateCount(0),
+      mPredictedWindOption(option) {
 }
 
 PredictedWindOption WeatherPrediction::getPredictedWindOption() const {
-	return mPredictedWindOption;
+   return mPredictedWindOption;
 }
 
 WeatherPrediction::~WeatherPrediction() {
 }
 
-const PredictedWindOption WeatherPrediction::PWOValues[3] = { SINGLE_DTG,
-		MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE };
+const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG,
+                                                             MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
+
+std::shared_ptr<Wind> WeatherPrediction::getForecastWind() const {
+   return getWind();
+}
+
+std::shared_ptr<Atmosphere> WeatherPrediction::getForecastAtmosphere() const {
+   return getAtmosphere();
+}
 
 void WeatherPrediction::dump() {
-	for (int iAlt = east_west.get_min_row();
-			iAlt <= east_west.get_max_row(); iAlt++) {
-		std::cout << iAlt << ":  " <<
-				east_west.getAltitude(iAlt) << " " <<
-				east_west.getSpeed(iAlt) << " " <<
-				north_south.getSpeed(iAlt) << std::endl;
-	}
+   for (int iAlt = east_west.get_min_row();
+        iAlt <= east_west.get_max_row(); iAlt++) {
+      std::cout << iAlt << ":  " <<
+                east_west.getAltitude(iAlt) << " " <<
+                east_west.getSpeed(iAlt) << " " <<
+                north_south.getSpeed(iAlt) << std::endl;
+   }
 }
 
 int WeatherPrediction::incrementUpdateCount() {
-	updateCount++;
-	return updateCount;
+   updateCount++;
+   return updateCount;
 }
 
 int WeatherPrediction::getUpdateCount() const {
-	return updateCount;
+   return updateCount;
 }

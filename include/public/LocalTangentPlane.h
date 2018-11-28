@@ -28,62 +28,74 @@
 #include "math/DMatrix.h"
 #include "utility/Logging.h"
 
-class LocalTangentPlane {
+class LocalTangentPlane
+{
 public:
-	static void printCoordinates(std::string title, Units::Length x, Units::Length y, Units::Length z);
+   static void printCoordinates(std::string title,
+                                Units::Length x,
+                                Units::Length y,
+                                Units::Length z);
 
-	LocalTangentPlane(const EarthModel *earthModel,
-			const EarthModel::AbsolutePositionEcef &ecefPointOfTangency,
-			const EarthModel::LocalPositionEnu &enuPointOfTangency);
-	virtual ~LocalTangentPlane();
+   LocalTangentPlane(const EarthModel *earthModel,
+                     const EarthModel::AbsolutePositionEcef &ecefPointOfTangency,
+                     const EarthModel::LocalPositionEnu &enuPointOfTangency);
 
-	/**
-	 * Sets the rotation matrices to what they would be
-	 * at (0N, 0E) in a typical round-earth model.  That is,
-	 * x = Up, y = East, z = North.
-	 *
-	 * The value from the constructor, (x = East, y = North,
-	 * z = Up), is more useful for flat-earth models.
-	 */
-	void initializeRotationForGeodeticOrigin();
-	/**
-	 * This method rotates the ENU frame.  The new rotation around
-	 * the vector <x,y,z>, angle theta, is appended to the end of
-	 * the existing ecefToEnu rotation.  Its inverse is prepended
-	 * to the beginning of the existing enuToEcef transformation.
-	 */
-	void rotateEnuFrame(const double x, const double y,
-			const double z, const Units::Angle theta);
+   virtual ~LocalTangentPlane();
 
-	void convertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
-			EarthModel::AbsolutePositionEcef &ecef) const;
-	void convertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
-			EarthModel::GeodeticPosition &geo) const;
+   /**
+    * Sets the rotation matrices to what they would be
+    * at (0N, 0E) in a typical round-earth model.  That is,
+    * x = Up, y = East, z = North.
+    *
+    * The value from the constructor, (x = East, y = North,
+    * z = Up), is more useful for flat-earth models.
+    */
+   void initializeRotationForGeodeticOrigin();
 
-	void convertLocalToAbsolute(const EarthModel::LocalPositionEnu &enu,
-			EarthModel::AbsolutePositionEcef &ecef) const;
-	void convertAbsoluteToLocal(const EarthModel::AbsolutePositionEcef &ecef,
-			EarthModel::LocalPositionEnu &enu) const;
+   /**
+    * This method rotates the ENU frame.  The new rotation around
+    * the vector <x,y,z>, angle theta, is appended to the end of
+    * the existing ecefToEnu rotation.  Its inverse is prepended
+    * to the beginning of the existing enuToEcef transformation.
+    */
+   void rotateEnuFrame(const double x,
+                       const double y,
+                       const double z,
+                       const Units::Angle theta);
 
-	void convertGeodeticToLocal(const EarthModel::GeodeticPosition &geo,
-			EarthModel::LocalPositionEnu &enu) const;
-	void convertLocalToGeodetic(const EarthModel::LocalPositionEnu &enu,
-			EarthModel::GeodeticPosition &geo) const;
+   void convertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
+                                  EarthModel::AbsolutePositionEcef &ecef) const;
 
-	const EarthModel::LocalPositionEnu& getPointOfTangencyEnu() const;
-	const EarthModel::AbsolutePositionEcef& getPointOfTangencyEcef() const;
+   void convertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
+                                  EarthModel::GeodeticPosition &geo) const;
+
+   void convertLocalToAbsolute(const EarthModel::LocalPositionEnu &enu,
+                               EarthModel::AbsolutePositionEcef &ecef) const;
+
+   void convertAbsoluteToLocal(const EarthModel::AbsolutePositionEcef &ecef,
+                               EarthModel::LocalPositionEnu &enu) const;
+
+   void convertGeodeticToLocal(const EarthModel::GeodeticPosition &geo,
+                               EarthModel::LocalPositionEnu &enu) const;
+
+   void convertLocalToGeodetic(const EarthModel::LocalPositionEnu &enu,
+                               EarthModel::GeodeticPosition &geo) const;
+
+   const EarthModel::LocalPositionEnu &getPointOfTangencyEnu() const;
+
+   const EarthModel::AbsolutePositionEcef &getPointOfTangencyEcef() const;
 
 private:
-	static log4cplus::Logger logger;
-	/** The model which created us, and which we use for geodetic conversion */
-	const EarthModel *earthModel;
-	/** The point which maps to pointOfTangencyEnu */
-	EarthModel::AbsolutePositionEcef pointOfTangencyEcef;
-	EarthModel::LocalPositionEnu pointOfTangencyEnu;
-	/** Rotation matrix for (x,y,z)-->(e,n,u) */
-	DMatrix ecefToEnu;
-	/** Rotation matrix for (e,n,u)-->(x,y,z), the inverse */
-	DMatrix enuToEcef;
-	const static double identity3x3[3][3];// = { { 1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+   static log4cplus::Logger logger;
+   /** The model which created us, and which we use for geodetic conversion */
+   const EarthModel *earthModel;
+   /** The point which maps to pointOfTangencyEnu */
+   EarthModel::AbsolutePositionEcef pointOfTangencyEcef;
+   EarthModel::LocalPositionEnu pointOfTangencyEnu;
+   /** Rotation matrix for (x,y,z)-->(e,n,u) */
+   DMatrix ecefToEnu;
+   /** Rotation matrix for (e,n,u)-->(x,y,z), the inverse */
+   DMatrix enuToEcef;
+   const static double identity3x3[3][3];// = { { 1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
 };
 

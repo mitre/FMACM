@@ -12,41 +12,44 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "public/PrecalcWaypoint.h"
 
-// IMPORTANT: All additions to this structure should use Units, not raw data types
-// simple data storage class to store the
 class Guidance
 {
 public:
-   Guidance(void);
+   Guidance();
 
-   virtual ~Guidance(void);
+   virtual ~Guidance();
 
-   void setValid(bool inValid);
+   void SetValid(bool value);
 
-   bool is_valid();
+   bool IsValid();
 
-   double m_im_speed_command_ias; // in FPS
-   Units::FeetPerSecondSpeed gs; // groundspeed
-   double heading; // in radians
-   double reference_altitude; // in feet
-   double altitude_rate; // in FPS
-   double psi; // measured from east counter-clockwise radians
-   Units::SignedRadiansAngle reference_phi; // desired bank angle
-   double cross_track; // measure the cross track error in meters
-   bool use_cross_track; // flag to indicate if using the cross track error
-   bool level; // flag to indicate if aircraft should be level or descending
-   PrecalcWaypoint activeWaypoint; // the active waypoint, not technically a guidance object, but used by some control logic
-   PrecalcConstraint activeConstraints; // the active constraints from the FMS
+   PrecalcConstraint m_active_precalc_constraints;
+
+   Units::Speed m_ias_command;
+   Units::Speed m_ground_speed;
+   Units::Speed m_vertical_speed;
+   Units::Length m_reference_altitude;
+   Units::Length m_cross_track_error;
+   Units::Angle m_reference_bank_angle;
+   Units::Angle m_track_angle; // measured from east counter-clockwise
+
+   bool m_use_cross_track;
 
 private:
-
-   bool valid; // Set to true if guidance is valid or rather it's data is valid.
-
+   bool m_valid;
 };
+
+inline void Guidance::SetValid(bool value) {
+   m_valid = value;
+}
+
+inline bool Guidance::IsValid() {
+   return m_valid;
+}

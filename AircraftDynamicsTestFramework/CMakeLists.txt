@@ -11,10 +11,10 @@ set(SOURCE_FILES
         IMSpeedCommandFile.cpp
         TestFrameworkAircraft.cpp
         TestFrameworkApplication.cpp
-        TestFrameworkDynamics.cpp
         TestFrameworkFMS.cpp
         TestFrameworkScenario.cpp
         TrajectoryFromFile.cpp
+        WeatherTruthByTime.cpp
         )
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)

@@ -12,30 +12,30 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/HorizontalPath.h"
 
 
-HorizontalPath::HorizontalPath(void)
-      : segment("") {
-   x = 0; // in meters
-   y = 0; // in meters
-   L = 0; // leg length in meters
-   course = 0;
+HorizontalPath::HorizontalPath()
+{
+   m_segment_type = HorizontalPath::SegmentType::UNSET;
+   m_x_position_meters = 0;
+   m_y_position_meters = 0;
+   m_path_length_cumulative_meters = 0;
+   m_path_course = 0;
 }
 
 bool HorizontalPath::operator==(const HorizontalPath &that) const {
-   return ((this->x == that.x) &&
-           (this->y == that.y) &&
-           (this->segment == that.segment) &&
-           (this->L == that.L) &&
-           (this->course == that.course) &&
-           ((this->segment == "straight") ||
-            (this->turns == that.turns)));
+   return ((this->m_x_position_meters == that.m_x_position_meters) &&
+           (this->m_y_position_meters == that.m_y_position_meters) &&
+           (this->m_segment_type == that.m_segment_type) &&
+           (this->m_path_length_cumulative_meters == that.m_path_length_cumulative_meters) &&
+           (this->m_path_course == that.m_path_course) &&
+           ((this->m_segment_type == HorizontalPath::SegmentType::STRAIGHT) ||
+            (this->m_turn_info == that.m_turn_info)));
 }
 
 
-HorizontalPath::~HorizontalPath(void) {
-}
+HorizontalPath::~HorizontalPath() = default;

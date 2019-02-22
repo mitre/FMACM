@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkAircraft.h"
@@ -21,12 +21,12 @@
 #include "public/Waypoint.h"
 #include "public/AircraftCalculations.h"
 #include "public/Guidance.h"
+#include "public/SpeedOnPitchControl.h"
+#include "public/SpeedOnThrustControl.h"
 #include <iostream>
 #include <stdio.h>
 
 using namespace std;
-
-//FILE *TestFrameworkAircraft::mGuidanceOut = fopen("testframework-guidance-output.csv","w");
 
 TestFrameworkAircraft::TestFrameworkAircraft() {
    // Set some default for the parameters that this class will NOT load
@@ -35,41 +35,11 @@ TestFrameworkAircraft::TestFrameworkAircraft() {
    m_initial_altitude = Units::FeetLength(0);
    m_initial_ias = Units::KnotsSpeed(0);
    m_initial_mach = 0.78;
-   //mFms = new TestFrameworkFMS();
+   m_aircraft_control.reset(new AircraftControl());
+   m_weather_truth = (new WeatherTruthByTime())->GetSharedPtr();
 }
 
-TestFrameworkAircraft::~TestFrameworkAircraft() {
-   // destructor stub
-}
-
-TestFrameworkAircraft::TestFrameworkAircraft(const TestFrameworkAircraft &in) {
-   Copy(in);
-}
-
-TestFrameworkAircraft &TestFrameworkAircraft::operator=(const TestFrameworkAircraft &in) {
-   if (this != &in) {
-      Copy(in);
-   }
-   return *this;
-}
-
-// helper method for copying values safely, used by copy constructor and operator=
-void TestFrameworkAircraft::Copy(const TestFrameworkAircraft &in) {
-   m_start_time = in.m_start_time;
-   m_id = in.m_id;
-   m_truth_state_vector_old = in.m_truth_state_vector_old;
-   m_is_finished = in.m_is_finished;
-   m_aircraft_intent = in.m_aircraft_intent;
-   m_dynamics = in.m_dynamics;
-   m_target_intent_not_used = in.m_target_intent_not_used;
-   m_precalc_traj = in.m_precalc_traj;
-   m_airborne_app = in.m_airborne_app;
-   m_fms = in.m_fms;
-   m_aircraft_control = in.m_aircraft_control;
-   m_initial_altitude = in.m_initial_altitude;
-   m_initial_ias = in.m_initial_ias;
-   m_initial_mach = in.m_initial_mach;
-}
+TestFrameworkAircraft::~TestFrameworkAircraft() = default;
 
 bool TestFrameworkAircraft::load(DecodedStream *input) {
    set_stream(input);
@@ -79,6 +49,13 @@ bool TestFrameworkAircraft::load(DecodedStream *input) {
    register_var("initial_altitude", &m_initial_altitude, true);
    register_var("initial_ias", &m_initial_ias, true);
    register_var("initial_mach", &m_initial_mach, true);
+
+   // moved from TestFrameworkDynamics
+   string speed_management_type(""), env_csv_file("");
+   register_var("ac_type", &m_ac_type, true);
+   register_var("speed_management_type", &speed_management_type, true);
+   register_var("env_csv_file", &env_csv_file, false);
+
    register_loadable_with_brackets("aircraft_intent", &m_aircraft_intent, true);
    register_loadable_with_brackets("dynamics", &m_dynamics, false);
    register_loadable_with_brackets("precalc_traj_file", &m_precalc_traj, true);
@@ -86,15 +63,66 @@ bool TestFrameworkAircraft::load(DecodedStream *input) {
 
    bool isloaded = complete(); // read the stream
    if (isloaded) {
-      //mAircraftIntent = &aiFromFile;
+      if (speed_management_type == "thrust") {
+         this->m_aircraft_control.reset(new SpeedOnThrustControl());
+      }
+      else if (speed_management_type == "pitch") {
+         this->m_aircraft_control.reset(new SpeedOnPitchControl(Units::KnotsSpeed(20.0), Units::FeetLength(500.0)));
+      }
+      else {
+         throw runtime_error("Supported speed_management_type values are thrust and pitch");
+      }
    }
+
+   m_weather_truth->LoadEnvFile(env_csv_file);
 
    return isloaded;
 }
 
 void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold,
-				       const WeatherTruth &weather) {
-   m_dynamics.SetWeatherTruth(weather);
+				       const WeatherTruth &weather_truth) {
+
+   // initial position and heading
+   EarthModel::LocalPositionEnu initial_enu_position;
+   initial_enu_position.x = m_aircraft_intent.GetFms().xWp[0];
+   initial_enu_position.y = m_aircraft_intent.GetFms().yWp[0];
+   initial_enu_position.z = m_initial_altitude;
+   DirectionOfFlightCourseCalculator course_calculator = DirectionOfFlightCourseCalculator(m_precalc_traj.GetHorizontalTrajectory(), TrajectoryIndexProgressionDirection::UNDEFINED);
+   double initial_heading = Units::RadiansAngle(course_calculator.GetCourseAtPathStart()).value();
+
+   Waypoint wp0(m_aircraft_intent.GetFms().Name[0],
+         m_aircraft_intent.GetFms().LatWp[0],
+         m_aircraft_intent.GetFms().LonWp[0],
+         Units::zero(), Units::zero(), Units::zero(), Units::zero(), Units::zero());
+   list<Waypoint> waypoint_list;
+   waypoint_list.push_back(wp0);
+   shared_ptr<TangentPlaneSequence> tangent_plane_sequence(
+         new TangentPlaneSequence(waypoint_list));
+
+   // Use the first line in the env file for initialization
+   m_weather_truth->SetWeatherFromTime(Units::zero());
+
+   // initialize eom dynamics
+   const TrajectoryFromFile::VerticalData verticalTrajectoryFromFile = m_precalc_traj.GetVerticalData();
+   const Units::MetersLength finalAltitude = Units::MetersLength(verticalTrajectoryFromFile.mAlt[0]);
+   Units::KnotsSpeed initial_tas = m_weather_truth->getAtmosphere()->CAS2TAS(m_initial_ias, m_initial_altitude);
+
+   m_dynamics.Initialize(m_precalc_traj.GetMassPercentile(),
+                  finalAltitude,
+                  initial_tas,
+                  tangent_plane_sequence, // only used for Wind
+                  initial_enu_position,
+                  initial_heading,
+                  *m_weather_truth);
+
+   m_bada_calculator.getAircraftParameters(m_ac_type, m_precalc_traj.GetMassPercentile());
+   m_bada_calculator.setFlapSpeeds(m_ac_type);
+
+   static const Units::DegreesAngle max_bank_angle(30);
+   m_aircraft_control->Initialize(m_bada_calculator,
+         finalAltitude,
+         max_bank_angle,
+         m_precalc_traj.GetPrecalcWaypoint().back());
 
    //Initialize navigation_measurement_old with info in first waypoint and other info:
    InitTruthStateVectorOld();
@@ -111,23 +139,20 @@ void TestFrameworkAircraft::InitTruthStateVectorOld() {
    m_truth_state_vector_old.m_y = Units::FeetLength(fms.yWp[0]).value();
    m_truth_state_vector_old.m_z = m_initial_altitude.value();
 
-   //state_model.recomputePathLengthLeft(truth_state_vector_old.x*FT_M,truth_state_vector_old.y*FT_M);
-   Units::UnsignedRadiansAngle dummyCourse; // not used, but required
-   Units::MetersLength distToGo;
-   AircraftCalculations::GetPathLengthFromPos(
-         Units::FeetLength(m_truth_state_vector_old.m_x),
-         Units::FeetLength(m_truth_state_vector_old.m_y),
-         m_precalc_traj.m_horizontal_trajectory,
-         distToGo, dummyCourse);
-   m_truth_state_vector_old.m_distance_to_go = distToGo.value();
+   Units::MetersLength distance_to_go;
+   m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(m_truth_state_vector_old.m_x),
+                                                                             Units::FeetLength(m_truth_state_vector_old.m_y),
+                                                                             distance_to_go);
+   m_truth_state_vector_old.m_distance_to_go = distance_to_go.value();
 
    // copy groundspeed components from ThreeDOFDynamics
-   m_truth_state_vector_old.m_xd = m_dynamics.m_state.xd / FEET_TO_METERS;
-   m_truth_state_vector_old.m_yd = m_dynamics.m_state.yd / FEET_TO_METERS;
+   m_truth_state_vector_old.m_xd = m_dynamics.m_dynamics_state.xd / FEET_TO_METERS;
+   m_truth_state_vector_old.m_yd = m_dynamics.m_dynamics_state.yd / FEET_TO_METERS;
    m_truth_state_vector_old.m_zd = 0.;
 
-   m_truth_state_vector_old.m_Vwx = Units::MetersPerSecondSpeed(m_dynamics.GetWindVelocityX()).value();
-   m_truth_state_vector_old.m_Vwy = Units::MetersPerSecondSpeed(m_dynamics.GetWindVelocityY()).value();
+   pair<Units::Speed,Units::Speed> wind_components = m_dynamics.GetWindComponents();
+   m_truth_state_vector_old.m_Vwx = Units::MetersPerSecondSpeed(wind_components.first).value();
+   m_truth_state_vector_old.m_Vwy = Units::MetersPerSecondSpeed(wind_components.second).value();
 
    //Initialize the time in truth_state_vector_old with this aircraft's start time:
    m_truth_state_vector_old.m_time = m_start_time;
@@ -146,77 +171,53 @@ bool TestFrameworkAircraft::Update(const SimulationTime &time) {
       return true;
    }
 
-   //It is not time for this aircraft to start yet:
-   //This aircraft is at the initial waypoint at its start_time. Its simulation starts at
-   //its (start_time + simulation_time_step).
    if (time.get_sim_cycle() <= m_start_time) {
       m_truth_state_vector_old.m_time = time.get_sim_cycle();
-      //mTruthAircraftStates.push_back(truth_state_vector_old);
       return false;
    }
+
+   m_weather_truth->SetWeatherFromTime(time.get_current_simulation_time());
 
    Guidance current_guidance;
    AircraftState state_result;
 
    // update FMS data
    m_fms.Update(m_truth_state_vector_old,
-               m_precalc_traj.m_waypoint,
-               m_precalc_traj.m_horizontal_trajectory);
+               m_precalc_traj.GetPrecalcWaypoint(),
+               m_precalc_traj.GetHorizontalTrajectory());
 
-   // TODO ? if( state_model.precalc_traj.is_loaded() )
-   {
-      // LAW: use measured state to determine guidance
-      current_guidance = m_precalc_traj.Update(m_truth_state_vector_old, current_guidance);
-   }
+   current_guidance = m_precalc_traj.Update(m_truth_state_vector_old, current_guidance);
 
-   // if airborne application is loaded check get airborne application guidance
    if (m_airborne_app.IsLoaded()) {
-      Guidance guidancefromairborneapplication;
-      guidancefromairborneapplication = m_airborne_app.Update(
-            time,
-            m_dynamics,
-            m_truth_state_vector_old,
-            current_guidance);
+      Guidance speed_guidance_from_application;
+      speed_guidance_from_application = m_airborne_app.Update(time,
+                                                              m_dynamics,
+                                                              m_truth_state_vector_old,
+                                                              current_guidance);
 
       // check if guidance has valid data.
-      if (guidancefromairborneapplication.is_valid() && guidancefromairborneapplication.m_im_speed_command_ias > 0.0) {
-         // Use the guidance as modified by the airborne appliation
-         current_guidance = guidancefromairborneapplication;
+      if (speed_guidance_from_application.IsValid() &&
+          speed_guidance_from_application.m_ias_command > Units::ZERO_SPEED) {
+         // Use the guidance as modified by the airborne application
+         current_guidance = speed_guidance_from_application;
       }
    }
 
-   //		fprintf(mGuidanceOut,"%f,%f,%f,%f,%f,%f,%i\n",time.get_current_simulation_time(),current_guidance.indicated_airspeed,current_guidance.reference_altitude,current_guidance.altitude_rate,current_guidance.psi,current_guidance.cross_track,current_guidance.use_cross_track);
-
    // run aircraft dynamics model to process the next state
-   m_dynamics.SetFms(&m_fms);
-   state_result = m_dynamics.Update(m_truth_state_vector_old, current_guidance);
+   state_result = m_dynamics.Update(m_truth_state_vector_old, current_guidance, m_aircraft_control);
    state_result.m_id = m_id;
    state_result.m_time = time.get_sim_cycle();
+   Units::MetersLength distance_to_go;
+   m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(state_result.m_x),
+                                                                             Units::FeetLength(state_result.m_y),
+                                                                             distance_to_go);
+   state_result.m_distance_to_go = distance_to_go.value();
 
-   //state_model.recomputePathLengthLeft(state_result.x*FT_M,state_result.y*FT_M);
-   Units::MetersLength distToGo;
-   Units::Angle dummyCourse;
-   AircraftCalculations::GetPathLengthFromPos(
-         Units::FeetLength(state_result.m_x),
-         Units::FeetLength(state_result.m_y),
-         m_precalc_traj.GetHorizontalData(),
-         distToGo, dummyCourse);
-   state_result.m_distance_to_go = distToGo.value();
-
-   InternalObserver::getInstance()->storeStateModel(state_result,
-                                                    m_dynamics.m_state.flapConfig, m_dynamics.m_state.speed_brake,
-                                                    m_dynamics.m_state.v_cas.value());
-
-   AircraftState report_state = state_result; // aircraft state reported to ADS-B (adds noise)
-
-   //mIsFinished = state_model.is_finished();
-   m_is_finished = (distToGo.value() < 0);
 
    // check if the model is finished
+   m_is_finished = m_decrementing_distance_calculator.IsPassedEndOfRoute();
    if (m_is_finished == true) {
       m_truth_state_vector_old.m_time = CalculateEndTime(m_truth_state_vector_old);
-      //			fclose(mGuidanceOut);
-      //			cout << "done" << endl;
       return m_is_finished;
    }
 
@@ -283,25 +284,18 @@ double TestFrameworkAircraft::CalculateEndTime(AircraftState state_in) {
 
 void TestFrameworkAircraft::PostLoad(Units::Time simulation_time_step,
                                       int predicted_wind_opt,
-                                      bool blend_wind) {
+                                      bool blend_wind,
+                                      WeatherTruth weather_truth) {
 
    // initialize the FMS information
    m_fms.CopyWaypointsFromIntent(m_aircraft_intent); // copy in waypoint data from aircraft intent
-   m_fms.Init(); // initialize the FMS data
+   m_fms.Initialize(m_precalc_traj.GetHorizontalTrajectory()); // initialize the FMS data
+   m_decrementing_distance_calculator = AlongPathDistanceCalculator(m_precalc_traj.GetHorizontalTrajectory(),
+                                                                    TrajectoryIndexProgressionDirection::DECREMENTING);
 
    if (m_precalc_traj.IsLoaded()) {
       m_precalc_traj.CalculateWaypoints(m_aircraft_intent);
    }
 
-
-   // initialize eom dynamics
-   const TrajectoryFromFile::VerticalData verticalTrajectoryFromFile = m_precalc_traj.GetVerticalData();
-   const Units::MetersLength finalAltitude = Units::MetersLength(verticalTrajectoryFromFile.mAlt[0]);
-   m_dynamics.SetFms(&m_fms);
-   m_dynamics.Init(m_precalc_traj.m_mass_percentile,
-                  finalAltitude,
-                  m_initial_altitude,
-                  m_initial_ias,   // FIXME should be TAS
-                  m_initial_mach,
-                  (double) m_start_time);
+   m_dynamics.SetBadaAcType(m_ac_type);
 }

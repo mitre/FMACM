@@ -12,10 +12,11 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/CoreUtils.h>
+#include <public/AlongPathDistanceCalculator.h>
 #include "framework/TestFrameworkFMS.h"
 #include "math/CustomMath.h"
 #include "public/AircraftCalculations.h"
@@ -30,9 +31,9 @@ TestFrameworkFMS::~TestFrameworkFMS() {
 
 
 // primary calculation method to update the FMS model
-void TestFrameworkFMS::Update(AircraftState state,
-      std::vector<PrecalcWaypoint> &precalc_waypoints,
-      std::vector<HorizontalPath> &horizontal_trajectory) {
+void TestFrameworkFMS::Update(const AircraftState &state,
+      const std::vector<PrecalcWaypoint> &precalc_waypoints,
+      const std::vector<HorizontalPath> &horizontal_trajectory) {
 
    double xWp, yWp, dx, dy;
 
@@ -163,29 +164,26 @@ void TestFrameworkFMS::Update(AircraftState state,
 
 
    // Recompute NextWp
+   Units::MetersLength current_distance_to_go;
+   m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(state.m_x),
+                                                                             Units::FeetLength(state.m_y),
+                                                                             current_distance_to_go);
 
-   Units::MetersLength currDist;
-   Units::RadiansAngle tempCrs;
-   AircraftCalculations::GetPathLengthFromPos(
-         Units::FeetLength(state.m_x), Units::FeetLength(state.m_y),
-         horizontal_trajectory, currDist, tempCrs);
 
-   m_next_waypoint_ix = precalc_waypoints.size() - 1;
-
-   for (int ix = 1; (ix < precalc_waypoints.size()); ix++) {
-
-      if ((currDist.value() < precalc_waypoints[ix - 1].constraints.constraint_dist) &&
-            (currDist.value() >= precalc_waypoints[ix].constraints.constraint_dist)) {
-         m_next_waypoint_ix = ix;
+   for (auto ix = 0; (ix < precalc_waypoints.size()); ix++) {
+      if (current_distance_to_go.value() <= precalc_waypoints[ix].m_precalc_constraints.constraint_dist) {
+         this->m_next_waypoint_ix = m_number_of_waypoints - ix - 1;
          break;
       }
-
    }
+
 }
 
 
 // init method to initialize the FMS data
-void TestFrameworkFMS::Init() {
+void TestFrameworkFMS::Initialize(const std::vector<HorizontalPath> &horizontal_path) {
+   m_decrementing_distance_calculator = AlongPathDistanceCalculator(horizontal_path, TrajectoryIndexProgressionDirection::DECREMENTING);
+
    int i;
    double dx;
    double dy;
@@ -231,13 +229,7 @@ void TestFrameworkFMS::CopyWaypointsFromIntent(AircraftIntent intent_in) {
 
 // check to see if the FMS has reached the last waypoint
 bool TestFrameworkFMS::IsFinished() {
-   bool result = false;
-
-   if (m_next_waypoint_ix > m_number_of_waypoints - 1) {
-      result = true;
-   }
-
-   return result;
+   return m_decrementing_distance_calculator.IsPassedEndOfRoute();
 }
 
 // get the psi of the given index if in range, returns -999.9 if out of range

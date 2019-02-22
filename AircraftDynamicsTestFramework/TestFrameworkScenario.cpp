@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkScenario.h"
@@ -23,6 +23,7 @@
 #include "loader/Loadable.h"
 #include "utility/constants.h"
 #include "public/StandardAtmosphere.h"
+#include "public/WindZero.h"
 #include <list>
 
 using namespace std;
@@ -64,7 +65,7 @@ bool TestFrameworkScenario::load(DecodedStream *input) {
    register_named_vector_item("aircraft", &m_master_aircraft_list, true); // required
 
    // get the base class to load things
-   bool r = complete(); //-----------------------------------------------------
+   complete();
 
    // this takes care of all the adaptation of the data structures
    PostLoad(bada_data_path, wind_truth_file, wind_forecast_file, predictedWindOpt, blendWind,
@@ -87,16 +88,6 @@ void TestFrameworkScenario::PostLoad(string bada_data_path,
    InternalObserver *internalObserver = InternalObserver::getInstance();
    internalObserver->set_scenario_name(GetScenarioName());
 
-   // Read the wind data in first so that grid available to get predicted winds
-   // for each aircraft's individual call.
-
-//  if ((Wind::windForecastFileName != wind_forecast_file) ||
-//      (Wind::m_truth_file_name != wind_truth_file)) {
-//    Wind::m_truth_file_name = wind_truth_file;
-//    Wind::windForecastFileName = wind_forecast_file;
-//    Wind::loadWindFiles();
-//  }
-
    PostLoadAircraft(simulation_time_step, predicted_wind_opt, blend_wind);
 
    SimulationTime::set_simulation_time_step(simulation_time_step);
@@ -109,10 +100,11 @@ void TestFrameworkScenario::PostLoadAircraft(
       Units::Time simulation_time_step,
       int predicted_wind_opt,
       bool blend_wind) {
+
    // Post load each aircraft individually.
    for (vector<TestFrameworkAircraft>::iterator i = m_master_aircraft_list.begin(); i != m_master_aircraft_list.end();
         i++) {
-      (*i).PostLoad(simulation_time_step, predicted_wind_opt, blend_wind);
+      (*i).PostLoad(simulation_time_step, predicted_wind_opt, blend_wind, m_weather);
    }
 
 
@@ -141,7 +133,7 @@ void TestFrameworkScenario::LoadOneScenarioFromScenarioClassIntoActorLists() {
 }
 
 // method to process one scenario from the list of scenario files
-void TestFrameworkScenario::process_one_scenario() {
+void TestFrameworkScenario::ProcessOneScenario() {
 
    //for each iteration:
    for (int i = 0; i < number_of_iterations; i++) {

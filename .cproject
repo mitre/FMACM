@@ -61,13 +61,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.assembler.base.1074625566" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.base">
 								<option id="gnu.both.asm.option.include.paths.192643479" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/aaesim/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/aaesim}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/framework}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/groundsystems}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/imalgs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/public}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1693076143" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -75,14 +69,23 @@
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.toolchain.gnu.base.1133741251.1166999962" name="Histogram.h" rcbsApplicability="disable" resourcePath="Math/Histogram.h.exclude" toolsToInvoke=""/>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="AAESim"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="AircraftDynamicsTestFramework"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="GroundSystems"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="IntervalManagement"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Loader"/>
 						<entry excluding="Histogram.h.exclude" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Math"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Public"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utility"/>
+						<entry excluding="aaesim|framework|groundsystems|imalgs|loader|math|public|utility" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/aaesim"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/framework"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/groundsystems"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/imalgs"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/loader"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/math"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/public"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="include/utility"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="unittest/src"/>
 					</sourceEntries>
 				</configuration>

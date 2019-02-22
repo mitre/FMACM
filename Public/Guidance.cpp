@@ -12,32 +12,23 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Guidance.h"
 
-Guidance::Guidance(void) {
-   m_im_speed_command_ias = 0;
-   gs = Units::ZERO_SPEED;
-   heading = 0;
-   reference_altitude = 0;
-   altitude_rate = 0;
-   psi = 0;
-   cross_track = 0;
-   use_cross_track = false;
-   level = true;
-   setValid(true);
-   reference_phi = Units::ZERO_ANGLE;
+Guidance::Guidance() {
+   m_ias_command = Units::ZERO_SPEED;
+   m_ground_speed = Units::ZERO_SPEED;
+   m_vertical_speed = Units::ZERO_SPEED;
+   m_reference_altitude = Units::ZERO_LENGTH;
+   m_cross_track_error = Units::ZERO_LENGTH;
+   m_track_angle = Units::ZERO_ANGLE;
+   m_reference_bank_angle = Units::ZERO_ANGLE;
+
+   m_use_cross_track = false;
+   m_valid = false;
 }
 
-Guidance::~Guidance(void) {
-}
-
-void Guidance::setValid(bool validIn) {
-   valid = validIn;
-}
-
-bool Guidance::is_valid() {
-   return valid;
+Guidance::~Guidance() {
 }

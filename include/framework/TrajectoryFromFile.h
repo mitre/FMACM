@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,6 +26,8 @@
 #include "loader/Loadable.h"
 #include <Angle.h>
 #include <Length.h>
+#include <public/AlongPathDistanceCalculator.h>
+#include <public/PositionCalculator.h>
 
 
 class TrajectoryFromFile : Loadable
@@ -48,24 +50,24 @@ public:
 
    bool load(DecodedStream *input);
 
-   std::vector<HorizontalPath> GetHorizontalData();
-
    VerticalData GetVerticalData();
 
-   Guidance Update(AircraftState state,
-                   Guidance guidance_in);
+   Guidance Update(const AircraftState &state,
+                   const Guidance &guidance_in);
 
    void CalculateWaypoints(AircraftIntent &intent);
 
    bool IsLoaded();
 
-   std::vector<HorizontalPath> m_horizontal_trajectory;
+   const Units::MetersLength GetEstimatedDistanceAlongPath() const;
 
-   Units::Length m_altitude_at_final_approach_fix;
-   double m_mass_percentile;
+   AlongPathDistanceCalculator &GetDecrementingDistanceCalculator();
 
-   std::vector<PrecalcWaypoint> m_waypoint;
+   const std::vector<HorizontalPath> &GetHorizontalTrajectory() const;
 
+   double GetMassPercentile() const;
+
+   const std::vector<PrecalcWaypoint> &GetPrecalcWaypoint() const;
 
 private:
 
@@ -106,9 +108,41 @@ private:
 
    void ReadHorizontalTrajectoryFile();
 
+   std::vector<HorizontalPath> m_horizontal_trajectory;
+
+   double m_mass_percentile;
+
+   std::vector<PrecalcWaypoint> m_waypoint;
+
    std::string m_vertical_trajectory_file;
    std::string m_horizontal_trajectory_file;
 
    bool m_loaded;
 
+   Units::MetersLength estimated_distance_to_go;
+
+   AlongPathDistanceCalculator m_decrementing_distance_calculator;
+
+   PositionCalculator m_decrementing_position_calculator;
+
 };
+
+inline const Units::MetersLength TrajectoryFromFile::GetEstimatedDistanceAlongPath() const {
+   return estimated_distance_to_go;
+}
+
+inline AlongPathDistanceCalculator &TrajectoryFromFile::GetDecrementingDistanceCalculator() {
+   return m_decrementing_distance_calculator;
+}
+
+inline const std::vector<HorizontalPath> &TrajectoryFromFile::GetHorizontalTrajectory() const {
+   return m_horizontal_trajectory;
+}
+
+inline double TrajectoryFromFile::GetMassPercentile() const {
+   return m_mass_percentile;
+}
+
+inline const std::vector<PrecalcWaypoint> &TrajectoryFromFile::GetPrecalcWaypoint() const {
+   return m_waypoint;
+}

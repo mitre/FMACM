@@ -37,16 +37,25 @@ set(SOURCE_FILES
         Scenario.cpp
         SimulationTime.cpp
         SingleTangentPlaneSequence.cpp
+        SpeedOnPitchControl.cpp
+        SpeedOnThrustControl.cpp
         StandardAtmosphere.cpp
         StereographicProjection.cpp
         TangentPlaneSequence.cpp
+        ThreeDOFDynamics.cpp
         VerticalPath.cpp
         VerticalPathObserver.cpp
         Waypoint.cpp
         WeatherEstimate.cpp
         WeatherPrediction.cpp
         WeatherTruth.cpp
+        Wind.cpp
         WindStack.cpp
+        HorizontalPathTracker.cpp
+        PositionCalculator.cpp
+        AlongPathDistanceCalculator.cpp
+        DirectionOfFlightCourseCalculator.cpp
+        WindZero.cpp
         )
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)

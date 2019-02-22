@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -36,7 +36,7 @@ public:
 
    virtual ~TestFrameworkScenario();
 
-   void process_one_scenario();
+   void ProcessOneScenario();
 
    void InitializeIterationState(int number_of_aircraft);
 

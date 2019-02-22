@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -24,43 +24,32 @@
 class PrecalcWaypoint : public LoggingLoadable
 {
 public:
-   PrecalcWaypoint(void);
+   PrecalcWaypoint();
 
-   ~PrecalcWaypoint(void);
+   virtual ~PrecalcWaypoint() = default;
 
-   // equals operator
    bool operator==(const PrecalcWaypoint &obj) const;
 
-   // load method to read in the Dynamics values
    bool load(DecodedStream *input);
 
-   // method to check if the model loaded properly
-   bool is_loaded();
+   std::string m_name;
 
-   std::string name;   // for diagnostics
+   double m_leg_length_meters;
+   Units::UnsignedRadiansAngle m_course_angle;
 
-   double leg_length; // in meters
-   Units::UnsignedRadiansAngle course_angle; // in radians
+   double m_x_pos_meters;
+   double m_y_pos_meters;
 
-   double x_pos; // in meters
-   double y_pos; // in meters
+   double m_center_x_for_rf_leg;
+   double m_center_y_for_rf_leg;
+   double m_radius_rf_leg_meters;
 
-   // Added for RF legs
-   double x_cp; // center point for RF leg
-   double y_cp;
-   double radius_cp; // in meters
+   Units::RadiansAngle m_bank_angle;
+   Units::MetersPerSecondSpeed m_ground_speed;
 
-   // added for research
-   Units::RadiansAngle bankAngle;
-   Units::MetersPerSecondSpeed groundspeed;
-
-   PrecalcConstraint constraints;
-
-   void setLoaded(bool val) {
-      loaded = val;
-   };
+   PrecalcConstraint m_precalc_constraints;
 
 private:
-   bool loaded;
+   bool m_loaded;
 };
 

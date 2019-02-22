@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,28 +26,28 @@
 
 // atmosphere constants
 // Standard Temperature at Sea Level
-const Units::KelvinTemperature T0(288.15);          // Kelvin
+const Units::KelvinTemperature T0(288.15);
 
 // Standard Density at Sea Level
-const Units::KilogramsMeterDensity RHO0(1.225);         // kg/m^3
+const Units::KilogramsMeterDensity RHO0(1.225);
 
 // Height of the tropopause
-const Units::MetersLength H_TROP(11000.);       // meters
+const Units::MetersLength H_TROP(11000.);
 
 // Temperature of the tropopause
-const Units::KelvinTemperature T_TROP(216.65);     // Kelvin
+const Units::KelvinTemperature T_TROP(216.65);
 
 // Density of the tropopause at 11,000 meters (kg/m^3)
 const Units::KilogramsMeterDensity RHO_TROP(0.3639228);
 
 // Pressure of the tropopause at 11,000 meters (Pa)
-const Units::PascalsPressure P_TROP(30101.615514);
+const Units::PascalsPressure P_TROP(22632.0);
 
 // Standard air pressure at sea level
-const Units::PascalsPressure P0(101325.);          // Pa (  N/m^2)
+const Units::PascalsPressure P0(101325.);
 
 // Speed of Sound at sea level
-const Units::MetersPerSecondSpeed A0(340.29);         // meters/second
+const Units::MetersPerSecondSpeed A0(340.29);
 
 // Isentropic expansion coefficient for air
 constexpr double GAMMA = 1.4;
@@ -69,7 +69,7 @@ public:
 
    virtual ~Atmosphere();
 
-   virtual Units::KelvinTemperature GetTemp(const Units::Length h) const = 0;
+   virtual Units::KelvinTemperature GetTemperature(const Units::Length altitude_msl) const = 0;
 
    void AirDensity(const Units::Length h,
                    Units::Density &rho,

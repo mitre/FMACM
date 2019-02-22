@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Waypoint.h"
@@ -59,14 +59,10 @@ Waypoint::Waypoint(const std::string &name_in,
    m_altitude = altitude_in;
    m_nominal_ias = nominal_ias_in;
 
-   std::cout << "----------------" << std::endl;
-   std::cout << m_name << std::endl;
    if (std::isnan(Units::MetersLength(altitude_constraint_in).value())) {
-      std::cout << "ALT 1 is NAN" << std::endl;
       altitude_constraint_in = UNDEFINED_ALTITUDE_CONSTRAINT;
    }
    if (std::isnan(Units::MetersLength(altitude_constraint_2_in).value())) {
-      std::cout << "ALT 2 is NAN" << std::endl;
       altitude_constraint_2_in = UNDEFINED_ALTITUDE_CONSTRAINT;
    }
    if (std::isnan(Units::KnotsSpeed(speed_constraint_in).value())) {

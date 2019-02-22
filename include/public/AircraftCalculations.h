@@ -12,14 +12,14 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "Atmosphere.h"
-#include "AircraftState.h"
-#include "HorizontalPath.h"
+#include "public/Atmosphere.h"
+#include "public/AircraftState.h"
+#include "public/HorizontalPath.h"
 #include <vector>
 #include <UnsignedAngle.h>
 #include <Length.h>
@@ -36,20 +36,64 @@ class AircraftCalculations
 {
 
 public:
-   // method to get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
-   static bool GetPosFromPathLength(const Units::Length &dist_in,
-                                    const std::vector<HorizontalPath> &traj_in,
-                                    Units::Length &x_out,
-                                    Units::Length &y_out,
-                                    Units::UnsignedAngle &course_out,
-                                    int &traj_index);
 
-   // method to get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
-   static void GetPathLengthFromPos(const Units::Length x,
-                                    const Units::Length y,
-                                    const std::vector<HorizontalPath> &hTraj,
-                                    Units::Length &dist,
-                                    Units::Angle &trk);
+   /**
+    * Get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory
+    *
+    * @deprecated Do not write new code that calls this.
+    * @see PositionCalculator
+    * @param distance_to_go
+    * @param horizontal_trajectory
+    * @param x_position
+    * @param y_position
+    * @param course
+    * @param traj_index
+    * @return true if calculation succeeded, false otherwise
+    */
+   static bool LegacyGetPositionFromPathLength(const Units::Length &distance_to_go,
+                                               const std::vector<HorizontalPath> &horizontal_trajectory,
+                                               Units::Length &x_position,
+                                               Units::Length &y_position,
+                                               Units::UnsignedAngle &course,
+                                               int &traj_index);
+
+    /**
+    * Get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
+    *
+    * @deprecated Do not write new code that calls this.
+    * @see AlongPathDistanceCalculator
+    * @param x
+    * @param y
+    * @param horizontal_trajectory
+    * @param distance_along_path
+    * @param course
+    */
+   static void LegacyGetPathLengthFromPosition(const Units::Length x,
+                                               const Units::Length y,
+                                               const std::vector<HorizontalPath> &horizontal_trajectory,
+                                               Units::Length &distance_along_path,
+                                               Units::Angle &course);
+
+
+   /**
+    * Get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
+    *
+    * @param position_x
+    * @param position_y
+    * @param horizontal_trajectory
+    * @param starting_trajectory_index
+    * @param distance_along_path
+    * @param course
+    * @param resolved_trajectory_index
+    * @return true if calculation succeeded, false otherwise
+    */
+   static bool CalculateDistanceAlongPathFromPosition(const Units::Length position_x,
+                                                      const Units::Length position_y,
+                                                      const std::vector<HorizontalPath> &horizontal_trajectory,
+                                                      const std::vector<HorizontalPath>::size_type starting_trajectory_index,
+                                                      Units::Length &distance_along_path,
+                                                      Units::Angle &course,
+                                                      std::vector<HorizontalPath>::size_type &resolved_trajectory_index);
 
    static Units::UnsignedRadiansAngle Convert0to2Pi(Units::Angle course_in);
 
@@ -86,15 +130,16 @@ public:
 private:
    static log4cplus::Logger logger;
 
-   struct mPathDistance
+   struct PathDistance
    {
-      int mIx; // Index to point in horizontal trajectory.
-      Units::Length mDist;
+      std::vector<HorizontalPath>::size_type m_horizontal_path_index;
+      Units::Length m_distance_to_path_node;
    };
 
-   static std::vector<mPathDistance> ComputePathDistances(
+   static std::vector<PathDistance> ComputePathDistances(
          const Units::Length x,
          const Units::Length y,
+         const std::vector<HorizontalPath>::size_type &starting_index,
          const std::vector<HorizontalPath> &hTraj);
 
    static void CrossTrackError(const Units::Length x,

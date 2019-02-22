@@ -12,94 +12,85 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcWaypoint.h"
 
 
-PrecalcWaypoint::PrecalcWaypoint(void) {
-   name = "noname";
-   leg_length = 0.0; // in nautical miles
-   course_angle = Units::DegreesAngle(0.0); // in degrees
+PrecalcWaypoint::PrecalcWaypoint() {
+   m_name = "noname";
+   m_leg_length_meters = 0.0;
+   m_course_angle = Units::DegreesAngle(0.0);
 
-   x_pos = 0.0; // in nautical miles (.h file says meters)
-   y_pos = 0.0; // in nautical miles (.h file says meters)
+   m_x_pos_meters = 0.0;
+   m_y_pos_meters = 0.0;
 
-   x_cp = 0.0;
-   y_cp = 0.0;
-   radius_cp = 0.0;
+   m_center_x_for_rf_leg = 0.0;
+   m_center_y_for_rf_leg = 0.0;
+   m_radius_rf_leg_meters = 0.0;
 
-   constraints.constraint_dist = 0.0; // distance constraints
-   constraints.constraint_altHi = 0.0; // altitude max constraints
-   constraints.constraint_altLow = 0.0; // altitude min constraints
+   m_precalc_constraints.constraint_dist = 0.0; // distance constraints
+   m_precalc_constraints.constraint_altHi = 0.0; // altitude max constraints
+   m_precalc_constraints.constraint_altLow = 0.0; // altitude min constraints
 
-   bankAngle = Units::RadiansAngle(0);
-   groundspeed = Units::MetersPerSecondSpeed(0.0);
+   m_bank_angle = Units::RadiansAngle(0);
+   m_ground_speed = Units::MetersPerSecondSpeed(0.0);
 
-   loaded = false;
+   m_loaded = false;
 }
 
-PrecalcWaypoint::~PrecalcWaypoint(void) {
-}
-
-// equals operator
 bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
-   bool match = (this->leg_length == obj.leg_length);
-   match = match && (this->course_angle == obj.course_angle);
-   match = match && (this->x_pos == obj.x_pos);
-   match = match && (this->y_pos == obj.y_pos);
-   match = match && (this->constraints == obj.constraints);
-   match = match && (this->x_cp == obj.x_cp);
-   match = match && (this->y_cp == obj.y_cp);
-   match = match && (this->radius_cp == obj.radius_cp);
+   bool match = (this->m_leg_length_meters == obj.m_leg_length_meters);
+   match = match && (this->m_course_angle == obj.m_course_angle);
+   match = match && (this->m_x_pos_meters == obj.m_x_pos_meters);
+   match = match && (this->m_y_pos_meters == obj.m_y_pos_meters);
+   match = match && (this->m_precalc_constraints == obj.m_precalc_constraints);
+   match = match && (this->m_center_x_for_rf_leg == obj.m_center_x_for_rf_leg);
+   match = match && (this->m_center_y_for_rf_leg == obj.m_center_y_for_rf_leg);
+   match = match && (this->m_radius_rf_leg_meters == obj.m_radius_rf_leg_meters);
 
    return match;
 }
 
-// load method to read in the Dynamics values
 bool PrecalcWaypoint::load(DecodedStream *input) {
    set_stream(input);
 
-   bool f = load_datum(leg_length); // loads in Nautical Miles
+   bool f = load_datum(m_leg_length_meters); // loads in Nautical Miles
    if (!f) {
       LoggingLoadable::report_error("could not load leg length");
    }
-   leg_length *= NAUTICAL_MILES_TO_METERS; // converts nautical miles to meters
+   m_leg_length_meters *= NAUTICAL_MILES_TO_METERS; // converts nautical miles to meters
 
    // Historically, course_angle was loaded in degrees but then
    // converted in place to radians.
    Units::DegreesAngle course_angle1;
    f = load_datum(course_angle1);
    if (!f) {
-      LoggingLoadable::report_error("could not load course angle");
+      LoggingLoadable::report_error("could not load m_path_course angle");
    }
-   course_angle = course_angle1;
+   m_course_angle = course_angle1;
 
-   f = load_datum(constraints.constraint_dist);
+   f = load_datum(m_precalc_constraints.constraint_dist);
    if (!f) {
       LoggingLoadable::report_error("could not load distance constraint");
    }
-   constraints.constraint_dist *= NAUTICAL_MILES_TO_METERS;
+   m_precalc_constraints.constraint_dist *= NAUTICAL_MILES_TO_METERS;
 
-   f = load_datum(constraints.constraint_altHi);
+   f = load_datum(m_precalc_constraints.constraint_altHi);
    if (!f) {
       LoggingLoadable::report_error("could not load max altitude constraint");
    }
-   constraints.constraint_altHi *= FEET_TO_METERS;
+   m_precalc_constraints.constraint_altHi *= FEET_TO_METERS;
 
-   f = load_datum(constraints.constraint_altLow);
+   f = load_datum(m_precalc_constraints.constraint_altLow);
    if (!f) {
       LoggingLoadable::report_error("could not load min altitude constraint");
    }
-   constraints.constraint_altLow *= FEET_TO_METERS;
+   m_precalc_constraints.constraint_altLow *= FEET_TO_METERS;
 
-   loaded = true;
+   m_loaded = true;
 
-   return loaded;
+   return m_loaded;
 }
 
-// method to check if the model loaded properly
-bool PrecalcWaypoint::is_loaded() {
-   return loaded;
-}

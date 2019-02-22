@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftIntent.h"
@@ -358,11 +358,12 @@ Units::MetersLength AircraftIntent::GetPlannedCruiseAltitude() const {
 void AircraftIntent::Copy(const AircraftIntent &in) {
    m_id = in.m_id;
    m_planned_cruise_altitude = in.m_planned_cruise_altitude;
+   m_planned_cruise_mach = in.m_planned_cruise_mach;
    m_number_of_waypoints = in.m_number_of_waypoints;
    m_is_loaded = in.m_is_loaded;
 
    // for loop to copy all waypoint information
-   for (int loop = 0; loop < MAX_NUM_WAYPOINTS; loop++) {
+   for (auto loop = 0; loop < MAX_NUM_WAYPOINTS; loop++) {
       m_waypoint_name[loop] = in.m_waypoint_name[loop];
       m_waypoint_y[loop] = in.m_waypoint_y[loop];
       m_waypoint_x[loop] = in.m_waypoint_x[loop];
@@ -375,7 +376,7 @@ void AircraftIntent::Copy(const AircraftIntent &in) {
    m_mach_transition_cas = in.m_mach_transition_cas;
 
    // loop to copy FMS values
-   for (int loop2 = 0; loop2 < MAX_NUM_WAYPOINTS; loop2++) {
+   for (auto loop2 = 0; loop2 < MAX_NUM_WAYPOINTS; loop2++) {
       m_fms.Name[loop2] = in.m_fms.Name[loop2];
       m_fms.xWp[loop2] = in.m_fms.xWp[loop2];
       m_fms.yWp[loop2] = in.m_fms.yWp[loop2];

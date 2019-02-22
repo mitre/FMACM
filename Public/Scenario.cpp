@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Scenario.h"
@@ -35,10 +35,6 @@ Scenario::~Scenario() {
 
 bool Scenario::load(DecodedStream *input) {
    return true;
-}
-
-void Scenario::ProcessOneScenario() {
-
 }
 
 void Scenario::SetScenarioName(const string in) {

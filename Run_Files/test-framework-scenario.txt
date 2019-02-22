@@ -12,11 +12,20 @@ bada_data_path "/data/aaesim/regressionScens/bada"
 ; Aircraft definition.
 aircraft
 {
-        ; initialization information for this aircraft
-        initial_altitude 35000 ; feet
-        initial_ias 270 ; knots
-        initial_mach 0.78
+    ; initialization information for this aircraft
+    initial_altitude 35000 ; feet
+    initial_ias 270 ; knots
+    initial_mach 0.78
 
+    ; Aircraft type: JET1, JET2, JET3, JET4, JET5, JET6. No default.
+    ac_type JET1
+    
+    ; Speed management setting
+    speed_management_type thrust
+        
+    ; ENV file, containing weather data by time and distance-to-go
+    env_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ENV.csv"
+        
 	; aircraft intent
 	aircraft_intent
 	{
@@ -31,15 +40,6 @@ aircraft
 	  dynamics
 	  {	
 	
-	    ; Aircraft type: JET1, JET2, JET3, JET4, JET5, JET6. No default.
-	    ac_type JET1
-	
-	    ; Speed management setting
-	    speed_management_type thrust
-	    
-	    ; ENV file, containing weather data by time and distance-to-go
-		env_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ENV.csv"
-		
 	  } ; dynamics
 	
 	  ; Pre-calculated trajectory from file

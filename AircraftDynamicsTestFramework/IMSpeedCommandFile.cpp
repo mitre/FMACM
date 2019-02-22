@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/IMSpeedCommandFile.h"
@@ -121,21 +121,21 @@ Guidance IMSpeedCommandFile::Update(Units::Time time) {
    // delay code declarations
    int hardcodeDelay = m_pilot_delay_seconds.value();
 
-   guidance.setValid(false);
+   guidance.SetValid(false);
 
    if (m_speed_data[0].mTime >= time) {
 
       // First
 
-      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[0].mSpeed).value();
-      guidance.setValid(true);
+      guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[0].mSpeed);
+      guidance.SetValid(true);
 
    } else if (m_speed_data[(m_speed_data.size() - 1)].mTime <= time) {
 
       // Last
 
-      guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[(m_speed_data.size() - 1)].mSpeed).value();
-      guidance.setValid(true);
+      guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[(m_speed_data.size() - 1)].mSpeed);
+      guidance.SetValid(true);
 
 
    } else {
@@ -152,8 +152,8 @@ Guidance IMSpeedCommandFile::Update(Units::Time time) {
 
          // Exact match on next
 
-         guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(m_speed_data[(ix + 1)].mSpeed).value();
-         guidance.setValid(true);
+         guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[(ix + 1)].mSpeed);
+         guidance.SetValid(true);
 
       } else {
 
@@ -164,8 +164,8 @@ Guidance IMSpeedCommandFile::Update(Units::Time time) {
 
          Units::Speed interpolatedspeed = (1.0 - pct) * m_speed_data[ix].mSpeed + pct * m_speed_data[(ix + 1)].mSpeed;
 
-         guidance.m_im_speed_command_ias = Units::FeetPerSecondSpeed(interpolatedspeed).value();
-         guidance.setValid(true);
+         guidance.m_ias_command = Units::FeetPerSecondSpeed(interpolatedspeed);
+         guidance.SetValid(true);
 
       }
 
@@ -177,13 +177,13 @@ Guidance IMSpeedCommandFile::Update(Units::Time time) {
       for (int i = m_hist_len - 1; i > 0; i--) {
          m_ias_hist[i] = m_ias_hist[i - 1];
       }
-      m_ias_hist[0] = guidance.m_im_speed_command_ias;
+      m_ias_hist[0] = Units::FeetPerSecondSpeed(guidance.m_ias_command).value();
 
       if (m_history_indexer < hardcodeDelay) {
          // protect against not enough history for requested delay
-         guidance.m_im_speed_command_ias = m_ias_hist[m_history_indexer];
+         guidance.m_ias_command = Units::FeetPerSecondSpeed(m_ias_hist[m_history_indexer]);
       } else {
-         guidance.m_im_speed_command_ias = m_ias_hist[hardcodeDelay];
+         guidance.m_ias_command = Units::FeetPerSecondSpeed(m_ias_hist[hardcodeDelay]);
       }
       m_history_indexer++;
    }//end delay processing

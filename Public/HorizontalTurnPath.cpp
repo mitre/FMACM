@@ -12,15 +12,15 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/HorizontalTurnPath.h"
 
 
 HorizontalTurnPath::HorizontalTurnPath(void) {
-   x_turn = 0;
-   y_turn = 0;
+   x_position_meters = 0;
+   y_position_meters = 0;
    q_start = Units::UnsignedRadiansAngle(0);
    q_end = Units::UnsignedRadiansAngle(0);
    radius = Units::MetersLength(0);
@@ -33,8 +33,8 @@ HorizontalTurnPath::~HorizontalTurnPath(void) {
 }
 
 bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
-   return ((this->x_turn == that.x_turn) &&
-           (this->y_turn == that.y_turn) &&
+   return ((this->x_position_meters == that.x_position_meters) &&
+           (this->y_position_meters == that.y_position_meters) &&
            (this->q_start == that.q_start) &&
            (this->q_end == that.q_end) &&
            (this->radius == that.radius));

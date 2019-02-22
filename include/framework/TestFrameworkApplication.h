@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -23,7 +23,7 @@
 #include "loader/Loadable.h"
 #include "public/Guidance.h"
 #include "public/SimulationTime.h"
-#include "framework/TestFrameworkDynamics.h"
+#include "public/ThreeDOFDynamics.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -36,7 +36,7 @@ public:
    ~TestFrameworkApplication();
 
    Guidance Update(const SimulationTime &simTime,
-                   TestFrameworkDynamics &dynamics,
+                   ThreeDOFDynamics &dynamics,
                    AircraftState state_in,
                    Guidance guidance_in);
 

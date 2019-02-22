@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -23,17 +23,23 @@
 class HorizontalPath
 {
 public:
-   HorizontalPath(void);
+   enum SegmentType {
+      STRAIGHT,
+      TURN,
+      UNSET
+   };
 
-   ~HorizontalPath(void);
+   HorizontalPath();
+
+   virtual ~HorizontalPath();
 
    bool operator==(const HorizontalPath &that) const;
 
-   double x; // in meters
-   double y; // in meters
-   std::string segment;
-   double L; // leg length in meters
-   double course;
-   HorizontalTurnPath turns;
+   double m_x_position_meters;
+   double m_y_position_meters;
+   SegmentType m_segment_type;
+   double m_path_length_cumulative_meters;
+   double m_path_course;
+   HorizontalTurnPath m_turn_info;
 };
 

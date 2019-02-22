@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Atmosphere.h"
@@ -40,7 +40,7 @@ void Atmosphere::AirDensity(const Units::Length h,
    //global h_trop G T0 RHO0 P0 R K_T rho_trop P_trop;
 
    // Find air temperature (Kelvin), density (kg/m^3), and pressure (kg/m^2)
-   Units::KelvinTemperature T = GetTemp(h);
+   Units::KelvinTemperature T = GetTemperature(h);
 
    if (h < H_TROP) {
       rho = RHO0 * pow((T / T0), (-Units::ONE_G_ACCELERATION / (K_T * R) - 1));
@@ -521,7 +521,7 @@ Units::Speed Atmosphere::MachToIAS(const double mach,
 
 
    Units::Speed tas = Units::MetersPerSecondSpeed(mach *
-                                                  sqrt(GAMMA * R * GetTemp(alt).value()));
+                                                  sqrt(GAMMA * R * GetTemperature(alt).value()));
 
    return TAS2CAS(tas, alt);
 }

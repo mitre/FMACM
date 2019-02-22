@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/CoreUtils.h>
@@ -126,7 +126,7 @@ Units::Angle AircraftControl::doLateralControl(const Guidance &guidance,
    const Units::Angle psi = eqmState.psi;         // heading angle measured from east counter-clockwise (rad)
 
    // Commanded Track Angle
-   Units::Angle trk = Units::RadiansAngle(guidance.psi); // GUIDANCE
+   Units::Angle trk = guidance.m_track_angle;
 
    Units::Speed Vw_para = m_Vwx * cos(trk) + m_Vwy * sin(trk);
    Units::Speed Vw_perp = -m_Vwx * sin(trk) + m_Vwy * cos(trk);
@@ -159,14 +159,11 @@ Units::Angle AircraftControl::doLateralControl(const Guidance &guidance,
    double dynamic_cross = 1.0;
 
    // check if guidance has has cross track error and use it if so
-   if (guidance.use_cross_track) {
-      //e_xtrk = Units::MetersLength(guidance.cross_track);
-      //compensate for turn
-      if (guidance.reference_phi != Units::ZERO_ANGLE) {
-         e_xtrk = Units::MetersLength(guidance.cross_track - Units::MetersLength((guidance.reference_phi
-                                                                                  / k_xtrk)).value());
+   if (guidance.m_use_cross_track) {
+      if (guidance.m_reference_bank_angle != Units::ZERO_ANGLE) {
+         e_xtrk = guidance.m_cross_track_error - (guidance.m_reference_bank_angle / k_xtrk);
       } else {
-         e_xtrk = Units::MetersLength(guidance.cross_track);
+         e_xtrk = guidance.m_cross_track_error;
       }
    }
 
@@ -183,7 +180,9 @@ Units::Angle AircraftControl::doLateralControl(const Guidance &guidance,
 
    InternalObserver::getInstance()->cross_output(Units::MetersLength(x).value(),
                                                  Units::MetersLength(y).value(),
-                                                 dynamic_cross, guidance.cross_track, guidance.psi, unlimited_phi_com,
+                                                 dynamic_cross,
+                                                 Units::MetersLength(guidance.m_cross_track_error).value(),
+                                                 Units::RadiansAngle(guidance.m_track_angle).value(), unlimited_phi_com,
                                                  Units::RadiansAngle(phi_com).value());
 
    return phi_com;

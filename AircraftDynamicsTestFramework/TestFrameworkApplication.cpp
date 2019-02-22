@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkApplication.h"
@@ -30,7 +30,7 @@ TestFrameworkApplication::~TestFrameworkApplication() {
 }
 
 Guidance TestFrameworkApplication::Update(const SimulationTime &simTime,
-      TestFrameworkDynamics &dynamics,
+      ThreeDOFDynamics &dynamics,
       AircraftState state_in,
       Guidance guidance_in) {
    // Main update method computing guidance based on particular airborne application from runfile.
@@ -56,8 +56,8 @@ Guidance TestFrameworkApplication::Update(const SimulationTime &simTime,
 
    //	Retrieve the IM speed from a test vector file.
    imGuidance = m_im_speed_command_file.Update(Units::SecondsTime(time));
-   guidance_out.m_im_speed_command_ias = imGuidance.m_im_speed_command_ias;
-   guidance_out.setValid(imGuidance.is_valid());
+   guidance_out.m_ias_command = imGuidance.m_ias_command;
+   guidance_out.SetValid(imGuidance.IsValid());
 
    return guidance_out;
 }

@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,13 +26,9 @@ class VerticalPath
 public:
    VerticalPath(void);
 
-   ~VerticalPath(void);
-
-   VerticalPath(const VerticalPath &in);
+   virtual ~VerticalPath(void);
 
    void append(const VerticalPath &in);
-
-   VerticalPath &operator=(const VerticalPath &in);
 
    void operator+=(const VerticalPath &in);
 
@@ -57,6 +53,4 @@ public:
    std::vector<Units::MetersPerSecondSpeed> vwe, vwn;
 
 private:
-   // helper method for copy and assignment operations
-   void copy(const VerticalPath &in);
 };

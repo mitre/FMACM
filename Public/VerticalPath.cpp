@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VerticalPath.h"
@@ -24,38 +24,6 @@ VerticalPath::VerticalPath(void) {
 }
 
 VerticalPath::~VerticalPath(void) {
-}
-
-// copy constructor and assignment operator for vertical paths.
-VerticalPath::VerticalPath(const VerticalPath &in) {
-   copy(in);
-}
-
-VerticalPath &VerticalPath::operator=(const VerticalPath &in) {
-   if (this != &in) {
-      // clear old data
-      x.clear();
-      h.clear();
-      v.clear();
-      h_dot.clear();
-      v_dot.clear();
-      theta.clear();
-      gs.clear();
-      time.clear();
-      mass.clear();
-      vwe.clear();
-      vwn.clear();
-
-      // copy new values
-      copy(in);
-   }
-
-   return *this;
-}
-
-// helper method for copy and assignment operations
-void VerticalPath::copy(const VerticalPath &in) {
-   append(in);
 }
 
 // method to append another Trajectory to this one

@@ -1,0 +1,7 @@
+*.*~
+*.xml
+lib/
+make.log
+*.html
+/aaesim_unit_test_results.xml
+bin/

@@ -12,258 +12,71 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftCalculations.h"
 #include <stdexcept>
 #include <public/CoreUtils.h>
+#include <public/AircraftCalculations.h>
+#include <public/PositionCalculator.h>
+
 
 using namespace std;
 
 log4cplus::Logger AircraftCalculations::logger = log4cplus::Logger::getInstance("AircraftCalculations");
 
-// method to get the position and course of an Aircraft based on current distance (in meters) and precalculated Horizontal Trajectory
-bool AircraftCalculations::GetPosFromPathLength(const Units::Length &dist_in,
-                                                const std::vector<HorizontalPath> &traj_in,
-                                                Units::Length &x_out,
-                                                Units::Length &y_out,
-                                                Units::UnsignedAngle &course_out,
-                                                int &traj_index) {
-   int index = -1; // stores the index last position < current distance
-   const double meters_in = Units::MetersLength(dist_in).value();
+bool AircraftCalculations::LegacyGetPositionFromPathLength(const Units::Length &distance_to_go,
+                                                           const std::vector<HorizontalPath> &horizontal_trajectory,
+                                                           Units::Length &x_position,
+                                                           Units::Length &y_position,
+                                                           Units::UnsignedAngle &course,
+                                                           int &traj_index) {
 
-   // loop to find the distance
-   bool found = false;
-   for (int loop = 0; loop < (int) traj_in.size() && !found; loop++) {
-      if (meters_in <= traj_in[loop].L) {
-         found = true;
-         index = loop - 1; // sets position to the last position that was less than the given distance
 
-         if (index < 0) {
-            index = 0;
-         }
-      }
+   PositionCalculator position_calculator(horizontal_trajectory, TrajectoryIndexProgressionDirection::UNDEFINED);
+   bool is_valid = position_calculator.CalculatePositionFromAlongPathDistance(distance_to_go,
+                                                                              x_position,
+                                                                              y_position,
+                                                                              course);
+
+   traj_index = static_cast<int>(position_calculator.GetCurrentTrajectoryIndex());
+   if (distance_to_go < Units::zero()) {
+      traj_index = 0;
    }
 
-   // See AAES-639 for explanation. In FAS scenario, metersIn is different from total pathlength in the 9th decimal place.
-   if (!found && (meters_in < (traj_in[traj_in.size() - 1].L + 0.0001))) {
-      found = true;
-      index = traj_in.size() - 1;
-   }
-
-   if (found == true) {
-      // calculate position based on if it's a straight or turning path
-      if (traj_in[index].segment == "straight") {
-         Units::Angle course = Units::RadiansAngle(traj_in[index].course); // get the course for the given index
-
-         // calculate output values
-         x_out = Units::MetersLength(traj_in[index].x) +
-                 ((dist_in - Units::MetersLength(traj_in[index].L)) * cos(course));
-         y_out = Units::MetersLength(traj_in[index].y) +
-                 ((dist_in - Units::MetersLength(traj_in[index].L)) * sin(course));
-         course_out = AircraftCalculations::Convert0to2Pi(course + Units::PI_RADIANS_ANGLE);
-      } else if (traj_in[index].segment == "turn") {
-         if ((dist_in - Units::MetersLength(traj_in[index].L)) < Units::MetersLength(3)) {
-            x_out = Units::MetersLength(traj_in[index].x);
-            y_out = Units::MetersLength(traj_in[index].y);
-            course_out = Units::UnsignedRadiansAngle(traj_in[index].course) + Units::PI_RADIANS_ANGLE;
-         } else {
-            Units::Length radius = Units::MetersLength(traj_in[index].turns.radius);
-            Units::UnsignedAngle start = Units::UnsignedRadiansAngle(traj_in[index].turns.q_start);
-            Units::UnsignedAngle end = Units::UnsignedRadiansAngle(traj_in[index].turns.q_end);
-
-            // calculate course change between the start and end of turn
-            Units::SignedRadiansAngle course_change = ConvertPitoPi(end - start);
-
-            // calculate difference in distance
-            Units::Angle delta = Units::RadiansAngle((dist_in - Units::MetersLength(traj_in[index].L)) / radius);
-
-            // calculate the theta of the turn
-            Units::Angle theta = start + delta * CoreUtils::SignOfValue(course_change.value());
-
-            // calculate X and Y positions
-            x_out = Units::MetersLength(traj_in[index].turns.x_turn) + radius * cos(theta);
-            y_out = Units::MetersLength(traj_in[index].turns.y_turn) + radius * sin(theta);
-
-            course_out = AircraftCalculations::Convert0to2Pi(
-                  theta - Units::PI_RADIANS_ANGLE / 2.0 * CoreUtils::SignOfValue(course_change.value()));
-         }
-      }
-      traj_index = index;
-      return true;
-   } else {
-      traj_index = -1;
-      return false;
-   }
+   return is_valid;
 }
 
+void AircraftCalculations::LegacyGetPathLengthFromPosition(const Units::Length x,
+                                                           const Units::Length y,
+                                                           const vector<HorizontalPath> &horizontal_trajectory,
+                                                           Units::Length &distance_along_path,
+                                                           Units::Angle &course) {
+   vector<HorizontalPath>::size_type ignored_trajectory_index;
+   const std::vector<HorizontalPath>::size_type default_start_index = 0;
+   CalculateDistanceAlongPathFromPosition(x, y, horizontal_trajectory, default_start_index, distance_along_path, course, ignored_trajectory_index);
+}
 
-void AircraftCalculations::GetPathLengthFromPos(const Units::Length x,
-                                                const Units::Length y,
-                                                const vector<HorizontalPath> &hTraj,
-                                                Units::Length &dist,
-                                                Units::Angle &trk) {
-
-   // Computes distance and course based on aircraft position
-   // and horizontal trajectory.  Distance is from aircraft
-   // to nearest point from the horizontal trajectory along
-   // the path.
-   //
-   // x,y:aircraft position in meters.
-   // hTraj:horizontal trajectory of aircraft,
-   //       (point positions in meters).
-   // dist:computed distance in meters (output).
-   // trk:aircraft course to point in radians (output).
-
-
-   // Dummy values
-
-   dist = Units::NegInfinity();
-   trk = Units::RadiansAngle(99999.99999);
-
-   // Find closest point
-
-   // Compute Euclidean distances for all horizontal trajectory points
-   // and order in ascending sequence.
-
-   vector<mPathDistance> distances =
-         AircraftCalculations::ComputePathDistances(x, y, hTraj);
-
-
-   // Find smallest distance with an acceptable cross track error.
-
-   int nextTrajIx = -1;
-   const Units::NauticalMilesLength cte_tolerance(2.5);
-   Units::NauticalMilesLength cte;
-   for (auto i = 0; ((i < distances.size()) && (nextTrajIx == -1)); i++) {
-
-      int computedNextIx;
-
-      AircraftCalculations::CrossTrackError(x, y,
-                                            distances[i].mIx, hTraj, computedNextIx, cte);
-
-      if (cte <= cte_tolerance) {
-         nextTrajIx = computedNextIx;
-      }
-   }
-
-   if (nextTrajIx == -1) {
-      /*
-       * Developer's: note that this if logic is no longer a FATAL condition, but we
-       * must allow it to throw. Some callers will catch and handle the situation because
-       * it is sometimes normal. See AAES-382, AAES-633
-       */
-      char msg[150];
-      sprintf(msg,
-              "Trajectory point with acceptable cross track error not found %lf nmi",
-              cte.value());
-//        LOG4CPLUS_FATAL(logger, "x: " << Units::MetersLength(x).value());
-//        LOG4CPLUS_FATAL(logger, "y: " << Units::MetersLength(y).value());
-//        LOG4CPLUS_FATAL(logger, "distances: ");
-//        for (int i = 0; i < distances.size(); ++i) {
-//            LOG4CPLUS_FATAL(logger, "\t" << Units::MetersLength(distances[i].mDist).value());
-//        }
-//        LOG4CPLUS_FATAL(logger, "hTraj:");
-//        for (int j = 0; j < hTraj.size(); ++j) {
-//            LOG4CPLUS_FATAL(logger, "\tx(m): " << hTraj[j].x);
-//            LOG4CPLUS_FATAL(logger, "\ty(m): " << hTraj[j].y);
-//            LOG4CPLUS_FATAL(logger, "\tL(m): " << hTraj[j].L);
-//        }
-      throw logic_error(msg);
-   }
-
-
-   // Calculate DTG and course of aircraft.
-
-   Units::Length dap;
-   Units::RadiansAngle theta;
-
-   if (hTraj[nextTrajIx].segment == "straight") {
-
-      Units::Length d = sqrt(Units::sqr(x - Units::MetersLength(hTraj[nextTrajIx].x)) +
-                             Units::sqr(y - Units::MetersLength(hTraj[nextTrajIx].y)));
-
-      //trk = convert0to2Pi( Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
-      trk = AircraftCalculations::Convert0to2Pi(
-            Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
-
-      if (fabs(Units::MetersLength(d).value()) < 1E-5) {
-         dap = Units::MetersLength(0.0);
-      } else {
-         Units::MetersLength dx = Units::MetersLength(hTraj[nextTrajIx].x) - x;
-         Units::MetersLength dy = Units::MetersLength(hTraj[nextTrajIx].y) - y;
-         theta = Units::RadiansAngle(atan2(dy.value(), dx.value()));
-
-         Units::SignedAngle deltaTheta = ConvertPitoPi(theta - trk);
-
-         dap = d * cos(deltaTheta);
-      }
-
-   } else if (hTraj[nextTrajIx].segment == "turn") {
-
-      Units::MetersLength dx = x - Units::MetersLength(hTraj[nextTrajIx].turns.x_turn);
-      Units::MetersLength dy = y - Units::MetersLength(hTraj[nextTrajIx].turns.y_turn);
-
-      // theta is undefined if dx and dy are both zero
-      // if within 5 meters of the point, consider at the point
-      double lx = (Units::MetersLength(x)).value();
-      double ly = (Units::MetersLength(y)).value();
-
-      if (pow(lx - (hTraj[nextTrajIx]).x, 2) + pow(ly - (hTraj[nextTrajIx]).y, 2) < 9) {
-         dist = Units::MetersLength(hTraj[nextTrajIx].L);
-         trk = AircraftCalculations::Convert0to2Pi(
-               Units::RadiansAngle(hTraj[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
-         return;
-      }
-
-      theta = Units::UnsignedRadiansAngle(atan2(dy.value(), dx.value()));
-
-      Units::RadiansAngle deltaTheta =
-            AircraftCalculations::ConvertPitoPi(Units::UnsignedRadiansAngle(hTraj[nextTrajIx].turns.q_start) - theta);
-
-      dap = Units::MetersLength(hTraj[nextTrajIx].turns.radius) * fabs(deltaTheta.value());
-
-      //trk = convert0to2Pi(Units::RadiansAngle(hTraj[nextTrajIx-1].course)
-      //                    + Units::PI_RADIANS_ANGLE - deltaTheta);
-      if (CoreUtils::SignOfValue(deltaTheta.value()) > 0) {
-         trk = theta + Units::PI_RADIANS_ANGLE / 2;
-      } else {
-         trk = theta - Units::PI_RADIANS_ANGLE / 2;
-      }
-
-      trk = Convert0to2Pi(trk);
-   } else {
-      throw logic_error("Non straight non turn segment in getPathLengthFromPos");
-   }
-
-   dist = dap + Units::MetersLength(hTraj[nextTrajIx].L);
-
-} // getPathLengthFromPos
-
-vector<AircraftCalculations::mPathDistance> AircraftCalculations::ComputePathDistances(
+vector<AircraftCalculations::PathDistance> AircraftCalculations::ComputePathDistances(
       const Units::Length x,
       const Units::Length y,
+      const std::vector<HorizontalPath>::size_type &starting_index,
       const vector<HorizontalPath> &hTraj) {
 
-   // Computes distances for a position along the horiontal
-   // trajectory.
-   //
-   // x,y:position in meters.
-   // hTraj:horizontal trajectory-containing points in meters.
    // returns distances and cross track errors for all points in a vector
    //         ordered ascending by distance.
 
-   vector<mPathDistance> pdVect;
+   vector<PathDistance> pdVect;
 
-   for (auto i = 0; i < hTraj.size(); i++) {
+   for (auto i = starting_index; i < hTraj.size(); i++) {
 
-      mPathDistance pd;
+      PathDistance pd;
 
-      Units::MetersLength d = sqrt(Units::sqr(x - Units::MetersLength(hTraj[i].x))
-                                   + Units::sqr(y - Units::MetersLength(hTraj[i].y)));
-      pd.mDist = d;
-      pd.mIx = i;
+      Units::MetersLength d = sqrt(Units::sqr(x - Units::MetersLength(hTraj[i].m_x_position_meters))
+                                   + Units::sqr(y - Units::MetersLength(hTraj[i].m_y_position_meters)));
+      pd.m_distance_to_path_node = d;
+      pd.m_horizontal_path_index = i;
 
       if (std::isnan(d.value())) {
          string msg = "undefined distance (NaN) computed for path distance";
@@ -274,11 +87,11 @@ vector<AircraftCalculations::mPathDistance> AircraftCalculations::ComputePathDis
          pdVect.push_back(pd);
       } else {
 
-         vector<mPathDistance>::iterator iter = pdVect.begin();
+         vector<PathDistance>::iterator iter = pdVect.begin();
 
          while (iter < pdVect.end()) {
 
-            if ((*iter).mDist > pd.mDist) {
+            if ((*iter).m_distance_to_path_node > pd.m_distance_to_path_node) {
                break;
             }
 
@@ -294,7 +107,7 @@ vector<AircraftCalculations::mPathDistance> AircraftCalculations::ComputePathDis
 }
 
 
-// coverts angle into a range from 0 to 2PI (0 to 360 degrees)
+// converts angle into a range from 0 to 2PI (0 to 360 degrees)
 Units::UnsignedRadiansAngle AircraftCalculations::Convert0to2Pi(Units::Angle course_in) {
    Units::UnsignedRadiansAngle result = course_in;
    result.normalize();
@@ -302,7 +115,7 @@ Units::UnsignedRadiansAngle AircraftCalculations::Convert0to2Pi(Units::Angle cou
    return result;
 }
 
-// coverts angle into a range from -PI to PI (-180 to 180 degrees)
+// converts angle into a range from -PI to PI (-180 to 180 degrees)
 Units::SignedRadiansAngle AircraftCalculations::ConvertPitoPi(Units::Angle course_in) {
    Units::SignedRadiansAngle result = course_in;
    result.normalize();
@@ -379,7 +192,7 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
    //  x,y: aircraft position in meters.
    //  trajIx: index of trajectory point.
    //  hTraj: horizontal trajectory for aircraft; positions, turn radius
-   //         in meters; course in radians.  Segment type, course, and
+   //         in meters; m_path_course in radians.  Segment type, m_path_course, and
    //         position are used from here.
    //  nextTrajIx: downstream trajectory point (output).
    //  cte: cross track error in meters (output).
@@ -401,7 +214,7 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
    //
    //  Straight Segment:
    //  Straight segments could have a small turn, and still be considered
-   //  straight. A perpendicular to the course segment through the
+   //  straight. A perpendicular to the m_path_course segment through the
    //  position is calculated.  If this perpendicular intersects the
    //  segment, its distance from the segment is returned.  If the position
    //  is after the horizontal trajectory point, a large value for cte is
@@ -424,7 +237,7 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
       return;
    }
 
-   if (hTraj[trajIx].segment == "turn") {
+   if (hTraj[trajIx].m_segment_type == HorizontalPath::SegmentType::TURN) {
       // Compute cross track error for turn.
 
       // Allowed for RF Legs
@@ -435,12 +248,12 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
       //}
 
 
-      double x0 = hTraj[trajIx].turns.x_turn; // turn center
-      double y0 = hTraj[trajIx].turns.y_turn;
-      double x1 = hTraj[trajIx + 1].x;          // start turn
-      double y1 = hTraj[trajIx + 1].y;
-      double x2 = hTraj[trajIx].x;            // stop turn
-      double y2 = hTraj[trajIx].y;
+      double x0 = hTraj[trajIx].m_turn_info.x_position_meters; // turn center
+      double y0 = hTraj[trajIx].m_turn_info.y_position_meters;
+      double x1 = hTraj[trajIx + 1].m_x_position_meters;          // start turn
+      double y1 = hTraj[trajIx + 1].m_y_position_meters;
+      double x2 = hTraj[trajIx].m_x_position_meters;            // stop turn
+      double y2 = hTraj[trajIx].m_y_position_meters;
 
       double dx = Units::MetersLength(x).value();
       double dy = Units::MetersLength(y).value();
@@ -458,24 +271,24 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
                                                              && (crossProdSign1 > 0))) {
          // position is before start turn
          // need to test if not in previous segment, i.e. in the V between two segments (see AAES-360)
-         if (hTraj[trajIx + 1].segment == "turn") {
-            double x3 = hTraj[trajIx + 1].turns.x_turn;
-            double y3 = hTraj[trajIx + 1].turns.y_turn;
+         if (hTraj[trajIx + 1].m_segment_type == HorizontalPath::SegmentType::TURN) {
+            double x3 = hTraj[trajIx + 1].m_turn_info.x_position_meters;
+            double y3 = hTraj[trajIx + 1].m_turn_info.y_position_meters;
             double crossProdSign3 = (y3 - y1) * dx + (x1 - x3) * dy + (x3 * y1 - x1 * y3);
             if (((crossProdSign3 > 0) && (crossProdSign1 < 0)) || ((crossProdSign3 < 0)
                                                                    && (crossProdSign1 >
                                                                        0))) { // not in previous section - so calculate error
                nextTrajIx = trajIx;
                cte = abs(Units::MetersLength(sqrt(pow(x0 - dx, 2) + pow(y0 - dy, 2))) -
-                         Units::MetersLength(hTraj[trajIx].turns.radius));
+                         Units::MetersLength(hTraj[trajIx].m_turn_info.radius));
             } // otherwise return not in segment
          } else { // previous segment is straight
             // Use Pythagorean Theorem
             if (trajIx >= hTraj.size() - 2) {
                return;
             }
-            double x3 = hTraj[trajIx + 2].x;
-            double y3 = hTraj[trajIx + 2].y;
+            double x3 = hTraj[trajIx + 2].m_x_position_meters;
+            double y3 = hTraj[trajIx + 2].m_y_position_meters;
             if (pow(x3 - dx, 2) + pow(y3 - dy, 2) >
                 (pow(x1 - dx, 2) + pow(y1 - dy, 2) + pow(x3 - x1, 2) + pow(y3 - y1, 2))) {
                // not in preceding segment so calculate cte
@@ -500,21 +313,21 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
       }
 
       cte = abs(Units::MetersLength(sqrt(pow(x0 - dx, 2) + pow(y0 - dy, 2))) -
-                Units::MetersLength(hTraj[trajIx].turns.radius));
+                Units::MetersLength(hTraj[trajIx].m_turn_info.radius));
       nextTrajIx = trajIx;
       return;
 
-   } else if (hTraj[trajIx].segment == "straight") {
+   } else if (hTraj[trajIx].m_segment_type == HorizontalPath::SegmentType::STRAIGHT) {
       // test for zero length leg
-      if (fabs(hTraj[trajIx].x - hTraj[trajIx + 1].x) < 0.00001
-          && fabs(hTraj[trajIx].y - hTraj[trajIx + 1].y) < 0.00001) {
+      if (fabs(hTraj[trajIx].m_x_position_meters - hTraj[trajIx + 1].m_x_position_meters) < 0.00001
+          && fabs(hTraj[trajIx].m_y_position_meters - hTraj[trajIx + 1].m_y_position_meters) < 0.00001) {
          return;
       }
 
-      double x0 = hTraj[trajIx + 1].x;                // start of segment
-      double y0 = hTraj[trajIx + 1].y;
-      double x1 = hTraj[trajIx].x;                  // end of segment
-      double y1 = hTraj[trajIx].y;
+      double x0 = hTraj[trajIx + 1].m_x_position_meters;                // start of segment
+      double y0 = hTraj[trajIx + 1].m_y_position_meters;
+      double x1 = hTraj[trajIx].m_x_position_meters;                  // end of segment
+      double y1 = hTraj[trajIx].m_y_position_meters;
       double dx = Units::MetersLength(x).value();   // position
       double dy = Units::MetersLength(y).value();
 
@@ -527,9 +340,9 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
       if (c1 < 0) { // before start of segment
          // See if in preceding segment
          if (trajIx + 2 < hTraj.size()) {
-            if (hTraj[trajIx + 1].segment == "straight") {
-               double x2 = hTraj[trajIx + 2].x;
-               double y2 = hTraj[trajIx + 2].y;
+            if (hTraj[trajIx + 1].m_segment_type == HorizontalPath::SegmentType::STRAIGHT) {
+               double x2 = hTraj[trajIx + 2].m_x_position_meters;
+               double y2 = hTraj[trajIx + 2].m_y_position_meters;
                double ux = x2 - x0;
                double uy = y2 - y0;
                double c3 = ux * wx + uy * wy;
@@ -538,10 +351,10 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
                   return;
                }
             } else { // previous segment is turn}
-               double x3 = hTraj[trajIx].turns.x_turn; // turn center
-               double y3 = hTraj[trajIx].turns.y_turn;
-               double x2 = hTraj[trajIx + 1].x;          // start turn
-               double y2 = hTraj[trajIx + 1].y;
+               double x3 = hTraj[trajIx].m_turn_info.x_position_meters; // turn center
+               double y3 = hTraj[trajIx].m_turn_info.y_position_meters;
+               double x2 = hTraj[trajIx + 1].m_x_position_meters;          // start turn
+               double y2 = hTraj[trajIx + 1].m_y_position_meters;
                double crossProdSign0 = (y3 - y0) * x2 + (x0 - x3) * y2 + (x3 * y0 - x0 * y3);
                if (crossProdSign0 == 0) { // zero length turn
                   return;
@@ -582,7 +395,7 @@ void AircraftCalculations::CrossTrackError(const Units::Length x,
 
    } else {
       // Error
-      throw logic_error("Invalid segment condition found in crossTrackError");
+      throw logic_error("Invalid segment_type condition found in crossTrackError");
    }
 
 } // crossTrackError()
@@ -622,4 +435,122 @@ Units::Area AircraftCalculations::ComputeCrossProduct(const Units::Length &xvert
    return (yvertex - y1) * x2 +
           (x1 - xvertex) * y2 +
           (xvertex * y1 - x1 * yvertex);
+}
+
+bool AircraftCalculations::CalculateDistanceAlongPathFromPosition(const Units::Length position_x,
+                                                                  const Units::Length position_y,
+                                                                  const std::vector<HorizontalPath> &horizontal_trajectory,
+                                                                  const std::vector<HorizontalPath>::size_type starting_trajectory_index,
+                                                                  Units::Length &distance_along_path,
+                                                                  Units::Angle &course,
+                                                                  std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
+
+   // Dummy values
+   distance_along_path = Units::NegInfinity();
+   course = Units::RadiansAngle(99999.99999);
+
+   // Compute Euclidean distances for all horizontal trajectory points
+   // and order in ascending sequence.
+   vector<PathDistance> distances = AircraftCalculations::ComputePathDistances(
+         position_x,
+         position_y,
+         starting_trajectory_index < 1 ? starting_trajectory_index : starting_trajectory_index - 1,
+         horizontal_trajectory);
+
+
+   // Find smallest distance with an acceptable cross track error.
+   int nextTrajIx = -1;
+   static const Units::NauticalMilesLength cte_tolerance(2.5);
+   Units::NauticalMilesLength cte;
+   for (auto i = 0; ((i < distances.size()) && (nextTrajIx == -1)); ++i) {
+
+      int computedNextIx;
+      AircraftCalculations::CrossTrackError(
+            position_x,
+            position_y,
+            distances[i].m_horizontal_path_index,
+            horizontal_trajectory,
+            computedNextIx,
+            cte);
+
+      if (cte <= cte_tolerance) {
+         nextTrajIx = computedNextIx;
+      }
+   }
+
+   resolved_trajectory_index = static_cast<unsigned long>(nextTrajIx);
+
+   if (nextTrajIx == -1) {
+      /*
+       * Developer's: note that this if logic is no longer a FATAL condition, but we
+       * must allow it to throw. Some callers will catch and handle the situation because
+       * it is sometimes normal. See AAES-382, AAES-633
+       */
+      char msg[150];
+      sprintf(msg, "Trajectory point with acceptable cross track error not found %lf nmi", cte.value());
+      throw logic_error(msg);
+   }
+
+
+   // Calculate DTG and course of aircraft.
+   Units::Length dap;
+   Units::RadiansAngle theta;
+   if (horizontal_trajectory[nextTrajIx].m_segment_type == HorizontalPath::SegmentType::STRAIGHT) {
+
+      Units::Length d = sqrt(Units::sqr(position_x - Units::MetersLength(horizontal_trajectory[nextTrajIx].m_x_position_meters)) +
+                             Units::sqr(position_y - Units::MetersLength(horizontal_trajectory[nextTrajIx].m_y_position_meters)));
+
+      //trk = convert0to2Pi( Units::RadiansAngle(horizontal_trajectory[nextTrajIx].course) + Units::PI_RADIANS_ANGLE);
+      course = AircraftCalculations::Convert0to2Pi(
+            Units::RadiansAngle(horizontal_trajectory[nextTrajIx].m_path_course) + Units::PI_RADIANS_ANGLE);
+
+      if (fabs(Units::MetersLength(d).value()) < 1E-5) {
+         dap = Units::MetersLength(0.0);
+      } else {
+         Units::MetersLength dx = Units::MetersLength(horizontal_trajectory[nextTrajIx].m_x_position_meters) - position_x;
+         Units::MetersLength dy = Units::MetersLength(horizontal_trajectory[nextTrajIx].m_y_position_meters) - position_y;
+         theta = Units::RadiansAngle(atan2(dy.value(), dx.value()));
+
+         Units::SignedAngle deltaTheta = ConvertPitoPi(theta - course);
+
+         dap = d * cos(deltaTheta);
+      }
+
+   } else if (horizontal_trajectory[nextTrajIx].m_segment_type == HorizontalPath::SegmentType::TURN) {
+
+      Units::MetersLength dx = position_x - Units::MetersLength(horizontal_trajectory[nextTrajIx].m_turn_info.x_position_meters);
+      Units::MetersLength dy = position_y - Units::MetersLength(horizontal_trajectory[nextTrajIx].m_turn_info.y_position_meters);
+
+      // theta is undefined if dx and dy are both zero
+      // if within 5 meters of the point, consider at the point
+      double lx = (Units::MetersLength(position_x)).value();
+      double ly = (Units::MetersLength(position_y)).value();
+
+      if (pow(lx - (horizontal_trajectory[nextTrajIx]).m_x_position_meters, 2) + pow(ly - (horizontal_trajectory[nextTrajIx]).m_y_position_meters, 2) < 9) {
+         distance_along_path = Units::MetersLength(horizontal_trajectory[nextTrajIx].m_path_length_cumulative_meters);
+         course = AircraftCalculations::Convert0to2Pi(
+               Units::RadiansAngle(horizontal_trajectory[nextTrajIx].m_path_course) + Units::PI_RADIANS_ANGLE);
+         return true;
+      }
+
+      theta = Units::UnsignedRadiansAngle(atan2(dy.value(), dx.value()));
+
+      Units::RadiansAngle deltaTheta =
+            AircraftCalculations::ConvertPitoPi(Units::UnsignedRadiansAngle(horizontal_trajectory[nextTrajIx].m_turn_info.q_start) - theta);
+
+      dap = Units::MetersLength(horizontal_trajectory[nextTrajIx].m_turn_info.radius) * fabs(deltaTheta.value());
+
+      if (CoreUtils::SignOfValue(deltaTheta.value()) > 0) {
+         course = theta + Units::PI_RADIANS_ANGLE / 2;
+      } else {
+         course = theta - Units::PI_RADIANS_ANGLE / 2;
+      }
+
+      course = Convert0to2Pi(course);
+   } else {
+      throw logic_error("Non straight non turn segment_type in CalculateDistanceAlongPathFromPosition");
+   }
+
+   distance_along_path = dap + Units::MetersLength(horizontal_trajectory[nextTrajIx].m_path_length_cumulative_meters);
+   return true;
 }

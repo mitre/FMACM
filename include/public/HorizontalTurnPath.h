@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2018 The MITRE Corporation. All Rights Reserved.
+// Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -30,13 +30,11 @@ public:
 
    bool operator==(const HorizontalTurnPath &that) const;
 
-   double x_turn;
-   double y_turn;
+   double x_position_meters;
+   double y_position_meters;
    Units::UnsignedRadiansAngle q_start;
    Units::UnsignedRadiansAngle q_end;
    Units::MetersLength radius;
-
-   // added for research - not used to determine equality
    Units::UnsignedRadiansAngle bankAngle;
    Units::MetersPerSecondSpeed groundspeed;
 };

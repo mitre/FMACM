@@ -1,0 +1,6 @@
+*.*~
+/aaesim_tester
+/aaesim_test
+*.o
+*.a
+/aaesim_unit_test_results.xml

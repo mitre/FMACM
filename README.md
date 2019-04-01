@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/mitre/FMACM.svg?branch=master)](https://travis-ci.org/mitre/FMACM)
+[![codecov](https://codecov.io/gh/mitre/fmacm/branch/master/graph/badge.svg)](https://codecov.io/gh/mitre/fmacm)
 
 # NOTICE
 This is the copyright work of The MITRE Corporation, and was produced

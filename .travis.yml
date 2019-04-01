@@ -26,7 +26,7 @@ after_script:
  - make run  # run tests
 after_success:
 # Create lcov report
-- lcov --capture --directory . --output-file coverage.info
+- lcov --capture --directory ./build --output-file coverage.info
 - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter system-files
 - lcov --list coverage.info # debug info
 # Uploading report to CodeCov

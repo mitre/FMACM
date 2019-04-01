@@ -5,6 +5,9 @@ os:
  - linux
 compiler:
  - gcc
+addons:
+  apt:
+    packages: lcov
 before_install:
  - git config core.filemode false   # this is needed to keep the next line from causing git to think the project has changed
  - chmod +x ./configure
@@ -21,3 +24,10 @@ after_script:
  - bin/FMACM --buildinfo
  - cd build
  - make run  # run tests
+after_success:
+# Create lcov report
+- lcov --capture --directory . --output-file coverage.info
+- lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter system-files
+- lcov --list coverage.info # debug info
+# Uploading report to CodeCov
+- bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"

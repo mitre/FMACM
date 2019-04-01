@@ -26,5 +26,7 @@ after_script:
  - make run  # run tests
  - lcov --capture --directory . --output-file coverage.info  # Create lcov report
  - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter system-files
+ - lcov --remove coverage.info 'unitsLib/*' --output-file coverage.info # filter unitslib files
+ - lcov --remove coverage.info 'unittest/*' --output-file coverage.info # filter unitslib files
  - lcov --list coverage.info # debug info
  - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"  # Uploading report to CodeCov

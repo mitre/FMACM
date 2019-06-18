@@ -36,9 +36,9 @@ public:
 
    // Since you can't send a vector of Units::XXX over SDDF, these methods will convert to doubles and return a
    // new vector that we can send. This is lab related only.
-   std::vector<double> getWindVelocityEast();
+   const std::vector<double> GetWindVelocityEast() const;
 
-   std::vector<double> getWindVelocityNorth();
+   const std::vector<double> GetWindVelocityNorth() const;
 
    // data member lists for the vertical path.  NOTE that the values are normally in METERS from descent predictors.
    std::vector<double> x;
@@ -50,7 +50,8 @@ public:
    std::vector<double> gs;
    std::vector<double> time;
    std::vector<double> mass;
-   std::vector<Units::MetersPerSecondSpeed> vwe, vwn;
+   std::vector<Units::MetersPerSecondSpeed> wind_velocity_east;
+   std::vector<Units::MetersPerSecondSpeed> wind_velocity_north;
 
 private:
 };

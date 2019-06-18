@@ -22,32 +22,29 @@ log4cplus::Logger AircraftState::logger = log4cplus::Logger::getInstance(LOG4CPL
 
 
 AircraftState::AircraftState()
-      :
-      m_id(-1),
-      m_time(-1),
-      m_x(0),
-      m_y(0),
-      m_z(0),
-      m_xd(0),
-      m_yd(0),
-      m_xdd(0),
-      m_ydd(0),
-      m_zdd(0.0),
-      m_gamma(0.0),
-      m_Vwx(0.0),
-      m_Vwy(0.0),
-      m_Vw_para(0.0),
-      m_Vw_perp(0.0),
-      m_psi(0.0) {
+      : m_id(-1),
+        m_time(-1),
+        m_x(0),
+        m_y(0),
+        m_z(0),
+        m_xd(0),
+        m_yd(0),
+        m_xdd(0),
+        m_ydd(0),
+        m_zdd(0.0),
+        m_gamma(0.0),
+        m_Vwx(0.0),
+        m_Vwy(0.0),
+        m_Vw_para(0.0),
+        m_Vw_perp(0.0),
+        m_psi(0.0) {
    SetZd(0);   // assumed to be in FPS
    m_Vwx_dh = Units::zero();
    m_Vwy_dh = Units::zero();
-   m_distance_to_go = -99999.99999; // meters
+   m_distance_to_go_meters = -99999.99999;
 }
 
-AircraftState::~AircraftState(void) {
-
-}
+AircraftState::~AircraftState() = default;
 
 AircraftState::AircraftState(const AircraftState &in) {
    m_id = in.m_id;
@@ -74,7 +71,7 @@ AircraftState::AircraftState(const AircraftState &in) {
    m_Vwy_dh = in.m_Vwy_dh;
    m_Vwx_dh = in.m_Vwx_dh;
 
-   m_distance_to_go = in.m_distance_to_go;
+   m_distance_to_go_meters = in.m_distance_to_go_meters;
 }
 
 AircraftState &AircraftState::operator=(const AircraftState &in) {
@@ -102,7 +99,7 @@ AircraftState &AircraftState::operator=(const AircraftState &in) {
       m_Vwy_dh = in.m_Vwy_dh;
       m_Vwx_dh = in.m_Vwx_dh;
 
-      m_distance_to_go = in.m_distance_to_go;
+      m_distance_to_go_meters = in.m_distance_to_go_meters;
    }
 
    return *this;
@@ -120,66 +117,26 @@ bool AircraftState::operator==(const AircraftState &in) const {
    same = same && (m_Vwx == in.m_Vwx) && (m_Vwy == in.m_Vwy);
    same = same && (m_Vw_para == in.m_Vw_para) && (m_Vw_perp == in.m_Vw_perp);
    same = same && (m_Vwx_dh == in.m_Vwx_dh) && (m_Vwy_dh == in.m_Vwy_dh);
-   same = same && (m_psi == in.m_psi) && (m_distance_to_go == in.m_distance_to_go);
+   same = same && (m_psi == in.m_psi) && (m_distance_to_go_meters == in.m_distance_to_go_meters);
 
    return same;
 }
 
-const bool AircraftState::IsTurning() const {
-   //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
-
-   double spd = sqrt(pow(m_xd, 2) + pow(m_yd, 2));
-   double turn_rate = (m_xd * m_ydd - m_yd * m_xdd) / spd;
-
-   return ((std::fabs(turn_rate) > 1.5));
-}
-
-// operator < to allow sorting
-
 bool AircraftState::operator<(const AircraftState &in) const {
-   bool result = false; // return value initialized to false
-
-   // check if id is less, or if matching the time is less
    if (m_id < in.m_id || (m_id == in.m_id && m_time < in.m_time)) {
-      result = true; // sets return value to true
+      return true;
    }
 
-   return result;
+   return false;
 }
 
-
-// heading methods
-// get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
-//gwang 2013-10: the function name should be get_ground_track, because xd and yd are ground speeds
-const double AircraftState::GetHeading() const {
-   double result = 0.0;
-
-   result = atan3(m_xd,
-                  m_yd); // takes the atan of x/y instead of y/x to find the angle from North clockwise, the result is in radians
-
-   return result;
-}
-
-// gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-const Units::UnsignedRadiansAngle AircraftState::GetHeadingInRadiansMathematical() const {
-   // gets mathematical 0 degrees counterclockwise position in radians
-
-   double result = 0.0;
-
-   result = atan3(m_yd, m_xd);
-
+const Units::UnsignedRadiansAngle AircraftState::GetHeadingCcwFromEastRadians() const {
+   double result = atan3(m_yd, m_xd);
    return Units::UnsignedRadiansAngle(result);
 }
 
-
-// speed methods
 const Units::Speed AircraftState::GetGroundSpeed() const {
    return Units::FeetPerSecondSpeed(sqrt(pow(m_xd, 2) + pow(m_yd, 2)));
-}
-
-
-void AircraftState::SetPsi(const double psi_in) {
-   m_psi = psi_in;
 }
 
 AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport) {
@@ -197,15 +154,10 @@ AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVRepo
 }
 
 void AircraftState::DumpParms(std::string str) const {
-
-   // Dumps selected AircraftState objects.
-   // To use this, logger properties level must be set to DEBUG.
-   //
-   // str:Header string for output.
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "(Subset) Aircraft state parms for " << str.c_str());
 
    LOG4CPLUS_DEBUG(AircraftState::logger,
-                   std::endl << "time " << m_time << "  id " << m_id << "  distToGo " << m_distance_to_go);
+                   std::endl << "time " << m_time << "  id " << m_id << "  distToGo " << m_distance_to_go_meters);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "position   x " << m_x << "  y " << m_y << "  z " << m_z);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "speed      x " << m_xd << "  y " << m_yd << "  z " << m_zd);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vw_para      " << m_Vw_para << "  Vw_perp " << m_Vw_perp);
@@ -224,7 +176,7 @@ void AircraftState::CsvDataDump(std::string str) const {
                              << m_xdd << "," << m_ydd << "," << m_zdd << "," << m_gamma << ","
                              << m_Vwx << "," << m_Vwy << "," << m_Vw_para << "," << m_Vw_perp << ","
                              << Units::HertzFrequency(m_Vwx_dh) << "," << Units::HertzFrequency(m_Vwy_dh) << ","
-                             << m_psi << "," << m_distance_to_go << "," << std::endl);
+                             << m_psi << "," << m_distance_to_go_meters << "," << std::endl);
 
 }
 
@@ -307,7 +259,7 @@ AircraftState &AircraftState::Extrapolate(const AircraftState &in,
 
 
 void AircraftState::SetZd(double zd) {
-   if (abs(zd) > 200) {
+   if (fabs(zd) > 200) {
       LOG4CPLUS_ERROR(logger, "zd out of range:  " << zd);
    }
    m_zd = zd;

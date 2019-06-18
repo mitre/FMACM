@@ -50,7 +50,8 @@ public:
 
 private:
    static log4cplus::Logger m_logger;
-   Units::UnsignedAngle m_end_course, m_start_course;
+   Units::UnsignedAngle m_end_course;
+   Units::UnsignedAngle m_start_course;
 
 protected:
    bool CalculateForwardCourse(const Units::Length &distance_along_path,

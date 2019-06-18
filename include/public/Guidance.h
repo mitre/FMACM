@@ -28,7 +28,7 @@ public:
 
    void SetValid(bool value);
 
-   bool IsValid();
+   const bool IsValid() const;
 
    PrecalcConstraint m_active_precalc_constraints;
 
@@ -50,6 +50,6 @@ inline void Guidance::SetValid(bool value) {
    m_valid = value;
 }
 
-inline bool Guidance::IsValid() {
+inline const bool Guidance::IsValid() const {
    return m_valid;
 }

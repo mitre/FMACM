@@ -45,7 +45,12 @@ public:
                               WindStack &east_west,
                               WindStack &north_south) override;
 
-   Units::Temperature InterpolateTemperature(
+   Units::KelvinTemperature InterpolateTemperature(
+         Units::Angle latitude_in,
+         Units::Angle longitude_in,
+         Units::Length alt) override;
+
+   Units::Pressure InterpolatePressure(
          Units::Angle latitude_in,
          Units::Angle longitude_in,
          Units::Length alt) override;

@@ -18,54 +18,33 @@
 #include "public/WeatherPrediction.h"
 #include "public/StandardAtmosphere.h"
 
+const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG, MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
+
 WeatherPrediction::WeatherPrediction()
-      :
-      WeatherEstimate(),
-      updateCount(0) {
+      : WeatherEstimate(),
+        m_predicted_wind_option(SINGLE_DTG),
+        m_update_count(0) {
 }
 
 WeatherPrediction::WeatherPrediction(PredictedWindOption option,
                                      std::shared_ptr<Wind> wind,
                                      std::shared_ptr<Atmosphere> atmosphere)
-      :
-      WeatherEstimate(wind, atmosphere),
-      updateCount(0),
-      mPredictedWindOption(option) {
+      : WeatherEstimate(std::move(wind), std::move(atmosphere)),
+        m_predicted_wind_option(option),
+        m_update_count(0) {
+   // inhibit 3-D predicted temperature for now.
+   m_temperature_checked = true;
+   m_temperature_available = false;
 }
 
-PredictedWindOption WeatherPrediction::getPredictedWindOption() const {
-   return mPredictedWindOption;
-}
+WeatherPrediction::~WeatherPrediction() = default;
 
-WeatherPrediction::~WeatherPrediction() {
-}
-
-const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG,
-                                                             MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
-
-std::shared_ptr<Wind> WeatherPrediction::getForecastWind() const {
-   return getWind();
-}
-
-std::shared_ptr<Atmosphere> WeatherPrediction::getForecastAtmosphere() const {
-   return getAtmosphere();
-}
-
-void WeatherPrediction::dump() {
-   for (int iAlt = east_west.get_min_row();
-        iAlt <= east_west.get_max_row(); iAlt++) {
+const void WeatherPrediction::Dump() const {
+   for (int iAlt = east_west.GetMinRow(); iAlt <= east_west.GetMaxRow(); iAlt++) {
       std::cout << iAlt << ":  " <<
-                east_west.getAltitude(iAlt) << " " <<
-                east_west.getSpeed(iAlt) << " " <<
-                north_south.getSpeed(iAlt) << std::endl;
+                east_west.GetAltitude(iAlt) << " " <<
+                east_west.GetSpeed(iAlt) << " " <<
+                north_south.GetSpeed(iAlt) << std::endl;
    }
-}
-
-int WeatherPrediction::incrementUpdateCount() {
-   updateCount++;
-   return updateCount;
-}
-
-int WeatherPrediction::getUpdateCount() const {
-   return updateCount;
+   std::cout << std::endl;
 }

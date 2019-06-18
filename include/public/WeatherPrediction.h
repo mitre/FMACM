@@ -48,21 +48,48 @@ public:
 
    virtual ~WeatherPrediction();
 
-   PredictedWindOption getPredictedWindOption() const;
+   PredictedWindOption GetPredictedWindOption() const;
+
+   void SetPredictedWindOption(PredictedWindOption predicted_wind_option);
 
    // for backward compatibility
-   std::shared_ptr<Wind> getForecastWind() const;
+   std::shared_ptr<Wind> GetForecastWind() const;
 
-   std::shared_ptr<Atmosphere> getForecastAtmosphere() const;
+   std::shared_ptr<Atmosphere> GetForecastAtmosphere() const;
 
-   void dump();
+   const void Dump() const;
 
-   int incrementUpdateCount();
+   int IncrementUpdateCount();
 
-   int getUpdateCount() const;
+   int GetUpdateCount() const;
 
 private:
-   int updateCount;
-   PredictedWindOption mPredictedWindOption;
+   PredictedWindOption m_predicted_wind_option;
+
+   int m_update_count;
 };
 
+inline void WeatherPrediction::SetPredictedWindOption(PredictedWindOption predicted_wind_option) {
+   m_predicted_wind_option = predicted_wind_option;
+}
+
+inline PredictedWindOption WeatherPrediction::GetPredictedWindOption() const {
+   return m_predicted_wind_option;
+}
+
+inline int WeatherPrediction::IncrementUpdateCount() {
+   m_update_count++;
+   return m_update_count;
+}
+
+inline int WeatherPrediction::GetUpdateCount() const {
+   return m_update_count;
+}
+
+inline std::shared_ptr<Wind> WeatherPrediction::GetForecastWind() const {
+   return getWind();
+}
+
+inline std::shared_ptr<Atmosphere> WeatherPrediction::GetForecastAtmosphere() const {
+   return getAtmosphere();
+}

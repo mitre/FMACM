@@ -38,7 +38,7 @@ public:
       SpeedRecord(Units::Time t,
                   Units::Speed s);
 
-      ~SpeedRecord();
+      virtual ~SpeedRecord();
 
       bool operator==(const IMSpeedCommandFile::SpeedRecord &sr) const;
 
@@ -50,34 +50,26 @@ public:
 
    IMSpeedCommandFile();
 
-   ~IMSpeedCommandFile();
+   virtual ~IMSpeedCommandFile();
 
    bool load(DecodedStream *strm);
 
    Guidance Update(Units::Time time);
 
-   std::vector<IMSpeedCommandFile::SpeedRecord> GetData();
-
    void dump();
 
-
 protected:
-
    std::vector<SpeedRecord> m_speed_data;
 
-
 private:
+   void ReadData();
 
    static const int m_hist_len = 20;
    double m_ias_hist[m_hist_len];
-   int m_history_indexer;
-
-   void ReadData();
 
    std::string m_file_path;
-   bool m_apply_pilot_delay;
    Units::SecondsTime m_pilot_delay_seconds;
 
+   bool m_apply_pilot_delay;
    bool m_loaded;
-
 };

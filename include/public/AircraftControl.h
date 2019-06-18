@@ -107,7 +107,7 @@ protected:
    PrecalcWaypoint m_final_waypoint; // the last waypoint on the planned route
 
 private:
-   static log4cplus::Logger logger;
+   static log4cplus::Logger m_logger;
 };
 
 

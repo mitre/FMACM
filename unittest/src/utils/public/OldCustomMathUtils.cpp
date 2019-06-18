@@ -15,22 +15,123 @@
 // Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/* CustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
+/* OldCustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
 
-
+#include "OldCustomMathUtils.h"
+#include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
-#include <stdexcept>
-#include "math/CustomMath.h"
-#include "utility/constants.h"
 
+#include "utility/constants.h"
+//uniform
+
+#define IA 16807
+#define IM 2147483647
+#define AM (1.0/IM)
+#define IQ 127773
+#define IR 2836
+
+using namespace aaesim::test::utils;
 using namespace aaesim::constants;
+
+log4cplus::Logger OldCustomMath::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("OldCustomMath"));
 
 //generate a uniform random number between 0 and 1
 //From "Numerical Recipe"
 
-double atan3(double x,
-             double y) {
+double OldCustomMath::uniform(double &seed) //seed should not be 0.0
+{
+   // TODO: consider replacing this method with the C++11 equivalent
+   double ans;
+   const double seed0 = seed;
+
+   long k = (long) (seed / (double) IQ);
+   seed = (double) IA * (seed - (double) (k * IQ)) - (double) (IR * k);
+   if (seed < 0) {
+      seed += (double) IM;
+   }
+   ans = (double) AM * seed;
+
+   LOG4CPLUS_TRACE(OldCustomMath::logger, seed0 << "," << seed << "," << ans);
+
+   return ans;
+}
+
+
+double OldCustomMath::gauss(double mean,
+                            double sigma,
+                            double &seed) {
+
+   // returns gaussian distributed random variable with mean mean and standard
+   // deviation sigma.
+   // usage example:  x = gauss(0., 32.);
+
+   const double seed0 = seed;
+   double u1, u2, eln, ang, v1;
+
+   u1 = uniform(seed);
+   u2 = uniform(seed);
+   eln = -2.0 * log(u1);     // ALOG(U1)
+   ang = 2.0 * PI * u2;
+   v1 = sqrt(eln) * cos(ang);
+   v1 = mean + sigma * v1;
+
+   LOG4CPLUS_TRACE(OldCustomMath::logger, mean << "," << sigma << "," << seed0 << "," << seed << "," << v1);
+
+   return (v1);
+
+} // gauss
+
+
+double OldCustomMath::trunc_gauss(double mean,
+                                  double sigma,
+                                  double max_std_dev,
+                                  double &seed) {
+
+   // returns truncated gaussian random varialbe with mean mean, standard
+   // deviation sigma, and maximum standard deviation max_std_dev
+   const double seed0 = seed;
+   double val;
+
+   val = mean + sigma * max_std_dev + 1.;
+   //gwang 09/05/2002
+   //while (val > (mean + sigma * max_std_dev) )
+   while (val > (mean + sigma * max_std_dev) || val < (mean - sigma * max_std_dev)) {
+      //end gwang 09/05/2002
+      val = gauss(mean, sigma, seed);
+   }
+
+   LOG4CPLUS_TRACE(OldCustomMath::logger,
+                   mean << "," << sigma << "," << max_std_dev << "," << seed0 << "," << seed << "," << val);
+
+   return (val);
+
+} // trunc_gauss
+
+
+double OldCustomMath::Rayleigh(double mean,
+                               double sigma,
+                               double &seed) {
+
+   // returns Rayleigh distributed random variable with mean mean and standard
+   // deviation sigma.
+   // usage example:  x = Rayleigh(0., 32.);
+   const double seed0 = seed;
+
+   double u1, v1;
+
+   u1 = uniform(seed);
+   v1 = (sqrt(-2.0 * log(u1)) - 1.253) / sqrt(0.429);
+   v1 = mean + sigma * v1;
+
+   LOG4CPLUS_TRACE(OldCustomMath::logger, mean << "," << sigma << "," << seed0 << "," << seed << "," << v1);
+
+   return (v1);
+
+} // Rayleigh
+
+
+double OldCustomMath::atan3(double x,
+                            double y) {
 
    // returns arc tangent as an angle measured from north in the range 0, 2pi
 
@@ -46,50 +147,87 @@ double atan3(double x,
 
 } // atan3
 
-double quantize(double value,
-                double lsb) {
-   // quantizes value to lsb (least significant bit)
-   double r = round(value / lsb);
-   if (r == -0) {
-      r = 0;
+
+double OldCustomMath::laplace(double lambda,
+                              double &seed) {
+
+   // returns laplacian r.v. with parameter lambda.
+   const double seed0 = seed;
+
+   double uni, err;
+
+   uni = uniform(seed);
+   err = -lambda * log(uni);
+   uni = uniform(seed);
+
+   if (uni < 0.5) {
+      err = -err;
    }
-   return (lsb * r);
+
+   LOG4CPLUS_TRACE(OldCustomMath::logger, lambda << "," << seed0 << "," << seed << "," << err);
+
+   return (err);
+
+} // laplace
+
+
+double OldCustomMath::quantize(double value,
+                               double lsb) {
+   // quantizes value to lsb (least significant bit)
+
+   int j;
+
+   if (value > 0.) {
+      j = (int) (0.5 + (double) (value / lsb));
+   } else {
+      j = (int) ((double) (value / lsb) - 0.5);
+   }
+
+   return (lsb * (double) j);
+
 } // quantize
 
 
-Units::Length quantize(Units::Length value,
-                       Units::Length lsb) {
+Units::Length OldCustomMath::quantize(Units::Length value,
+                                      Units::Length lsb) {
    // quantizes value to lsb (least significant bit)
-   double r = round(value / lsb);
-   if (r == -0) {
-      r = 0;
+   double r = value / lsb;
+   if (r > 0.) {
+      r += .5;
+   } else {
+      r -= .5;
    }
-   return (lsb * r);
+
+   return (lsb * (long) r);
 }
 
 
-Units::Speed quantize(Units::Speed value,
-                      Units::Speed lsb) {
+Units::Speed OldCustomMath::quantize(Units::Speed value,
+                                     Units::Speed lsb) {
    // quantizes value to lsb (least significant bit)
-   double r = round(value / lsb);
-   if (r == -0) {
-      r = 0;
+   double r = value / lsb;
+   if (r > 0.) {
+      r += .5;
+   } else {
+      r -= .5;
    }
-   return (lsb * r);
+
+   return (lsb * (long) r);
 }
 
-Units::Time quantize(Units::Time value,
-                     Units::Time lsb) {
-   // quantizes value to lsb (least significant bit)
-   double r = round(value / lsb);
-   if (r == -0) {
-      r = 0;
+
+bool OldCustomMath::hit(double probability,
+                        double &seed) {
+   if (uniform(seed) < probability) {
+      return true;
+   } else {
+      return false;
    }
-   return (lsb * r);
 }
 
-double subtract_headings(double hd1,
-                         double hd2) {
+
+double OldCustomMath::subtract_headings(double hd1,
+                                        double hd2) {
    // subtract heading 2 from heading 1 with the following convention:
    // negative (counterclockwise) deltas are indicated by being greater than pi.
    // positive (clockwise) deltas are less than pi.
@@ -110,8 +248,8 @@ double subtract_headings(double hd1,
 //-------------------------------------------------------------
 // Speed conversion using MACH & altitude as inputs; unit of output is FPS
 //-------------------------------------------------------------
-double MachToTas(double mach,
-                 double altitude) {
+double OldCustomMath::MachToTas(double mach,
+                                double altitude) {
 
    float speedOfSound;
    double tas;
@@ -124,9 +262,8 @@ double MachToTas(double mach,
    } else if (82000 < altitude && altitude <= 99900) {
       speedOfSound = 120 * altitude / 100000. + 475.4;
    } else {
-      char msg[200];
-      sprintf(msg, "Unexpected altitude in MachToTas:  %lf", altitude);
-      throw std::logic_error(msg);
+      printf("Unexpected altitude in MachToTas:  %f\n", altitude);
+      exit(1);
    }
 
    tas = (mach * speedOfSound);
@@ -141,8 +278,8 @@ double MachToTas(double mach,
 
 
 //output CAS in FPS
-double MachToCas_MITRE(double mach,
-                       double alt) {
+double OldCustomMath::MachToCas_MITRE(double mach,
+                                      double alt) {
    double cas, thetas, deltam;
 
    if (alt < 36089.24) {
@@ -150,8 +287,6 @@ double MachToCas_MITRE(double mach,
       deltam = pow(thetas, 5.2558797);
    } else {
       thetas = 0.7519;
-      // It appears the value of e is hardcoded to only 4 significant digits.
-      // FIXME use exp() instead of pow()
       deltam = 0.2233609 * pow(2.718, (-((alt - 36089.24) / 20806.0)));
    }
    cas = 661.4786 * sqrt(5.0 * ((pow((1.0 + deltam *
@@ -166,9 +301,9 @@ double MachToCas_MITRE(double mach,
 
 //inverse = inverse(in)
 /* Gauss-Jordan elimination from Numerical recipe:*/
-bool inverse(DMatrix &in,
-             int n,
-             DMatrix &out) {
+bool OldCustomMath::inverse(DMatrix &in,
+                            int n,
+                            DMatrix &out) {
    int irow = -1, icol = -1;
 
    DVector indxc(1, n);
@@ -271,10 +406,10 @@ bool inverse(DMatrix &in,
 }
 
 
-void matrix_times_vector(DMatrix &matrix_in,
-                         DVector &vector_in,
-                         int n,
-                         DVector &vector_out) {
+void OldCustomMath::matrix_times_vector(DMatrix &matrix_in,
+                                        DVector &vector_in,
+                                        int n,
+                                        DVector &vector_out) {
 
 
    for (int i = 0; i < n; i++) {
@@ -289,7 +424,7 @@ void matrix_times_vector(DMatrix &matrix_in,
 
 
 #ifndef _LINUX_
-int roundToInt(double d)
+int OldCustomMath::roundToInt(double d)
 {
    // Rounds double to int, away from 0 for the midpoint values.
    //
@@ -319,10 +454,10 @@ int roundToInt(double d)
  * matrix [x y z] is post-multiplied by the rotation
  * matrix.
  */
-DMatrix &createRotationMatrix(double l,
-                              double m,
-                              double n,
-                              const Units::Angle theta) {
+DMatrix &OldCustomMath::createRotationMatrix(double l,
+                                             double m,
+                                             double n,
+                                             const Units::Angle theta) {
 
    // basic formula acquired from:
    // https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2

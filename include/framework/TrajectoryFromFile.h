@@ -37,16 +37,25 @@ public:
 
    struct VerticalData
    {
-      std::vector<double> mTimeToGo; // secs
-      std::vector<double> mDistToGo; // meters
-      std::vector<double> mAlt; // meters
-      std::vector<double> mIas; // mps
-      std::vector<double> mDotAlt; // mps
-   } m_vertical_trajectory;
+      VerticalData()
+            : m_time_to_go_sec(),
+              m_distance_to_go_meters(),
+              m_altitude_meters(),
+              m_ias_mps(),
+              m_vertical_speed_mps(),
+              m_ground_speed_mps() {}
+
+      std::vector<double> m_time_to_go_sec;
+      std::vector<double> m_distance_to_go_meters;
+      std::vector<double> m_altitude_meters;
+      std::vector<double> m_ias_mps;
+      std::vector<double> m_vertical_speed_mps;
+      std::vector<double> m_ground_speed_mps;
+   } m_vertical_data;
 
    TrajectoryFromFile();
 
-   ~TrajectoryFromFile();
+   virtual ~TrajectoryFromFile();
 
    bool load(DecodedStream *input);
 
@@ -57,7 +66,6 @@ public:
 
    void CalculateWaypoints(AircraftIntent &intent);
 
-   bool IsLoaded();
 
    const Units::MetersLength GetEstimatedDistanceAlongPath() const;
 
@@ -69,10 +77,9 @@ public:
 
    const std::vector<PrecalcWaypoint> &GetPrecalcWaypoint() const;
 
+   const bool IsLoaded() const;
+
 private:
-
-   // Fields from vertical file in order.
-
    enum VerticalFields
    {
       TIME_TO_GO_SEC = 0,
@@ -80,6 +87,7 @@ private:
       ALTITUDE_M,
       IAS_MPS,
       DOT_ALTITUDE_MPS,
+      GS_MPS,
       NUM_VERTICAL_TRAJ_FIELDS
    };
 
@@ -96,6 +104,8 @@ private:
       ANGLE_AT_TURN_START_R,
       ANGLE_AT_TURN_END_R,
       TURN_RADIUS_M,
+      GROUND_SPEED_MPS,
+      BANK_ANGLE_DEG,
       LAT_D,
       LON_D,
       TURN_CENTER_LAT_D,
@@ -103,28 +113,31 @@ private:
       NUM_HORIZONTAL_TRAJ_FIELDS
    };
 
+   enum TurnDirection {
+      LEFT,
+      RIGHT
+   };
+
+   TurnDirection GetTurnDirection(const Units::Angle course_change);
 
    void ReadVerticalTrajectoryFile();
 
    void ReadHorizontalTrajectoryFile();
 
    std::vector<HorizontalPath> m_horizontal_trajectory;
+   std::vector<PrecalcWaypoint> m_precalc_waypoints;
 
-   double m_mass_percentile;
+   AlongPathDistanceCalculator m_decrementing_distance_calculator;
+   PositionCalculator m_decrementing_position_calculator;
 
-   std::vector<PrecalcWaypoint> m_waypoint;
+   Units::MetersLength estimated_distance_to_go;
 
    std::string m_vertical_trajectory_file;
    std::string m_horizontal_trajectory_file;
 
+   double m_mass_percentile;
+
    bool m_loaded;
-
-   Units::MetersLength estimated_distance_to_go;
-
-   AlongPathDistanceCalculator m_decrementing_distance_calculator;
-
-   PositionCalculator m_decrementing_position_calculator;
-
 };
 
 inline const Units::MetersLength TrajectoryFromFile::GetEstimatedDistanceAlongPath() const {
@@ -144,5 +157,21 @@ inline double TrajectoryFromFile::GetMassPercentile() const {
 }
 
 inline const std::vector<PrecalcWaypoint> &TrajectoryFromFile::GetPrecalcWaypoint() const {
-   return m_waypoint;
+   return m_precalc_waypoints;
+}
+
+inline const bool TrajectoryFromFile::IsLoaded() const {
+   return m_loaded;
+}
+
+inline TrajectoryFromFile::VerticalData TrajectoryFromFile::GetVerticalData() {
+   return m_vertical_data;
+}
+
+inline TrajectoryFromFile::TurnDirection TrajectoryFromFile::GetTurnDirection(const Units::Angle course_change) {
+   if (course_change > Units::SignedRadiansAngle(0.0)) {
+      return LEFT;
+   } else {
+      return RIGHT;
+   }
 }

@@ -23,28 +23,14 @@
 #include "Density.h"
 #include "utility/CustomUnits.h"
 #include "public/WindStack.h"
-
-// atmosphere constants
-// Standard Temperature at Sea Level
-const Units::KelvinTemperature T0(288.15);
-
-// Standard Density at Sea Level
-const Units::KilogramsMeterDensity RHO0(1.225);
-
-// Height of the tropopause
-const Units::MetersLength H_TROP(11000.);
-
-// Temperature of the tropopause
-const Units::KelvinTemperature T_TROP(216.65);
-
-// Density of the tropopause at 11,000 meters (kg/m^3)
-const Units::KilogramsMeterDensity RHO_TROP(0.3639228);
-
-// Pressure of the tropopause at 11,000 meters (Pa)
-const Units::PascalsPressure P_TROP(22632.0);
+#include <log4cplus/logger.h>
 
 // Standard air pressure at sea level
-const Units::PascalsPressure P0(101325.);
+const Units::PascalsPressure P0_ISA(101325.);
+
+// Standard Density at Sea Level
+// BADA_37_USER_MANUAL eq. 3.2-8
+const Units::KilogramsMeterDensity RHO0_ISA(1.225);
 
 // Speed of Sound at sea level
 const Units::MetersPerSecondSpeed A0(340.29);
@@ -61,6 +47,11 @@ const Units::MetersSecondsKelvinGasConstant R(287.05287);
 // Temperature gradient (K/m)
 const Units::KelvinPerMeter K_T(-0.0065);
 
+// exponent for eq. 3.2-15, about 5.25583
+const double P_T_EXPONENT(-Units::ONE_G_ACCELERATION / (K_T * R));
+
+// exponent for eq. 3.2-6, about 4.25583
+const double RHO_T_EXPONENT(P_T_EXPONENT - 1);
 
 class Atmosphere
 {
@@ -75,22 +66,46 @@ public:
                    Units::Density &rho,
                    Units::Pressure &P) const;
 
-   void CalcWindGrad(const Units::Length h_star,
-                     const WindStack &wind,
-                     Units::Speed &w_dir,
-                     Units::Frequency &w_dir_grad) const;
+   void CalculateWindGradientAtAltitude(const Units::Length altitude_in,
+                                        const WindStack &wind_stack,
+                                        Units::Speed &wind_speed,
+                                        Units::Frequency &wind_gradient) const;
+
+   static Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Pressure p, const Units::Density rho);
 
    Units::Speed CAS2TAS(const Units::Speed vcas,
                         const Units::Length alt) const;
 
+   static Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Pressure p, const Units::Density rho);
+
    Units::Speed TAS2CAS(const Units::Speed vtas,
                         const Units::Length alt) const;
 
-   // method to calculate the MACH to IAS transition
-   Units::Length GetMachIASTransition(const Units::Speed &ias,
+   virtual Units::Length GetMachIASTransition(const Units::Speed &ias,
                                       const double &mach) const;
 
-   // method to convert mach to ias-ias in meters per second.
    Units::Speed MachToIAS(const double mach,
                           const Units::Length alt) const;
+
+   static Units::Speed SpeedOfSound(Units::KelvinTemperature temperature);
+   Units::Speed SpeedOfSound(Units::Length altitude) const;
+
+   virtual Units::KelvinTemperature GetSeaLevelTemperature() const = 0;
+   virtual Units::Density GetSeaLevelDensity() const = 0;
+
+   virtual Units::MetersLength GetTropopauseHeight() const = 0;
+   virtual Units::Density GetTropopauseDensity() const = 0;
+   virtual Units::Pressure GetTropopausePressure() const = 0;
+
+   /**
+    * Calculate the Calibrated Airspeed BADA Energy Share Factor
+    */
+   double ESFconstantCAS(const Units::Speed true_airspeed,
+                                const Units::Length altitude_msl,
+                                const Units::KelvinTemperature temperature);
+
+
+
+private:
+   static log4cplus::Logger m_logger;
 };

@@ -10,14 +10,12 @@
 // under that Clause is authorized without the express written
 // permission of The MITRE Corporation. For further information, please
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// McLean, VA  22102-7539, (703) 983-6000.
 //
 // Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
-
-class Wind;    // avoid dependency loop
 
 #include <Length.h>
 #include <Speed.h>
@@ -28,9 +26,9 @@ class Wind;    // avoid dependency loop
 #include "public/AircraftIntent.h"
 #include "public/AircraftState.h"
 
-#define FLIGHT_LEVEL_UPPER_BOUND 45 // FIXME this is not flight level! should be 450 or renamed
-#define FLIGHT_LEVEL_LOWER_BOUND 0
-#define DIST_FROM_FAF_NM 60 // Distance from beginning point to select waypoint from which to winds at descent altitudes.
+class Wind;
+//class WeatherPrediction;
+//enum PredictedWindOption;
 
 // needed for WindSpeedUtils friend class
 namespace aaesim {
@@ -41,8 +39,6 @@ namespace aaesim {
    }
 }
 
-// File wind data formats implemented.
-
 enum WindDataFormat
 {
    /** 46 x 40 x 70 CSV file from MATLAB */
@@ -52,9 +48,6 @@ enum WindDataFormat
    /** Binary file to be detected by CAASD Wind API */
          BINARY
 };
-
-
-// Wind files used in processing.
 
 enum WindFileType
 {
@@ -80,52 +73,40 @@ class Wind
 
    friend class Wind_readRAPTestDataWindFile_Test;
 
-   friend class aaesim::test::utils::WindSpeedUtils;//::populateWindMatrices(const Units::Speed windSpeedEast, const Units::Speed windSpeedNorth);
-
-private:
-   static log4cplus::Logger m_logger;
-   static Units::Length m_blending_altitude_limit;
-   static std::shared_ptr<Wind> m_wind_truth_instance;
-protected:
-   static bool m_use_wind;
+   friend class aaesim::test::utils::WindSpeedUtils;
 
 public:
+   static const Units::NauticalMilesLength SAMPLING_DISTANCE_FROM_END_OF_ROUTE;
+   static const Units::FeetLength MAXIMUM_ALTITUDE_LIMIT;
+   static const Units::FeetLength MINIMUM_ALTITUDE_LIMIT;
 
    Wind();
 
    virtual ~Wind();
-
-   static void Initialize();
 
    /**
     * Updates the forecast wind matrix in the altitude domain. The blending
     * algorithm is provided by Lesley. It will smoothly blend wind velocities from sensed to forecast
     * up to windBlendingAltitudeLimit above and below the current aircraft's altitude
     * and across all lat/longs.
-    *
-    * @param current_state the current navigation state of the aircraft
-    * @param &wind_x the predicted winds in the x
-    * @param &wind_y the predicted winds in the y
-    *
-    * @see Wind::PopulatePredictedWindMatrices
     */
-   static void UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &current_state, WeatherPrediction &weather_prediction);
+   static void UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &current_state,
+                                                            WeatherPrediction &weather_prediction);
 
-   void PopulatePredictedWindMatrices(const AircraftIntent &intent,
-                                      const std::vector<Units::Length> &predicted_wind_altitudes,
+   void PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
+                                      const std::vector<Units::Length> &predicted_wind_altitudes_in,
                                       WeatherPrediction &weather_prediction);
 
-   static void ValidatePredictedOptOne(const AircraftIntent &intent,
-                                       PredictedWindOption &useOpt,
-                                       double &altCoef,
-                                       Units::Length &distConst);
+   static void ValidatePredictedOptOne(const AircraftIntent &aircraft_intent,
+                                       PredictedWindOption &predicted_wind_option,
+                                       double &altitude_coefficient,
+                                       Units::Length &distance_constant);
 
-   void InterpolateTrueWind(const std::shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
-                                   const Units::Length x_in,
-                                   const Units::Length y_in,
-                                   const Units::Length altitude,
-                                   WindStack &east_west,
-                                   WindStack &north_south);
+   void InterpolateTrueWind(const Units::Angle lat_in,
+                            const Units::Angle lon_in,
+                            const Units::Length altitude,
+                            WindStack &east_west,
+                            WindStack &north_south);
 
    void InterpolateForecastWind(const std::shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
                                 const Units::Length x_in,
@@ -134,22 +115,25 @@ public:
                                 Units::Speed &east_west,
                                 Units::Speed &north_south);
 
-   virtual Units::Temperature InterpolateTemperature(const Units::Angle latitude_in,
-                                                     const Units::Angle longitude_in,
-                                                     const Units::Length altitude) = 0;
+   virtual Units::KelvinTemperature InterpolateTemperature(
+         const Units::Angle latitude_in,
+         const Units::Angle longitude_in,
+         const Units::Length altitude) = 0;
 
-   static void CheckWindIntegrity(const WindStack &wind);
-
-   static void CheckWindIntegrity(const int id,
-                                  const std::string &str,
-                                  const WindStack &wind);
+   virtual Units::Pressure InterpolatePressure(
+         const Units::Angle latitude_in,
+         const Units::Angle longitude_in,
+         const Units::Length altitude) = 0;
 
    static WeatherPrediction CreateZeroWindPrediction();
 
    static std::shared_ptr<Wind> GetWindTruthInstance();
-   static void SetWindTruthInstance(std::shared_ptr<Wind> truth_instance);
+
+   static void SetWindTruthInstance(std::shared_ptr<Wind> &truth_instance);
+
    static void SetUseWind(const bool useWind);
-   static bool IsUseWind();
+
+   static bool UseWind();
 
 protected:
 
@@ -171,8 +155,69 @@ protected:
                                       WindStack &east_west,
                                       WindStack &north_south) = 0;
 
+private:
+
+   static bool m_use_wind;
+
+   void CreatePredictionUsingCurrentWindOption(const AircraftIntent &aircraft_intent,
+                                               const Units::FeetLength altitude_at_end_of_route,
+                                               const int maximum_wind_index,
+                                               std::set<Units::Length> &forecast_wind_altitudes,
+                                               int current_wind_index_in,
+                                               WeatherPrediction &weather_prediction);
+
+   void CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_wind_option_in,
+                                              const std::set<Units::Length> &wind_altitudes,
+                                              const AircraftIntent &aircraft_intent,
+                                              const Units::Length altitude_at_beginning_of_route,
+                                              const int current_wind_index_in,
+                                              const int maximum_wind_index,
+                                              WeatherPrediction &weather_prediction);
+
+   void AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
+                                  const AircraftIntent::RouteData &fms,
+                                  const Units::FeetLength altitude_at_beginning_of_route,
+                                  std::set<Units::Length> &forecast_wind_altitudes,
+                                  WeatherPrediction &weather_prediction,
+                                  int &current_wind_index);
+
+   void AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
+                                         const Units::FeetLength x_position,
+                                         const Units::FeetLength y_position,
+                                         const Units::FeetLength altitude_at_end_of_route,
+                                         std::set<Units::Length> &forecast_wind_altitudes,
+                                         WeatherPrediction &weather_prediction,
+                                         int &current_wind_index);
+
+   Units::FeetLength GetAdjustedEndPointAltitude(Units::FeetLength altitude_at_end_of_route);
+
+   Units::FeetLength GetAdjustedStartPointAltitude(Units::FeetLength altitude_at_beginning_of_route);
+
+   std::set<Units::Length> AddRouteAltitudesToList(const std::set<Units::Length> &wind_altitudes_in,
+                                                   Units::FeetLength altitude_at_end_of_route,
+                                                   Units::FeetLength altitude_at_beginning_of_route);
+
+   std::set<Units::Length> ValidateWindAltitudeInputs(const std::vector<Units::Length> &wind_altitudes_in);
+
+   void AddIntermediateWindAltitudes(std::set<Units::Length> &wind_altitudes_ft);
+
+   static log4cplus::Logger m_logger;
+   static Units::Length m_blending_altitude_limit;
+   static std::shared_ptr<Wind> m_wind_truth_instance;
 };
+
+inline void Wind::SetWindTruthInstance(std::shared_ptr<Wind> &truth_instance) {
+   m_wind_truth_instance = truth_instance;
+}
 
 inline std::shared_ptr<Wind> Wind::GetWindTruthInstance() {
    return m_wind_truth_instance;
+}
+
+inline void Wind::SetUseWind(const bool useWind) {
+   m_use_wind = useWind;
+}
+
+inline bool Wind::UseWind() {
+   return m_use_wind;
 }

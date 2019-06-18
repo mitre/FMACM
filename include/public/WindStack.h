@@ -35,31 +35,44 @@ public:
 
    bool operator!=(const WindStack &obj) const;
 
-   //WindStack(const DMatrix &dMatrix);
-   //void load(const DMatrix &dMatrix);
-   UVector<Units::FeetLength> getAltitudeVector();
+   UVector<Units::FeetLength> GetAltitudeVector();
 
-   UVector<Units::KnotsSpeed> getSpeedVector();
+   UVector<Units::KnotsSpeed> GetSpeedVector();
 
-   Units::FeetLength getAltitude(const int index) const;
+   Units::FeetLength GetAltitude(const int index) const;
 
-   Units::KnotsSpeed getSpeed(const int index) const;
+   Units::KnotsSpeed GetSpeed(const int index) const;
 
-   int get_min_row() const;
+   int GetMinRow() const;
 
-   int get_max_row() const;
+   int GetMaxRow() const;
 
-   void setBounds(const int min,
+   void SetBounds(const int min,
                   const int max);
 
-   void set(const int index,
+   void Set(const int index,
             const Units::Length altitude,
             const Units::Speed speed);
 
-   void ascendSort();
+   void AscendSort();
 
 private:
-   UVector<Units::FeetLength> altitude;
-   UVector<Units::KnotsSpeed> speed;
+   UVector<Units::FeetLength> m_altitude;
+   UVector<Units::KnotsSpeed> m_speed;
 };
 
+inline UVector<Units::FeetLength> WindStack::GetAltitudeVector() {
+   return m_altitude;
+}
+
+inline UVector<Units::KnotsSpeed> WindStack::GetSpeedVector() {
+   return m_speed;
+}
+
+inline int WindStack::GetMinRow() const {
+   return m_altitude.get_min();
+}
+
+inline int WindStack::GetMaxRow() const {
+   return m_altitude.get_max();
+}

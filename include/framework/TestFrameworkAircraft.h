@@ -53,14 +53,13 @@ public:
    bool Update(const SimulationTime &time);
 
    void PostLoad(Units::Time simulation_time_step,
-                  int predicted_wind_opt,
-                  bool blend_wind,
-                  WeatherTruth weather_truth);
+                 int predicted_wind_opt,
+                 bool blend_wind,
+                 WeatherTruth weather_truth);
 
    void Initialize(Units::Length adsbReceptionRangeThreshold,
-		   const WeatherTruth &weather);
+                   const WeatherTruth &weather);
 
-   //Other Member Data:
    int m_start_time;
    int m_id;
    AircraftState m_truth_state_vector_old;
@@ -76,20 +75,14 @@ public:
 private:
    void InitTruthStateVectorOld();
 
-   // helper method to calculate the end time of the aircraft
    double CalculateEndTime(AircraftState state_in);
 
-   // Data Members
-   bool m_is_finished;
-
-   // Initialization loadables
    Units::FeetLength m_initial_altitude;
    Units::KnotsSpeed m_initial_ias;
-   double m_initial_mach; // default 0.78
+   double m_initial_mach;
 
    std::shared_ptr<WeatherTruthByTime> m_weather_truth;
 
-   AlongPathDistanceCalculator m_decrementing_distance_calculator;
-
+   static log4cplus::Logger m_logger;
 };
 

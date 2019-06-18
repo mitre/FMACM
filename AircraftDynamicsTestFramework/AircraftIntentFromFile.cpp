@@ -20,23 +20,19 @@
 #include "utility/CsvParser.h"
 #include <fstream>
 
-using namespace std;
+using std::string;
 
-AircraftIntentFromFile::AircraftIntentFromFile() {
-   //
-}
+AircraftIntentFromFile::AircraftIntentFromFile() = default;
 
-AircraftIntentFromFile::~AircraftIntentFromFile() {
-   //
-}
+AircraftIntentFromFile::~AircraftIntentFromFile() = default;
 
 bool AircraftIntentFromFile::load(DecodedStream *input) {
-   set_stream(input); // set the Loadable stream
+   set_stream(input);
 
    std::string csvfile;
    register_var("hfp_csv_file", &csvfile, true);
 
-   bool loaded = complete(); // perform the read operation to get the file name
+   bool loaded = complete();
 
    if (loaded) {
       PopulateWaypointsFromCsv(csvfile);
@@ -45,7 +41,7 @@ bool AircraftIntentFromFile::load(DecodedStream *input) {
    return loaded;
 }
 
-void AircraftIntentFromFile::PopulateWaypointsFromCsv(std::string csvfile) {
+void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string &csvfile) {
 
    std::ifstream file(csvfile.c_str());
    if (!file.is_open()) {
@@ -72,13 +68,12 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(std::string csvfile) {
    for (CsvParser::CsvIterator csvrow(file); csvrow != CsvParser::CsvIterator(); ++csvrow) {
       irow++;
       if (irow < 2) {
-         continue; // go back to the top of the iterator loop
+         continue;
       }
 
-      // Now iterate over each element in the row
       int rowindex = 0;
       for (int rowElement = 0; rowElement < (*csvrow).Size(); ++rowElement) {
-         string s = (*csvrow)[rowElement]; // get the element as a string, it will be cast out of string as appropriate below
+         string s = (*csvrow)[rowElement];
          switch (rowElement) {
             case 0:
                rowindex = LocalStringToInt(s) - 1; // the value extracted from the CSV file is 1-based, we need 0-based
@@ -126,35 +121,33 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(std::string csvfile) {
                lonturncenter[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
                break;
             default:
-               // nothing to do
                break;
          }
       }
-
-   } // for CSVIterator...
+   }
 
    // Now store all information into the public Fms struct in the appropriate order
    int numberofrowsofdata = irow - 1, forwardrow = 0;
    SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
    SetNumberOfWaypoints(numberofrowsofdata);
    for (int reverserow = numberofrowsofdata - 1; reverserow >= 0; --reverserow) {
-      m_fms.LatWp[forwardrow] = latwpt[reverserow];
-      m_fms.LonWp[forwardrow] = lonwpt[reverserow];
-      m_fms.xWp[forwardrow] = xwptlocation[reverserow];
-      m_fms.yWp[forwardrow] = ywptlocation[reverserow];
+      m_fms.m_latitude[forwardrow] = latwpt[reverserow];
+      m_fms.m_longitude[forwardrow] = lonwpt[reverserow];
+      m_fms.m_x[forwardrow] = xwptlocation[reverserow];
+      m_fms.m_y[forwardrow] = ywptlocation[reverserow];
       forwardrow++;
    }
 
 }
 
-double AircraftIntentFromFile::LocalStringToDouble(string s) {
+double AircraftIntentFromFile::LocalStringToDouble(const string &s) {
    std::istringstream iss(s);
    double val = 0;
    iss >> val;
    return val;
 }
 
-int AircraftIntentFromFile::LocalStringToInt(string s) {
+int AircraftIntentFromFile::LocalStringToInt(const string &s) {
    std::istringstream iss(s);
    int val = 0;
    iss >> val;

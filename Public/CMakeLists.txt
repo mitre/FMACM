@@ -33,6 +33,7 @@ set(SOURCE_FILES
         NMObserverEntry.cpp
         PrecalcConstraint.cpp
         PrecalcWaypoint.cpp
+        PilotDelay.cpp
         RunFile.cpp
         Scenario.cpp
         SimulationTime.cpp

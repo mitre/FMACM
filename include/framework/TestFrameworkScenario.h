@@ -38,11 +38,11 @@ public:
 
    void ProcessOneScenario();
 
-   void InitializeIterationState(int number_of_aircraft);
+   void InitializeIterationState(int number_of_aircraft_in);
 
-   void InitializeIterationMetrics(int number_of_aircraft);
+   void InitializeIterationMetrics(int number_of_aircraft_in);
 
-   void ProcessOneIteration(int iter);
+   void ProcessOneIteration();
 
    bool ProcessOneCycle(SimulationTime &time);
 
@@ -55,32 +55,25 @@ public:
 private:
 
    void PostLoadAircraft(Units::Time simulation_time_step,
-         int predicted_wind_opt,
-         bool blend_wind);
+                         int predicted_wind_opt,
+                         bool blend_wind);
 
-   void PostLoad(std::string bada_data_path,
-         std::string wind_truth,
-         std::string wind_forecast,
-         int predicted_wind_opt,
-         bool blend_wind,
-         Units::Time simulation_time_step);
+   void PostLoad(const std::string &bada_data_path,
+                 int predicted_wind_opt,
+                 bool blend_wind,
+                 Units::Time simulation_time_step);
 
    void RecordState(const AircraftState &aircraft_state) const;
 
-   // Default declarations for the loadable parameters
    static const Units::SecondsTime mDefaultSimulationTimeStep;
+   static const int number_of_iterations;
+   static const int number_of_aircraft;
 
-   // scenario initialization
-   static const int number_of_iterations = 1;
-   static const int number_of_aircraft = 1;
    std::vector<TestFrameworkAircraft> m_aircraft_list;
-   double m_seed;
    std::vector<TestFrameworkAircraft> m_master_aircraft_list; // this list is loaded and then copied for each iteration
 
-   //scenario data used for all iterations:
    double m_mean_inter_delivery_time;
    double m_stdev_inter_delivery_time;
-   double m_start_time_seed;
    FILE *m_acstates;
 };
 

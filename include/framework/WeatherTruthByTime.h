@@ -14,20 +14,14 @@
 //
 // Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
-/*
- * WeatherTruthByTime.h
- *
- *  Created on: Jan 8, 2019
- */
-
 #pragma once
 
 #include <memory>
-#include <public/Wind.h>
+#include <public/StandardAtmosphere.h>
 #include <public/WeatherTruth.h>
+#include <public/Wind.h>
 
-class WeatherTruthByTime: public Atmosphere, public WeatherTruth, public Wind {
+class WeatherTruthByTime: public StandardAtmosphere, public WeatherTruth, public Wind {
 public:
    class Weather
    {
@@ -41,12 +35,16 @@ public:
    virtual ~WeatherTruthByTime();
 
    void SetWeatherFromTime(Units::Time time);
-   void LoadEnvFile(std::string env_csv_file);
+   void LoadEnvFile(const std::string &env_csv_file);
    std::shared_ptr<WeatherTruthByTime> GetSharedPtr() const;
 
    virtual Units::KelvinTemperature GetTemperature(const Units::Length h) const;
 
-   virtual Units::Temperature InterpolateTemperature(const Units::Angle latitude_in,
+   virtual Units::KelvinTemperature InterpolateTemperature(const Units::Angle latitude_in,
+                                                     const Units::Angle longitude_in,
+                                                     const Units::Length altitude);
+
+   virtual Units::Pressure InterpolatePressure(const Units::Angle latitude_in,
                                                      const Units::Angle longitude_in,
                                                      const Units::Length altitude);
 
@@ -70,11 +68,9 @@ protected:
                                       WindStack &east_west,
                                       WindStack &north_south);
 
-
 private:
    std::shared_ptr<WeatherTruthByTime> m_shared_ptr;
    std::map<Units::Time, Weather *> m_weather_by_time;
    Weather *m_weather;
-
 };
 

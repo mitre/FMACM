@@ -17,30 +17,22 @@
 
 #pragma once
 
-#include "public/AircraftIntent.h"
+#include <public/HorizontalPath.h>
+#include <vector>
 
-class AircraftIntentFromFile : public AircraftIntent
-{
-public:
-   AircraftIntentFromFile();
+namespace aaesim {
+   namespace test {
+      namespace utils {
+         enum Quadrant {
+            FIRST, SECOND, THIRD, FOURTH
+         };
 
-   virtual ~AircraftIntentFromFile();
+         class PublicUtils
+         {
 
-   // override method inherited from parent as we don't want any of that in this implementation
-   bool load(DecodedStream *input);
-
-   // override method inherited from parent as we don't want nay of the base class implementation
-   void update_xy_from_latlon();
-
-private:
-
-   /**
-    * Implementation that takes the data from CSV and populates the parent's waypoint data sets.
-    */
-   void PopulateWaypointsFromCsv(const std::string &csvfile);
-
-   double LocalStringToDouble(const std::string &s);
-
-   int LocalStringToInt(const std::string &s);
-};
-
+         public:
+            static std::vector<HorizontalPath> CreateStraightHorizontalPath(Quadrant quadrant);
+         };
+      }
+   }
+}

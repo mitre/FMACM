@@ -17,18 +17,32 @@
 
 #include "public/WeatherEstimate.h"
 #include "public/StandardAtmosphere.h"
+#include "public/Wind.h"
+
+log4cplus::Logger WeatherEstimate::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherEstimate"));
 
 WeatherEstimate::WeatherEstimate()
-      :
-      m_atmosphere(std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0)))) {
+      : east_west(),
+        north_south(),
+        m_wind(nullptr),
+        m_atmosphere(std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0)))),
+        m_temperature_checked(true),
+        m_temperature_available(false) {
 }
 
-WeatherEstimate::WeatherEstimate(
-      std::shared_ptr<Wind> wind,
-      std::shared_ptr<Atmosphere> atmosphere)
-      :
-      m_wind(wind),
-      m_atmosphere(atmosphere) {
+WeatherEstimate::WeatherEstimate(std::shared_ptr<Wind> wind,
+                                 std::shared_ptr<Atmosphere> atmosphere)
+      : east_west(),
+        north_south(),
+        m_wind(wind),
+        m_atmosphere(atmosphere),
+        m_temperature_checked(false),
+        m_temperature_available(false) {
+
+   if (!Wind::UseWind()) {
+      m_temperature_checked = true;
+      m_temperature_available = false;
+   }
 }
 
 std::shared_ptr<Wind> WeatherEstimate::getWind() const {
@@ -40,4 +54,148 @@ std::shared_ptr<Atmosphere> WeatherEstimate::getAtmosphere() const {
 }
 
 WeatherEstimate::~WeatherEstimate() {
+}
+
+void WeatherEstimate::LoadConditionsAt(const Units::Angle latitude,
+      const Units::Angle longitude, const Units::Length altitude) {
+
+   SetLocation(latitude, longitude, altitude);
+   m_wind->InterpolateTrueWind(latitude, longitude, altitude, east_west, north_south);
+
+   if (IsTemperatureAvailable(latitude, longitude, altitude)) {
+      m_temperature = m_wind->InterpolateTemperature(latitude, longitude, altitude);
+      m_pressure = m_wind->InterpolatePressure(latitude, longitude, altitude);
+      m_density = m_pressure / (m_temperature * R);
+   }
+   else {
+      m_temperature = m_atmosphere->GetTemperature(altitude);
+      m_atmosphere->AirDensity(altitude, m_density, m_pressure);
+   }
+}
+
+Units::Density WeatherEstimate::GetDensity() const {
+   return m_density;
+}
+
+Units::Pressure WeatherEstimate::GetPressure() const {
+   return m_pressure;
+}
+
+Units::KelvinTemperature WeatherEstimate::GetTemperature() const {
+   return m_temperature;
+}
+
+
+
+Units::Speed WeatherEstimate::MachToTAS(const double mach, const Units::Length altitude) const {
+
+   Units::MetersPerSecondSpeed speed_of_sound;
+
+   if (m_temperature_available) {
+      // assume conditions have been loaded
+      speed_of_sound = m_atmosphere->SpeedOfSound(m_temperature);
+   }
+   else {
+      speed_of_sound = m_atmosphere->SpeedOfSound(altitude);
+   }
+
+   Units::Speed true_airspeed = mach * speed_of_sound;
+   return true_airspeed;
+}
+
+Units::Speed WeatherEstimate::MachToCAS(const double mach, const Units::Length altitude) const {
+
+   Units::Speed true_airspeed = MachToTAS(mach, altitude);
+   Units::Speed calibrated_airspeed = TAS2CAS(true_airspeed, altitude);
+
+   return calibrated_airspeed;
+}
+
+double WeatherEstimate::ESFconstantCAS(const Units::Speed true_airspeed,
+      const Units::Length altitude) const {
+
+   Units::KelvinTemperature temperature;
+   if (!m_temperature_available) {
+      /* assume LoadConditionsAt has been called with the current location to set m_temperature */
+      temperature = m_temperature;
+   }
+   else {
+      temperature = m_atmosphere->GetTemperature(altitude);
+   }
+
+   double esf = m_atmosphere->ESFconstantCAS(true_airspeed, altitude, temperature);
+   return esf;
+}
+
+bool WeatherEstimate::IsTemperatureAvailable(const Units::Angle latitude,
+      const Units::Angle longitude, const Units::Length altitude) const {
+
+   if (!m_temperature_checked) {
+      /*
+       * This check changes values of boolean fields, but we consider it
+       * a lazy init and therefore const.  Results may depend on the
+       * coordinates used the first time through.
+       */
+
+      Units::KelvinTemperature t = m_wind->InterpolateTemperature(latitude, longitude, altitude);
+      m_temperature_available = (t.value() >= 0);
+      m_temperature_checked = true;
+      if (m_temperature_available) {
+         LOG4CPLUS_INFO(m_logger, "Temperature is available from Wind object.");
+      }
+      else {
+         LOG4CPLUS_WARN(m_logger, "Temperature is unavailable from wind object, using Atmosphere");
+      }
+   }
+
+   return m_temperature_available;
+}
+
+Units::Speed WeatherEstimate::TAS2CAS(const Units::Speed true_airspeed,
+      const Units::Length altitude) const {
+
+   Units::Speed calibrated_airspeed;
+
+   if (m_temperature_available) {
+      // Assume current conditions have been loaded
+      calibrated_airspeed = m_atmosphere->TAS2CAS(true_airspeed, m_pressure, m_density);
+   }
+   else {
+      calibrated_airspeed = m_atmosphere->TAS2CAS(true_airspeed, altitude);
+   }
+
+   return calibrated_airspeed;
+}
+
+double WeatherEstimate::TAS2Mach(const Units::Speed true_airspeed,
+      const Units::Length altitude) const {
+
+   Units::MetersPerSecondSpeed speed_of_sound;
+
+   if (m_temperature_available) {
+      // Assume correct conditions have been loaded
+      speed_of_sound = m_atmosphere->SpeedOfSound(m_temperature);
+   }
+   else {
+      speed_of_sound = m_atmosphere->SpeedOfSound(altitude);
+   }
+
+   double mach = true_airspeed / speed_of_sound;
+   return mach;
+}
+
+Units::Speed WeatherEstimate::CAS2TAS(const Units::Speed calibrated_airspeed,
+      const Units::Length altitude) const {
+
+   Units::Speed true_airspeed;
+
+   if (m_temperature_available) {
+      // assume conditions have been loaded
+      true_airspeed = m_atmosphere->CAS2TAS(calibrated_airspeed, m_pressure, m_density);
+   }
+   else {
+      true_airspeed = m_atmosphere->CAS2TAS(calibrated_airspeed, altitude);
+   }
+
+   return true_airspeed;
 }

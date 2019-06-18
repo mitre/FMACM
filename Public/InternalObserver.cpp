@@ -18,6 +18,7 @@
 #include "public/InternalObserver.h"
 #include "public/Environment.h"
 #include "public/StereographicProjection.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -183,7 +184,7 @@ string InternalObserver::stateModelString(AircraftState asv,
    strm << asv.m_Vwy << ","; // true wind Vwy in MPS
    strm << asv.m_Vw_para << ","; // true wind Vw_para in MPS
    strm << asv.m_Vw_perp << ","; // true wind Vw_perp in MPS
-   strm << asv.m_distance_to_go << ","; // output distance to go in meters
+   strm << asv.m_distance_to_go_meters << ","; // output distance to go in meters
    strm << flapsConfig << ","; // configuration for flaps (mainly debug)
    strm << speed_brake << ",";
    strm << ias;
@@ -294,10 +295,10 @@ void InternalObserver::process_IM_command() {
          out << im_commands[loop].predictedDistance << ",";
          out << im_commands[loop].state_altitude << ",";
          out << im_commands[loop].state_TAS << ",";
-         out << im_commands[loop].state_groundspeed << ",";
-         out << im_commands[loop].IAS_command << ",";
-         out << im_commands[loop].unmodified_IAS << ",";
-         out << im_commands[loop].TAS_command << endl;
+         out << std::setprecision(15) << im_commands[loop].state_groundspeed << ",";
+         out << std::setprecision(15) << im_commands[loop].IAS_command << ",";
+         out << std::setprecision(15) << im_commands[loop].unmodified_IAS << ",";
+         out << std::setprecision(15) << im_commands[loop].TAS_command << endl;
       }
 
       out.close();
@@ -916,7 +917,7 @@ void InternalObserver::addPredictedWind(int id,
 
    // Add header.
    if (predWinds.size() == 0) {
-      predWinds.push_back(predWindsHeading(predWindX.get_max_row()));
+      predWinds.push_back(predWindsHeading(predWindX.GetMaxRow()));
    }
 
    // Add altitudes, x speed, y speed.
@@ -980,13 +981,13 @@ string InternalObserver::predWindsData(int id,
 
    // Data line-all in meters, meters/second.
 
-   for (int i = 1; i <= mat.get_max_row(); i++) {
+   for (int i = 1; i <= mat.GetMaxRow(); i++) {
       switch (col) {
          case 1:
-            sprintf(txt, ",%lf", mat.getAltitude(i).value());
+            sprintf(txt, ",%lf", mat.GetAltitude(i).value());
             break;
          case 2:
-            sprintf(txt, ",%lf", mat.getSpeed(i).value());
+            sprintf(txt, ",%lf", mat.GetSpeed(i).value());
 
       }
       str += txt;
@@ -1099,14 +1100,14 @@ void InternalObserver::dumpOwnKinTraj(int id,
 
    // Check iteration
 
-   if (mOwnKinVertPathObs->getIter() != scenario_iter) {
-      mOwnKinVertPathObs->setIter(scenario_iter);
+   if (mOwnKinVertPathObs->GetIterationNumber() != scenario_iter) {
+      mOwnKinVertPathObs->SetIterationNumber(scenario_iter);
    }
 
 
    // Write trajectory
 
-   mOwnKinVertPathObs->addTrajectory(id, fullTraj);
+   mOwnKinVertPathObs->AddTrajectory(id, fullTraj);
 
 }
 
@@ -1130,14 +1131,14 @@ void InternalObserver::dumpTargetKinTraj(int id,
 
    // Check iteration
 
-   if (mTargKinVertPathObs->getIter() != scenario_iter) {
-      mTargKinVertPathObs->setIter(scenario_iter);
+   if (mTargKinVertPathObs->GetIterationNumber() != scenario_iter) {
+      mTargKinVertPathObs->SetIterationNumber(scenario_iter);
    }
 
 
    // Write trajectory
 
-   mTargKinVertPathObs->addTrajectory(id, fullTraj);
+   mTargKinVertPathObs->AddTrajectory(id, fullTraj);
 
 }
 

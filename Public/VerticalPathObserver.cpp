@@ -22,123 +22,71 @@
 using namespace std;
 using namespace aaesim::constants;
 
-VerticalPathObserver::VerticalPathObserver(void)
-      : scenName(""), fileName(""), header("") {
-
-   // Default constructor.  Included for completeness.
-   // Class not setup to use this and write trajectories.
-
-
-   iter = -1;
-   isTargetData = false;
-
+VerticalPathObserver::VerticalPathObserver()
+      : m_scenario_name(), m_file_name(), m_column_header() {
+   m_iteration = -1;
+   m_is_target_aircraft_data = false;
 }
 
 
-VerticalPathObserver::VerticalPathObserver(string inScenName,
-                                           string inFileName,
-                                           bool inIsTargetData)
-      :
-      scenName(inScenName), fileName(inFileName) {
+VerticalPathObserver::VerticalPathObserver(const string &scenario_name,
+                                           const string &file_name,
+                                           bool is_target_aircraft_data)
+      :m_scenario_name(scenario_name),
+       m_file_name(file_name) {
 
-   // Constructor to initialize class.  Opens file using
-   // full file name made from scenario name and file name
-   // and writes header.
-   //
-   // scenName:Input scenario name.
-   // fileName:Input file name.
-   // isTargetData:Determines whether file is for target aircraft or not.
-   //              true-file is for target aircraft.
-   //              false-file is not for target aircraft.
 
-   iter = -1;
-   isTargetData = inIsTargetData;
+   m_iteration = -1;
+   m_is_target_aircraft_data = is_target_aircraft_data;
 
-   header = getHeader();
+   m_column_header = GetHeader();
 
-   initialize();
-
+   Initialize();
 }
 
-VerticalPathObserver::~VerticalPathObserver() {
+VerticalPathObserver::~VerticalPathObserver() = default;
+
+void VerticalPathObserver::Initialize() {
+   string fullFileName = CreateFullFileName(m_scenario_name, m_file_name);
+
+   out_stream.open(fullFileName.c_str());
+
+   if (out_stream.is_open()) {
+      out_stream << m_column_header << endl;
+   } else {
+      cout << "CANNOT OPEN TRAJECTORY FILE " << fullFileName << endl
+           << "TRAJECTORY DATA WILL NOT BE WRITTEN" << endl << endl;
+   }
 }
 
-void VerticalPathObserver::addTrajectory(int id,
-                                         const VerticalPath &fullTraj) {
-
-   // Adds (writes) input trajectory to the output file.
-   //
-   // id:aircraft id.
-   // fullTraj:full trajectory.
-
-   if (strm.is_open()) {
-      for (unsigned int i = 0; i < fullTraj.x.size(); i++) {
-         strm << iter << ",";
-         strm << id << ",";
-         strm << fullTraj.time[i] << ",";
-         strm << fullTraj.x[i] / FEET_TO_METERS << ",";
-         strm << fullTraj.h[i] / FEET_TO_METERS << ",";
-         strm << fullTraj.v[i] / KNOTS_TO_METERS_PER_SECOND << ",";
-         strm << fullTraj.h_dot[i] << ",";
-         strm << fullTraj.v_dot[i] << ",";
-         strm << fullTraj.theta[i] << ",";
-         strm << fullTraj.gs[i] / KNOTS_TO_METERS_PER_SECOND << ",";
-         strm << fullTraj.mass[i] << endl;
+void VerticalPathObserver::AddTrajectory(int id,
+                                         const VerticalPath &vertical_path) {
+   if (out_stream.is_open()) {
+      for (unsigned int i = 0; i < vertical_path.x.size(); i++) {
+         out_stream << m_iteration << ",";
+         out_stream << id << ",";
+         out_stream << vertical_path.time[i] << ",";
+         out_stream << vertical_path.x[i] / FEET_TO_METERS << ",";
+         out_stream << vertical_path.h[i] / FEET_TO_METERS << ",";
+         out_stream << vertical_path.v[i] / KNOTS_TO_METERS_PER_SECOND << ",";
+         out_stream << vertical_path.h_dot[i] << ",";
+         out_stream << vertical_path.v_dot[i] << ",";
+         out_stream << vertical_path.theta[i] << ",";
+         out_stream << Units::KnotsSpeed(Units::MetersPerSecondSpeed(vertical_path.gs[i])).value() << ",";
+         out_stream << vertical_path.mass[i] << endl;
       }
    }
-
 }
 
-
-void VerticalPathObserver::setIter(int iterIn) {
-
-   // Sets iteration.
-   //
-   // iterIn:input iteration.
-
-   iter = iterIn;
-
+string VerticalPathObserver::CreateFullFileName(const string &scenario_name,
+                                                const string &file_name) {
+   return scenario_name + "_" + file_name + ".csv";
 }
 
-
-int VerticalPathObserver::getIter(void) {
-
-   // Gets iteration.
-   //
-   // returns iteration.
-
-   return iter;
-
-}
-
-
-string VerticalPathObserver::createFullFileName(string scenName,
-                                                string fileName) {
-
-   // Builds full file name from scenario name and file name.
-   //
-   // scenName:scenario name.
-   // fileName:file name.
-   //
-   // returns full file name.
-
-   string fullName = scenName + "_" + fileName + ".csv";
-
-   return fullName;
-
-}
-
-
-string VerticalPathObserver::getHeader(void) {
-
-   // Gets header based on whether file is for target aircraft
-   // or not.
-   //
-   // returns file header.
-
+string VerticalPathObserver::GetHeader() {
    string hdr = "Iteration,";
 
-   if (isTargetData) {
+   if (m_is_target_aircraft_data) {
       hdr += "target AC_ID,";
    } else {
       hdr += "AC_ID,";
@@ -147,42 +95,10 @@ string VerticalPathObserver::getHeader(void) {
    hdr += "Time,Distance(feet),Altitude(Feet),IAS_Speed(Knots),Altitude_Change,Velocity_Change,Theta,GroundSpeed(Knots),Mass";
 
    return hdr;
-
 }
 
-
-void VerticalPathObserver::initialize(void) {
-   // Initialization method.
-
-
-   // Open file
-
-   string fullFileName = createFullFileName(scenName, fileName);
-
-   strm.open(fullFileName.c_str());
-
-
-   if (strm.is_open()) {
-
-      // Write file header
-
-      strm << header << endl;
-
-   } else {
-
-      // Error message
-
-      cout << "CANNOT OPEN TRAJECTORY FILE " << fullFileName << endl
-           << "TRAJECTORY DATA WILL NOT BE WRITTEN" << endl << endl;
-
+void VerticalPathObserver::WriteData() {
+   if (out_stream.is_open()) {
+      out_stream.close();
    }
-
-}
-
-void VerticalPathObserver::writeData() {
-   // Destructor.  Closes file.
-   if (strm.is_open()) {
-      strm.close();
-   }
-
 }

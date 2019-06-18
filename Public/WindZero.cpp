@@ -51,19 +51,27 @@ void WindZero::InterpolateWindMatrix(Units::Angle lat_in,
                                      WindStack &east_west,
                                      WindStack &north_south) {
 
-   for (int i = east_west.get_min_row(); i <= east_west.get_max_row(); i++) {
-      east_west.set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+   for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
+      east_west.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
    }
 
-   for (int i = north_south.get_min_row(); i <= north_south.get_max_row(); i++) {
-      north_south.set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+   for (int i = north_south.GetMinRow(); i <= north_south.GetMaxRow(); i++) {
+      north_south.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
    }
 }
 
-Units::Temperature WindZero::InterpolateTemperature(Units::Angle latitude_in,
+Units::KelvinTemperature WindZero::InterpolateTemperature(Units::Angle latitude_in,
                                                     Units::Angle longitude_in,
                                                     Units::Length alt) {
 
    // use the standard atmosphere, ignoring lat/lon
    return m_standard_atmosphere.GetTemperature(alt);
+}
+
+Units::Pressure WindZero::InterpolatePressure(Units::Angle latitude_in,
+      Units::Angle longitude_in, Units::Length alt) {
+   Units::Pressure pressure;
+   Units::Density density;
+   m_standard_atmosphere.AirDensity(alt, density, pressure);
+   return pressure;
 }

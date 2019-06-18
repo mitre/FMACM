@@ -12,8 +12,8 @@ include(non_public.cmake OPTIONAL)
 
 SET(TEST_SUPPORT_SOURCE
         ${NONPUBLIC_TEST_SUPPORT_SOURCE}
-        src/utils/OldCustomMathUtils.cpp
-        src/utils/PublicUtils.cpp
+        src/utils/public/OldCustomMathUtils.cpp
+        src/utils/public/PublicUtils.cpp
 		)
 
 

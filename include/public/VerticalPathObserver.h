@@ -21,65 +21,55 @@
 #include <fstream>
 #include <string>
 
-// Trajectory output class.  Used to write full trajectory flight data
-// into a .csv file.  Output is the trajectory data for all the flights
-// over all the iterations for a type of trajectory.  Examples of types
-// of trajectories are the precalculated trajectories created at the
-// beginning of the run, kinematic trajectories for own aircraft, or
-// kinematic trajectories for target aircraft.
-
+// Used to write trajectory data for all the flights over all the iterations for a type of trajectory. Examples of types
+// of trajectories are the precalculated trajectories created at the beginning of the run, kinematic trajectories for
+// own aircraft, or kinematic trajectories for target aircraft.
 
 class VerticalPathObserver
 {
 
 public:
-   // Basic constructor.  Do not used; included for completeness only.
-   VerticalPathObserver(void);
+   VerticalPathObserver();
 
-   // Setup constructor.
-   VerticalPathObserver(std::string inScenName,
-                        std::string inFileName,
-                        bool inIsTargetData);
+   VerticalPathObserver(const std::string &scenario_name,
+                        const std::string &file_name,
+                        bool is_target_aircraft_data);
 
    virtual ~VerticalPathObserver();
 
-   // Adds a new trajectory to file.
-   void addTrajectory(int id,
-                      const VerticalPath &fullTraj);
+   void AddTrajectory(int id,
+                      const VerticalPath &vertical_path);
 
-   // Sets iteration.
-   void setIter(int iterIn);
+   void SetIterationNumber(int iteration_number);
 
-   // Gets iteration.
-   int getIter(void);
+   int GetIterationNumber();
 
-   void writeData();
-
+   void WriteData();
 
 protected:
+   void Initialize();
 
-   // Initializes class.
-   void initialize(void);
+   std::string m_scenario_name;
+   std::string m_file_name;
+   std::string m_column_header;
 
-   // Makes full file name from scenario name and file name.
-   std::string createFullFileName(std::string scenName,
-                                  std::string fileName);
-
-   std::string scenName; // Name of scenario being run.
-   std::string fileName; // Individual file name.
-   std::string header; // File line header.
-
-   std::ofstream strm; // Output stream of file.
-
+   std::ofstream out_stream;
 
 private:
+   std::string CreateFullFileName(const std::string &scenario_name,
+                                  const std::string &file_name);
 
+   std::string GetHeader();
 
-   // Gets header.
-   virtual std::string getHeader(void);
+   int m_iteration;
 
-   int iter; // Current iteration.
-
-   bool isTargetData; // Determines whether data is for target or own ship.
-
+   bool m_is_target_aircraft_data;
 };
+
+inline void VerticalPathObserver::SetIterationNumber(int iteration_number) {
+   m_iteration = iteration_number;
+}
+
+inline int VerticalPathObserver::GetIterationNumber() {
+   return m_iteration;
+}

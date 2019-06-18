@@ -20,7 +20,7 @@
 #include "public/Environment.h"
 #include "public/InternalObserver.h"
 
-log4cplus::Logger AircraftControl::logger = log4cplus::Logger::getInstance("AircraftControl");
+log4cplus::Logger AircraftControl::m_logger = log4cplus::Logger::getInstance("AircraftControl");
 
 AircraftControl::AircraftControl()
       : m_speed_brake_gain(0.0),
@@ -97,6 +97,7 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
 
    drag = 1. / 2. * rho * cD * Units::sqr(eqmState.true_airspeed) * m_wing_area;
    lift = 1. / 2. * rho * cL * Units::sqr(eqmState.true_airspeed) * m_wing_area;
+
 }
 
 /**
@@ -108,8 +109,8 @@ void AircraftControl::estimateKineticForces(const EquationsOfMotionState &eqmSta
 void AircraftControl::calculateSensedWind(const WeatherTruth &wind,
                                           const Units::MetersLength &altitude) {
    // Get Winds and Wind Gradients at altitude
-   wind.getAtmosphere()->CalcWindGrad(altitude, wind.east_west, m_Vwx, m_dVwx_dh);
-   wind.getAtmosphere()->CalcWindGrad(altitude, wind.north_south, m_Vwy, m_dVwy_dh);
+   wind.getAtmosphere()->CalculateWindGradientAtAltitude(altitude, wind.east_west, m_Vwx, m_dVwx_dh);
+   wind.getAtmosphere()->CalculateWindGradientAtAltitude(altitude, wind.north_south, m_Vwy, m_dVwy_dh);
 
 }
 

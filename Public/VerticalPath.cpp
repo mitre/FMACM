@@ -39,8 +39,8 @@ void VerticalPath::append(const VerticalPath &in) {
       gs.push_back(in.gs[index]);
       time.push_back(in.time[index]);
       mass.push_back(in.mass[index]);
-      vwe.push_back(in.vwe[index]);
-      vwn.push_back(in.vwn[index]);
+      wind_velocity_east.push_back(in.wind_velocity_east[index]);
+      wind_velocity_north.push_back(in.wind_velocity_north[index]);
    }
 }
 
@@ -61,8 +61,8 @@ bool VerticalPath::operator==(const VerticalPath &obj) const {
    match = match && (this->gs.size() == obj.gs.size());
    match = match && (this->time.size() == obj.time.size());
    match = match && (this->mass.size() == obj.mass.size());
-   match = match && (this->vwe.size() == obj.vwe.size());
-   match = match && (this->vwn.size() == obj.vwn.size());
+   match = match && (this->wind_velocity_east.size() == obj.wind_velocity_east.size());
+   match = match && (this->wind_velocity_north.size() == obj.wind_velocity_north.size());
 
 
    for (auto ix = 0; match && (ix < x.size()); ix++) {
@@ -109,30 +109,30 @@ bool VerticalPath::operator==(const VerticalPath &obj) const {
       match = match && (this->mass[ix] == obj.mass[ix]);
    }
 
-   for (auto ix = 0; match && (ix < vwe.size()); ix++) {
-      match = match && (this->vwe[ix] == obj.vwe[ix]);
+   for (auto ix = 0; match && (ix < wind_velocity_east.size()); ix++) {
+      match = match && (this->wind_velocity_east[ix] == obj.wind_velocity_east[ix]);
    }
 
-   for (auto ix = 0; match && (ix < vwn.size()); ix++) {
-      match = match && (this->vwn[ix] == obj.vwn[ix]);
+   for (auto ix = 0; match && (ix < wind_velocity_north.size()); ix++) {
+      match = match && (this->wind_velocity_north[ix] == obj.wind_velocity_north[ix]);
    }
 
    return match;
 
 }
 
-std::vector<double> VerticalPath::getWindVelocityEast() {
+const std::vector<double> VerticalPath::GetWindVelocityEast() const {
    std::vector<double> vwe_mps_vector;
-   for (auto i = vwe.begin(); i != vwe.end(); ++i) {
+   for (auto i = wind_velocity_east.begin(); i != wind_velocity_east.end(); ++i) {
       vwe_mps_vector.push_back(Units::MetersPerSecondSpeed(*i).value());
    }
 
    return vwe_mps_vector;
 }
 
-std::vector<double> VerticalPath::getWindVelocityNorth() {
+const std::vector<double> VerticalPath::GetWindVelocityNorth() const {
    std::vector<double> vwn_mps_vector;
-   for (auto i = vwe.begin(); i != vwe.end(); ++i) {
+   for (auto i = wind_velocity_north.begin(); i != wind_velocity_north.end(); ++i) {
       vwn_mps_vector.push_back(Units::MetersPerSecondSpeed(*i).value());
    }
 

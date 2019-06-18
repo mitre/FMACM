@@ -92,7 +92,7 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
 
    // Commands
    const Units::Speed ias_com = guidance.m_ias_command;
-   true_airspeed_command = true_weather.getAtmosphere()->CAS2TAS(ias_com, eqmState.enu_z);
+   true_airspeed_command = true_weather.CAS2TAS(ias_com, eqmState.enu_z);
 
    const Units::Force maxThrust = Units::NewtonsForce(m_bada_calculator->getMaxThrust(eqmState.enu_z, new_flap_config, "cruise"));
    const Units::Force minThrust = Units::NewtonsForce(
@@ -129,8 +129,7 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
    }
       // DESCENDING FLIGHT - manage altitude with thrust, speed with pitch
    else {
-      double esf = AircraftCalculations::ESFconstantCAS(eqmState.true_airspeed, eqmState.enu_z,
-                                                        true_weather.getAtmosphere()->GetTemperature(eqmState.enu_z));
+      double esf = true_weather.ESFconstantCAS(eqmState.true_airspeed, eqmState.enu_z);
 
       // adjust esf based on velocity error compared to the speed threshold
       if (ev <= -m_speed_threshold) {
@@ -175,8 +174,7 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
    }
 
    // Determine if speed brake is needed
-   Units::Speed v_cas = true_weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(eqmState.true_airspeed), Units::MetersLength(
-         eqmState.enu_z)); // current indicated airspeed in meters per second
+   Units::Speed v_cas = true_weather.TAS2CAS(eqmState.true_airspeed, eqmState.enu_z);
 
    if (thrust_command == minThrust) {
 

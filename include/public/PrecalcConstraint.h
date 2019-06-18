@@ -27,7 +27,7 @@ enum class ActiveFlagType
    SEG_END_LOW_ALT,
    SEG_END_MID_ALT,
    AT_ALT_SLOW,
-   SEG_END_AT_ALT = 2
+   SEG_END_AT_ALT
 };
 
 

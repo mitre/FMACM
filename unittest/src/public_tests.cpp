@@ -33,8 +33,8 @@
 #include "public/SingleTangentPlaneSequence.h"
 #include "public/StandardAtmosphere.h"
 #include "utility/CustomUnits.h"
-#include "utils/OldCustomMathUtils.h"
-#include "utils/PublicUtils.h"
+#include "utils/public/OldCustomMathUtils.h"
+#include "utils/public/PublicUtils.h"
 #include "public/WindZero.h"
 
 using namespace std;
@@ -173,8 +173,8 @@ TEST(Atmosphere, temperature) {
    // check for discontinuity at tropopause
    Units::MetersLength half_eps(1e-6);
    Units::KelvinTemperature delta(1e-3);
-   Units::KelvinTemperature temp_pre_tropo = atm->GetTemperature(H_TROP - half_eps);
-   Units::KelvinTemperature temp_post_tropo = atm->GetTemperature(H_TROP + half_eps);
+   Units::KelvinTemperature temp_pre_tropo = atm->GetTemperature(atm->GetTropopauseHeight() - half_eps);
+   Units::KelvinTemperature temp_post_tropo = atm->GetTemperature(atm->GetTropopauseHeight() + half_eps);
    EXPECT_NEAR(temp_pre_tropo.value(), temp_post_tropo.value(), delta.value());
 
    // check for temperature below absolute zero
@@ -207,7 +207,7 @@ TEST(Atmosphere, density_above_htrop) {
 
    // above H_TROP
    const Units::MetersLength alt(3000.0);
-   const Units::MetersLength higher_alt = alt + H_TROP;
+   const Units::MetersLength higher_alt = alt + atm->GetTropopauseHeight();
    const Units::KilogramsMeterDensity expectedRho(2.268e-1); // from tabular standard atmosphere
    const Units::PascalsPressure expectedPressure(1.4101e4); // from tabular standard atmosphere
    Units::KilogramsMeterDensity rho;
@@ -226,7 +226,7 @@ TEST(Atmosphere, speed) {
    const Units::Length alt = Units::MetersLength(3000.0);
    Units::Speed cas = Units::MetersPerSecondSpeed(400.0);
    Units::Speed tas = atm->CAS2TAS(cas, alt);
-   EXPECT_NEAR(Units::MetersPerSecondSpeed(tas).value(), 436.54, .02);
+   EXPECT_NEAR(Units::MetersPerSecondSpeed(tas).value(), 443.67, .02);
    Units::Speed cas2 = atm->TAS2CAS(tas, alt);
    EXPECT_DOUBLE_EQ(Units::MetersPerSecondSpeed(cas).value(),
                     Units::MetersPerSecondSpeed(cas2).value());
@@ -377,7 +377,7 @@ TEST(AircraftIntent, wgs84_to_xy) {
          0};
    for (int var = 0; var < aiTest.GetNumberOfWaypoints(); ++var) {
 //    cout << xWpExpected[var] << ", " << aiTest.getFms().xWp[var] << endl; // handy for debuggin
-      EXPECT_NEAR(xWpExpected[var], aiTest.GetFms().xWp[var].value(), TOLERANCE_METERS_TIGHT);
+      EXPECT_NEAR(xWpExpected[var], aiTest.GetFms().m_x[var].value(), TOLERANCE_METERS_TIGHT);
    }
 
    // Asserts on yWp
@@ -397,7 +397,7 @@ TEST(AircraftIntent, wgs84_to_xy) {
          0};
    for (int var = 0; var < aiTest.GetNumberOfWaypoints(); ++var) {
 //    cout << yWpExpected[var] << ", " << aiTest.getFms().yWp[var] << endl; // handy for debugging
-      EXPECT_NEAR(yWpExpected[var], aiTest.GetFms().yWp[var].value(), TOLERANCE_METERS_TIGHT);
+      EXPECT_NEAR(yWpExpected[var], aiTest.GetFms().m_y[var].value(), TOLERANCE_METERS_TIGHT);
    }
 
 }
@@ -433,9 +433,9 @@ TEST(AircraftIntent, xyz_to_wgs84) {
    // Convert back to lat/lon
    Units::Angle latRad[128], lonRad[128];
    for (int i = 0; i < aiTest.GetNumberOfWaypoints(); i++) {
-      aiTest.GetLatLonFromXYZ(Units::MetersLength(aiTest.GetFms().xWp[i]),
-                                  Units::MetersLength(aiTest.GetFms().yWp[i]),
-                                  Units::MetersLength(aiTest.GetFms().zWp[i]), latRad[i], lonRad[i]);
+      aiTest.GetLatLonFromXYZ(Units::MetersLength(aiTest.GetFms().m_x[i]),
+                                  Units::MetersLength(aiTest.GetFms().m_y[i]),
+                                  Units::MetersLength(aiTest.GetFms().m_z[i]), latRad[i], lonRad[i]);
    }
 
    const vector<Waypoint> waypoints = aiTest.GetTangentPlaneSequence()->getWaypointsFromInitialization();
@@ -468,9 +468,9 @@ TEST(AircraftIntent, xyz_to_wgs84) {
       EarthModel::LocalPositionEnu enu;
       tps->convertGeodeticToLocal(geo, enu);
 
-      EXPECT_NEAR(aiTest.GetFms().xWp[i].value(),
+      EXPECT_NEAR(aiTest.GetFms().m_x[i].value(),
                   Units::MetersLength(enu.x).value(), TOLERANCE_METERS);
-      EXPECT_NEAR(aiTest.GetFms().yWp[i].value(),
+      EXPECT_NEAR(aiTest.GetFms().m_y[i].value(),
                   Units::MetersLength(enu.y).value(), TOLERANCE_METERS);
    }
 }
@@ -1213,5 +1213,55 @@ TEST(TestHorizontalPathTracker, check_is_on_node_distance) {
          EXPECT_TRUE(actual_return_bool);
          EXPECT_EQ(index, actual_node_index);
       }
+   }
+}
+
+TEST(StandardAtmosphere, mach_ias_transition_isa) {
+   // Test mach/ias conversion at altitude using mach of unity.
+   const std::vector<double> test_machs = {.6, .65, .713, .868};
+   const std::vector<Units::Length> test_altitudes = {Units::FeetLength(27800.0),
+                                                      Units::FeetLength(30000.0),
+                                                      Units::FeetLength(35000.0)};
+   const Units::FeetLength tolerance(50.0);
+
+   for (double test_mach: test_machs) {
+      for (Units::FeetLength test_altitude: test_altitudes) {
+         // zero temp offset
+         const StandardAtmosphere atmosphere_0(Units::CelsiusTemperature(0.));
+         Units::Speed ias_at_test_mach = atmosphere_0.MachToIAS(test_mach, test_altitude);
+         Units::FeetLength actual_alt_trans_sea_level_old = atmosphere_0.GetMachIASTransition(ias_at_test_mach,
+                                                                                                test_mach);
+         Units::FeetLength actual_alt_trans_sea_level = atmosphere_0.GetMachIASTransition(
+               ias_at_test_mach, test_mach);
+         EXPECT_NEAR(test_altitude.value(), actual_alt_trans_sea_level_old.value(), tolerance.value());
+         EXPECT_NEAR(test_altitude.value(), actual_alt_trans_sea_level.value(), tolerance.value());
+      }
+   }
+
+}
+
+TEST(AircraftState, GetHeadingCcwFromEastRadians) {
+
+   for (int q = Quadrant::FIRST; q <= Quadrant::FOURTH ; ++q) {
+
+      vector<HorizontalPath> known_course_path = PublicUtils::CreateStraightHorizontalPath(static_cast<Quadrant>(q));
+      AircraftState state1, state2, test_state;
+      state1.m_x = known_course_path[0].m_x_position_meters;
+      state1.m_y = known_course_path[0].m_y_position_meters;
+      state1.m_z = 0;
+      state1.m_time = 0;
+      state2.m_x = known_course_path[1].m_x_position_meters;
+      state2.m_y = known_course_path[1].m_y_position_meters;
+      state2.m_z = 0;
+      state2.m_time = 1;
+
+      state1.m_xd = state2.m_x / (state2.m_time - state1.m_time);
+      state1.m_yd = state2.m_y / (state2.m_time - state1.m_time);
+      state2.m_xd = state1.m_xd;
+      state2.m_yd = state1.m_yd;
+
+      test_state.Interpolate(state1, state2, 0.5);
+      const Units::SignedRadiansAngle reported_heading = test_state.GetHeadingCcwFromEastRadians();
+      EXPECT_NEAR(known_course_path[0].m_path_course, reported_heading.value(), 1e-3);
    }
 }

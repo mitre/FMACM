@@ -48,7 +48,18 @@ public:
 
    Units::Temperature GetTemperatureOffset() const;
 
+   Units::KelvinTemperature GetSeaLevelTemperature() const;
+   Units::Density GetSeaLevelDensity() const;
+   Units::MetersLength GetTropopauseHeight() const;
+   Units::Density GetTropopauseDensity() const;
+   Units::Pressure GetTropopausePressure() const;
+
 private:
    const Units::Temperature m_temperature_offset;
+   const Units::MetersLength m_tropopause_height;
+   const Units::Temperature m_sea_level_temperature;
+   const Units::Density m_sea_level_density;
+   const Units::Density m_tropopause_density;
+   const Units::Pressure m_tropopause_pressure;
 };
 

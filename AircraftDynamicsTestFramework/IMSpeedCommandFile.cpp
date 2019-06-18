@@ -21,24 +21,19 @@
 #include <stdlib.h>
 #include "utility/CsvParser.h"
 
+IMSpeedCommandFile::IMSpeedCommandFile()
+      : m_ias_hist(),
+        m_apply_pilot_delay(false) {
 
-IMSpeedCommandFile::IMSpeedCommandFile() {
+   for (double& i : m_ias_hist) {
+      i = 0.0;
+   }
 
    m_loaded = false;
    m_file_path = "";
-
-   for (int i = 0; i < m_hist_len; i++) {
-      m_ias_hist[i] = 0.0;
-   }
-
-   m_history_indexer = 0;
-
 }
 
-
-IMSpeedCommandFile::~IMSpeedCommandFile() {
-}
-
+IMSpeedCommandFile::~IMSpeedCommandFile() = default;
 
 bool IMSpeedCommandFile::load(DecodedStream *strm) {
 
@@ -57,11 +52,7 @@ bool IMSpeedCommandFile::load(DecodedStream *strm) {
    return m_loaded;
 }
 
-
 void IMSpeedCommandFile::ReadData() {
-
-   // Parses speed file data and stores data.
-
    std::ifstream file(m_file_path.c_str());
 
    if (!file.is_open()) {
@@ -105,141 +96,70 @@ void IMSpeedCommandFile::ReadData() {
 
 }
 
-
 Guidance IMSpeedCommandFile::Update(Units::Time time) {
-
-   // update method to return guidance speed at the time or an interpolated
-   // speed.  If time before first record's time, the first record's speed is
-   // used to set guidance.  If time after last record's time, the last record's
-   // speed is used to set guidance.
-   //
-   // time: input time
-   // returns guidance speed
-
    Guidance guidance;
 
-   // delay code declarations
-   int hardcodeDelay = m_pilot_delay_seconds.value();
+   Units::Time lookup_time(time);
+   if (m_apply_pilot_delay)
+      lookup_time = time - m_pilot_delay_seconds;
 
+   const Units::Time final_time_available = m_speed_data[(m_speed_data.size() - 1)].mTime;
    guidance.SetValid(false);
 
-   if (m_speed_data[0].mTime >= time) {
-
-      // First
-
+   if (m_speed_data[0].mTime > lookup_time) {
       guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[0].mSpeed);
-      guidance.SetValid(true);
-
-   } else if (m_speed_data[(m_speed_data.size() - 1)].mTime <= time) {
-
-      // Last
-
+   } else if (final_time_available < lookup_time) {
       guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[(m_speed_data.size() - 1)].mSpeed);
-      guidance.SetValid(true);
-
-
    } else {
-
-      // Somewhere inbetween
-
       int ix = 0;
 
-      while ((ix < (m_speed_data.size() - 1)) && (m_speed_data[(ix + 1)].mTime < time)) {
+      while ((ix < (m_speed_data.size() - 1)) && (m_speed_data[(ix + 1)].mTime < lookup_time)) {
          ix++;
       }
 
-      if (m_speed_data[(ix + 1)].mTime == time) {
-
-         // Exact match on next
-
+      if (m_speed_data[(ix + 1)].mTime == lookup_time) {
          guidance.m_ias_command = Units::FeetPerSecondSpeed(m_speed_data[(ix + 1)].mSpeed);
-         guidance.SetValid(true);
 
       } else {
-
-         // Interpolate
-
          double pct = Units::SecondsTime(time - m_speed_data[ix].mTime).value() /
                       Units::SecondsTime(m_speed_data[(ix + 1)].mTime - m_speed_data[ix].mTime).value();
 
          Units::Speed interpolatedspeed = (1.0 - pct) * m_speed_data[ix].mSpeed + pct * m_speed_data[(ix + 1)].mSpeed;
 
          guidance.m_ias_command = Units::FeetPerSecondSpeed(interpolatedspeed);
-         guidance.SetValid(true);
-
       }
+      guidance.SetValid(true);
 
    }
 
-   // Delay processing
-   if (m_apply_pilot_delay) {
-      // Update the ias history array
-      for (int i = m_hist_len - 1; i > 0; i--) {
-         m_ias_hist[i] = m_ias_hist[i - 1];
-      }
-      m_ias_hist[0] = Units::FeetPerSecondSpeed(guidance.m_ias_command).value();
-
-      if (m_history_indexer < hardcodeDelay) {
-         // protect against not enough history for requested delay
-         guidance.m_ias_command = Units::FeetPerSecondSpeed(m_ias_hist[m_history_indexer]);
-      } else {
-         guidance.m_ias_command = Units::FeetPerSecondSpeed(m_ias_hist[hardcodeDelay]);
-      }
-      m_history_indexer++;
-   }//end delay processing
-
    return guidance;
-
 }
-
-
-std::vector<IMSpeedCommandFile::SpeedRecord> IMSpeedCommandFile::GetData() {
-
-   // A Get data method setup to aid unittesting.
-
-   return m_speed_data;
-}
-
 
 void IMSpeedCommandFile::dump() {
 
    std::cout << "Dumping data read from " << m_file_path.c_str() << std::endl << std::endl;
    std::cout << "Number of records " << m_speed_data.size() << std::endl << std::endl;
 
-   for (int ix = 0; ix < m_speed_data.size(); ix++) {
-      std::cout << (int) Units::SecondsTime(m_speed_data[ix].mTime).value() << ","
-                << Units::MetersPerSecondSpeed(m_speed_data[ix].mSpeed).value() << std::endl;
+   for (auto& ix : m_speed_data) {
+      std::cout << (int) Units::SecondsTime(ix.mTime).value() << ","
+                << Units::MetersPerSecondSpeed(ix.mSpeed).value() << std::endl;
    }
-
 }
 
-
-IMSpeedCommandFile::SpeedRecord::SpeedRecord() {
-}
-
+IMSpeedCommandFile::SpeedRecord::SpeedRecord() = default;
 
 IMSpeedCommandFile::SpeedRecord::SpeedRecord(Units::Time t,
                                              Units::Speed s) {
-
    mTime = t;
    mSpeed = s;
-
 }
 
-
-IMSpeedCommandFile::SpeedRecord::~SpeedRecord() {
-}
-
+IMSpeedCommandFile::SpeedRecord::~SpeedRecord() = default;
 
 bool IMSpeedCommandFile::SpeedRecord::operator==(const IMSpeedCommandFile::SpeedRecord &sr) const {
-
    return ((mTime == sr.mTime) && (mSpeed == sr.mSpeed));
-
 }
 
-
 bool IMSpeedCommandFile::SpeedRecord::operator!=(const IMSpeedCommandFile::SpeedRecord &sr) const {
-
    return !(*this == sr);
-
 }

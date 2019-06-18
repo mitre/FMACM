@@ -2,67 +2,51 @@
 ; for RTCA can be loaded and run with this code.
 
 #echo_file
-"input_echo.html"
+"input_echo_fmacm.html"
 
-; General scenario parameters
+; Bada data file input
+bada_data_path "/data/aaesim/regressionScens/bada"
 
-; Bada data file input.
-bada_data_path "/data/aaesim/regressionScens/bada" 
-
-; Aircraft definition.
+; Aircraft definition
 aircraft
 {
     ; initialization information for this aircraft
     initial_altitude 35000 ; feet
-    initial_ias 270 ; knots
-    initial_mach 0.78
+    initial_ias 280 ; knots
+    initial_mach 0
 
     ; Aircraft type: JET1, JET2, JET3, JET4, JET5, JET6. No default.
-    ac_type JET1
+    ac_type {actype}
+
+    ; Speed management setting: pitch or thrust
+    speed_management_type pitch
     
-    ; Speed management setting
-    speed_management_type thrust
-        
     ; ENV file, containing weather data by time and distance-to-go
-    env_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ENV.csv"
-        
-	; aircraft intent
-	aircraft_intent
-	{
-	  ; define the csv file that contains the horizontal profile
-	  hfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_HFP.csv"
-	} ; aircraft_intent
+    env_csv_file "./FimAcTv-P~W_JET_ENV.csv"
 
-	; State model parameters
-	; no longer an explicit structure
-	
-	  ; Dynamics parameters
-	  dynamics
-	  {	
-	
-	  } ; dynamics
-	
-	  ; Pre-calculated trajectory from file
-	  precalc_traj_file
-	  {
-	    ; define the csv file that contain the horizontal profile
-            hfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_HFP.csv"
-		
-            ; define the csv file that contain the vertical profile
-	    vfp_csv_file "../Run_Files/FimAcTv-PD~_DevAc_VFP.csv"		
-	  }
-	
-	airborne_app
-	{
-	  IM_speed_commands_from_file
-	  {
-            imspd_csv_file "../Run_Files/FimAcTv-PD~_DevAc_ImSpd.csv"
-            use_pilot_delay true
-            pilot_delay_seconds 5.0
-	  }
-	} ; airborne_app
+    aircraft_intent
+    {
+        ; define the csv file that contains the horizontal profile
+        hfp_csv_file "./FimAcTv-P~W_JET_HFP.csv"
+    }
 
-  ; state model
+    precalc_traj_file
+    {
+        ; define the csv file that contain the horizontal profile
+        hfp_csv_file "./FimAcTv-P~W_JET_HFP.csv"
+
+        ; define the csv file that contain the vertical profile
+        vfp_csv_file "./FimAcTv-P~W_JET_VFP.csv"
+    }
+
+    airborne_app
+    {
+        IM_speed_commands_from_file
+        {
+            imspd_csv_file "./FimAcTv-P~W_JET_Im_Spd.csv"
+            use_pilot_delay false
+            pilot_delay_seconds 0
+        }
+    } ; airborne_app
 
 } ; aircraft
-

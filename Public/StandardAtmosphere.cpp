@@ -17,9 +17,24 @@
 
 #include "public/StandardAtmosphere.h"
 
-StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset)
-      :
-      m_temperature_offset(temperatureOffset) {
+// Standard Temperature at Sea Level
+// BADA_37_USER_MANUAL eq. 3.2-3
+const Units::KelvinTemperature T0_ISA(288.15);
+
+// Temperature of the tropopause
+// BADA_37_USER_MANUAL eq. 3.2-4
+const Units::KelvinTemperature T_TROP(216.65);
+
+StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset) :
+      m_temperature_offset(temperatureOffset),
+      // BADA_37_USER_MANUAL eq. 3.2-1
+      m_tropopause_height(Units::MetersLength(11000) + Units::MetersLength(1000)
+            * temperatureOffset / Units::CelsiusTemperature(6.5)),
+      m_sea_level_temperature(T0_ISA + m_temperature_offset),  // BADA_37_USER_MANUAL eq. 3.2-2
+      m_sea_level_density(RHO0_ISA * T0_ISA / m_sea_level_temperature), // BADA_37_USER_MANUAL eq. 3.2-7
+      m_tropopause_density(m_sea_level_density * pow(T_TROP / m_sea_level_temperature,RHO_T_EXPONENT)),
+      m_tropopause_pressure(P0_ISA * pow(T_TROP / m_sea_level_temperature, P_T_EXPONENT))
+{
 }
 
 StandardAtmosphere::~StandardAtmosphere() {
@@ -32,11 +47,33 @@ Units::Temperature StandardAtmosphere::GetTemperatureOffset() const {
 
 Units::KelvinTemperature StandardAtmosphere::GetTemperature(const Units::Length altitude_msl) const {
    Units::KelvinTemperature T;
-   if (altitude_msl < H_TROP) {
-      T = T0 + m_temperature_offset - Units::KelvinPerMeter(6.5 / 1000) * altitude_msl;
+   if (altitude_msl < GetTropopauseHeight()) {
+      T = GetSeaLevelTemperature() - Units::KelvinPerMeter(6.5 / 1000) * altitude_msl;
    } else {
       T = T_TROP + m_temperature_offset;
    }
 
    return T;
 }
+
+Units::KelvinTemperature StandardAtmosphere::GetSeaLevelTemperature() const {
+   return m_sea_level_temperature;
+}
+
+
+Units::MetersLength StandardAtmosphere::GetTropopauseHeight() const {
+   return m_tropopause_height;
+}
+
+Units::Density StandardAtmosphere::GetSeaLevelDensity() const {
+   return m_sea_level_density;
+}
+
+Units::Density StandardAtmosphere::GetTropopauseDensity() const {
+   return m_tropopause_density;
+}
+
+Units::Pressure StandardAtmosphere::GetTropopausePressure() const {
+   return m_tropopause_pressure;
+}
+

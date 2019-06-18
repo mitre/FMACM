@@ -124,32 +124,6 @@ Units::SignedRadiansAngle AircraftCalculations::ConvertPitoPi(Units::Angle cours
 }
 
 
-// method for calculating the Cas ESF
-//double v_tas: true airspeed (m/s)
-//double alt: altitude (meters)
-double AircraftCalculations::ESFconstantCAS(const Units::Speed v_tas,
-                                            const Units::Length alt,
-                                            const Units::Temperature temp_in) {
-   double esf;
-   Units::KelvinTemperature temperature(temp_in);
-   double mach;
-   double temp1, temp2, temp3;
-
-   mach = v_tas / sqrt(GAMMA * R * temperature);
-
-   temp1 = 1.0 + (GAMMA - 1.0) / 2 * pow(mach, 2);
-   temp2 = (pow(temp1, (-1.0 / (GAMMA - 1)))) * (pow(temp1, (GAMMA / (GAMMA - 1))) - 1.0);
-
-   if (alt <= H_TROP) {
-      temp3 = 1.0 + (GAMMA * R * K_T) / (Units::ONE_G_ACCELERATION * 2) * pow(mach, 2) + temp2;
-   } else {
-      temp3 = 1.0 + temp2;
-   }
-
-   esf = 1.0 / temp3;
-   return esf;
-}
-
 Units::NauticalMilesLength AircraftCalculations::PtToPtDist(Units::Length x0,
                                                             Units::Length y0,
                                                             Units::Length x1,
@@ -444,6 +418,12 @@ bool AircraftCalculations::CalculateDistanceAlongPathFromPosition(const Units::L
                                                                   Units::Length &distance_along_path,
                                                                   Units::Angle &course,
                                                                   std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
+
+   LOG4CPLUS_TRACE(logger, "Calculating distance from (" <<
+         Units::MetersLength(position_x) << "," <<
+         Units::MetersLength(position_y) << ") to hpath@" <<
+         (long) (&horizontal_trajectory) << ":" <<
+         starting_trajectory_index << "/" << horizontal_trajectory.size());
 
    // Dummy values
    distance_along_path = Units::NegInfinity();

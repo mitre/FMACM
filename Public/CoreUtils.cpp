@@ -43,30 +43,30 @@ int CoreUtils::FindNearestIndex(const double &value_to_find,
 }
 
 double CoreUtils::LinearlyInterpolate(int upper_index,
-                                      double value,
-                                      const std::vector<double> &value_vector,
-                                      const std::vector<double> &output_vector) {
+                                      double x_interpolation_value,
+                                      const std::vector<double> &x_values,
+                                      const std::vector<double> &y_values) {
 
-   if (upper_index < 1 || upper_index >= value_vector.size()) {
+   if (upper_index < 1 || upper_index >= x_values.size()) {
       char msg[200];
-      sprintf(msg, "upperIx (%d) is not between 1 and %d", upper_index, static_cast<int>(value_vector.size() - 1));
+      sprintf(msg, "upperIx (%d) is not between 1 and %d", upper_index, static_cast<int>(x_values.size() - 1));
       LOG4CPLUS_FATAL(m_logger, msg);
       throw out_of_range(msg);
    }
 
-   double v2 = value_vector[upper_index];
-   double v1 = value_vector[upper_index - 1];
-   double o2 = output_vector[upper_index];
-   double o1 = output_vector[upper_index - 1];
+   double v2 = x_values[upper_index];
+   double v1 = x_values[upper_index - 1];
+   double o2 = y_values[upper_index];
+   double o1 = y_values[upper_index - 1];
 
-   if ((value - v1) * (value - v2) > 0) {
+   if ((x_interpolation_value - v1) * (x_interpolation_value - v2) > 0) {
       char msg[200];
-      sprintf(msg, "v (%lf) is not between %lf and %lf.", value, v1, v2);
+      sprintf(msg, "v (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
       LOG4CPLUS_FATAL(m_logger, msg);
       throw domain_error(msg);
    }
 
-   return ((o2 - o1) / (v2 - v1)) * (value - v1) + o1;
+   return ((o2 - o1) / (v2 - v1)) * (x_interpolation_value - v1) + o1;
 }
 
 const Units::Length CoreUtils::CalculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,

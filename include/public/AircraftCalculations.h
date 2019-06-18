@@ -27,11 +27,6 @@
 #include <Speed.h>
 #include <Area.h>
 
-// Structure of distances in computing path length
-// from position.  Data inserted from smallest to
-// greatest.
-
-
 class AircraftCalculations
 {
 
@@ -42,12 +37,12 @@ public:
     *
     * @deprecated Do not write new code that calls this.
     * @see PositionCalculator
-    * @param distance_to_go
-    * @param horizontal_trajectory
-    * @param x_position
-    * @param y_position
-    * @param course
-    * @param traj_index
+    * @param distance_to_go for the position desired
+    * @param horizontal_trajectory on which distance_to_go is calculated
+    * @param x_position, an output
+    * @param y_position, an output
+    * @param course, an output
+    * @param traj_index, an output
     * @return true if calculation succeeded, false otherwise
     */
    static bool LegacyGetPositionFromPathLength(const Units::Length &distance_to_go,
@@ -62,11 +57,11 @@ public:
     *
     * @deprecated Do not write new code that calls this.
     * @see AlongPathDistanceCalculator
-    * @param x
-    * @param y
-    * @param horizontal_trajectory
-    * @param distance_along_path
-    * @param course
+    * @param x position for distance calculation
+    * @param y position for distance calculation
+    * @param horizontal_trajectory on which position exists and distance is to be calculated
+    * @param distance_along_path, an output
+    * @param course, an output
     */
    static void LegacyGetPathLengthFromPosition(const Units::Length x,
                                                const Units::Length y,
@@ -78,13 +73,13 @@ public:
    /**
     * Get the distance and course of the Aircraft based on the current position and precalculated Horizontal Trajectory
     *
-    * @param position_x
-    * @param position_y
-    * @param horizontal_trajectory
-    * @param starting_trajectory_index
-    * @param distance_along_path
-    * @param course
-    * @param resolved_trajectory_index
+    * @param position_x for distance calculation
+    * @param position_y for distance calculation
+    * @param horizontal_trajectory that the position must be on and that will be used for distance calculation
+    * @param starting_trajectory_index, allows the caller to keep track of indices and make calls more efficient
+    * @param distance_along_path, an output
+    * @param course, an output
+    * @param resolved_trajectory_index, an output that indexes into horizontal_trajectory
     * @return true if calculation succeeded, false otherwise
     */
    static bool CalculateDistanceAlongPathFromPosition(const Units::Length position_x,
@@ -95,24 +90,38 @@ public:
                                                       Units::Angle &course,
                                                       std::vector<HorizontalPath>::size_type &resolved_trajectory_index);
 
+   /**
+    * Utility to translate the incoming angle to be on [0, 2pi]. See also Units::UnsignedAngle.
+    */
    static Units::UnsignedRadiansAngle Convert0to2Pi(Units::Angle course_in);
 
+   /**
+    * Utility to translate the incoming angle to be on [-pi, pi]. See also Units::SignedAngle.
+    */
    static Units::SignedRadiansAngle ConvertPitoPi(Units::Angle course_in);
 
-   // method for calculating the Cas ESF
-   static double ESFconstantCAS(const Units::Speed v_tas,
-                                const Units::Length alt,
-                                const Units::Temperature temp_in);
-
-   // method to compute distance between two points given in feet.
+   /**
+    * @deprecated
+    * @see CoreUtils::CalculateEuclideanDistance()
+    */
    static Units::NauticalMilesLength PtToPtDist(Units::Length x0,
                                                 Units::Length y0,
                                                 Units::Length x1,
                                                 Units::Length y1);
 
-   // method to compute ground speed from an aircraft state.
+   /**
+    * Compute ground speed from an aircraft state.
+    *
+    * Do not write new code that uses this.
+    *
+    * @deprecated
+    */
    static Units::Speed GsAtACS(AircraftState acs);
 
+   /**
+    * Use the dot product rule to calculate the angle between vectors. The angle will be on the
+    * interval [-pi, pi].
+    */
    static Units::SignedRadiansAngle ComputeAngleBetweenVectors(const Units::Length &xvertex,
                                                                const Units::Length &yvertex,
                                                                const Units::Length &x1,
@@ -120,6 +129,9 @@ public:
                                                                const Units::Length &x2,
                                                                const Units::Length &y2);
 
+   /**
+    * Standard cross-product calculation.
+    */
    static Units::Area ComputeCrossProduct(const Units::Length &xvertex,
                                           const Units::Length &yvertex,
                                           const Units::Length &x1,

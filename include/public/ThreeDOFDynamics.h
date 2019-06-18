@@ -41,18 +41,19 @@ typedef struct
    //represent the state outside the EOM function. Within the EOM function, the state is
    //represented with the X vector.
    int id;
-   double x; //aircraft position east coordinate (m)
-   double y; //aircraft position north coordinate (m)
-   double h; //aircraft altitude (m)
-   double V; // True airspeed (m/s)
+   Units::MetersLength x; //aircraft position east coordinate (m)
+   Units::MetersLength y; //aircraft position north coordinate (m)
+   Units::MetersLength h; //aircraft altitude (m)
+   Units::MetersPerSecondSpeed V; // True airspeed (m/s)
    Units::KnotsSpeed v_cas;   // calibrated/indicated airspeed
-   double psi; //aircraft heading angle measured from east counter-clockwise (rad)
-   double phi;  //aircraft roll angle (rad)
-   double gamma; //aircraft flight-path angle (rad) NOTE: for gamma, heading down is positive; heading up is negative
-   double thrust;  //thrust (N)
+   Units::RadiansAngle psi; //aircraft heading angle measured from east counter-clockwise (rad)
+   Units::RadiansAngle phi;  //aircraft roll angle (rad)
+   Units::RadiansAngle gamma; //aircraft flight-path angle (rad) NOTE: for gamma, heading down is positive; heading
+   // up is negative
+   Units::NewtonsForce thrust;
+   Units::MetersPerSecondSpeed xd; //ground speed x component (m/s)
+   Units::MetersPerSecondSpeed yd; //ground speed y component (m/s)
    double speed_brake; //speed brake (% of deployment)-currently unused
-   double xd; //ground speed x component (m/s)
-   double yd; //ground speed y component (m/s)
    int m_flap_configuration; // 0, 1, 2, or 3 for flaps speed.
 } DynamicsState;
 
@@ -61,7 +62,7 @@ typedef struct
 class ThreeDOFDynamics : public LoggingLoadable
 {
 public:
-   ThreeDOFDynamics(void);
+   ThreeDOFDynamics();
 
    /**
     * Aircraft update method that calculates the new aircraft state from the given command state
@@ -73,12 +74,10 @@ public:
     */
    virtual AircraftState Update(const AircraftState &aircraft_state,
                                 const Guidance &guidance,
-                                std::shared_ptr<AircraftControl> aircraft_control);
-
-   // load method to read in the Dynamics values
+                                const std::shared_ptr<AircraftControl> &aircraft_control);
+   
    bool load(DecodedStream *input);
 
-   // method to check if the model loaded properly
    bool IsLoaded() const;
 
    void Initialize(const double mass_percentile,
@@ -86,7 +85,7 @@ public:
                    Units::Speed initial_tas,
                    std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence,
                    const EarthModel::LocalPositionEnu &initial_enu_position,
-                   const double initial_heading,
+                   const Units::Angle initial_heading,
                    const WeatherTruth &true_weather);
 
    const std::string &GetBadaAcType() const;
@@ -95,16 +94,17 @@ public:
 
    const std::pair<Units::Speed, Units::Speed> GetWindComponents() const;
 
+   const WeatherTruth GetTruthWeather() const;
+
    DynamicsState m_dynamics_state;
 
 private:
    static log4cplus::Logger m_logger;
 
    EquationsOfMotionState m_equations_of_motion_state;
-
-   // integrate method to integrate the command vector into the aircraft state
+   
    AircraftState Integrate(const Guidance &guidance,
-                           std::shared_ptr<AircraftControl> aircraft_controller);
+                           const std::shared_ptr<AircraftControl> &aircraft_control);
 
    static std::string GetTrueWindAsCsvString(const WindStack &wind_x,
                                              const WindStack &wind_y);
@@ -128,20 +128,29 @@ private:
                                    Units::Frequency &dVwy_dh);
 
    std::string m_ac_type;
-
-   bool m_model_loaded;
-
    BadaWithCalc m_bada_calculator;
 
-   Units::Speed m_wind_velocity_x, m_wind_velocity_y;  // True wind direction values computed by dynamics and speed_on_pitch_control_dynamics
+   // True wind direction values computed by dynamics and speed_on_pitch_control_dynamics
+   Units::Speed m_wind_velocity_x;
+   Units::Speed m_wind_velocity_y;
 
    double m_max_thrust_percent;
    double m_min_thrust_percent;
    Units::Length m_altitude_msl_at_final_waypoint;
    std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
    WeatherTruth m_true_weather;
+
+   bool m_model_loaded;
 };
+
+inline bool ThreeDOFDynamics::IsLoaded() const {
+   return m_model_loaded;
+}
 
 inline const std::pair<Units::Speed, Units::Speed> ThreeDOFDynamics::GetWindComponents() const {
    return std::make_pair(m_wind_velocity_x, m_wind_velocity_y);
-};
+}
+
+inline const WeatherTruth ThreeDOFDynamics::GetTruthWeather() const {
+   return m_true_weather;
+}

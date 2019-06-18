@@ -28,7 +28,7 @@ DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator() {
 }
 
 DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                                                               TrajectoryIndexProgressionDirection expected_index_progression)
+                                                                     TrajectoryIndexProgressionDirection expected_index_progression)
       : HorizontalPathTracker(horizontal_path, expected_index_progression) {
 
    m_end_course = Units::RadiansAngle(horizontal_path.front().m_path_course) + Units::PI_RADIANS_ANGLE;
@@ -38,7 +38,7 @@ DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator(const std::
 DirectionOfFlightCourseCalculator::~DirectionOfFlightCourseCalculator() = default;
 
 bool DirectionOfFlightCourseCalculator::CalculateCourseAtAlongPathDistance(const Units::Length &distance_along_path,
-                                                                       Units::UnsignedAngle &forward_course) {
+                                                                           Units::UnsignedAngle &forward_course) {
    std::vector<HorizontalPath>::size_type resolved_index;
    Units::Angle ignored_turn_theta;
    Units::Length ignored_turn_radius;
@@ -93,12 +93,12 @@ bool DirectionOfFlightCourseCalculator::CalculateCourseAtAlongPathDistance(const
 }
 
 bool DirectionOfFlightCourseCalculator::CalculateForwardCourse(const Units::Length &distance_along_path,
-                                                     const std::vector<HorizontalPath> &horizontal_trajectory,
-                                                     const std::vector<HorizontalPath>::size_type starting_trajectory_index,
-                                                     Units::UnsignedAngle &forward_course,
-                                                     Units::Angle &turn_theta,
-                                                     Units::Length &turn_radius,
-                                                     std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
+                                                               const std::vector<HorizontalPath> &horizontal_trajectory,
+                                                               const std::vector<HorizontalPath>::size_type starting_trajectory_index,
+                                                               Units::UnsignedAngle &forward_course,
+                                                               Units::Angle &turn_theta,
+                                                               Units::Length &turn_radius,
+                                                               std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
    std::vector<HorizontalPath>::size_type index = 0; // stores the index last position < current distance
    bool found = false;
    const double distance_to_find_meters = Units::MetersLength(distance_along_path).value();

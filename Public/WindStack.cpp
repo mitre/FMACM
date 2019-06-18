@@ -17,53 +17,27 @@
 
 #include "public/WindStack.h"
 
-WindStack::WindStack() {
-   // TODO Auto-generated constructor stub
-
+WindStack::WindStack()
+      : m_altitude(),
+        m_speed() {
 }
 
 WindStack::WindStack(const int min,
-                     const int max) {
-   setBounds(min, max);
+                     const int max)
+      : m_altitude(),
+        m_speed() {
+   SetBounds(min, max);
 }
 
-WindStack::~WindStack() {
-   // TODO Auto-generated destructor stub
-}
-
-/*
-This was useful for migration, but we don't need it any more.
-
-WindStack::WindStack(const DMatrix& dMatrix) {
-	load(dMatrix);
-}
-
-void WindStack::load(const DMatrix& dMatrix) {
-	int altCol = dMatrix.get_min_colomn();
-	int speedCol = dMatrix.get_max_colomn();
-	int min = dMatrix.get_min_row();
-	int max = dMatrix.get_max_row();
-	setBounds(min, max);
-	for (int i = min; i <= max; i++) {
-		set(i, Units::FeetLength(dMatrix.get(i, altCol)), Units::KnotsSpeed(dMatrix.get(i, speedCol)));
-	}
-}*/
+WindStack::~WindStack() = default;
 
 bool WindStack::operator==(const WindStack &obj) const {
+   bool match = ((GetMinRow() == obj.GetMinRow()) &&
+                 (GetMaxRow() == obj.GetMaxRow()));
 
-   // Generic equals operator.
-   //
-   // obj:comparison object.
-   // returns true if obj matches.
-   //         false if obj doesn't match
-
-
-   bool match = ((this->get_min_row() == obj.get_min_row()) &&
-                 (this->get_max_row() == obj.get_max_row()));
-
-   for (auto ix = this->get_min_row(); (match && (ix <= this->get_max_row())); ix++) {
-      match = match && (this->getAltitude(ix) == obj.getAltitude(ix)) &&
-              (this->getSpeed(ix) == obj.getSpeed(ix));
+   for (auto ix = GetMinRow(); (match && (ix <= GetMaxRow())); ix++) {
+      match = match && (GetAltitude(ix) == obj.GetAltitude(ix)) &&
+              (GetSpeed(ix) == obj.GetSpeed(ix));
    }
 
    return match;
@@ -71,71 +45,48 @@ bool WindStack::operator==(const WindStack &obj) const {
 }
 
 bool WindStack::operator!=(const WindStack &obj) const {
-
-   // Generic not equals operator.
-   //
-   // obj:comparison object.
-   // returns true if obj doesn't match.
-   //         false if obj matches.
-
-   return !this->operator==(obj);
-
+   return !operator==(obj);
 }
 
-UVector<Units::FeetLength> WindStack::getAltitudeVector() {
-   return altitude;
+Units::FeetLength WindStack::GetAltitude(const int index) const {
+   return m_altitude.get(index);
 }
 
-UVector<Units::KnotsSpeed> WindStack::getSpeedVector() {
-   return speed;
+Units::KnotsSpeed WindStack::GetSpeed(const int index) const {
+   return m_speed.get(index);
 }
 
-Units::FeetLength WindStack::getAltitude(const int index) const {
-   return altitude.get(index);
-}
-
-Units::KnotsSpeed WindStack::getSpeed(const int index) const {
-   return speed.get(index);
-}
-
-void WindStack::setBounds(int min,
+void WindStack::SetBounds(int min,
                           int max) {
-   altitude.setBounds(min, max);
-   speed.setBounds(min, max);
+   m_altitude.setBounds(min, max);
+   m_speed.setBounds(min, max);
+
+   for (int i = min; i <= max; ++i) {
+      m_altitude.set(i, Units::FeetLength(Units::Infinity()));
+      m_speed.set(i, Units::KnotsSpeed(Units::Infinity()));
+   }
 }
 
-int WindStack::get_min_row() const {
-   return altitude.get_min();
+void WindStack::Set(const int index,
+                    const Units::Length altitude,
+                    const Units::Speed speed) {
+   m_altitude.set(index, altitude);
+   m_speed.set(index, speed);
 }
 
-int WindStack::get_max_row() const {
-   return altitude.get_max();
-}
-
-void WindStack::set(const int index,
-                    const Units::Length a,
-                    const Units::Speed s) {
-   altitude.set(index, a);
-   speed.set(index, s);
-}
-
-void WindStack::ascendSort() {
-   //std::sort(&rows[0],&rows[maxRow-minRow+1],&DMatrix::rowsComparator);
-   // std::sort(&altitude,&speed);
-   // Because std::sort doesn't seem to apply to Units, implement our own.
-   // bubble sort
+void WindStack::AscendSort() {
    bool dirty = true;
-   for (int top = altitude.get_max(); dirty && (top > altitude.get_min()); top--) {
+   for (int top = m_altitude.get_max(); dirty && (top > m_altitude.get_min()); top--) {
       dirty = false;
-      for (int i = altitude.get_min(); i < top; i++) {
-         if (altitude[i] > altitude[i + 1]) {
+      for (int i = m_altitude.get_min(); i < top; i++) {
+         if (m_altitude[i] > m_altitude[i + 1]) {
             dirty = true;
-            Units::Length tempA = altitude[i];
-            Units::Speed tempS = speed[i];
-            altitude[i] = altitude[i + 1];
-            speed[i] = speed[i + 1];
-            altitude[i + 1] = tempA;
-            speed[i + 1] = tempS;
+            Units::Length tempA = m_altitude[i];
+            Units::Speed tempS = m_speed[i];
+            m_altitude[i] = m_altitude[i + 1];
+            m_speed[i] = m_speed[i + 1];
+            m_altitude[i + 1] = tempA;
+            m_speed[i + 1] = tempS;
          }
       }
    }

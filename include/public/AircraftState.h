@@ -14,53 +14,33 @@
 //
 // Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #pragma once
+
+#include <string>
 
 #include "utility/Logging.h"
 #include "public/ADSBSVReport.h"
-#include <UnsignedAngle.h>
-#include <string>
-#include "Speed.h"
-#include <Frequency.h>
 
+#include "UnsignedAngle.h"
+#include "Speed.h"
+#include "Frequency.h"
 
 // Aircraft data storage class, for the purpose of the various coversion methods the internal values are assumed to be in feet
-
 class AircraftState
 {
 public:
-   // Creational methods
    static AircraftState CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport);
 
    AircraftState();
 
-   ~AircraftState();
+   virtual ~AircraftState();
 
    AircraftState(const AircraftState &in);
 
-   AircraftState &operator=(const AircraftState &in);
+   const Units::UnsignedRadiansAngle GetHeadingCcwFromEastRadians() const;
 
-   const bool IsTurning() const;
+   void SetPsi(const Units::Angle psi_in);
 
-   bool operator==(const AircraftState &in) const;
-
-   // operator < to allow sorting
-   bool operator<(const AircraftState &in) const;
-
-   // heading methods
-
-   // get the aircraft heading in radians, clockwise from North (mathematical 90 degrees)
-   const double GetHeading() const;
-
-
-   // gets the aircraft heading in radians, counter-clockwise from 0 degrees (mathematical)
-   const Units::UnsignedRadiansAngle GetHeadingInRadiansMathematical() const;
-
-   // psi getter/setters
-   void SetPsi(const double psi_in);
-
-   // speed methods
    const Units::Speed GetGroundSpeed() const;
 
    void DumpParms(std::string str) const;
@@ -91,13 +71,17 @@ public:
    AircraftState &Extrapolate(const AircraftState &in,
                               const Units::SecondsTime &time);
 
-   inline double GetZd() const {
-      return m_zd;
-   };
+
+   double GetZd() const;
 
    void SetZd(const double zd);
 
-//Other Data:
+   AircraftState &operator=(const AircraftState &in);
+
+   bool operator==(const AircraftState &in) const;
+
+   bool operator<(const AircraftState &in) const;
+
    int m_id;
    double m_time;
    double m_x, m_y, m_z; //position (ft)
@@ -106,13 +90,21 @@ public:
    double m_gamma;
    double m_Vwx, m_Vwy; // true wind direction meters/second
    double m_Vw_para, m_Vw_perp; // true wind factors meters/second
-   double m_psi; // aircraft psi measured from east counter-clockwise
-   double m_distance_to_go; // For state-model-output in meters.  FIXME remove this silly parameter from this class!
-   Units::Frequency m_Vwx_dh, m_Vwy_dh; // true wind vertical derivatives (speed per length == 1/time == frequency)
+   Units::RadiansAngle m_psi; // aircraft psi measured from east counter-clockwise
+   double m_distance_to_go_meters;
 
+   // true wind vertical derivatives (speed per length == 1/time == frequency)
+   Units::Frequency m_Vwx_dh;
+   Units::Frequency m_Vwy_dh;
 
 private:
-
    static log4cplus::Logger logger;
-
 };
+
+inline void AircraftState::SetPsi(const Units::Angle psi_in) {
+   m_psi = psi_in;
+}
+
+inline double AircraftState::GetZd() const {
+   return m_zd;
+}

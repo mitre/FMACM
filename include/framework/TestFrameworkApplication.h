@@ -37,8 +37,8 @@ public:
 
    Guidance Update(const SimulationTime &simTime,
                    ThreeDOFDynamics &dynamics,
-                   AircraftState state_in,
-                   Guidance guidance_in);
+                   const AircraftState &state_in,
+                   const Guidance &guidance_in);
 
    bool load(DecodedStream *input);
 

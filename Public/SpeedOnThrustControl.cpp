@@ -94,7 +94,7 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
    gamma_com = Units::RadiansAngle(asin(temp_gamma));
 
    // Speed Control
-   tas_com = weather.getAtmosphere()->CAS2TAS(guidance.m_ias_command, eqmState.enu_z);
+   tas_com = weather.CAS2TAS(guidance.m_ias_command, eqmState.enu_z);
    Units::Speed v_cas = weather.getAtmosphere()->TAS2CAS(eqmState.true_airspeed,
                                                          eqmState.enu_z);
 

@@ -10,40 +10,41 @@
 // under that Clause is authorized without the express written
 // permission of The MITRE Corporation. For further information, please
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// McLean, VA  22102-7539, (703) 983-6000.
 //
 // Copyright 2019 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #include <cstring>
 #include <sstream>
+#include <stdexcept>
+#include <public/Wind.h>
+
+
+#include "aaesim/Bada.h"
 #include "public/Wind.h"
 #include "public/WindZero.h"
 #include "public/AircraftCalculations.h"
 #include "public/InternalObserver.h"
-#include <stdexcept>
 
-using namespace std;
+using std::cout;
+using std::shared_ptr;
+using std::string;
 
 log4cplus::Logger Wind::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Wind"));
 
-Wind::Wind() {}
+const Units::NauticalMilesLength Wind::SAMPLING_DISTANCE_FROM_END_OF_ROUTE(60);
+const Units::FeetLength Wind::MAXIMUM_ALTITUDE_LIMIT(45000);
+const Units::FeetLength Wind::MINIMUM_ALTITUDE_LIMIT(0);
 
-Wind::~Wind() {}
+Units::Length Wind::m_blending_altitude_limit = Units::FeetLength(5000.0);
 
 shared_ptr<Wind> Wind::m_wind_truth_instance;
 
 bool Wind::m_use_wind = false;
 
-Units::Length Wind::m_blending_altitude_limit = Units::FeetLength(5000.0);
+Wind::Wind() = default;
 
-void Wind::SetWindTruthInstance(std::shared_ptr<Wind> truth_instance) {
-   m_wind_truth_instance = truth_instance;
-}
-
-bool Wind::IsUseWind() {
-   return m_use_wind;
-}
+Wind::~Wind() = default;
 
 void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &current_state,
                                                         WeatherPrediction &weather_prediction) {
@@ -71,14 +72,14 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
    Units::Length maxAlt = currentAlt + Wind::m_blending_altitude_limit;
 
 
-   if (maxAlt > Units::FeetLength(FLIGHT_LEVEL_UPPER_BOUND * 1000.0)) {
-      maxAlt = Units::FeetLength(FLIGHT_LEVEL_UPPER_BOUND * 1000.0);
+   if (maxAlt > MAXIMUM_ALTITUDE_LIMIT) {
+      maxAlt = MAXIMUM_ALTITUDE_LIMIT;
    }
 
    Units::Length minAlt = (currentAlt - Wind::m_blending_altitude_limit);
 
-   if (Units::FeetLength(minAlt) < Units::FeetLength(FLIGHT_LEVEL_LOWER_BOUND * 1000.0)) {
-      minAlt = Units::FeetLength(FLIGHT_LEVEL_LOWER_BOUND * 1000.0);
+   if (Units::FeetLength(minAlt) < MINIMUM_ALTITUDE_LIMIT) {
+      minAlt = MINIMUM_ALTITUDE_LIMIT;
    }
 
    // Loop over the predicted matrices. The altitude values between
@@ -92,9 +93,9 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 
    Units::Length altFromPrediction;
 
-   for (iRow = local_blended_x.get_max_row(); iRow >= 1; iRow--) {
+   for (iRow = local_blended_x.GetMaxRow(); iRow >= 1; iRow--) {
 
-      altFromPrediction = local_blended_x.getAltitude(
+      altFromPrediction = local_blended_x.GetAltitude(
             iRow); // this will go down in altitude from highest to lowest value stored in local_blended_x
 
       if (altFromPrediction > maxAlt || altFromPrediction < minAlt) {
@@ -111,12 +112,12 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 
       const double unityMinusWeightValue = 1.0 - weightValue;
 
-      const Units::Speed Vwx_predicted = local_blended_x.getSpeed(iRow);
-      const Units::Speed Vwy_predicted = local_blended_y.getSpeed(iRow);
+      const Units::Speed Vwx_predicted = local_blended_x.GetSpeed(iRow);
+      const Units::Speed Vwy_predicted = local_blended_y.GetSpeed(iRow);
       const Units::Speed Vwx_update((weightValue * Vwx_sensed) + (unityMinusWeightValue * Vwx_predicted));
       const Units::Speed Vwy_update((weightValue * Vwy_sensed) + (unityMinusWeightValue * Vwy_predicted));
-      local_blended_x.set(iRow, altFromPrediction, Vwx_update);
-      local_blended_y.set(iRow, altFromPrediction, Vwy_update);
+      local_blended_x.Set(iRow, altFromPrediction, Vwx_update);
+      local_blended_y.Set(iRow, altFromPrediction, Vwy_update);
    }
 
    // Add the current location and sensed wind to the matrices also
@@ -128,33 +129,33 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 
    int currentAltIx = -1;
 
-   for (iRow = local_blended_x.get_min_row(); iRow <= local_blended_x.get_max_row() && currentAltIx == -1; iRow++) {
-      if (abs(currentAlt - local_blended_x.getAltitude(iRow)) < Units::FeetLength(0.1)) {
+   for (iRow = local_blended_x.GetMinRow(); iRow <= local_blended_x.GetMaxRow() && currentAltIx == -1; iRow++) {
+      if (abs(currentAlt - local_blended_x.GetAltitude(iRow)) < Units::FeetLength(0.1)) {
          // Current altitude found in blended wind matrix.
 
          currentAltIx = iRow;
       }
    }
 
-   const int newMaxBound = ((currentAltIx == -1) ? (local_blended_x.get_max_row() + 1) : local_blended_x.get_max_row());
+   const int newMaxBound = ((currentAltIx == -1) ? (local_blended_x.GetMaxRow() + 1) : local_blended_x.GetMaxRow());
 
-   weather_prediction.east_west.setBounds(1, newMaxBound); // this will delete all data
-   weather_prediction.north_south.setBounds(1, newMaxBound); // this will delete all data
-   for (iRow = local_blended_x.get_min_row(); iRow <= local_blended_x.get_max_row(); iRow++) {
+   weather_prediction.east_west.SetBounds(1, newMaxBound); // this will delete all data
+   weather_prediction.north_south.SetBounds(1, newMaxBound); // this will delete all data
+   for (iRow = local_blended_x.GetMinRow(); iRow <= local_blended_x.GetMaxRow(); iRow++) {
 
       if (iRow != currentAltIx) {
 
          // Take winds from blended matrix.
 
-         weather_prediction.east_west.set(iRow, local_blended_x.getAltitude(iRow), local_blended_x.getSpeed(iRow));
-         weather_prediction.north_south.set(iRow, local_blended_y.getAltitude(iRow), local_blended_y.getSpeed(iRow));
+         weather_prediction.east_west.Set(iRow, local_blended_x.GetAltitude(iRow), local_blended_x.GetSpeed(iRow));
+         weather_prediction.north_south.Set(iRow, local_blended_y.GetAltitude(iRow), local_blended_y.GetSpeed(iRow));
 
       } else {
 
          // Take winds from current altitude.
 
-         weather_prediction.east_west.set(iRow, currentAlt, Vwx_sensed);
-         weather_prediction.north_south.set(iRow, currentAlt, Vwy_sensed);
+         weather_prediction.east_west.Set(iRow, currentAlt, Vwx_sensed);
+         weather_prediction.north_south.Set(iRow, currentAlt, Vwy_sensed);
       }
 
    }
@@ -162,294 +163,382 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
    if (currentAltIx == -1) {
       // Add current wind to end
 
-      weather_prediction.east_west.set(newMaxBound, currentAlt, Vwx_sensed);
-      weather_prediction.north_south.set(newMaxBound, currentAlt, Vwy_sensed);
+      weather_prediction.east_west.Set(newMaxBound, currentAlt, Vwx_sensed);
+      weather_prediction.north_south.Set(newMaxBound, currentAlt, Vwy_sensed);
    }
 
 
    // Sort before returning
-   weather_prediction.east_west.ascendSort();
-   weather_prediction.north_south.ascendSort();
-
-   return;
+   weather_prediction.east_west.AscendSort();
+   weather_prediction.north_south.AscendSort();
 }
 
-void Wind::PopulatePredictedWindMatrices(
-      const AircraftIntent &intent,
-      const std::vector<Units::Length> &predicted_wind_altitudes,
-      WeatherPrediction &weather_prediction) {
+void Wind::PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
+                                         const vector<Units::Length> &predicted_wind_altitudes_in,
+                                         WeatherPrediction &weather_prediction) {
+   double altitude_at_beginning_of_route_ft = Units::FeetLength(intent_in.GetFms().m_altitude[0]).value() + 1000;
 
-   // Populates wind matrices with predicted wind data.  Data is computed
-   // at the initial aircraft position and altitude and for 30,000, 20,000, 10,000,
-   // and ground altitude at the waypoint closest to 60 nmi from the initial waypoint.
-   // An error message is output and the run is aborted if the altitude at the initial
-   // point or altitude at the FAF point matches a descent altitude.  The FAF point is
-   // defined as the last waypoint in the run scenario.
-   //
-   // intent:contains waypoint x,y,h information.
-   // weatherPrediction:wind matrices containing altitude and velocity.
+   Units::FeetLength altitude_at_beginning_of_route(altitude_at_beginning_of_route_ft);
+   Units::FeetLength altitude_at_end_of_route = intent_in.GetFms().m_altitude[intent_in.GetNumberOfWaypoints() - 1];
 
-   // Get option to process predicted winds.
+   std::vector<Units::FeetLength> end_point_altitudes;
+   end_point_altitudes.push_back(altitude_at_beginning_of_route);
+   end_point_altitudes.push_back(altitude_at_end_of_route);
 
-   PredictedWindOption useOpt = weather_prediction.getPredictedWindOption();
+   std::set<Units::Length> input_wind_altitudes = ValidateWindAltitudeInputs(predicted_wind_altitudes_in);
 
-   // 0-default.
-   // 1-first sampling option (Denver and Phoenix).
+   Units::FeetLength adjusted_altitude_at_beginning_of_route =
+         GetAdjustedStartPointAltitude(altitude_at_beginning_of_route);
+   Units::FeetLength adjusted_altitude_at_end_of_route =
+         GetAdjustedEndPointAltitude(altitude_at_end_of_route);
 
-   double altCoef;
-   Units::NauticalMilesLength distConst;
+   std::set<Units::Length> wind_forecast_altitudes = AddRouteAltitudesToList(input_wind_altitudes,
+                                                                             adjusted_altitude_at_end_of_route,
+                                                                             adjusted_altitude_at_beginning_of_route);
 
-   set<Units::Length> descent_altitudes;
-   for (auto it = predicted_wind_altitudes.begin(); it != predicted_wind_altitudes.end(); ++it) {
-      descent_altitudes.insert(*it);
+   if (wind_forecast_altitudes.size() < 5) {
+      AddIntermediateWindAltitudes(wind_forecast_altitudes);
    }
 
-   // descent_altitudes will be copied to wind_altitudes.  This allows us to check that
-   // initial altitude and final altitude are not in descent_altitudes.  If either is
-   // in the list, then InterpolateForecastWind will fail because there will be two
-   // data points for the same altitude.
-   set<Units::Length> wind_altitudes(descent_altitudes);
-   ostringstream oss;
+   int current_wind_index = 1;
+   int minimum_wind_index = 1;
+   int maximum_wind_index = static_cast<int>(wind_forecast_altitudes.size());
 
-   if (useOpt == MULTIPLE_DTG_LEGACY) {
-      Wind::ValidatePredictedOptOne(intent, useOpt, altCoef, distConst);
-      if (useOpt != weather_prediction.getPredictedWindOption()) {
-         string msg = "Wind option 1 invalid!";
-         LOG4CPLUS_FATAL(m_logger, msg);
-         throw logic_error(msg);
+   weather_prediction.east_west.SetBounds(minimum_wind_index, maximum_wind_index);
+   weather_prediction.north_south.SetBounds(minimum_wind_index, maximum_wind_index);
+
+   AddSensedWindsToWindStack(intent_in.GetTangentPlaneSequence(), intent_in.GetFms(),
+                             adjusted_altitude_at_beginning_of_route, wind_forecast_altitudes, weather_prediction,
+                             current_wind_index);
+
+   PredictedWindOption predicted_wind_option = weather_prediction.GetPredictedWindOption();
+
+   if (predicted_wind_option == SINGLE_DTG || predicted_wind_option == MULTIPLE_DTG_ALONG_ROUTE) {
+      CreatePredictionUsingCurrentWindOption(intent_in, adjusted_altitude_at_end_of_route,
+                                             maximum_wind_index, wind_forecast_altitudes, current_wind_index,
+                                             weather_prediction);
+   } else if (predicted_wind_option == MULTIPLE_DTG_LEGACY) {
+      CreatePredictionUsingLegacyWindOption(SINGLE_DTG, wind_forecast_altitudes, intent_in,
+                                            altitude_at_beginning_of_route, current_wind_index, maximum_wind_index,
+                                            weather_prediction);
+   }
+
+   weather_prediction.east_west.AscendSort();
+   weather_prediction.north_south.AscendSort();
+}
+
+Units::FeetLength Wind::GetAdjustedStartPointAltitude(Units::FeetLength altitude_at_beginning_of_route) {
+   int altitude_at_beginning_of_route_ft =
+         static_cast<int>(std::round(Units::FeetLength(altitude_at_beginning_of_route).value()));
+   if (altitude_at_beginning_of_route_ft % 100 == 0) {
+      return altitude_at_beginning_of_route;
+   } else {
+      int rounded_altitude_at_beginning_of_route_ft = altitude_at_beginning_of_route_ft +
+                                                      (100 - (altitude_at_beginning_of_route_ft % 100));
+
+      std::stringstream ss;
+      ss << "Route start point altitude " << altitude_at_beginning_of_route_ft <<
+         " is not a multiple of 100. Adjusting to " << rounded_altitude_at_beginning_of_route_ft <<
+         " to ensure that route is bounded by wind prediction.";
+      LOG4CPLUS_ERROR(m_logger, ss.str());
+
+      return Units::FeetLength(rounded_altitude_at_beginning_of_route_ft);
+   }
+}
+
+Units::FeetLength Wind::GetAdjustedEndPointAltitude(Units::FeetLength altitude_at_end_of_route) {
+   int altitude_at_end_of_route_ft = static_cast<int>(std::round(Units::FeetLength(altitude_at_end_of_route).value()));
+   if (altitude_at_end_of_route_ft % 100 == 0) {
+      return altitude_at_end_of_route;
+   } else {
+      int rounded_altitude_at_end_of_route_ft = altitude_at_end_of_route_ft - (altitude_at_end_of_route_ft % 100);
+
+      std::stringstream ss;
+      ss << "Route end point altitude " << altitude_at_end_of_route_ft << " is not a multiple of 100. Adjusting to " <<
+         rounded_altitude_at_end_of_route_ft << " to ensure that route is bounded by wind prediction.";
+      LOG4CPLUS_ERROR(m_logger, ss.str());
+
+      return Units::FeetLength(rounded_altitude_at_end_of_route_ft);
+   }
+}
+
+std::set<Units::Length> Wind::AddRouteAltitudesToList(const std::set<Units::Length> &wind_altitudes_in,
+                                                      Units::FeetLength altitude_at_end_of_route,
+                                                      Units::FeetLength altitude_at_beginning_of_route) {
+   std::set<Units::Length> all_valid_altitudes = wind_altitudes_in;
+
+   auto result = all_valid_altitudes.insert(altitude_at_end_of_route);
+   if (!result.second) {
+      std::stringstream ss;
+      ss << "Route end point altitude " << altitude_at_end_of_route << " already in the list. Discarding "
+                                                                       "this altitude.";
+      LOG4CPLUS_ERROR(m_logger, ss.str());
+   }
+
+   result = all_valid_altitudes.insert(altitude_at_beginning_of_route);
+   if (!result.second) {
+      std::stringstream ss;
+      ss << "Route start point altitude " << altitude_at_beginning_of_route << " already in the list. Discarding "
+                                                                               "this altitude.";
+      LOG4CPLUS_ERROR(m_logger, ss.str());
+   }
+
+   return all_valid_altitudes;
+}
+
+std::set<Units::Length> Wind::ValidateWindAltitudeInputs(const std::vector<Units::Length> &wind_altitudes_in) {
+   std::set<Units::Length> valid_wind_prediction_altitudes;
+   for (auto &predicted_wind_altitude : wind_altitudes_in) {
+      int wind_altitude_ft = static_cast<int>(std::round(Units::FeetLength(predicted_wind_altitude).value()));
+
+      if (wind_altitude_ft % 100 == 0) {
+         auto result = valid_wind_prediction_altitudes.insert(Units::FeetLength(wind_altitude_ft));
+         if (!result.second) {
+            std::stringstream ss;
+            ss << "Predicted wind altitude " << wind_altitude_ft << " already in the list. Discarding this altitude.";
+            LOG4CPLUS_ERROR(m_logger, ss.str());
+         }
+      } else {
+         std::stringstream ss;
+         ss << "Predicted wind altitude " << wind_altitude_ft << " is not a multiple of 100. Discarding this altitude.";
+         LOG4CPLUS_ERROR(m_logger, ss.str());
       }
    }
 
-   int num_descents = descent_altitudes.size();
-
-   if (num_descents < 3) {
-      string str = "Cannot create wind stack with less than 3 altitudes in mPredictedAltitudes";
+   if (valid_wind_prediction_altitudes.size() < 3) {
+      string str = "Cannot create wind stack with less than 3 prediction altitudes";
       LOG4CPLUS_FATAL(m_logger, str);
    }
 
-   // if there are less than 5 descent_altitudes and init alt or final alt is in the list, we might not have
-   // the necessary 5 altitudes.  In this case, add extra altitude half way between the existing altitudes to
-   // bring the number up to (at least) 5.
-   Units::MetersLength startAlt(intent.GetFms().AltWp[0]);
-   Units::MetersLength endAlt(intent.GetFms().AltWp[intent.GetNumberOfWaypoints() - 1]);
-   wind_altitudes.insert(startAlt);
-   wind_altitudes.insert(endAlt);
+   return valid_wind_prediction_altitudes;
+}
 
-   if (wind_altitudes.size() < 5) {
-      // add altitudes between each of the incoming altitudes
-      bool first = true;
-      Units::Length prev;
-      for (auto it = descent_altitudes.begin(); it != descent_altitudes.end(); ++it) {
-         if (!first) {
-            Units::Length alt = 0.5 * (prev + *it);
-            wind_altitudes.insert(alt);
-            oss << "Not enough altitudes in the wind stack: adding " << Units::FeetLength(alt).value() << " feet";
-            string str = oss.str();
-            oss.str("");
-            LOG4CPLUS_WARN(m_logger, str);
-         }
-         first = false;
-         prev = *it;
+void Wind::AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
+                                     const AircraftIntent::RouteData &fms,
+                                     const Units::FeetLength altitude_at_beginning_of_route,
+                                     std::set<Units::Length> &forecast_wind_altitudes,
+                                     WeatherPrediction &weather_prediction,
+                                     int &current_wind_index) {
+   Units::Length x_position = fms.m_x[0];
+   Units::Length y_position = fms.m_y[0];
+
+   WindStack x_true_wind(1, 5);
+   WindStack y_true_wind(1, 5);
+
+   EarthModel::GeodeticPosition geoPosition;
+
+   // do lat/lon conversion only if using wind
+   if (UseWind()) {
+      EarthModel::LocalPositionEnu localPosition;
+      localPosition.x = x_position;
+      localPosition.y = y_position;
+      localPosition.z = altitude_at_beginning_of_route;
+      tangent_plane_sequence->convertLocalToGeodetic(localPosition, geoPosition);
+   }
+
+
+   m_wind_truth_instance->InterpolateTrueWind(geoPosition.latitude, geoPosition.longitude,
+         altitude_at_beginning_of_route, x_true_wind, y_true_wind);
+   Units::MetersPerSecondSpeed Vwx, Vwy;
+   Units::HertzFrequency dVwx_dh, dVwy_dh;
+   weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_at_beginning_of_route, x_true_wind, Vwx,
+                                                                       dVwx_dh);
+   weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_at_beginning_of_route, y_true_wind, Vwy,
+                                                                       dVwy_dh);
+
+   weather_prediction.east_west.Set(current_wind_index, altitude_at_beginning_of_route, Vwx);
+   weather_prediction.north_south.Set(current_wind_index, altitude_at_beginning_of_route, Vwy);
+   ++current_wind_index;
+
+   if (!forecast_wind_altitudes.erase(altitude_at_beginning_of_route)) {
+      LOG4CPLUS_WARN(m_logger, "Didn't erase altitude at beginning of route ("
+            << Units::FeetLength(altitude_at_beginning_of_route)
+            << ") after loading sensed winds. Something may have gone wrong.");
+   }
+}
+
+void Wind::CreatePredictionUsingCurrentWindOption(const AircraftIntent &aircraft_intent,
+                                                  const Units::FeetLength altitude_at_end_of_route,
+                                                  const int maximum_wind_index,
+                                                  std::set<Units::Length> &forecast_wind_altitudes,
+                                                  int current_wind_index_in,
+                                                  WeatherPrediction &weather_prediction) {
+   Units::NauticalMilesLength total_linear_route_length(0.0);
+   int last_ix = aircraft_intent.GetNumberOfWaypoints() - 1;
+
+   Units::FeetLength x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[last_ix]);
+   Units::FeetLength y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[last_ix]);
+
+   AddPredictedWindAtPtpToWindStack(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position,
+                                    altitude_at_end_of_route, forecast_wind_altitudes, weather_prediction,
+                                    current_wind_index_in);
+
+   for (int ix = (last_ix - 1); ix >= 0; ix--) {
+      Units::Length x_next = Units::MetersLength(aircraft_intent.GetFms().m_x[ix]);
+      Units::Length y_next = Units::MetersLength(aircraft_intent.GetFms().m_y[ix]);
+
+      Units::Length distance_between_points = AircraftCalculations::PtToPtDist(x_position, y_position, x_next, y_next);
+      Units::Length d_total_thru_next = total_linear_route_length + distance_between_points;
+
+      if (abs(d_total_thru_next - SAMPLING_DISTANCE_FROM_END_OF_ROUTE) <
+          abs(total_linear_route_length - SAMPLING_DISTANCE_FROM_END_OF_ROUTE)) {
+
+         x_position = x_next;
+         y_position = y_next;
+         total_linear_route_length = d_total_thru_next;
+      } else {
+         break;
       }
    }
 
-   int wind_count = wind_altitudes.size();
-   weather_prediction.east_west.setBounds(1, wind_count);
-   weather_prediction.north_south.setBounds(1, wind_count);
+   int current_wind_index = current_wind_index_in;
+   for (auto wind_altitude : forecast_wind_altitudes) {
+      if (current_wind_index <= maximum_wind_index) {
+         const bool prediction_needed_at_current_altitude =
+               weather_prediction.north_south.GetAltitude(current_wind_index) == Units::Infinity() &&
+               weather_prediction.east_west.GetAltitude(current_wind_index) == Units::Infinity();
 
-   // Initial point, initial altitude wind.
+         if (prediction_needed_at_current_altitude) {
+            Units::KnotsSpeed wind_x, wind_y;
+            InterpolateForecastWind(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position, wind_altitude,
+                                    wind_x, wind_y);
+            weather_prediction.east_west.Set(current_wind_index, wind_altitude, wind_x);
+            weather_prediction.north_south.Set(current_wind_index, wind_altitude, wind_y);
+            ++current_wind_index;
+         }
+      }
+   }
+}
 
-   Units::FeetLength x; // In feet.
-   Units::FeetLength y; // In feet.
-   Units::Length h;
+void Wind::AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
+                                            const Units::FeetLength x_position,
+                                            const Units::FeetLength y_position,
+                                            const Units::FeetLength altitude_at_end_of_route,
+                                            std::set<Units::Length> &forecast_wind_altitudes,
+                                            WeatherPrediction &weather_prediction,
+                                            int &current_wind_index) {
+   Units::KnotsSpeed wind_x, wind_y;
 
-   x = Units::MetersLength(intent.GetFms().xWp[0]); // In feet.
-   y = Units::MetersLength(intent.GetFms().yWp[0]); // In feet.
-   h = Units::MetersLength(intent.GetFms().AltWp[0]);
+   InterpolateForecastWind(tangent_plane_sequence, x_position, y_position, altitude_at_end_of_route, wind_x, wind_y);
+
+   weather_prediction.east_west.Set(current_wind_index, altitude_at_end_of_route, wind_x);
+   weather_prediction.north_south.Set(current_wind_index, altitude_at_end_of_route, wind_y);
+   ++current_wind_index;
+
+   if (!forecast_wind_altitudes.erase(altitude_at_end_of_route)) {
+      LOG4CPLUS_WARN(m_logger, "Didn't erase altitude at end of route ("
+            << Units::FeetLength(altitude_at_end_of_route) <<
+            ") after loading PTP winds. Something may have gone wrong.");
+   }
+}
 
 
-   // Compute wind and set matrices.  Use true wind at first point.
+void Wind::CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_wind_option_in,
+                                                 const std::set<Units::Length> &wind_altitudes,
+                                                 const AircraftIntent &aircraft_intent,
+                                                 const Units::Length altitude_at_beginning_of_route,
+                                                 const int current_wind_index_in,
+                                                 const int maximum_wind_index,
+                                                 WeatherPrediction &weather_prediction) {
+   double altitude_coefficient;
+   Units::NauticalMilesLength distance_constant;
+   std::vector<Units::NauticalMilesLength> dtg;
 
-   WindStack trueWindX(1, 5);
-   WindStack trueWindY(1, 5);
+   PredictedWindOption predicted_wind_option = predicted_wind_option_in;
+   int last_ix = aircraft_intent.GetNumberOfWaypoints() - 1;
 
-   m_wind_truth_instance->InterpolateTrueWind(intent.GetTangentPlaneSequence(),
-                             x, y, h, trueWindX, trueWindY);
+   Wind::ValidatePredictedOptOne(aircraft_intent, predicted_wind_option, altitude_coefficient, distance_constant);
 
-   Units::MetersPerSecondSpeed Vwx, Vwy;
-   Units::HertzFrequency dVwx_dh, dVwy_dh;
-   weather_prediction.getAtmosphere()->CalcWindGrad(h, trueWindX, Vwx, dVwx_dh);
-   weather_prediction.getAtmosphere()->CalcWindGrad(h, trueWindY, Vwy, dVwy_dh);
+   if (predicted_wind_option != weather_prediction.GetPredictedWindOption()) {
+      string msg = "Wind option 1 invalid!";
+      LOG4CPLUS_FATAL(m_logger, msg);
+      throw std::logic_error(msg);
+   }
 
-   weather_prediction.east_west.set(1, h, Vwx);
+   for (auto wind_altitude : wind_altitudes) {
+      dtg.emplace_back(wind_altitude * altitude_coefficient + distance_constant);
+   }
 
-   weather_prediction.north_south.set(1, h, Vwy);
+   int current_wind_index = current_wind_index_in;
+   auto altitude_iter = wind_altitudes.begin();
+   for (int jx = 0; jx < wind_altitudes.size(); jx++, ++altitude_iter) {
+      Units::NauticalMilesLength total_dtg_from_end_of_route(0.0);
 
-   int last_ix = intent.GetNumberOfWaypoints() - 1;
-
-   int ix_count = 2;
-
-   if (useOpt == SINGLE_DTG || useOpt == MULTIPLE_DTG_ALONG_ROUTE) {
-
-      // Selected waypoint, descent altitude winds.
-
-      // Find point to compute descent points from.  The point is within a distance
-      // of the FAF where the FAF is defined as the final waypoint.
-
-      Units::NauticalMilesLength d_total(0.0); // Distance backwards through route from FAF summing
-      // linear distance between each pair of points.  In nmi.
-
-      x = Units::MetersLength(intent.GetFms().xWp[last_ix]); // In feet.
-      y = Units::MetersLength(intent.GetFms().yWp[last_ix]); // In feet.
-      h = Units::MetersLength(intent.GetFms().AltWp[last_ix]);
+      Units::Length x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[last_ix]);
+      Units::Length y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[last_ix]);
 
       for (int ix = (last_ix - 1); ix >= 0; ix--) {
-         Units::Length x_next = Units::MetersLength(intent.GetFms().xWp[ix]); // In feet.
-         Units::Length y_next = Units::MetersLength(intent.GetFms().yWp[ix]); // In feet.
+         Units::FeetLength next_x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[ix]);
+         Units::FeetLength next_y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[ix]);
 
-         Units::Length d_between_pts = AircraftCalculations::PtToPtDist(x, y, x_next, y_next);
+         Units::FeetLength distance_between_points = AircraftCalculations::PtToPtDist(x_position, y_position,
+                                                                                      next_x_position,
+                                                                                      next_y_position);
 
-         Units::Length d_total_thru_next = d_total + d_between_pts; // In nmi.
+         Units::NauticalMilesLength total_dtg_thru_next_point = total_dtg_from_end_of_route +
+                                                                distance_between_points;
 
-         if (abs(d_total_thru_next - Units::NauticalMilesLength(DIST_FROM_FAF_NM))
-             < abs(d_total - Units::NauticalMilesLength(DIST_FROM_FAF_NM))) {
-            // Next point a better match.
-
-            x = x_next; // In feet.
-            y = y_next; // In feet.
-            d_total = d_total_thru_next;
+         if (abs(total_dtg_thru_next_point) < abs(dtg[jx])) {
+            x_position = next_x_position;
+            y_position = next_y_position;
+            total_dtg_from_end_of_route = total_dtg_thru_next_point;
          } else {
-            // Previous point is the point we want.
+            Units::NauticalMilesLength delta = dtg[jx] - total_dtg_from_end_of_route;
 
+            Units::Angle crs = Units::arctan2(Units::FeetLength(next_y_position - y_position).value(),
+                                              Units::FeetLength(next_x_position - x_position).value());
+
+            x_position = x_position + (delta * cos(crs));
+            y_position = y_position + (delta * sin(crs));
             break;
          }
       }
 
-      // Compute wind and set matrices.
+      Units::KnotsSpeed wind_speed_x;
+      Units::KnotsSpeed wind_speed_y;
 
-      //for (int ix=0;ix<wind_altitudes.size();ix++) {
-      for (auto it = wind_altitudes.begin(); it != wind_altitudes.end(); ++it) {
-         // skip altitudes that match startAlt or endAlt
-         if ((startAlt == *it) ||
-             (endAlt == *it)) {
-            continue;
-         }
-         Units::KnotsSpeed wind_x, wind_y;
-         InterpolateForecastWind(intent.GetTangentPlaneSequence(),
-                                 x, y, *it, wind_x, wind_y);
-         weather_prediction.east_west.set(ix_count, *it, wind_x);   // Altitude in feet.
-         weather_prediction.north_south.set(ix_count, *it, wind_y);   // Altitude in feet.
-         ix_count++;
+      Units::FeetLength current_altitude = *altitude_iter;
+      if (altitude_at_beginning_of_route - current_altitude > Units::FeetLength(100.0)) {
+         Wind::InterpolateForecastWind(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position,
+                                       current_altitude, wind_speed_x, wind_speed_y);
+
+         weather_prediction.east_west.Set(current_wind_index, current_altitude, wind_speed_x);
+         weather_prediction.north_south.Set(current_wind_index, current_altitude, wind_speed_y);
+         ++current_wind_index;
       }
-
-   } else if (useOpt == MULTIPLE_DTG_LEGACY) {
-      // Compute distance to go for descent altitudes.
-
-      vector<Units::NauticalMilesLength> dtg;
-
-      for (auto it = wind_altitudes.begin(); it != wind_altitudes.end(); ++it) {
-         dtg.push_back((*it) * altCoef + distConst);
-      }
-
-      // Compute winds for each descent altitude.
-
-      auto it = wind_altitudes.begin();
-      for (int jx = 0; jx < wind_altitudes.size(); jx++, ++it) {
-         // Find x,y for winds interpolation
-
-         Units::NauticalMilesLength d_total(0.0); // Distance backwards through route from FAF summing
-         // linear distance between each pair of points.  In nmi.
-
-         x = Units::MetersLength(intent.GetFms().xWp[last_ix]);  // feet.
-         y = Units::MetersLength(intent.GetFms().yWp[last_ix]);  // feet.
-
-
-         // Loop through waypoints to determine x,y
-
-         for (int ix = (last_ix - 1); ix >= 0; ix--) {
-            Units::FeetLength x_next = Units::MetersLength(intent.GetFms().xWp[ix]); // feet
-            Units::FeetLength y_next = Units::MetersLength(intent.GetFms().yWp[ix]); // feet
-
-            Units::FeetLength d_between_pts = AircraftCalculations::PtToPtDist(x, y, x_next, y_next);
-
-            Units::NauticalMilesLength d_total_thru_next = d_total + d_between_pts; // nmi
-
-            if (abs(d_total_thru_next) < abs(dtg[jx])) {
-               // Setup for next point
-
-               x = x_next; // feet
-               y = y_next; // feet
-               d_total = d_total_thru_next; // nmi
-            } else {
-               // Calculate x,y position from this waypoint to set predicted winds at this altitude.
-
-               Units::NauticalMilesLength delta = dtg[jx] - d_total;
-
-               Units::Angle crs = Units::arctan2(Units::FeetLength(y_next - y).value(),
-                                                 Units::FeetLength(x_next - x).value());
-
-               x = x + (delta * cos(crs));
-               y = y + (delta * sin(crs));
-
-               break;
-            }
-         }
-
-         // Compute measured wind from computed x,y and set predicted winds for the descent altitude.
-         Units::KnotsSpeed wind_x, wind_y;
-         // skip altitudes that match startAlt or endAlt
-         if ((startAlt == *it) || (endAlt == *it)) {
-            continue;
-         }
-
-         Wind::InterpolateForecastWind(intent.GetTangentPlaneSequence(),
-                                       x, y, *it, wind_x, wind_y);
-         weather_prediction.east_west.set(ix_count, *it, wind_x); // altitude in feet.
-         weather_prediction.north_south.set(ix_count, *it, wind_y); // altitude in feet.
-         ix_count++;
-
-      }
-
    }
+}
 
-   // Final point, final altitude wind.
+void Wind::AddIntermediateWindAltitudes(std::set<Units::Length> &wind_altitudes_ft) {
+   std::ostringstream oss;
+   bool first = true;
+   Units::FeetLength previous_altitude_ft = Units::FeetLength(0);
 
-   if (startAlt != endAlt) {
-      x = Units::MetersLength(intent.GetFms().xWp[last_ix]);
-      y = Units::MetersLength(intent.GetFms().yWp[last_ix]);
-      h = Units::MetersLength(intent.GetFms().AltWp[last_ix]);
+   for (auto wind_altitude : wind_altitudes_ft) {
+      if (!first && wind_altitudes_ft.size() < 5) {
+         int intermediate_altitude_ft =
+               static_cast<int>(std::round((0.5 * Units::FeetLength(previous_altitude_ft + wind_altitude).value())));
+         if (intermediate_altitude_ft % 100 != 0) {
+            // The mod of the average of two altitudes that are multiples of 100 feet is either 50 or 0.
+            intermediate_altitude_ft += 50;
+         }
 
-      // Compute wind and set matrices.
-      Units::KnotsSpeed wind_x, wind_y;
-      Wind::InterpolateForecastWind(intent.GetTangentPlaneSequence(),
-                                    x, y, h, wind_x, wind_y);
-
-      //int ix = num_descents + 2;
-
-      // OLD FORMAT
-      weather_prediction.east_west.set(ix_count, h, wind_x); // altitude in feet.
-      weather_prediction.north_south.set(ix_count, h, wind_y); // wind_y speed in knots.
-
+         wind_altitudes_ft.insert(Units::FeetLength(intermediate_altitude_ft));
+         oss << "Not enough altitudes in the wind stack: adding " << Units::FeetLength(intermediate_altitude_ft)
+             << " feet";
+         string str = oss.str();
+         oss.str("");
+         LOG4CPLUS_WARN(m_logger, str);
+      }
+      first = false;
+      previous_altitude_ft = wind_altitude;
    }
-   /* // SURFACE WINDS = 0
-   weatherPrediction.east_west.set(ix,1,Units::FeetLength(h).value()-1800); // approximate Altitude of airport surface (in feet)
-   weatherPrediction.east_west.set(ix,2,0); // assumed winds = 0 at surface
-   weatherPrediction.north_south.set(ix,1,Units::FeetLength(h).value()-1800); // approximate Altitude of airport surface (in feet)
-   weatherPrediction.north_south.set(ix,2,0); // assumed winds = 0 at surface */
+}
 
-
-   // Sort matrices
-
-   weather_prediction.east_west.ascendSort();
-   weather_prediction.north_south.ascendSort();
-
-} // PopulatePredictedWindMatrices
-
-
-void Wind::ValidatePredictedOptOne(const AircraftIntent &intent,
-                                   PredictedWindOption &useOpt,
-                                   double &altCoef,
-                                   Units::Length &distConst) {
+void Wind::ValidatePredictedOptOne(const AircraftIntent &aircraft_intent,
+                                   PredictedWindOption &predicted_wind_option,
+                                   double &altitude_coefficient,
+                                   Units::Length &distance_constant) {
 
    // Validates whether predicated winds option one can be used based on the
    // the route in the intent waypoints.  Option one samples for Denver and
@@ -464,81 +553,56 @@ void Wind::ValidatePredictedOptOne(const AircraftIntent &intent,
    // distConst:Output distance constant (nmi).
 
 
-   useOpt = SINGLE_DTG; // default
-
-   // Check if descent sampling valid.
+   predicted_wind_option = SINGLE_DTG;
 
    string samplingWaypoints[] = {"EAGUL", "KOOLY", "KAILE", "KIPPR", "TSHNR", "WAHUU"};
    double altSamp[] = {0.00326316, 0.00380133, 0.00395813, 0.00363655, 0.00423597, 0.00362616};
    double distSamp[] = {5.36717, 11.8737, 23.951, 20.105, 28.6911, 19.8141};
 
-   unsigned int numSampWaypoints = (unsigned int) (sizeof(altSamp) / sizeof(altSamp[0]));
+   auto numSampWaypoints = (unsigned int) (sizeof(altSamp) / sizeof(altSamp[0]));
 
-   bool isValid = false;
+   bool is_valid = false;
 
-   for (unsigned int ix = 0; (ix < intent.GetNumberOfWaypoints()) && !isValid; ix++) {
+   for (unsigned int ix = 0; (ix < aircraft_intent.GetNumberOfWaypoints()) && !is_valid; ix++) {
       for (unsigned int jx = 0; jx < numSampWaypoints; jx++) {
-         if (samplingWaypoints[jx] == intent.GetFms().Name[ix]) {
+         if (samplingWaypoints[jx] == aircraft_intent.GetFms().m_name[ix]) {
             // We found validating waypoint-set outputs and terminate loops.
 
-            useOpt = MULTIPLE_DTG_LEGACY;
-            altCoef = altSamp[jx] * NAUTICAL_MILES_TO_METERS / FEET_TO_METERS;
-            distConst = Units::NauticalMilesLength(distSamp[jx]);
-            isValid = true;
+            predicted_wind_option = MULTIPLE_DTG_LEGACY;
+            altitude_coefficient = altSamp[jx] * NAUTICAL_MILES_TO_METERS / FEET_TO_METERS;
+            distance_constant = Units::NauticalMilesLength(distSamp[jx]);
+            is_valid = true;
             break;
          }
       }
    }
-   if (!isValid) {
+
+   if (!is_valid) {
       string msg = "predicted_wind_opt 1 is invalid for this scenario.";
       LOG4CPLUS_FATAL(m_logger, msg);
-      throw runtime_error(msg);
+      throw std::runtime_error(msg);
    }
 }
 
 /**
  * Interpolates wind into a pair of WindStack objects,
- * but only if m_use_wind is true.
+ * but only if m_use_wind is true.  Also includes temperature.
  */
-void Wind::InterpolateTrueWind(const shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
-                               const Units::Length x_in,
-                               const Units::Length y_in,
+void Wind::InterpolateTrueWind(const Units::Angle lat_in,
+                               const Units::Angle lon_in,
                                const Units::Length altitude,
                                WindStack &east_west,
                                WindStack &north_south) {
-
-   // TODO:Update this comment to correctly reflect the arguments.
-
-   // lat_in: degrees
-   // lon_in: degrees
-   // x: feet
-   // y: feet
-   // altitude: feet
-   // output: wind speeds (knots)
-   // The return values are east_west and north_south. Both are two-dimensional WindStack: the first column contains the altitude (ft),
-   // and the second column contains the wind speed (knots).
    if (!m_use_wind) {
-      for (int i = east_west.get_min_row(); i <= east_west.get_max_row(); i++) {
-         east_west.set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+      for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
+         east_west.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
       }
 
-      for (int i = north_south.get_min_row(); i <= north_south.get_max_row(); i++) {
-         north_south.set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+      for (int i = north_south.GetMinRow(); i <= north_south.GetMaxRow(); i++) {
+         north_south.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
       }
-
       return;
    }
-
-   Units::RadiansAngle lat_in(0), lon_in(0);
-
-   EarthModel::LocalPositionEnu localPosition;
-   localPosition.x = x_in;
-   localPosition.y = y_in;
-   localPosition.z = altitude;
-   EarthModel::GeodeticPosition wpnt;
-   tangentPlaneSequence->convertLocalToGeodetic(localPosition, wpnt);
-   lat_in = wpnt.latitude;
-   lon_in = wpnt.longitude;
 
    InterpolateWindMatrix(lat_in, lon_in, altitude, east_west, north_south);
 }
@@ -549,13 +613,6 @@ void Wind::InterpolateForecastWind(const shared_ptr<TangentPlaneSequence> &tange
                                    const Units::Length altitude,
                                    Units::Speed &east_west,
                                    Units::Speed &north_south) {
-
-   // lat_in: degrees
-   // lon_in: degrees
-   // x: feet
-   // y: feet
-   // altitude
-   // output: wind speeds (knots)
    if (!m_use_wind) {
       east_west = Units::KnotsSpeed(0.);
       north_south = Units::KnotsSpeed(0.);
@@ -574,126 +631,17 @@ void Wind::InterpolateForecastWind(const shared_ptr<TangentPlaneSequence> &tange
    lon = wpnt.longitude;
 
    InterpolateWindScalar(lat, lon, altitude, east_west, north_south);
-
-   /* std::cout << "(" << Units::DegreesAngle(lat) << ", " <<
-         Units::DegreesAngle(lon) << ") " <<
-         Units::FeetLength(altitude) << ":  (" <<
-         Units::KnotsSpeed(east_west) << ", " <<
-         Units::KnotsSpeed(north_south) << ")" << std::endl;
-         */
-}
-
-void Wind::SetUseWind(const bool useWind) {
-   m_use_wind = useWind;
-}
-
-void Wind::CheckWindIntegrity(const WindStack &wind) {
-
-   // Checks integrity of wind matrix based on whether the entries have
-   // undefined values, whether they are sorted by altitude (ascending),
-   // and whether there are repeated altitudes and repeated lines.
-   //
-   // wind:wind matrix to check.
-
-
-   // Undefined values.
-
-   for (int i = wind.get_min_row(); i <= wind.get_max_row(); i++) {
-      if (std::isnan(wind.getAltitude(i).value()) || std::isnan(wind.getSpeed(i).value())) {
-         cout << "Undefined wind matrix value found" << endl;
-         return;
-      }
-   }
-
-   // Sort order.
-
-   for (int i = wind.get_min_row() + 1; i <= wind.get_max_row(); i++) {
-      if (wind.getAltitude(i) < wind.getAltitude(i - 1)) {
-         cout << "Bad sort order in wind matrix found" << endl;
-         return;
-      }
-   }
-
-   // Repeated altitudes and lines.
-
-   int numAltsRepeated = 0;
-   int numLinesRepeated = 0;
-
-   for (int i = wind.get_min_row() + 1; i <= wind.get_max_row(); i++) {
-      if (wind.getAltitude(i) == wind.getAltitude(i - 1)) {
-         numAltsRepeated++;
-
-         if (wind.getSpeed(i) == wind.getSpeed(i - 1)) {
-            numLinesRepeated++;
-         }
-      }
-   }
-
-   if (numAltsRepeated > 0) {
-      cout << "Repeats found in wind matrix.  Alts " << numAltsRepeated
-           << " lines " << numLinesRepeated << endl;
-   }
-}
-
-
-void Wind::CheckWindIntegrity(const int id,
-                              const string &str,
-                              const WindStack &wind) {
-
-   // Checks integrity of wind matrix based on whether the entries have
-   // undefined values, whether they are sorted by altitude (ascending),
-   // and whether there are repeated altitudes and repeated lines.
-   //
-   // id:aircraft id for output.
-   // str:string for output.
-   // wind:wind matrix to check.
-
-
-   // Undefined values.
-   for (int i = wind.get_min_row(); i <= wind.get_max_row(); i++) {
-      if (std::isnan(wind.getAltitude(i).value()) || std::isnan(wind.getSpeed(i).value())) {
-         cout << str << "  id " << id << "  Undefined wind matrix value found" << endl;
-         return;
-      }
-   }
-
-   // Sort order.
-   for (int i = wind.get_min_row() + 1; i <= wind.get_max_row(); i++) {
-      if (wind.getAltitude(i) < wind.getAltitude(i - 1)) {
-         cout << str << "  id " << id << "  Bad sort order in wind matrix found" << endl;
-         return;
-      }
-   }
-
-   // Repeated altitudes and lines.
-
-   int numAltsRepeated = 0;
-   int numLinesRepeated = 0;
-   for (int i = wind.get_min_row() + 1; i <= wind.get_max_row(); i++) {
-      if (wind.getAltitude(i) == wind.getAltitude(i - 1)) {
-         numAltsRepeated++;
-
-         if (wind.getSpeed(i) == wind.getSpeed(i - 1)) {
-            numLinesRepeated++;
-         }
-      }
-   }
-
-   if (numAltsRepeated > 0) {
-      cout << str << "  id " << id << "  Repeats found in wind matrix.  Alts " << numAltsRepeated
-           << " lines " << numLinesRepeated << endl;
-   }
 }
 
 WeatherPrediction Wind::CreateZeroWindPrediction() {
 
    // Create zero winds data and provide that to the x and y values.
    WindStack zeroWinds(1, 5);
-   zeroWinds.set(1, Units::FeetLength(0.), Units::KnotsSpeed(0.));
-   zeroWinds.set(2, Units::FeetLength(10000.), Units::KnotsSpeed(0.));
-   zeroWinds.set(3, Units::FeetLength(20000.), Units::KnotsSpeed(0.));
-   zeroWinds.set(4, Units::FeetLength(30000.), Units::KnotsSpeed(0.));
-   zeroWinds.set(5, Units::FeetLength(50000.), Units::KnotsSpeed(0.));
+   zeroWinds.Set(1, Units::FeetLength(0.), Units::KnotsSpeed(0.));
+   zeroWinds.Set(2, Units::FeetLength(10000.), Units::KnotsSpeed(0.));
+   zeroWinds.Set(3, Units::FeetLength(20000.), Units::KnotsSpeed(0.));
+   zeroWinds.Set(4, Units::FeetLength(30000.), Units::KnotsSpeed(0.));
+   zeroWinds.Set(5, Units::FeetLength(50000.), Units::KnotsSpeed(0.));
    WeatherPrediction zeroWeather;
    zeroWeather.east_west = zeroWinds;
    zeroWeather.north_south = zeroWinds;

@@ -30,34 +30,17 @@ TestFrameworkApplication::~TestFrameworkApplication() {
 }
 
 Guidance TestFrameworkApplication::Update(const SimulationTime &simTime,
-      ThreeDOFDynamics &dynamics,
-      AircraftState state_in,
-      Guidance guidance_in) {
-   // Main update method computing guidance based on particular airborne application from runfile.
-   // The Interval Management models have checks to ensure they are loaded properly and that
-   // they have the correct trajectory data.
-   //
-   // dynamics:aircraft dynamimcs model.
-   // state_in:current state of IM aircraft.
-   // ads_b_in:received ADS B reports list.
-   // own_intent:intent of IM aircraft.
-   // target_intent:intent of target aircraft.
-   // guidance_in:input guidance of IM aircraft.
-   // wind_x, wind_y:wind data (altitude in feet, wind speed in knots).
-   // seed:current seed for use in functions needing a random number.
-   // output:data store and output for metrics collected on each IM algorithm update call.
-   //
-   // returns updated guidance from Interval Management update method, (mainly ias in FPS).
+                                          ThreeDOFDynamics &dynamics,
+                                          const AircraftState &state_in,
+                                          const Guidance &guidance_in) {
+   Guidance guidance_out = guidance_in;
+   Guidance im_guidance;
 
-   Guidance guidance_out = guidance_in; // initialize output guidance to given guidance
-   Guidance imGuidance;
+   double time = state_in.m_time;
 
-   double time = state_in.m_time; // sets the current time to the give state time
-
-   //	Retrieve the IM speed from a test vector file.
-   imGuidance = m_im_speed_command_file.Update(Units::SecondsTime(time));
-   guidance_out.m_ias_command = imGuidance.m_ias_command;
-   guidance_out.SetValid(imGuidance.IsValid());
+   im_guidance = m_im_speed_command_file.Update(Units::SecondsTime(time));
+   guidance_out.m_ias_command = im_guidance.m_ias_command;
+   guidance_out.SetValid(im_guidance.IsValid());
 
    return guidance_out;
 }

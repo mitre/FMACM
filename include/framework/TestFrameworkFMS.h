@@ -24,7 +24,6 @@
 #include "public/PrecalcWaypoint.h"
 #include "public/HorizontalPath.h"
 
-// Data storage class for flight management systems
 class TestFrameworkFMS
 {
 public:
@@ -34,25 +33,25 @@ public:
 
    ~TestFrameworkFMS();
 
-   // primary calculation method to update the FMS model
    void Update(const AircraftState &state,
                const std::vector<PrecalcWaypoint> &precalc_waypoints,
                const std::vector<HorizontalPath> &horizontal_trajectory);
 
-   // get the psi of the given index if in range, returns -999.9 if out of range
-   double GetPsi(int index);
-
-   // init method to initialize the FMS data
    void Initialize(const std::vector<HorizontalPath> &horizontal_path);
 
-   // method to read in the waypoint information from an AircraftIntent
-   void CopyWaypointsFromIntent(AircraftIntent intent_in);
+   void CopyWaypointsFromIntent(const AircraftIntent &intent_in);
 
    bool IsFinished();
 
-private:
-
    AlongPathDistanceCalculator m_decrementing_distance_calculator;
+
+   int m_number_of_waypoints;
+   double m_psi[127];
+   double m_waypoint_altitude[128];
+   double m_waypoint_x[128];
+   double m_waypoint_y[128];
+
+private:
 
    int m_mode;
    double m_delta_track;
@@ -66,13 +65,6 @@ private:
    double m_nominal_ias_at_waypoint[128];
    double m_mach_at_waypoint[128];
    PrecalcConstraint m_constraints[128];
-
-public:
-   int m_number_of_waypoints;
-   double m_psi[127];
-   double m_waypoint_altitude[128];
-   double m_waypoint_x[128];
-   double m_waypoint_y[128];
 };
 
 

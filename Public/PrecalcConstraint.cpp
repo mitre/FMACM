@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcConstraint.h"
@@ -22,7 +22,7 @@ bool operator<=(ActiveFlagType l,
    return ((static_cast<int> (l)) <= (static_cast<int> (r)));
 }
 
-PrecalcConstraint::PrecalcConstraint(void) {
+PrecalcConstraint::PrecalcConstraint() {
 
    active_flag = ActiveFlagType::UNSET;
    constraint_dist = 0.0; // distance constraints-meters.
@@ -35,85 +35,59 @@ PrecalcConstraint::PrecalcConstraint(void) {
 
 }
 
-
-PrecalcConstraint::~PrecalcConstraint(void) {
-}
-
+PrecalcConstraint::~PrecalcConstraint() = default;
 
 PrecalcConstraint &PrecalcConstraint::operator=(const PrecalcConstraint &obj) {
-
-   // Generic = operator.
-   //
-   // obj:VerticalPredictor object to set with.
-   // returns this object with new values.
-
    if (this != &obj) {
 
-      this->constraint_dist = obj.constraint_dist;
-      this->constraint_altHi = obj.constraint_altHi;
-      this->constraint_altLow = obj.constraint_altLow;
-      this->constraint_speedHi = obj.constraint_speedHi;
-      this->constraint_speedLow = obj.constraint_speedLow;
-      this->index = obj.index;
-      this->active_flag = obj.active_flag;
-      this->violation_flag = obj.violation_flag;
+      constraint_dist = obj.constraint_dist;
+      constraint_altHi = obj.constraint_altHi;
+      constraint_altLow = obj.constraint_altLow;
+      constraint_speedHi = obj.constraint_speedHi;
+      constraint_speedLow = obj.constraint_speedLow;
+      index = obj.index;
+      active_flag = obj.active_flag;
+      violation_flag = obj.violation_flag;
 
    }
-
    return *this;
-
 }
-
 
 bool PrecalcConstraint::operator<(const PrecalcConstraint &obj) const {
-
-   bool result = false;
-
-   if (this->constraint_dist < obj.constraint_dist) {
-      result = true;
-   }
-
-   return result;
-
+   return constraint_dist < obj.constraint_dist;
 }
 
-
 bool PrecalcConstraint::operator==(const PrecalcConstraint &obj) const {
+   bool match = (constraint_dist == obj.constraint_dist);
 
-   // Generic equals operator.
-   //
-   // obj:comparison object.
-   // returns true if obj matches.
-   //         false if object doesn't match.
+   match = match && (constraint_altHi == obj.constraint_altHi);
+   match = match && (constraint_altLow == obj.constraint_altLow);
 
+   match = match && (constraint_speedHi == obj.constraint_speedHi);
+   match = match && (constraint_speedLow == obj.constraint_speedLow);
 
-   bool match = (this->constraint_dist == obj.constraint_dist);
+   match = match && (index == obj.index);
 
-   match = match && (this->constraint_altHi == obj.constraint_altHi);
-   match = match && (this->constraint_altLow == obj.constraint_altLow);
-
-   match = match && (this->constraint_speedHi == obj.constraint_speedHi);
-   match = match && (this->constraint_speedLow == obj.constraint_speedLow);
-
-   match = match && (this->index == obj.index);
-
-   match = match && (this->active_flag == obj.active_flag);
-   match = match && (this->violation_flag == obj.violation_flag);
+   match = match && (active_flag == obj.active_flag);
+   match = match && (violation_flag == obj.violation_flag);
 
    return match;
 
 }
 
-
 bool PrecalcConstraint::operator!=(const PrecalcConstraint &obj) const {
-
-   // Generic not equals operator.
-   //
-   // obj:comparison object.
-   // returns true if obj doesn't match.
-   //         false if obj matches.
-
-   return !this->operator==(obj);
-
+   return !operator==(obj);
 }
 
+
+std::ostream& operator<<(std::ostream &out, const PrecalcConstraint &constraint) {
+   out << "Constraint " << constraint.index <<
+         " at " << constraint.constraint_dist <<
+         ", active=" << static_cast<int>(constraint.active_flag) <<
+         " alt between " << constraint.constraint_altLow <<
+         " and " << constraint.constraint_altHi << " meters, " <<
+         " speed between " << constraint.constraint_speedLow <<
+         " and " << constraint.constraint_speedHi << " m/s, " <<
+         " violation=" << constraint.violation_flag;
+   return out;
+}

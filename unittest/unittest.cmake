@@ -11,6 +11,11 @@ SET(TEST_SOURCE
         ${UNITTEST_DIR}/src/main.cpp
         ${UNITTEST_DIR}/src/public_tests.cpp)
 
+SET(FMACM_SOURCE
+        ${UNITTEST_DIR}/src/main.cpp
+        ${UNITTEST_DIR}/src/framework_tests.cpp)
+
+# Build aaesim_test
 add_executable(aaesim_test ${TEST_SOURCE})
 target_link_libraries(aaesim_test
         unittest
@@ -21,10 +26,35 @@ set_target_properties(aaesim_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
         EXCLUDE_FROM_ALL TRUE)
 
+# Build fmacm_test
+add_executable(fmacm_test ${FMACM_SOURCE})
+target_link_libraries(fmacm_test
+        unittest
+        gtest
+        framework
+        )
+set_target_properties(fmacm_test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
+        EXCLUDE_FROM_ALL TRUE)
+
 # add a target for running the unit tests
 add_custom_target(run
+        DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
+        )
+add_dependencies(run
+        test_aaesim
+        test_fmacm)
+
+add_custom_target(test_aaesim
         ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test --gtest_output=xml:aaesim_unit_test_results.xml || echo FAIL
         DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
+        )
+
+add_custom_target(test_fmacm
+        ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test --gtest_output=xml:fmacm_unit_test_results.xml || echo FAIL
+        DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
         )
 
@@ -34,7 +64,7 @@ add_custom_target(public_test
         DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
         )
-        
+
 # core tests only
 add_custom_target(core_test
         ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test --gtest_filter=SimpleAircraft.*:SimpleAircraft/*.*:*/SimpleAircraft.*/*:*/SimpleAircraft/*.* --gtest_color=noaaesim_test --gtest_filter=SimpleAircraft.*:SimpleAircraft/*.*:*/SimpleAircraft.*/*:*/SimpleAircraft/*.* --gtest_color=no --gtest_output=xml:aaesim_unit_test_results.xml || echo FAIL

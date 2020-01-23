@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Atmosphere.h"
@@ -259,6 +259,10 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
 
    // full equation
    Units::Speed speed = sqrt(2 / MU * p / rho * temp3);
+
+   LOG4CPLUS_TRACE(m_logger, "CAS " << Units::KnotsSpeed(vcas) << " at " <<
+         Units::PascalsPressure(p) << " and " << Units::KilogramsMeterDensity(rho) <<
+         " is TAS " << Units::KnotsSpeed(speed));
 
    return speed;
 }

@@ -12,12 +12,12 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+#include <fstream>
 
-// enum for active_flag  values from original code
 enum class ActiveFlagType
 {
    UNSET = 0,
@@ -30,19 +30,17 @@ enum class ActiveFlagType
    SEG_END_AT_ALT
 };
 
-
 bool operator<=(ActiveFlagType l,
                 ActiveFlagType r);
-
 
 class PrecalcConstraint
 {
 
 public:
 
-   PrecalcConstraint(void);
+   PrecalcConstraint();
 
-   ~PrecalcConstraint(void);
+   virtual ~PrecalcConstraint();
 
    PrecalcConstraint &operator=(const PrecalcConstraint &obj);
 
@@ -60,6 +58,6 @@ public:
    double index;
    ActiveFlagType active_flag;
    bool violation_flag;
-
 };
 
+std::ostream& operator<<(std::ostream &out, const PrecalcConstraint &constraint);

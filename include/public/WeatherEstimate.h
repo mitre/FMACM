@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -57,6 +57,7 @@ public:
    double TAS2Mach(const Units::Speed true_airspeed, const Units::Length altitude) const;
    double ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude) const;
    std::pair< std::pair<Units::Angle, Units::Angle>, Units::Length> GetCurrentLocationOfWeather() const;
+   void SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere);
 
 protected:
    // Constructors are protected to prevent bare instantiation.
@@ -81,6 +82,11 @@ protected:
    std::pair< std::pair<Units::Angle, Units::Angle>, Units::Length> m_location_of_current_conditions;
 
 };
+
+inline void WeatherEstimate::SetAtmosphere(
+      std::shared_ptr<Atmosphere> atmosphere) {
+   m_atmosphere = atmosphere;
+}
 
 inline void WeatherEstimate::SetLocation(const Units::Angle latitude, const Units::Angle longitude, const Units::Length altitude) {
    m_location_of_current_conditions.first = std::pair<Units::Angle, Units::Angle>(latitude, longitude);

@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -39,8 +39,15 @@ public:
 
    Units::Length getMinDist();
 
+   void SetAcIds(int im_ac_id, int target_ac_id);
+   int GetImAcId() const;
+   bool IsReportMetrics() const;
+   int GetTargetAcId() const;
 
 private:
+   int m_im_ac_id;
+   int m_target_ac_id;
+   bool m_report_metrics;
 
    // Minimum distance between IM and target aircraft.
    Units::Length mMinDist;

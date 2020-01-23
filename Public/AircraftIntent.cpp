@@ -12,12 +12,14 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
 #include "public/AircraftIntent.h"
 
 #include <stdexcept>
 
+#include "math/InvalidIndexException.h"
 #include "public/AircraftCalculations.h"
 #include "public/SingleTangentPlaneSequence.h"
 
@@ -352,9 +354,6 @@ void AircraftIntent::GetLatLonFromXYZ(const Units::Length &xMeters,
                                       const Units::Length &zMeters,
                                       Units::Angle &lat,
                                       Units::Angle &lon) {
-   if (m_number_of_waypoints < 1) {
-      throw std::logic_error("No waypoints in AircraftIntent");
-   }
 
    // use the ellipsoidal model
    EarthModel::LocalPositionEnu localPos;
@@ -413,12 +412,32 @@ void AircraftIntent::InsertPairAtIndex(const std::string &wpname,
    wp.SetWaypointLatLon(lat, lon);
    wp.SetName(wpname);
 
+   InsertWaypointAtIndex(wp, index);
+}
+
+
+
+void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
 
    auto itr = std::next(m_waypoints.begin(), index);
    m_waypoints.insert(itr, wp);
 
    LoadWaypointsFromList(m_waypoints);
    UpdateXYZFromLatLonWgs84();
+}
+
+
+void AircraftIntent::ClearWaypoints() {
+   m_waypoints.clear();
+
+   // Re-initialize this object with no waypoints
+   LoadWaypointsFromList(m_waypoints);
+   UpdateXYZFromLatLonWgs84();
+}
+
+const Waypoint &AircraftIntent::GetWaypoint(unsigned int i) const {
+   std::list<Waypoint>::const_iterator itr = std::next(m_waypoints.begin(), i); // get an iterator pointing to index
+   return *itr;
 }
 
 std::ostream &operator<<(std::ostream &out,
@@ -434,3 +453,33 @@ std::ostream &operator<<(std::ostream &out,
    out << "}" << std::endl;
    return out;
 }
+
+
+void AircraftIntent::SetPlannedCruiseAltitude(Units::Length altitude) {
+   this->m_planned_cruise_altitude = altitude;
+}
+
+const std::string &AircraftIntent::GetWaypointName(int i) const {
+   if (i < 0 || i >= m_number_of_waypoints) {
+      LOG4CPLUS_FATAL(logger, "Index out of range.");
+      throw InvalidIndexException(i, 0, m_number_of_waypoints-1);
+   }
+   return m_waypoint_name[i];
+}
+
+Units::MetersLength AircraftIntent::GetWaypointX(int i) const {
+   if (i < 0 || i >= m_number_of_waypoints) {
+      LOG4CPLUS_FATAL(logger, "Index out of range.");
+      throw InvalidIndexException(i, 0, m_number_of_waypoints-1);
+   }
+   return m_waypoint_x[i];
+}
+
+Units::MetersLength AircraftIntent::GetWaypointY(int i) const {
+   if (i < 0 || i >= m_number_of_waypoints) {
+      LOG4CPLUS_FATAL(logger, "Index out of range.");
+      throw InvalidIndexException(i, 0, m_number_of_waypoints-1);
+   }
+   return m_waypoint_y[i];
+}
+

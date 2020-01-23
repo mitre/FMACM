@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -29,7 +29,12 @@ class AlongPathDistanceCalculator: public HorizontalPathTracker
 {
 public:
    AlongPathDistanceCalculator();
-   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path, TrajectoryIndexProgressionDirection expected_index_progression);
+   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
+                               TrajectoryIndexProgressionDirection expected_index_progression);
+
+   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
+                               TrajectoryIndexProgressionDirection expected_index_progression,
+                               bool use_large_cross_track_tolerance);
 
    virtual ~AlongPathDistanceCalculator();
 
@@ -53,8 +58,9 @@ public:
 
 private:
    static log4cplus::Logger m_logger;
+   static Units::Length CROSS_TRACK_TOLERANCE, EXTENDED_CROSS_TRACK_TOLERANCE;
    bool m_is_first_call;
-
+   Units::NauticalMilesLength m_cross_track_tolerance;
 };
 
 

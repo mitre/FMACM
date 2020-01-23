@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -21,6 +21,7 @@
 #include "public/WeatherTruth.h"
 #include <string>
 #include "math/RandomGenerator.h"
+#include "utility/Logging.h"
 
 
 /**
@@ -45,6 +46,8 @@ public:
    }
 
    virtual void SetScenarioName(const std::string in);
+
+   void DuplicateAcidCheck(const size_t aircraft_count);
 
    static int GetUniqueIdForAircraftId(const std::string aircraft_id) {
       // Note: implementation intentionally here in the header file because static method
@@ -79,6 +82,7 @@ protected:
    WeatherTruth m_weather;
 
 private:
+   static log4cplus::Logger m_logger;
 
    std::string m_scenario_name;
    static std::map<std::string, int> m_aircraft_string_int_map;

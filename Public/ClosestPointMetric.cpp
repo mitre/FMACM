@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ClosestPointMetric.h"
@@ -20,7 +20,10 @@
 
 
 ClosestPointMetric::ClosestPointMetric(void) {
-   mMinDist = Units::NauticalMilesLength(1000000000.0);
+   m_im_ac_id = 0;
+   m_target_ac_id = 0;
+   m_report_metrics = false;
+   mMinDist = Units::infinity();
 }
 
 
@@ -59,4 +62,22 @@ Units::Length ClosestPointMetric::getMinDist() {
    // returns minimum distance.
 
    return mMinDist;
+}
+
+void ClosestPointMetric::SetAcIds(int im_ac_id, int target_ac_id) {
+   m_im_ac_id = im_ac_id;
+   m_target_ac_id = target_ac_id;
+   m_report_metrics = (im_ac_id != target_ac_id && target_ac_id >= 0);
+}
+
+int ClosestPointMetric::GetImAcId() const {
+   return m_im_ac_id;
+}
+
+bool ClosestPointMetric::IsReportMetrics() const {
+   return m_report_metrics;
+}
+
+int ClosestPointMetric::GetTargetAcId() const {
+   return m_target_ac_id;
 }

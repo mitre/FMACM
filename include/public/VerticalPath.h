@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -23,12 +23,30 @@
 
 class VerticalPath
 {
+
 public:
-   VerticalPath(void);
 
-   virtual ~VerticalPath(void);
+   enum PredictionAlgorithmType
+   {
+      UNDETERMINED = 0,
+      LEVEL,
+      LEVEL_DECEL1,
+      LEVEL_DECEL2,
+      CONSTANT_CAS,
+      CONSTANT_MACH,
+      CONSTANT_DECEL,
+      IDLE1,
+      IDLE2,
+      FPA,
+      FPA_DECEL,
+      FPA_TO_CURRENT_POS
+   };
 
-   void append(const VerticalPath &in);
+   VerticalPath();
+
+   virtual ~VerticalPath();
+
+   void Append(const VerticalPath &in);
 
    void operator+=(const VerticalPath &in);
 
@@ -52,6 +70,5 @@ public:
    std::vector<double> mass;
    std::vector<Units::MetersPerSecondSpeed> wind_velocity_east;
    std::vector<Units::MetersPerSecondSpeed> wind_velocity_north;
-
-private:
+   std::vector<PredictionAlgorithmType> algorithm_type;
 };

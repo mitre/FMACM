@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/HorizontalPathTracker.h>
@@ -44,8 +44,10 @@ std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(co
    Units::RadiansAngle crs(horizontal_trajectory[0].m_path_course);
    HorizontalPath hp;
    hp.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-   hp.m_x_position_meters = horizontal_trajectory[0].m_x_position_meters - Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs) ;  // meter
-   hp.m_y_position_meters = horizontal_trajectory[0].m_y_position_meters - Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs);  // meter
+   hp.SetXYPositionMeters(horizontal_trajectory[0].GetXPositionMeters()
+         - Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs),
+         horizontal_trajectory[0].GetYPositionMeters()
+         - Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs));  // meter
    hp.m_path_length_cumulative_meters = 0;
    hp.m_path_course = horizontal_trajectory[0].m_path_course;
    extended_trajectory.push_back(hp);
@@ -61,8 +63,10 @@ std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(co
    Units::RadiansAngle crs_back(horizontal_trajectory.back().m_path_course);
    HorizontalPath hp_beginning;
    hp_beginning.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-   hp_beginning.m_x_position_meters = horizontal_trajectory.back().m_x_position_meters + Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs_back) ;  // meter
-   hp_beginning.m_y_position_meters = horizontal_trajectory.back().m_y_position_meters + Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs_back);  // meter
+   hp_beginning.SetXYPositionMeters(horizontal_trajectory.back().GetXPositionMeters()
+         + Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs_back),
+         horizontal_trajectory.back().GetYPositionMeters()
+         + Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs_back));  // meter
    hp_beginning.m_path_length_cumulative_meters = horizontal_trajectory.back().m_path_length_cumulative_meters + 2 * Units::MetersLength(EXTENSION_LENGTH).value();
    hp_beginning.m_path_course = horizontal_trajectory.back().m_path_course;
    extended_trajectory.push_back(hp_beginning);
@@ -135,8 +139,8 @@ void HorizontalPathTracker::UpdateHorizontalTrajectory(const std::vector<Horizon
 bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
                                              const Units::Length position_y,
                                              std::vector<HorizontalPath>::size_type &node_index) {
-   bool is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].m_x_position_meters) - position_x) < ON_NODE_TOLERANCE &&
-         Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].m_y_position_meters) - position_y) < ON_NODE_TOLERANCE;
+   bool is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetXPositionMeters()) - position_x) < ON_NODE_TOLERANCE &&
+         Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetYPositionMeters()) - position_y) < ON_NODE_TOLERANCE;
 
    if (!is_on_node) {
       std::vector<HorizontalPath>::size_type next_index;
@@ -144,8 +148,8 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
          case TrajectoryIndexProgressionDirection::DECREMENTING:
             if (m_current_index > 0) {
                next_index = m_current_index - 1;  // can go UB
-               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_x_position_meters) - position_x);
-               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_y_position_meters) - position_y);
+               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) - position_x);
+               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) - position_y);
                is_on_node = x_diff < ON_NODE_TOLERANCE && y_diff < ON_NODE_TOLERANCE;
                if (is_on_node) node_index = next_index;
             }
@@ -154,8 +158,8 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
          case TrajectoryIndexProgressionDirection::INCREMENTING:
             if (m_current_index < m_extended_horizontal_trajectory.size()-1) {
                next_index = m_current_index + 1;
-               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_x_position_meters) - position_x);
-               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_y_position_meters) - position_y);
+               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) - position_x);
+               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) - position_y);
                is_on_node = x_diff < ON_NODE_TOLERANCE && y_diff < ON_NODE_TOLERANCE;
                if (is_on_node) node_index = next_index;
             }
@@ -163,8 +167,8 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
 
          case TrajectoryIndexProgressionDirection::UNDEFINED:
             for (auto index = 0; index < m_extended_horizontal_trajectory.size(); ++index) {
-               is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].m_x_position_meters) - position_x) < ON_NODE_TOLERANCE &&
-                            Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].m_y_position_meters) - position_y) < ON_NODE_TOLERANCE;
+               is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetXPositionMeters()) - position_x) < ON_NODE_TOLERANCE &&
+                            Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetYPositionMeters()) - position_y) < ON_NODE_TOLERANCE;
                if (is_on_node) {
                   node_index = index;
                   break;

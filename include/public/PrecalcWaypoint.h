@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,7 +26,7 @@ class PrecalcWaypoint : public LoggingLoadable
 public:
    PrecalcWaypoint();
 
-   virtual ~PrecalcWaypoint() = default;
+   virtual ~PrecalcWaypoint();
 
    bool operator==(const PrecalcWaypoint &obj) const;
 
@@ -34,15 +34,15 @@ public:
 
    std::string m_name;
 
-   double m_leg_length_meters;
+   Units::Length m_leg_length;
    Units::UnsignedRadiansAngle m_course_angle;
 
-   double m_x_pos_meters;
-   double m_y_pos_meters;
+   Units::MetersLength m_x_pos_meters;
+   Units::MetersLength m_y_pos_meters;
 
-   double m_center_x_for_rf_leg;
-   double m_center_y_for_rf_leg;
-   double m_radius_rf_leg_meters;
+   Units::MetersLength m_rf_leg_center_x;
+   Units::MetersLength m_rf_leg_center_y;
+   Units::MetersLength m_radius_rf_leg;
 
    Units::RadiansAngle m_bank_angle;
    Units::MetersPerSecondSpeed m_ground_speed;

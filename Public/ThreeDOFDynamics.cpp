@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/CoreUtils.h>
@@ -48,9 +48,9 @@ AircraftState ThreeDOFDynamics::Update(const AircraftState &aircraft_state,
                                               m_dynamics_state.x << "," <<
                                               m_dynamics_state.y << ")");
 
-   InternalObserver::getInstance()->cross_entry.time = aircraft_state.m_time;
+   InternalObserver::getInstance()->GetCrossEntry().time = aircraft_state.m_time;
 
-   if (InternalObserver::getInstance()->debugTrueWind()) {
+   if (InternalObserver::getInstance()->IsDebugTrueWind()) {
       InternalObserver::getInstance()->setTrueWindHdrVals(aircraft_state.m_time, aircraft_state.m_id);
    }
 
@@ -165,6 +165,9 @@ AircraftState ThreeDOFDynamics::Integrate(const Guidance &guidance,
    result_state.m_Vw_perp = Units::MetersPerSecondSpeed(Vw_perp).value();
    result_state.m_Vwx_dh = dVwx_dh;
    result_state.m_Vwy_dh = dVwy_dh;
+   result_state.m_sensed_temperature = m_true_weather.GetTemperature();
+   result_state.m_sensed_density = m_true_weather.GetDensity();
+   result_state.m_sensed_pressure = m_true_weather.GetPressure();
 
    return result_state;
 }
@@ -415,7 +418,7 @@ void ThreeDOFDynamics::CalculateEnvironmentalWind(WindStack &windstack_x,
    windstack_y = m_true_weather.north_south;
 
 
-   if (InternalObserver::getInstance()->debugTrueWind()) {
+   if (InternalObserver::getInstance()->IsDebugTrueWind()) {
       InternalObserver::getInstance()->writeTrueWind(ThreeDOFDynamics::GetTrueWindAsCsvString(windstack_x, windstack_y));
    }
 

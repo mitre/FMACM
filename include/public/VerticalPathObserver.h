@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -31,8 +31,8 @@ class VerticalPathObserver
 public:
    VerticalPathObserver();
 
-   VerticalPathObserver(const std::string &scenario_name,
-                        const std::string &file_name,
+   VerticalPathObserver(std::string scenario_name,
+                        std::string file_name,
                         bool is_target_aircraft_data);
 
    virtual ~VerticalPathObserver();

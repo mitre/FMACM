@@ -12,10 +12,13 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/StandardAtmosphere.h"
+#include "utility/Logging.h"
+
+log4cplus::Logger StandardAtmosphere::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("StandardAtmosphere"));
 
 // Standard Temperature at Sea Level
 // BADA_37_USER_MANUAL eq. 3.2-3
@@ -24,6 +27,34 @@ const Units::KelvinTemperature T0_ISA(288.15);
 // Temperature of the tropopause
 // BADA_37_USER_MANUAL eq. 3.2-4
 const Units::KelvinTemperature T_TROP(216.65);
+
+const Units::KelvinPerMeter TEMPERATURE_GRADIENT_TROPOSPHERE(-.0065);
+
+const StandardAtmosphere StandardAtmosphere::ISA0(Units::CelsiusTemperature(0));
+
+StandardAtmosphere* StandardAtmosphere::MakeInstance(
+      const Units::KelvinTemperature temperature,
+      const Units::Length altitude) {
+   if (temperature < T_TROP) {
+      LOG4CPLUS_FATAL(m_logger, "Unable to create StandardAtmosphere with temperature " << temperature
+            << " at " << Units::FeetLength(altitude) << ".  Tropopause temperature is " << T_TROP);
+      throw std::runtime_error("Invalid temperature");
+   }
+   if (altitude < Units::zero()) {
+      LOG4CPLUS_FATAL(m_logger, "Specified altitude is below sea level:  " << Units::FeetLength(altitude));
+      throw std::runtime_error("Invalid altitude");
+   }
+   if (temperature == T_TROP) {
+      LOG4CPLUS_WARN(m_logger, "StandardAtmosphere created using tropopause temperature " << T_TROP
+            << " at " << Units::FeetLength(altitude) << ".  Assuming that represents the floor of the tropopause.");
+   }
+
+   // sea_level_temperature = temperature + 6.5/1000 * altitude
+   Units::KelvinTemperature sea_level_temperature = temperature - TEMPERATURE_GRADIENT_TROPOSPHERE * altitude;
+   Units::KelvinTemperature offset(sea_level_temperature - ISA0.GetSeaLevelTemperature());
+   LOG4CPLUS_TRACE(m_logger, "For StandardAtmosphere with " << temperature << " at " << Units::FeetLength(altitude) << ", offset is " << offset);
+   return new StandardAtmosphere(offset);
+}
 
 StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset) :
       m_temperature_offset(temperatureOffset),
@@ -50,7 +81,7 @@ Units::KelvinTemperature StandardAtmosphere::GetTemperature(const Units::Length 
    if (altitude_msl < GetTropopauseHeight()) {
       T = GetSeaLevelTemperature() - Units::KelvinPerMeter(6.5 / 1000) * altitude_msl;
    } else {
-      T = T_TROP + m_temperature_offset;
+      T = T_TROP;
    }
 
    return T;

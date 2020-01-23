@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -73,7 +73,6 @@ public:
                           double true_dist_in); // add an entry to the command list
    void process_IM_command(); // process the IM report
 
-   // TODO: is this part of 'output the PSEB spacing algorithm values'?
    void process_NM_aircraft();
 
    void process_NM_stats();
@@ -137,9 +136,6 @@ public:
    void dumpTargetKinTraj(int id,
                           const VerticalPath &fullTraj);
 
-   // true wind debug data.
-   bool debugTrueWind();
-
    void writeTrueWind(std::string str);
 
    void setTrueWindHdrVals(double time,
@@ -159,54 +155,16 @@ public:
 	static void FatalError(const char *str)
 	{
 		LOG4CPLUS_FATAL(logger, str);
-		// Can this getchar() be removed?  KAL, 9/22/2016
-		// getchar();
 		throw std::logic_error(str);
 	} // FatalError
 
-   typedef std::vector<AircraftState> listlist;
-   listlist isa;
-   std::vector<AircraftState> truth_state_vector_list;
-   // output data vectors
+   NMObserver &GetNMObserver(int id);
 
-   std::vector<std::vector<std::vector<std::string> > > stateModelOutput;
-   std::vector<IMCommandObserver> im_commands;
-   std::vector<DynamicsObserver> achieved_dynamics_list;
-   std::vector<NMObserver> aircraft_NM_list;
-   std::vector<std::vector<int> > aircraft_speed_count_list;
-   CrossTrackObserver cross_entry;
+   MaintainMetric &GetMaintainMetric(int id);
 
-   std::vector<MaintainMetric> maintainStats;
-   std::vector<std::string> maintainOutput;
+   MergePointMetric &GetMergePointMetric(int id);
 
-   std::vector<double> finalGS;
-   std::vector<std::string> finalGSOutput;
-
-   std::vector<MergePointMetric> mergePointStats;
-   std::vector<std::string> mergePointOutput;
-
-   std::vector<ClosestPointMetric> closestPointStats;
-   std::vector<std::string> closestPointOutput;
-   std::vector<Sensor::ADSB::ADSBSVReport> ptis_b_report_list;
-
-   int cycle[6000];
-   double IAS[6000];
-
-   std::vector<std::vector<AchieveObserver> > mAchieveList; // Organized by aircraft id.
-
-   // Kinematic trajectory output objects.  Each dumps kinematic trajectories
-   // over a whole scenario, for all iterations for all aircraft into a single
-   // file.
-
-   VerticalPathObserver *mOwnKinVertPathObs;   // Outputs own kinematic predicted vertical paths.
-   VerticalPathObserver *mTargKinVertPathObs;  // Outputs target kinematic predicted vertical paths.
-
-   // Some debug for winds from dynamics and speed_on_pitch_control_dynamics.
-   double trueTime;
-   int trueId;
-   bool debuggingTrueWind;
-
-   int scenario_iter; // variable to store the current scenario iteration
+   ClosestPointMetric &GetClosestPointMetric(int id);
 
    void set_scenario_name(std::string in);
 
@@ -222,8 +180,31 @@ public:
    void SetRecordMaintainMetrics(bool new_value);
 
    const bool GetRecordMaintainMetrics() const;
+   bool IsDebugTrueWind() const;
+   void SetDebugTrueWind(bool debug_true_wind);
+   int GetScenarioIter() const;
+   void SetScenarioIter(int scenario_iter);
+   CrossTrackObserver& GetCrossEntry();
 
 private:
+   class AircraftIterationStats {
+   public:
+      MergePointMetric m_merge_point_metric;
+      MaintainMetric m_maintain_metric;
+      ClosestPointMetric m_closest_point_metric;
+      double finalGS;
+      AircraftIterationStats();
+   };
+
+   class AircraftScenarioStats {
+   public:
+      NMObserver m_nm_observer;
+      std::vector<AchieveObserver> m_achieve_list;
+   };
+
+
+   static InternalObserver *mInstance;
+   static log4cplus::Logger logger;
 
    InternalObserver(void);
 
@@ -238,19 +219,49 @@ private:
    // Returns header for state model report.
    std::string stateModelHdr();
 
-   //Data for individual aircraft
+   // output flags
+   bool outputNMFiles;
+   bool m_save_maintain_metrics;
 
    //Data for aggregate
    std::string scenario_name;
 
-   //NM output flag
-   bool outputNMFiles;
+   int m_scenario_iter; // variable to store the current scenario iteration
 
-   bool m_save_maintain_metrics;
+   CrossTrackObserver m_cross_entry;
 
    std::vector<std::string> predWinds;
 
-   static InternalObserver *mInstance;
-   static log4cplus::Logger logger;
+   typedef std::vector<AircraftState> listlist;
+   listlist isa;
+   std::vector<AircraftState> truth_state_vector_list;
+
+   //Data for individual aircraft
+   std::map<int,AircraftIterationStats> m_aircraft_iteration_stats;  // cleared between iterations
+   std::map<int,AircraftScenarioStats> m_aircraft_scenario_stats; // never cleared
+
+   // output data vectors
+   std::vector<std::vector<std::vector<std::string> > > stateModelOutput;
+   std::vector<IMCommandObserver> im_commands;
+   std::vector<std::vector<int> > aircraft_speed_count_list;
+   std::vector<Sensor::ADSB::ADSBSVReport> ptis_b_report_list;
+
+   // string vectors for file output
+   std::vector<std::string> maintainOutput;
+   std::vector<std::string> finalGSOutput;
+   std::vector<std::string> mergePointOutput;
+   std::vector<std::string> closestPointOutput;
+
+   // Kinematic trajectory output objects.  Each dumps kinematic trajectories
+   // over a whole scenario, for all iterations for all aircraft into a single
+   // file.
+   VerticalPathObserver *mOwnKinVertPathObs;   // Outputs own kinematic predicted vertical paths.
+   VerticalPathObserver *mTargKinVertPathObs;  // Outputs target kinematic predicted vertical paths.
+
+   // Some debug for winds from dynamics and speed_on_pitch_control_dynamics.
+   double trueTime;
+   int trueId;
+   bool debugTrueWind;
+
 
 };

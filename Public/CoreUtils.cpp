@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <stdexcept>
@@ -62,8 +62,16 @@ double CoreUtils::LinearlyInterpolate(int upper_index,
    if ((x_interpolation_value - v1) * (x_interpolation_value - v2) > 0) {
       char msg[200];
       sprintf(msg, "v (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
-      LOG4CPLUS_FATAL(m_logger, msg);
-      throw domain_error(msg);
+
+      double ratio = (x_interpolation_value-v1) / (x_interpolation_value-v2);   // must be positive
+      if (upper_index + 1 == x_values.size() && (ratio < .1 || ratio > 10)) {
+         // within 10%, let him off with a warning
+         LOG4CPLUS_WARN(m_logger, msg);
+      }
+      else {
+         LOG4CPLUS_FATAL(m_logger, msg);
+         throw domain_error(msg);
+      }
    }
 
    return ((o2 - o1) / (v2 - v1)) * (x_interpolation_value - v1) + o1;

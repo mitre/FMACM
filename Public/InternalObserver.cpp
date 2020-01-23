@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/InternalObserver.h"
@@ -41,8 +41,8 @@ void InternalObserver::clearInstance() {
 
 InternalObserver::InternalObserver(void) {
    m_save_maintain_metrics = true;
-   scenario_iter = 0;
-   debuggingTrueWind = false;
+   m_scenario_iter = 0;
+   debugTrueWind = false;
 
    trueTime = -99999.0;
    trueId = -1;
@@ -71,10 +71,6 @@ void InternalObserver::reset(void) {
 }
 
 void InternalObserver::process(void) {
-   //ADSBEther::iterator sv_report;
-
-   //TODO: solve the problem caused by dynamic memory allocation in track class, specifically, in cov.m
-   //The memmory for cov.m (dynamic) is lost at this point. !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
    FILE *fp = fopen((scenario_name + "-output-WinSS.csv").c_str(), "w");
 
@@ -107,9 +103,7 @@ void InternalObserver::process(void) {
    processClosestPointMetric();
    process_ptis_b_reports();
 
-   if (mAchieveList.size() > 0) {
-      dumpAchieveList();
-   }
+   dumpAchieveList();
 
 }
 
@@ -126,22 +120,22 @@ void InternalObserver::storeStateModel(AircraftState asv,
    // asv:Aircraft state vector data.
    // flapsConfig:Configuration of flaps.
 
-   while (scenario_iter >= (int) stateModelOutput.size()) {
+   while (m_scenario_iter >= (int) stateModelOutput.size()) {
       vector<vector<string> > strings;
       stateModelOutput.push_back(strings);
    }
 
    // Add vector for current aircraft if needed.
 
-   while (asv.m_id >= (int) stateModelOutput[scenario_iter].size()) {
+   while (asv.m_id >= (int) stateModelOutput[m_scenario_iter].size()) {
       vector<string> strings;
-      stateModelOutput[scenario_iter].push_back(strings);
+      stateModelOutput[m_scenario_iter].push_back(strings);
    }
 
 
    // Store state model string.
 
-   stateModelOutput[scenario_iter][asv.m_id].push_back(stateModelString(asv, flapsConfig, speed_brake, ias));
+   stateModelOutput[m_scenario_iter][asv.m_id].push_back(stateModelString(asv, flapsConfig, speed_brake, ias));
 }
 
 
@@ -162,7 +156,7 @@ string InternalObserver::stateModelString(AircraftState asv,
 
    double currSpeed = sqrt(pow(asv.m_xd, 2) + pow(asv.m_yd, 2));
 
-   strm << scenario_iter << ","; // iteration number
+   strm << m_scenario_iter << ","; // iteration number
    strm << asv.m_id << ","; // id
    strm << asv.m_time << ","; // time
    strm << asv.m_x << ","; // x value in feet
@@ -196,6 +190,37 @@ string InternalObserver::stateModelString(AircraftState asv,
    return str;
 }
 
+bool InternalObserver::IsDebugTrueWind() const {
+   return debugTrueWind;
+}
+
+void InternalObserver::SetDebugTrueWind(bool debug_true_wind) {
+   debugTrueWind = debug_true_wind;
+}
+
+MergePointMetric& InternalObserver::GetMergePointMetric(int id) {
+   return m_aircraft_iteration_stats[id].m_merge_point_metric;
+}
+
+MaintainMetric& InternalObserver::GetMaintainMetric(int id) {
+   return m_aircraft_iteration_stats[id].m_maintain_metric;
+}
+
+ClosestPointMetric& InternalObserver::GetClosestPointMetric(int id) {
+   return m_aircraft_iteration_stats[id].m_closest_point_metric;
+}
+
+NMObserver& InternalObserver::GetNMObserver(int id) {
+   return m_aircraft_scenario_stats[id].m_nm_observer;
+}
+
+int InternalObserver::GetScenarioIter() const {
+   return m_scenario_iter;
+}
+
+void InternalObserver::SetScenarioIter(int scenario_iter) {
+   this->m_scenario_iter = scenario_iter;
+}
 
 string InternalObserver::stateModelHdr() {
    // Returns state model string.
@@ -253,7 +278,7 @@ void InternalObserver::IM_command_output(int id_in,
                                          double predDistIn,
                                          double trueDistIn) {
    IMCommandObserver new_command;
-   new_command.iteration = this->scenario_iter;
+   new_command.iteration = this->m_scenario_iter;
    new_command.id = id_in;
    new_command.time = time_in;
    new_command.state_altitude = state_alt * FEET_TO_METERS;
@@ -311,12 +336,13 @@ void InternalObserver::process_NM_aircraft() {
       // Write NM report if we are outputting NM files.
 
       // loop to process all of the aircraft NM reports
-      for (unsigned int loop = 0; loop < aircraft_NM_list.size(); loop++) {
+      for (auto ix = m_aircraft_scenario_stats.begin(); ix != m_aircraft_scenario_stats.end(); ++ix) {
+         NMObserver &nm_observer = ix->second.m_nm_observer;
          // if the current aircraft has Nautical Mile output entries output them
-         if (!aircraft_NM_list[loop].entry_list.empty()) {
+         if (!nm_observer.entry_list.empty()) {
             char *temp = new char[10];
 
-            sprintf(temp, "%u", loop);
+            sprintf(temp, "%d", ix->first);
 
             string output_file_name = scenario_name + "_AC" + temp + "-NM-output.csv";
             delete[] temp;
@@ -324,7 +350,7 @@ void InternalObserver::process_NM_aircraft() {
             ofstream out;
 
             // if first iteration create file, otherwise append file
-            if (scenario_iter == 0) {
+            if (m_scenario_iter == 0) {
                out.open(output_file_name.c_str());
             } else {
                out.open(output_file_name.c_str(), ios::out | ios::app);
@@ -334,50 +360,50 @@ void InternalObserver::process_NM_aircraft() {
             if (out.is_open()) {
                // if first iteration create header
 
-               if (scenario_iter == 0) {
+               if (m_scenario_iter == 0) {
                   out <<
                       "AC_ID,Iteration,Predicted_Distance(NM),True_Distance(NM),Time,Own_Command_IAS(Knots),Own_Current_GroundSpeed(Knots),Target_GroundSpeed(Knots),Min_IAS_Command(Knots),Max_IAS_Command(Knots),Min_GS_Command(Knots),Max_GS_Command(Knots)"
                       <<
                       endl;
                }
 
-               aircraft_NM_list[loop].initialize_stats(); // initialize the statistics to the size of the entry list
+               nm_observer.initialize_stats(); // initialize the statistics to the size of the entry list
 
                // loop to process all aircraft entries
-               for (unsigned int index = 0; index < aircraft_NM_list[loop].entry_list.size(); index++) {
+               for (unsigned int index = 0; index < nm_observer.entry_list.size(); index++) {
                   // output the report
-                  out << loop << ",";
-                  out << scenario_iter << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].time << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].minTAS / KNOTS_TO_METERS_PER_SECOND << ",";
-                  out << aircraft_NM_list[loop].entry_list[index].maxTAS / KNOTS_TO_METERS_PER_SECOND << endl;
+                  out << ix->first << ",";
+                  out << m_scenario_iter << ",";
+                  out << nm_observer.entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS << ",";
+                  out << nm_observer.entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS << ",";
+                  out << nm_observer.entry_list[index].time << ",";
+                  out << nm_observer.entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].minTAS / KNOTS_TO_METERS_PER_SECOND << ",";
+                  out << nm_observer.entry_list[index].maxTAS / KNOTS_TO_METERS_PER_SECOND << endl;
 
                   // add entries to Statistics class
-                  aircraft_NM_list[loop].predictedDistance[index] =
-                        aircraft_NM_list[loop].entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS;
-                  aircraft_NM_list[loop].trueDistance[index] =
-                        aircraft_NM_list[loop].entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS;
-                  aircraft_NM_list[loop].ac_IAS_stats[index].Insert(
-                        aircraft_NM_list[loop].entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND);
-                  aircraft_NM_list[loop].ac_GS_stats[index].Insert(
-                        aircraft_NM_list[loop].entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND);
-                  aircraft_NM_list[loop].target_GS_stats[index].Insert(
-                        aircraft_NM_list[loop].entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND);
-                  aircraft_NM_list[loop].min_IAS_stats[index].Insert(
-                        aircraft_NM_list[loop].entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND);
-                  aircraft_NM_list[loop].max_IAS_stats[index].Insert(
-                        aircraft_NM_list[loop].entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND);
+                  nm_observer.predictedDistance[index] =
+                        nm_observer.entry_list[index].predictedDistance / NAUTICAL_MILES_TO_METERS;
+                  nm_observer.trueDistance[index] =
+                        nm_observer.entry_list[index].trueDistance / NAUTICAL_MILES_TO_METERS;
+                  nm_observer.ac_IAS_stats[index].Insert(
+                        nm_observer.entry_list[index].acIAS / KNOTS_TO_METERS_PER_SECOND);
+                  nm_observer.ac_GS_stats[index].Insert(
+                        nm_observer.entry_list[index].acGS / KNOTS_TO_METERS_PER_SECOND);
+                  nm_observer.target_GS_stats[index].Insert(
+                        nm_observer.entry_list[index].targetGS / KNOTS_TO_METERS_PER_SECOND);
+                  nm_observer.min_IAS_stats[index].Insert(
+                        nm_observer.entry_list[index].minIAS / KNOTS_TO_METERS_PER_SECOND);
+                  nm_observer.max_IAS_stats[index].Insert(
+                        nm_observer.entry_list[index].maxIAS / KNOTS_TO_METERS_PER_SECOND);
                }
 
-               aircraft_NM_list[loop].entry_list.clear();
-               aircraft_NM_list[loop].curr_NM = -2; // resets the current NM value
+               nm_observer.entry_list.clear();
+               nm_observer.curr_NM = -2; // resets the current NM value
                out.close();
             }
          }
@@ -391,13 +417,13 @@ void InternalObserver::process_NM_stats() {
    if (outputNM()) {
 
       // loop to process all of the aircraft NM reports
+      for (auto ix = m_aircraft_scenario_stats.begin(); ix != m_aircraft_scenario_stats.end(); ++ix) {
+         NMObserver &nm_observer = ix->second.m_nm_observer;
 
-      for (unsigned int loop = 0; loop < aircraft_NM_list.size(); loop++) {
-
-         if (aircraft_NM_list[loop].predictedDistance.size() > 0) {
+         if (nm_observer.predictedDistance.size() > 0) {
             char *temp = new char[10];
 
-            sprintf(temp, "%d", loop);
+            sprintf(temp, "%d", ix->first);
 
             string output_file_name = scenario_name + "_AC" + temp + "-stats-NM-output.csv";
 
@@ -415,19 +441,19 @@ void InternalObserver::process_NM_stats() {
                    endl;
 
                // loop to process all distance entry statistics
-               for (unsigned int index = 0; index < aircraft_NM_list[loop].predictedDistance.size(); index++) {
-                  out << aircraft_NM_list[loop].predictedDistance[index] << ",";
-                  out << aircraft_NM_list[loop].trueDistance[index] << ",";
-                  out << aircraft_NM_list[loop].ac_IAS_stats[index].GetMean() << ",";
-                  out << aircraft_NM_list[loop].ac_IAS_stats[index].ComputeStandardDeviation() << ",";
-                  out << aircraft_NM_list[loop].ac_GS_stats[index].GetMean() << ",";
-                  out << aircraft_NM_list[loop].ac_GS_stats[index].ComputeStandardDeviation() << ",";
-                  out << aircraft_NM_list[loop].target_GS_stats[index].GetMean() << ",";
-                  out << aircraft_NM_list[loop].target_GS_stats[index].ComputeStandardDeviation() << ",";
-                  out << aircraft_NM_list[loop].min_IAS_stats[index].GetMean() << ",";
-                  out << aircraft_NM_list[loop].min_IAS_stats[index].ComputeStandardDeviation() << ",";
-                  out << aircraft_NM_list[loop].max_IAS_stats[index].GetMean() << ",";
-                  out << aircraft_NM_list[loop].max_IAS_stats[index].ComputeStandardDeviation() << endl;
+               for (unsigned int index = 0; index < nm_observer.predictedDistance.size(); index++) {
+                  out << nm_observer.predictedDistance[index] << ",";
+                  out << nm_observer.trueDistance[index] << ",";
+                  out << nm_observer.ac_IAS_stats[index].GetMean() << ",";
+                  out << nm_observer.ac_IAS_stats[index].ComputeStandardDeviation() << ",";
+                  out << nm_observer.ac_GS_stats[index].GetMean() << ",";
+                  out << nm_observer.ac_GS_stats[index].ComputeStandardDeviation() << ",";
+                  out << nm_observer.target_GS_stats[index].GetMean() << ",";
+                  out << nm_observer.target_GS_stats[index].ComputeStandardDeviation() << ",";
+                  out << nm_observer.min_IAS_stats[index].GetMean() << ",";
+                  out << nm_observer.min_IAS_stats[index].ComputeStandardDeviation() << ",";
+                  out << nm_observer.max_IAS_stats[index].GetMean() << ",";
+                  out << nm_observer.max_IAS_stats[index].ComputeStandardDeviation() << endl;
                }
 
                out.close();
@@ -447,20 +473,20 @@ void InternalObserver::cross_output(double x_in,
                                     double psi_command,
                                     double phi,
                                     double limited_phi) {
-   cross_entry.x = x_in;
-   cross_entry.y = y_in;
-   cross_entry.dynamic_cross = dynamic_cross;
-   cross_entry.commanded_cross = commanded_cross;
-   cross_entry.psi_command = psi_command;
-   cross_entry.phi = phi;
-   cross_entry.limited_phi = limited_phi;
+   m_cross_entry.x = x_in;
+   m_cross_entry.y = y_in;
+   m_cross_entry.dynamic_cross = dynamic_cross;
+   m_cross_entry.commanded_cross = commanded_cross;
+   m_cross_entry.psi_command = psi_command;
+   m_cross_entry.phi = phi;
+   m_cross_entry.limited_phi = limited_phi;
 
 }
 
 void InternalObserver::process_cross() {
    string output_file_name = scenario_name + "-crosstrack-report.csv";
    ofstream out;
-   if (cross_entry.time < 2) {
+   if (m_cross_entry.time < 2) {
       out.open(output_file_name.c_str());
    } else {
       out.open(output_file_name.c_str(), ios::out | ios::app);
@@ -468,26 +494,26 @@ void InternalObserver::process_cross() {
 
    if (out.is_open() == true) {
       // if at the first time stamp create the header
-      if (cross_entry.time < 2) {
+      if (m_cross_entry.time < 2) {
          out <<
              "Time,X(Meters),Y(Meters),Dynamics_Cross(Meters),Commanded_Cross(Meters),Unmodified_Cross,Psi_Command,Phi,Limited_Phi,Reported_Distance(Meters)"
              <<
              endl;
       }
 
-      if (cross_entry.time >= 0.0) {
+      if (m_cross_entry.time >= 0.0) {
          // add entry to the output file
 
-         out << cross_entry.time << ",";
-         out << cross_entry.x << ",";
-         out << cross_entry.y << ",";
-         out << cross_entry.dynamic_cross << ",";
-         out << cross_entry.commanded_cross << ",";
-         out << cross_entry.unmodified_cross << ",";
-         out << cross_entry.psi_command << ",";
-         out << cross_entry.phi << ",";
-         out << cross_entry.limited_phi << ",";
-         out << cross_entry.reported_distance << endl;
+         out << m_cross_entry.time << ",";
+         out << m_cross_entry.x << ",";
+         out << m_cross_entry.y << ",";
+         out << m_cross_entry.dynamic_cross << ",";
+         out << m_cross_entry.commanded_cross << ",";
+         out << m_cross_entry.unmodified_cross << ",";
+         out << m_cross_entry.psi_command << ",";
+         out << m_cross_entry.phi << ",";
+         out << m_cross_entry.limited_phi << ",";
+         out << m_cross_entry.reported_distance << endl;
       }
 
       out.close(); // close output file
@@ -526,24 +552,8 @@ void InternalObserver::process_speed_command_count() {
 }
 
 void InternalObserver::initializeIteration(int number_of_aircraft_in_scenario) {
-   maintainStats.clear();
-   finalGS.clear();
-   mergePointStats.clear();
-   closestPointStats.clear();
+   m_aircraft_iteration_stats.clear();
    predWinds.clear();
-
-   for (int ix = 0; ix < number_of_aircraft_in_scenario; ix++) {
-      MaintainMetric emptyMaintain;
-      maintainStats.push_back(emptyMaintain);
-
-      finalGS.push_back(-1.0);
-
-      MergePointMetric emptyMergePoint;
-      mergePointStats.push_back(emptyMergePoint);
-
-      ClosestPointMetric emptyClosestPoint;
-      closestPointStats.push_back(emptyClosestPoint);
-   }
 }
 
 void InternalObserver::outputMaintainMetrics() {
@@ -560,9 +570,12 @@ void InternalObserver::outputMaintainMetrics() {
    if (maintainOutput.size() == 0) {
       body = "Iteration";
 
-      for (unsigned int ix = 1; ix < maintainStats.size(); ix++) {
+      for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+         int acid = ix->first;
+         MaintainMetric &maintain_metric = ix->second.m_maintain_metric;
+         if (!maintain_metric.IsOutputEnabled()) continue;
          sprintf(bfr, ",ac %d-mean,ac %d-stdev,ac %d-95bound,ac %d-maintainTime,ac %d-timeGreaterThan10",
-                 ix, ix, ix, ix, ix);
+                 acid, acid, acid, acid, acid);
          body = body + bfr;
       }
 
@@ -574,11 +587,13 @@ void InternalObserver::outputMaintainMetrics() {
    sprintf(bfr, "%d", ((int) maintainOutput.size() - 1));  // Iteration
    body = bfr;
 
-   for (unsigned int ix = 1; ix < maintainStats.size(); ix++) {
-      if (maintainStats[ix].hasSamples()) {
-         sprintf(bfr, ",%f,%f,%f,%f,%d", maintainStats[ix].getMeanErr(),
-                 maintainStats[ix].getStdErr(), maintainStats[ix].getBound95(),
-                 maintainStats[ix].getTotMaintain(), maintainStats[ix].getNumCycles());
+   for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+      MaintainMetric &maintain_metric = ix->second.m_maintain_metric;
+      if (!maintain_metric.IsOutputEnabled()) continue;
+      if (maintain_metric.hasSamples()) {
+         sprintf(bfr, ",%f,%f,%f,%f,%d", maintain_metric.getMeanErr(),
+                 maintain_metric.getStdErr(), maintain_metric.getBound95(),
+                 maintain_metric.getTotMaintain(), maintain_metric.getNumCycles());
       } else {
          sprintf(bfr, ",No samples,,,,");
       }
@@ -587,11 +602,6 @@ void InternalObserver::outputMaintainMetrics() {
    }
 
    maintainOutput.push_back(body);
-
-
-   // Clear final maintain metrics vectors.
-
-   maintainStats.clear();
 }
 
 void InternalObserver::processMaintainMetrics() {
@@ -624,15 +634,8 @@ void InternalObserver::updateFinalGS(int id,
    // id:id of aircraft.
    // gs:ground speed.
 
-   // TODO:Throw exception if id >= finalGS.size().  Also, clarify if the other should
-   // be stored, (ie:own id > 0).  The warning that was output was not desirable.
-
-   //if ((id<0) || (id>=finalGS.size()))
-   //cout << "WARNING:BAD aircraft id-final ground speed not updated.  id = " << id << endl;
-   //else
-
-   if ((id >= 0) && (id < (int) finalGS.size())) {
-      finalGS[id] = gs;
+   if (id >= 0) {
+      m_aircraft_iteration_stats[id].finalGS = gs;
    }
 
 }
@@ -652,8 +655,8 @@ void InternalObserver::outputFinalGS() {
    if (finalGSOutput.size() == 0) {
       body = "Iteration";
 
-      for (unsigned int ix = 0; ix < finalGS.size(); ix++) {
-         sprintf(bfr, ",ac %u-gs", ix);
+      for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+         sprintf(bfr, ",ac %d-gs", ix->first);
          body = body + bfr;
       }
 
@@ -665,8 +668,8 @@ void InternalObserver::outputFinalGS() {
    sprintf(bfr, "%d", ((int) finalGSOutput.size() - 1)); // Iteration // TODO:A better way of determining iteration.
    body = bfr;
 
-   for (size_t ix = 0; ix < finalGS.size(); ix++) {
-      sprintf(bfr, ",%f", finalGS[ix]);
+   for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+      sprintf(bfr, ",%f", ix->second.finalGS);
       body = body + bfr;
    }
 
@@ -675,10 +678,6 @@ void InternalObserver::outputFinalGS() {
 
    finalGSOutput.push_back(body);
 
-
-   // Clear final GS stats vector.
-
-   finalGS.clear();
 }
 
 void InternalObserver::processFinalGS() {
@@ -720,9 +719,14 @@ void InternalObserver::outputMergePointMetric() {
    if (mergePointOutput.size() == 0) {
       body = "Iteration";
 
-      for (unsigned int ix = 1; ix < mergePointStats.size(); ix++) {
-         sprintf(bfr, ",ac %d-mergePt,ac %d-distTo ac %d", ix, ix, (ix - 1));
-         body = body + bfr;
+      for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+         MergePointMetric &merge_point_metric = ix->second.m_merge_point_metric;
+         if (merge_point_metric.willReportMetrics()) {
+            int id1 = merge_point_metric.GetImAcId();
+            int id0 = merge_point_metric.GetTargetAcId();
+            sprintf(bfr, ",ac %d-mergePt,ac %d-distTo ac %d", id1, id1, id0);
+            body = body + bfr;
+         }
       }
 
       mergePointOutput.push_back(body);
@@ -733,18 +737,16 @@ void InternalObserver::outputMergePointMetric() {
    sprintf(bfr, "%d", ((int) mergePointOutput.size() - 1));  // Iteration
    body = bfr;
 
-   for (size_t ix = 1; ix < mergePointStats.size(); ix++) {
-      sprintf(bfr, ",%s,%f", mergePointStats[ix].getMergePoint().c_str(),
-              Units::NauticalMilesLength(mergePointStats[ix].getDist()).value());
-      body = body + bfr;
+   for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+      MergePointMetric &merge_point_metric = ix->second.m_merge_point_metric;
+      if (merge_point_metric.willReportMetrics()) {
+         sprintf(bfr, ",%s,%f", merge_point_metric.getMergePoint().c_str(),
+               Units::NauticalMilesLength(merge_point_metric.getDist()).value());
+         body = body + bfr;
+      }
    }
 
    mergePointOutput.push_back(body);
-
-
-   // Clear merge point vector.
-
-   mergePointStats.clear();
 
 }
 
@@ -785,10 +787,13 @@ void InternalObserver::outputClosestPointMetric() {
 
    if (closestPointOutput.size() == 0) {
       body = "Iteration";
-
-      for (unsigned int ix = 1; ix < closestPointStats.size(); ix++) {
-         sprintf(bfr, ",ac %u-smallestDistTo ac %u", ix, (ix - 1));
-         body = body + bfr;
+      for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+         ClosestPointMetric &closest_point_metric = ix->second.m_closest_point_metric;
+         if (closest_point_metric.IsReportMetrics()) {
+            sprintf(bfr, ",ac %u-smallestDistTo ac %u",
+                  closest_point_metric.GetImAcId(), closest_point_metric.GetTargetAcId());
+            body = body + bfr;
+         }
       }
 
       closestPointOutput.push_back(body);
@@ -799,18 +804,16 @@ void InternalObserver::outputClosestPointMetric() {
    sprintf(bfr, "%d", ((int) closestPointOutput.size() - 1));  // Iteration
    body = bfr;
 
-   for (size_t ix = 1; ix < closestPointStats.size(); ix++) {
-      sprintf(bfr, ",%f",
-              Units::NauticalMilesLength(closestPointStats[ix].getMinDist()).value());
-      body = body + bfr;
+   for (auto ix = m_aircraft_iteration_stats.begin(); ix != m_aircraft_iteration_stats.end(); ++ix) {
+      ClosestPointMetric &closest_point_metric = ix->second.m_closest_point_metric;
+      if (closest_point_metric.IsReportMetrics()) {
+         sprintf(bfr, ",%f",
+               Units::NauticalMilesLength(closest_point_metric.getMinDist()).value());
+         body = body + bfr;
+      }
    }
 
    closestPointOutput.push_back(body);
-
-
-   // Clear closest point vector.
-
-   closestPointStats.clear();
 
 }
 
@@ -1033,51 +1036,45 @@ void InternalObserver::addAchieveRcd(size_t aircraftId,
    // curr_distance:current distance (meters).
    // reference_distance:reference distance (meters).
 
-   while (aircraftId >= mAchieveList.size()) {
-      vector<AchieveObserver> newachievelist;
-      mAchieveList.push_back(newachievelist);
-   }
-
-   AchieveObserver achievercd(this->scenario_iter, aircraftId, tm, target_ttg_to_ach, own_ttg_to_ach,
+   AchieveObserver achievercd(this->m_scenario_iter, aircraftId, tm, target_ttg_to_ach, own_ttg_to_ach,
                               curr_distance, reference_distance);
-   mAchieveList[aircraftId].push_back(achievercd);
+   m_aircraft_scenario_stats[aircraftId].m_achieve_list.push_back(achievercd);
 }
 
 
 void InternalObserver::dumpAchieveList() {
-   // Outputs output from achieve algorithms to time to go .csv file.
+   // Writes output from achieve algorithms to time to go .csv file.
 
    string fileName = scenario_name + "-time-to-go.csv";
    ofstream out;
-   out.open(fileName.c_str());
 
    bool needHdr = true;
 
-   if (out.is_open()) {
-      for (size_t acIx = 0; acIx < mAchieveList.size(); acIx++) {
-         if (mAchieveList[acIx].size() == 0) {
-            continue;
-         } // Nada for this ac
+   for (auto ix = m_aircraft_scenario_stats.begin(); ix != m_aircraft_scenario_stats.end(); ++ix) {
+      vector<AchieveObserver> &achieve_list = ix->second.m_achieve_list;
 
-         // Header
-         if (needHdr) {
-            out << mAchieveList[acIx][0].Hdr().c_str() << endl;
-            needHdr = false;
-         }
+      if (achieve_list.empty()) {
+         continue;
+      } // Nada for this ac
 
-         for (size_t ix = 0; ix < mAchieveList[acIx].size(); ix++) {
-            out << mAchieveList[acIx][ix].ToString().c_str() << endl;
+      // Header
+      if (needHdr) {
+         out.open(fileName.c_str());
+         if (!out.is_open()) {
+            LOG4CPLUS_ERROR(logger, "Cannot open " << fileName << " for achieve list output.");
+            return;
          }
+         out << achieve_list[0].Hdr().c_str() << endl;
+         needHdr = false;
       }
+
+      for (size_t ix = 0; ix < achieve_list.size(); ix++) {
+         out << achieve_list[ix].ToString().c_str() << endl;
+      }
+   }
+   if (out.is_open())
       out.close();
-   }
 
-
-   // Clear sublists.
-
-   for (size_t acIx = 0; acIx < mAchieveList.size(); acIx++) {
-      mAchieveList[acIx].clear();
-   }
 }
 
 
@@ -1100,8 +1097,8 @@ void InternalObserver::dumpOwnKinTraj(int id,
 
    // Check iteration
 
-   if (mOwnKinVertPathObs->GetIterationNumber() != scenario_iter) {
-      mOwnKinVertPathObs->SetIterationNumber(scenario_iter);
+   if (mOwnKinVertPathObs->GetIterationNumber() != m_scenario_iter) {
+      mOwnKinVertPathObs->SetIterationNumber(m_scenario_iter);
    }
 
 
@@ -1131,8 +1128,8 @@ void InternalObserver::dumpTargetKinTraj(int id,
 
    // Check iteration
 
-   if (mTargKinVertPathObs->GetIterationNumber() != scenario_iter) {
-      mTargKinVertPathObs->SetIterationNumber(scenario_iter);
+   if (mTargKinVertPathObs->GetIterationNumber() != m_scenario_iter) {
+      mTargKinVertPathObs->SetIterationNumber(m_scenario_iter);
    }
 
 
@@ -1165,10 +1162,6 @@ void InternalObserver::setTrueWindHdrVals(double time,
    trueId = id;
 }
 
-bool InternalObserver::debugTrueWind() {
-   return this->debuggingTrueWind;
-}
-
 
 void InternalObserver::setNMOutput(bool NMflag) {
    // Sets flag to output NM data.
@@ -1196,4 +1189,12 @@ void InternalObserver::SetRecordMaintainMetrics(bool new_value) {
 
 const bool InternalObserver::GetRecordMaintainMetrics() const {
    return m_save_maintain_metrics;
+}
+
+CrossTrackObserver& InternalObserver::GetCrossEntry() {
+   return m_cross_entry;
+}
+
+InternalObserver::AircraftIterationStats::AircraftIterationStats() :
+   finalGS(-1.0) {
 }

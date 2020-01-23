@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /* CustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
@@ -49,6 +49,7 @@ double atan3(double x,
 double quantize(double value,
                 double lsb) {
    // quantizes value to lsb (least significant bit)
+   if (lsb == 0) return value;
    double r = round(value / lsb);
    if (r == -0) {
       r = 0;
@@ -60,6 +61,7 @@ double quantize(double value,
 Units::Length quantize(Units::Length value,
                        Units::Length lsb) {
    // quantizes value to lsb (least significant bit)
+   if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
    if (r == -0) {
       r = 0;
@@ -71,6 +73,7 @@ Units::Length quantize(Units::Length value,
 Units::Speed quantize(Units::Speed value,
                       Units::Speed lsb) {
    // quantizes value to lsb (least significant bit)
+   if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
    if (r == -0) {
       r = 0;
@@ -81,6 +84,7 @@ Units::Speed quantize(Units::Speed value,
 Units::Time quantize(Units::Time value,
                      Units::Time lsb) {
    // quantizes value to lsb (least significant bit)
+   if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
    if (r == -0) {
       r = 0;

@@ -12,23 +12,22 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcWaypoint.h"
 
-
 PrecalcWaypoint::PrecalcWaypoint() {
    m_name = "noname";
-   m_leg_length_meters = 0.0;
+   m_leg_length = Units::zero();
    m_course_angle = Units::DegreesAngle(0.0);
 
-   m_x_pos_meters = 0.0;
-   m_y_pos_meters = 0.0;
+   m_x_pos_meters = Units::MetersLength(0);
+   m_y_pos_meters = Units::MetersLength(0);
 
-   m_center_x_for_rf_leg = 0.0;
-   m_center_y_for_rf_leg = 0.0;
-   m_radius_rf_leg_meters = 0.0;
+   m_rf_leg_center_x = Units::MetersLength(0);
+   m_rf_leg_center_y = Units::MetersLength(0);
+   m_radius_rf_leg = Units::MetersLength(0);
 
    m_precalc_constraints.constraint_dist = 0.0; // distance constraints
    m_precalc_constraints.constraint_altHi = 0.0; // altitude max constraints
@@ -40,15 +39,17 @@ PrecalcWaypoint::PrecalcWaypoint() {
    m_loaded = false;
 }
 
+PrecalcWaypoint::~PrecalcWaypoint() = default;
+
 bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
-   bool match = (this->m_leg_length_meters == obj.m_leg_length_meters);
-   match = match && (this->m_course_angle == obj.m_course_angle);
-   match = match && (this->m_x_pos_meters == obj.m_x_pos_meters);
-   match = match && (this->m_y_pos_meters == obj.m_y_pos_meters);
-   match = match && (this->m_precalc_constraints == obj.m_precalc_constraints);
-   match = match && (this->m_center_x_for_rf_leg == obj.m_center_x_for_rf_leg);
-   match = match && (this->m_center_y_for_rf_leg == obj.m_center_y_for_rf_leg);
-   match = match && (this->m_radius_rf_leg_meters == obj.m_radius_rf_leg_meters);
+   bool match = (m_leg_length == obj.m_leg_length);
+   match = match && (m_course_angle == obj.m_course_angle);
+   match = match && (m_x_pos_meters == obj.m_x_pos_meters);
+   match = match && (m_y_pos_meters == obj.m_y_pos_meters);
+   match = match && (m_precalc_constraints == obj.m_precalc_constraints);
+   match = match && (m_rf_leg_center_x == obj.m_rf_leg_center_x);
+   match = match && (m_rf_leg_center_y == obj.m_rf_leg_center_y);
+   match = match && (m_radius_rf_leg == obj.m_radius_rf_leg);
 
    return match;
 }
@@ -56,14 +57,13 @@ bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
 bool PrecalcWaypoint::load(DecodedStream *input) {
    set_stream(input);
 
-   bool f = load_datum(m_leg_length_meters); // loads in Nautical Miles
+   Units::NauticalMilesLength leg_length;
+   bool f = load_datum(leg_length);
    if (!f) {
       LoggingLoadable::report_error("could not load leg length");
    }
-   m_leg_length_meters *= NAUTICAL_MILES_TO_METERS; // converts nautical miles to meters
+   m_leg_length = leg_length;
 
-   // Historically, course_angle was loaded in degrees but then
-   // converted in place to radians.
    Units::DegreesAngle course_angle1;
    f = load_datum(course_angle1);
    if (!f) {

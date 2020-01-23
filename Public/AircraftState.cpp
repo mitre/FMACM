@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftCalculations.h"
@@ -46,65 +46,6 @@ AircraftState::AircraftState()
 
 AircraftState::~AircraftState() = default;
 
-AircraftState::AircraftState(const AircraftState &in) {
-   m_id = in.m_id;
-   m_time = in.m_time;
-   m_x = in.m_x;
-   m_y = in.m_y;
-   m_z = in.m_z;
-   m_xd = in.m_xd;
-   m_yd = in.m_yd;
-   SetZd(in.m_zd);
-   m_xdd = in.m_xdd;
-   m_ydd = in.m_ydd;
-   m_zdd = in.m_zdd;
-
-
-   m_gamma = in.m_gamma;
-   m_psi = in.m_psi;
-
-   m_Vwx = in.m_Vwx;
-   m_Vwy = in.m_Vwy;
-
-   m_Vw_para = in.m_Vw_para;
-   m_Vw_perp = in.m_Vw_perp;
-   m_Vwy_dh = in.m_Vwy_dh;
-   m_Vwx_dh = in.m_Vwx_dh;
-
-   m_distance_to_go_meters = in.m_distance_to_go_meters;
-}
-
-AircraftState &AircraftState::operator=(const AircraftState &in) {
-   if (this != &in) {
-      m_id = in.m_id;
-      m_time = in.m_time;
-      m_x = in.m_x;
-      m_y = in.m_y;
-      m_z = in.m_z;
-      m_xd = in.m_xd;
-      m_yd = in.m_yd;
-      SetZd(in.m_zd);
-      m_xdd = in.m_xdd;
-      m_ydd = in.m_ydd;
-      m_zdd = in.m_zdd;
-
-      m_gamma = in.m_gamma;
-      m_psi = in.m_psi;
-
-      m_Vwx = in.m_Vwx;
-      m_Vwy = in.m_Vwy;
-
-      m_Vw_para = in.m_Vw_para;
-      m_Vw_perp = in.m_Vw_perp;
-      m_Vwy_dh = in.m_Vwy_dh;
-      m_Vwx_dh = in.m_Vwx_dh;
-
-      m_distance_to_go_meters = in.m_distance_to_go_meters;
-   }
-
-   return *this;
-}
-
 bool AircraftState::operator==(const AircraftState &in) const {
 
    bool same = true;
@@ -128,6 +69,16 @@ bool AircraftState::operator<(const AircraftState &in) const {
    }
 
    return false;
+}
+
+const bool AircraftState::IsTurning() const
+{
+	//Determine if a turn is taking place: source nav_NSE.cpp of WinSS
+
+	double spd = sqrt(std::pow(m_xd, 2) + std::pow(m_yd, 2));
+	double turn_rate = (m_xd * m_ydd - m_yd * m_xdd) / spd;
+
+	return std::fabs(turn_rate) > 1.5;
 }
 
 const Units::UnsignedRadiansAngle AircraftState::GetHeadingCcwFromEastRadians() const {

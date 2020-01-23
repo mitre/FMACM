@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /**
@@ -32,6 +32,9 @@
 class StandardAtmosphere : public Atmosphere
 {
 public:
+   static const StandardAtmosphere ISA0;
+   static StandardAtmosphere *MakeInstance(const Units::KelvinTemperature temperature, const Units::Length altitude);
+
    StandardAtmosphere(const Units::Temperature temperatureOffset);
 
    virtual ~StandardAtmosphere();
@@ -55,6 +58,7 @@ public:
    Units::Pressure GetTropopausePressure() const;
 
 private:
+   static log4cplus::Logger m_logger;
    const Units::Temperature m_temperature_offset;
    const Units::MetersLength m_tropopause_height;
    const Units::Temperature m_sea_level_temperature;

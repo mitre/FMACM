@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /**
@@ -168,7 +168,7 @@ TEST(CoreUtils, calculateEuclideanDistance) {
 }
 
 TEST(Atmosphere, temperature) {
-   const Units::Temperature offset_temperature = Units::CelsiusTemperature(0);
+   const Units::Temperature offset_temperature = Units::CelsiusTemperature(5);
    Atmosphere *atm = new StandardAtmosphere(offset_temperature);
    // check for discontinuity at tropopause
    Units::MetersLength half_eps(1e-6);
@@ -492,7 +492,7 @@ TEST(HorizontalPathTracker, consistency_check_straight_line_reverse) {
 
       std::vector<HorizontalPath>::const_reverse_iterator reverse_iterator = horizontal_trajectory.rbegin();
       for (; reverse_iterator != horizontal_trajectory.rend(); ++reverse_iterator) {
-         Units::MetersLength x1(reverse_iterator->m_x_position_meters), y1(reverse_iterator->m_y_position_meters), dist;
+         Units::MetersLength x1(reverse_iterator->GetXPositionMeters()), y1(reverse_iterator->GetYPositionMeters()), dist;
          Units::UnsignedAngle crs1;
          distance_calculator.CalculateAlongPathDistanceFromPosition(x1, y1, dist, crs1);
 
@@ -586,7 +586,7 @@ TEST(HorizontalPathTracker, consistency_check_straight_line_forward) {
 
    std::vector<HorizontalPath>::const_iterator iterator = horizontal_trajectory.begin();
    for (; iterator != horizontal_trajectory.end(); ++iterator) {
-      Units::MetersLength x1(iterator->m_x_position_meters), y1(iterator->m_y_position_meters), dist;
+      Units::MetersLength x1(iterator->GetXPositionMeters()), y1(iterator->GetYPositionMeters()), dist;
       Units::UnsignedAngle crs1;
       distance_calculator.CalculateAlongPathDistanceFromPosition(x1, y1, dist, crs1);
 
@@ -648,8 +648,8 @@ TEST(HorizontalPathTracker, consistency_check_straight_line_nodirection) {
    // Test at beginning of route
    const HorizontalPath front = horizontal_trajectory.front();
    {
-      x1 = Units::MetersLength(front.m_x_position_meters);
-      y1 = Units::MetersLength(front.m_y_position_meters);
+      x1 = Units::MetersLength(front.GetXPositionMeters());
+      y1 = Units::MetersLength(front.GetYPositionMeters());
       distance_calculator.CalculateAlongPathDistanceFromPosition(x1, y1, dist, crs1);
 
       // Expect the distance to match the same distance in the horizontal path description
@@ -669,8 +669,8 @@ TEST(HorizontalPathTracker, consistency_check_straight_line_nodirection) {
    // Jump to the end of the route and test
    const HorizontalPath back = horizontal_trajectory.back();
    {
-      x1 = Units::MetersLength(back.m_x_position_meters);
-      y1 = Units::MetersLength(back.m_y_position_meters);
+      x1 = Units::MetersLength(back.GetXPositionMeters());
+      y1 = Units::MetersLength(back.GetYPositionMeters());
       distance_calculator.CalculateAlongPathDistanceFromPosition(x1, y1, dist, crs1);
 
       // Expect the distance to match the same distance in the horizontal path description
@@ -697,8 +697,8 @@ TEST(AlongPathDistanceCalculator, check_for_throw_when_invalid_call_made_increme
    const HorizontalPath front_node = horizontal_trajectory.front();
    const HorizontalPath test_node_should_throw = horizontal_trajectory.back();
    try {
-      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(front_node.m_x_position_meters), Units::MetersLength(front_node.m_y_position_meters), dist);  // should pass
-      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(test_node_should_throw.m_x_position_meters), Units::MetersLength(test_node_should_throw.m_y_position_meters), dist); // should throw
+      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(front_node.GetXPositionMeters()), Units::MetersLength(front_node.GetYPositionMeters()), dist);  // should pass
+      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(test_node_should_throw.GetXPositionMeters()), Units::MetersLength(test_node_should_throw.GetYPositionMeters()), dist); // should throw
       FAIL(); // this should NOT be hit
    } catch (exception e) {
       // if here, the test has passed
@@ -935,8 +935,8 @@ TEST(AlongPathDistanceCalculator, check_for_throw_when_invalid_call_made_decreme
    const HorizontalPath front_node = horizontal_trajectory.back();
    const HorizontalPath test_node_should_throw = horizontal_trajectory.front();
    try {
-      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(front_node.m_x_position_meters), Units::MetersLength(front_node.m_y_position_meters), dist);  // should pass
-      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(test_node_should_throw.m_x_position_meters), Units::MetersLength(test_node_should_throw.m_y_position_meters), dist); // should throw
+      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(front_node.GetXPositionMeters()), Units::MetersLength(front_node.GetYPositionMeters()), dist);  // should pass
+      distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(test_node_should_throw.GetXPositionMeters()), Units::MetersLength(test_node_should_throw.GetYPositionMeters()), dist); // should throw
       FAIL(); // this should NOT be hit
    } catch (exception e) {
       // if here, the test has passed
@@ -1109,8 +1109,8 @@ TEST(AlongPathDistanceCalculator, consistency_check_two_public_methods) {
    const HorizontalPath horizontal_path_node = horizontal_trajectory.back();
    Units::UnsignedAngle actual_crs;
    Units::MetersLength actual_distance_to_go_method_1, actual_distance_to_go_method_2;
-   distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.m_x_position_meters),Units::MetersLength(horizontal_path_node.m_y_position_meters),actual_distance_to_go_method_1, actual_crs);
-   distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.m_x_position_meters),Units::MetersLength(horizontal_path_node.m_y_position_meters),actual_distance_to_go_method_2);
+   distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.GetXPositionMeters()),Units::MetersLength(horizontal_path_node.GetYPositionMeters()),actual_distance_to_go_method_1, actual_crs);
+   distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.GetXPositionMeters()),Units::MetersLength(horizontal_path_node.GetYPositionMeters()),actual_distance_to_go_method_2);
    EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_1.value(), 1e-13 );
    EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_2.value(), 1e-13 );
    EXPECT_NEAR(expected_reciprocal_course.value(),
@@ -1137,8 +1137,8 @@ TEST(TestHorizontalPathTracker, check_is_on_node_position) {
       TestHorizontalPathTracker tracker(horizontal_trajectory, TrajectoryIndexProgressionDirection::DECREMENTING);
       for (std::vector<HorizontalPath>::size_type index = horizontal_trajectory.size() - 1; index > 0; --index) {
          const HorizontalPath hp = horizontal_trajectory[index];
-         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.m_x_position_meters),
-                                                            Units::MetersLength(hp.m_y_position_meters));
+         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.GetXPositionMeters()),
+                                                            Units::MetersLength(hp.GetYPositionMeters()));
          std::vector<HorizontalPath>::size_type actual_node_index = tracker.GetCurrentTrajectoryIndex();
 
          EXPECT_TRUE(actual_return_bool);
@@ -1151,8 +1151,8 @@ TEST(TestHorizontalPathTracker, check_is_on_node_position) {
       TestHorizontalPathTracker tracker(horizontal_trajectory, TrajectoryIndexProgressionDirection::INCREMENTING);
       for (std::vector<HorizontalPath>::size_type index = 0; index < horizontal_trajectory.size(); ++index) {
          const HorizontalPath hp = horizontal_trajectory[index];
-         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.m_x_position_meters),
-                                                            Units::MetersLength(hp.m_y_position_meters));
+         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.GetXPositionMeters()),
+                                                            Units::MetersLength(hp.GetYPositionMeters()));
          std::vector<HorizontalPath>::size_type actual_node_index = tracker.GetCurrentTrajectoryIndex();
          EXPECT_TRUE(actual_return_bool);
          EXPECT_EQ(index, actual_node_index);
@@ -1164,8 +1164,8 @@ TEST(TestHorizontalPathTracker, check_is_on_node_position) {
       TestHorizontalPathTracker tracker(horizontal_trajectory, TrajectoryIndexProgressionDirection::UNDEFINED);
       for (std::vector<HorizontalPath>::size_type index = 0; index < horizontal_trajectory.size(); ++index) {
          const HorizontalPath hp = horizontal_trajectory[index];
-         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.m_x_position_meters),
-                                                            Units::MetersLength(hp.m_y_position_meters));
+         bool actual_return_bool = tracker.TestIsPositionOnNode(Units::MetersLength(hp.GetXPositionMeters()),
+                                                            Units::MetersLength(hp.GetYPositionMeters()));
          std::vector<HorizontalPath>::size_type actual_node_index = tracker.GetCurrentTrajectoryIndex();
          EXPECT_TRUE(actual_return_bool);
          EXPECT_EQ(index, actual_node_index);
@@ -1246,12 +1246,12 @@ TEST(AircraftState, GetHeadingCcwFromEastRadians) {
 
       vector<HorizontalPath> known_course_path = PublicUtils::CreateStraightHorizontalPath(static_cast<Quadrant>(q));
       AircraftState state1, state2, test_state;
-      state1.m_x = known_course_path[0].m_x_position_meters;
-      state1.m_y = known_course_path[0].m_y_position_meters;
+      state1.m_x = known_course_path[0].GetXPositionMeters();
+      state1.m_y = known_course_path[0].GetYPositionMeters();
       state1.m_z = 0;
       state1.m_time = 0;
-      state2.m_x = known_course_path[1].m_x_position_meters;
-      state2.m_y = known_course_path[1].m_y_position_meters;
+      state2.m_x = known_course_path[1].GetXPositionMeters();
+      state2.m_y = known_course_path[1].GetYPositionMeters();
       state2.m_z = 0;
       state2.m_time = 1;
 

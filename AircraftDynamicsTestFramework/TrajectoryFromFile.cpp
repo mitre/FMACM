@@ -12,12 +12,13 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TrajectoryFromFile.h"
 #include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
+#include "public/HfpReader.h"
 #include "utility/CsvParser.h"
 
 #include "AngularSpeed.h"
@@ -171,9 +172,9 @@ Guidance TrajectoryFromFile::Update(const AircraftState &state,
       }
    } else {
       result.m_cross_track_error = Units::MetersLength(
-            -(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index].m_y_position_meters) *
+            -(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index].GetYPositionMeters()) *
             cos(estimated_course) +
-            (state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index].m_x_position_meters) *
+            (state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index].GetXPositionMeters()) *
             sin(estimated_course));
    }
 
@@ -194,17 +195,17 @@ void TrajectoryFromFile::CalculateWaypoints(AircraftIntent &intent) {
       double course = atan2(delta_y, delta_x);
 
       PrecalcWaypoint new_waypoint;
-      new_waypoint.m_leg_length_meters = leg_length_meters;
+      new_waypoint.m_leg_length = Units::MetersLength(leg_length_meters);
       new_waypoint.m_course_angle = Units::RadiansAngle(course);
       new_waypoint.m_name = intent.GetFms().m_name[loop];
-      new_waypoint.m_x_pos_meters = intent.GetFms().m_x[loop].value();
-      new_waypoint.m_y_pos_meters = intent.GetFms().m_y[loop].value();
+      new_waypoint.m_x_pos_meters = intent.GetFms().m_x[loop];
+      new_waypoint.m_y_pos_meters = intent.GetFms().m_y[loop];
 
       new_waypoint.m_precalc_constraints.constraint_dist = leg_length_meters + prev_dist;
-      new_waypoint.m_precalc_constraints.constraint_altHi = intent.GetFms().m_high_altitude_constraint[loop -
-                                                                                                       1].value();
-      new_waypoint.m_precalc_constraints.constraint_altLow = intent.GetFms().m_low_altitude_constraint[loop -
-                                                                                                       1].value();
+      new_waypoint.m_precalc_constraints.constraint_altHi =
+            intent.GetFms().m_high_altitude_constraint[loop - 1].value();
+      new_waypoint.m_precalc_constraints.constraint_altLow =
+            intent.GetFms().m_low_altitude_constraint[loop - 1].value();
       new_waypoint.m_precalc_constraints.constraint_speedHi = intent.GetFms().m_high_speed_constraint[loop - 1].value();
       new_waypoint.m_precalc_constraints.constraint_speedLow = intent.GetFms().m_low_speed_constraint[loop - 1].value();
 
@@ -216,10 +217,10 @@ void TrajectoryFromFile::CalculateWaypoints(AircraftIntent &intent) {
    // add the final waypoint
    PrecalcWaypoint new_waypoint;
    new_waypoint.m_name = intent.GetFms().m_name[0];
-   new_waypoint.m_leg_length_meters = 0;
+   new_waypoint.m_leg_length = Units::MetersLength(0);
    new_waypoint.m_course_angle = m_precalc_waypoints.back().m_course_angle;
-   new_waypoint.m_x_pos_meters = intent.GetFms().m_x[0].value();
-   new_waypoint.m_y_pos_meters = intent.GetFms().m_y[0].value();
+   new_waypoint.m_x_pos_meters = intent.GetFms().m_x[0];
+   new_waypoint.m_y_pos_meters = intent.GetFms().m_y[0];
    new_waypoint.m_precalc_constraints.constraint_dist = prev_dist;
    new_waypoint.m_precalc_constraints.constraint_altHi = intent.GetFms().m_high_altitude_constraint[0].value();
    new_waypoint.m_precalc_constraints.constraint_altLow = intent.GetFms().m_low_altitude_constraint[0].value();
@@ -293,109 +294,41 @@ void TrajectoryFromFile::ReadVerticalTrajectoryFile() {
 void TrajectoryFromFile::ReadHorizontalTrajectoryFile() {
    static const std::string STRAIGHT("straight"), TURN("turn");
 
-   std::ifstream file(m_horizontal_trajectory_file.c_str());
+   testvector::HfpReader hfpReader(m_horizontal_trajectory_file, 2);
 
-   if (!file.is_open()) {
-      std::cout << "Horizontal trajectory file " << m_horizontal_trajectory_file.c_str() << " not found" << std::endl;
-      exit(-22);
-   }
-
-   int numhdrs = 0;
-
-   for (CsvParser::CsvIterator csviter(file); csviter != CsvParser::CsvIterator(); ++csviter) {
-
-      if (numhdrs < 2) {
-         numhdrs++;
-         continue;
-      }
-
-      if ((*csviter).Size() != NUM_HORIZONTAL_TRAJ_FIELDS) {
-         std::cout << "Bad number of fields found in " << m_horizontal_trajectory_file.c_str()
-                   << std::endl << "horizontal trajectory file.  Found " << (*csviter).Size()
-                   << " fields expected " << NUM_HORIZONTAL_TRAJ_FIELDS << " fields." << std::endl;
-         exit(-38);
-      }
+   while (hfpReader.Advance()) {
 
       HorizontalPath htrajseg;
 
-      for (int hfield = IX; hfield != (int) NUM_HORIZONTAL_TRAJ_FIELDS; hfield++) {
-         std::string fieldstr = (*csviter)[hfield];
+      htrajseg.SetXYPositionMeters(
+            Units::MetersLength(hfpReader.GetX()).value(),
+            Units::MetersLength(hfpReader.GetY()).value());
 
-         double val = atof(fieldstr.c_str());
+      htrajseg.m_path_length_cumulative_meters = Units::MetersLength(hfpReader.GetDTG()).value();
 
-         switch (static_cast<HorizontalFields>(hfield)) {
-            case IX:
-               break;
-
-            case X_M:
-               htrajseg.m_x_position_meters = val;
-               break;
-
-            case Y_M:
-               htrajseg.m_y_position_meters = val;
-               break;
-
-            case DISTANCE_TO_GO_HORZ_M:
-               htrajseg.m_path_length_cumulative_meters = val;
-               break;
-
-            case SEGMENT_TYPE:
-               if (STRAIGHT == fieldstr) {
-                  htrajseg.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-               } else if (TURN == fieldstr) {
-                  htrajseg.m_segment_type = HorizontalPath::SegmentType::TURN;
-               } else {
-                  htrajseg.m_segment_type = HorizontalPath::SegmentType::UNSET;
-               }
-               break;
-
-            case COURSE_R:
-               htrajseg.m_path_course = val;
-               break;
-
-            case TURN_CENTER_X_M:
-               htrajseg.m_turn_info.x_position_meters = val;
-               break;
-
-            case TURN_CENTER_Y_M:
-               htrajseg.m_turn_info.y_position_meters = val;
-               break;
-
-            case ANGLE_AT_TURN_START_R:
-               htrajseg.m_turn_info.q_start = Units::UnsignedRadiansAngle(val);
-               break;
-
-            case ANGLE_AT_TURN_END_R:
-               htrajseg.m_turn_info.q_end = Units::UnsignedRadiansAngle(val);
-               break;
-
-            case TURN_RADIUS_M:
-               htrajseg.m_turn_info.radius = Units::MetersLength(val);
-               break;
-
-            case GROUND_SPEED_MPS:
-               htrajseg.m_turn_info.groundspeed = Units::MetersPerSecondSpeed(val);
-               break;
-
-            case BANK_ANGLE_DEG:
-               htrajseg.m_turn_info.bankAngle = Units::DegreesAngle(val);
-               break;
-
-            case LAT_D:
-            case LON_D:
-            case TURN_CENTER_LAT_D:
-            case TURN_CENTER_LON_D:
-               break;
-
-            default:
-               break;
-
-         }
+      std::string fieldstr(hfpReader.GetSegmentType());
+      if (STRAIGHT == fieldstr) {
+         htrajseg.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
+      } else if (TURN == fieldstr) {
+         htrajseg.m_segment_type = HorizontalPath::SegmentType::TURN;
+      } else {
+         htrajseg.m_segment_type = HorizontalPath::SegmentType::UNSET;
       }
+
+      htrajseg.m_path_course = Units::RadiansAngle(hfpReader.GetCourse()).value();
+
+      htrajseg.m_turn_info.x_position_meters = Units::MetersLength(hfpReader.GetTurnCenterX()).value();
+      htrajseg.m_turn_info.y_position_meters = Units::MetersLength(hfpReader.GetTurnCenterY()).value();
+
+      htrajseg.m_turn_info.q_start = hfpReader.GetAngleStartOfTurn();
+      htrajseg.m_turn_info.q_end = hfpReader.GetAngleEndOfTurn();
+
+      htrajseg.m_turn_info.radius = hfpReader.GetTurnRadius();
+      htrajseg.m_turn_info.groundspeed = hfpReader.GetGroundSpeed();
+      htrajseg.m_turn_info.bankAngle = hfpReader.GetBankAngle();
+
       m_horizontal_trajectory.push_back(htrajseg);
    }
-
-   file.close();
 
    m_decrementing_distance_calculator = AlongPathDistanceCalculator(m_horizontal_trajectory,
                                                                     TrajectoryIndexProgressionDirection::DECREMENTING);

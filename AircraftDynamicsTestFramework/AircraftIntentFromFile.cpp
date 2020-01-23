@@ -12,13 +12,12 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/AircraftIntentFromFile.h"
 
-#include "utility/CsvParser.h"
-#include <fstream>
+#include "public/HfpReader.h"
 
 using std::string;
 
@@ -43,11 +42,7 @@ bool AircraftIntentFromFile::load(DecodedStream *input) {
 
 void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string &csvfile) {
 
-   std::ifstream file(csvfile.c_str());
-   if (!file.is_open()) {
-      std::cout << "Error: Unable to open file " << csvfile << std::endl;
-      exit(-1);
-   }
+   testvector::HfpReader hfpReader(csvfile, 2);
 
    /*
     * Notes on Loading:
@@ -65,69 +60,35 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string &csvfile
    Units::RadiansAngle course[128], startofturn[128], endofturn[128];
    Units::DegreesAngle latwpt[128], lonwpt[128], latturncenter[128], lonturncenter[128];
    int irow = -1;
-   for (CsvParser::CsvIterator csvrow(file); csvrow != CsvParser::CsvIterator(); ++csvrow) {
+   while (hfpReader.Advance()) {
       irow++;
-      if (irow < 2) {
-         continue;
-      }
 
-      int rowindex = 0;
-      for (int rowElement = 0; rowElement < (*csvrow).Size(); ++rowElement) {
-         string s = (*csvrow)[rowElement];
-         switch (rowElement) {
-            case 0:
-               rowindex = LocalStringToInt(s) - 1; // the value extracted from the CSV file is 1-based, we need 0-based
-               break;
-            case 1:
-               xwptlocation[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 2:
-               ywptlocation[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 3:
-               disttogo[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 4:
-               segmenttype[rowindex] = s;
-               break;
-            case 5:
-               course[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
-               break;
-            case 6:
-               xturncenter[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 7:
-               yturncenter[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 8:
-               startofturn[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
-               break;
-            case 9:
-               endofturn[rowindex] = Units::RadiansAngle(LocalStringToDouble(s));
-               break;
-            case 10:
-               turnradius[rowindex] = Units::MetersLength(LocalStringToDouble(s));
-               break;
-            case 11:
-               latwpt[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
-               break;
-            case 12:
-               lonwpt[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
-               break;
-            case 13:
-               latturncenter[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
-               break;
-            case 14:
-               lonturncenter[rowindex] = Units::DegreesAngle(LocalStringToDouble(s));
-               break;
-            default:
-               break;
-         }
-      }
+      // the value extracted from the CSV file is 1-based, we need 0-based
+      int rowindex = (int) hfpReader.GetDouble(0) - 1;
+
+      xwptlocation[rowindex] = hfpReader.GetX();
+      ywptlocation[rowindex] = hfpReader.GetY();
+
+      disttogo[rowindex] = hfpReader.GetDTG();
+      segmenttype[rowindex] = hfpReader.GetSegmentType();
+      course[rowindex] = hfpReader.GetCourse();
+
+      xturncenter[rowindex] = hfpReader.GetTurnCenterX();
+      yturncenter[rowindex] = hfpReader.GetTurnCenterY();
+
+      startofturn[rowindex] = hfpReader.GetAngleStartOfTurn();
+      endofturn[rowindex] = hfpReader.GetAngleEndOfTurn();
+      turnradius[rowindex] = hfpReader.GetTurnRadius();
+
+      latwpt[rowindex] = hfpReader.GetLatitude();
+      lonwpt[rowindex] = hfpReader.GetLongitude();
+
+      latturncenter[rowindex] = hfpReader.GetTurnCenterLatitude();
+      lonturncenter[rowindex] = hfpReader.GetTurnCenterLongitude();
    }
 
    // Now store all information into the public Fms struct in the appropriate order
-   int numberofrowsofdata = irow - 1, forwardrow = 0;
+   int numberofrowsofdata = irow + 1, forwardrow = 0;
    SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
    SetNumberOfWaypoints(numberofrowsofdata);
    for (int reverserow = numberofrowsofdata - 1; reverserow >= 0; --reverserow) {

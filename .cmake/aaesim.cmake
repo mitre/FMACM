@@ -120,6 +120,10 @@ set(CORE_SRC
         ${CORE_DIR}/DelayBuffer.cpp
         ${CORE_DIR}/DistanceObserver.h
         ${CORE_DIR}/DistanceObserver.cpp
+        ${CORE_DIR}/DiveDescent4DPredictor.h
+        ${CORE_DIR}/DiveDescent4DPredictor.cpp
+        ${CORE_DIR}/DriveDescent4DPredictor.h
+        ${CORE_DIR}/DriveDescent4DPredictor.cpp
         ${CORE_DIR}/DynamicsObserver.h
         ${CORE_DIR}/DynamicsObserver.cpp
         ${CORE_DIR}/EarthModel.cpp
@@ -128,6 +132,8 @@ set(CORE_SRC
         ${CORE_DIR}/EllipsoidalEarthModel.cpp
         ${CORE_DIR}/Environment.h
         ${CORE_DIR}/Environment.cpp
+        ${CORE_DIR}/GeometricDescent4DPredictor.h
+        ${CORE_DIR}/GeometricDescent4DPredictor.cpp
         ${CORE_DIR}/Guidance.cpp
         ${CORE_DIR}/Guidance.h
         ${CORE_DIR}/HorizontalPath.cpp

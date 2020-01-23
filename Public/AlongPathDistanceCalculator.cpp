@@ -12,19 +12,33 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <algorithm>
 #include <public/AlongPathDistanceCalculator.h>
 #include <public/AircraftCalculations.h>
 #include "public/AlongPathDistanceCalculator.h"
 
 log4cplus::Logger AlongPathDistanceCalculator::m_logger = log4cplus::Logger::getInstance("AlongPathDistanceCalculator");
+Units::Length AlongPathDistanceCalculator::CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(2.5);
+Units::Length AlongPathDistanceCalculator::EXTENDED_CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(4.0);
 
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                                                          TrajectoryIndexProgressionDirection expected_index_progression) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
 
    m_is_first_call = true;
+   m_cross_track_tolerance = CROSS_TRACK_TOLERANCE;
+}
+
+AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
+                                                         TrajectoryIndexProgressionDirection expected_index_progression,
+                                                         bool use_large_cross_track_tolerance) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
+   m_is_first_call = true;
+   if (use_large_cross_track_tolerance)
+      m_cross_track_tolerance = EXTENDED_CROSS_TRACK_TOLERANCE;
+   else
+      m_cross_track_tolerance = CROSS_TRACK_TOLERANCE;
 }
 
 AlongPathDistanceCalculator::~AlongPathDistanceCalculator() = default;
@@ -41,7 +55,7 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
       if (m_is_first_call)
          UpdateCurrentIndex(0);
 
-      return_boolean = AircraftCalculations::CalculateDistanceAlongPathFromPosition(position_x, position_y,
+      return_boolean = AircraftCalculations::CalculateDistanceAlongPathFromPosition(m_cross_track_tolerance, position_x, position_y,
                                                                                     m_extended_horizontal_trajectory,
                                                                                     m_current_index,
                                                                                     calculated_distance_along_path,
@@ -57,7 +71,7 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
       UpdateCurrentIndex(resolved_index); // force validate to succeed
       m_is_first_call = false;
    }
-   
+
    // Verify that resolved_index has not become discontinuous and is progressing appropriately
    const bool found_index_is_valid = return_boolean && ValidateIndexProgression(resolved_index);
    if (found_index_is_valid) {
@@ -75,6 +89,14 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
                    "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index %lu, resolved_index %lu",
                    m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
+      auto high_index = std::max(m_current_index, resolved_index) + 1;
+      auto low_index = std::min(m_current_index, resolved_index);
+      for (auto i = low_index; i <= high_index; i++) {
+         LOG4CPLUS_TRACE(m_logger, "" << i << ": (" <<
+               m_extended_horizontal_trajectory[i].GetXPositionMeters() << "," <<
+               m_extended_horizontal_trajectory[i].GetYPositionMeters() << ")");
+
+      }
       throw std::logic_error(msg);
    }
 

@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/MaintainMetric.h"
@@ -26,6 +26,7 @@ MaintainMetric::MaintainMetric(void) {
    achieveByTime = -1.0;
    totalMaintainTime = 0.0;
    numCyclesOutsideThreshold = 0;
+   m_output_enabled = false;
 }
 
 
@@ -35,7 +36,7 @@ MaintainMetric::~MaintainMetric(void) {
 }
 
 
-void MaintainMetric::addErr(double err) {
+void MaintainMetric::AddSpacingErrorSec(double err) {
 
    // Adds data to be added for each pass through an IM::update method.
    // Also increments number of cycles if outside of threshold.
@@ -52,7 +53,7 @@ void MaintainMetric::addErr(double err) {
 }
 
 
-void MaintainMetric::setAchieve(double aTime) {
+void MaintainMetric::SetTimeAtAbp(double aTime) {
 
    // Sets time aircraft went by achieve by point.
    //
@@ -62,7 +63,7 @@ void MaintainMetric::setAchieve(double aTime) {
 }
 
 
-void MaintainMetric::computeTotalMaintainTime(double cTime) {
+void MaintainMetric::ComputeTotalMaintainTime(double cTime) {
 
    // Computes total maintain time subtracting the achieveByTime
    // from the current time.
@@ -73,7 +74,7 @@ void MaintainMetric::computeTotalMaintainTime(double cTime) {
 }
 
 
-bool MaintainMetric::hasAchieve() {
+bool MaintainMetric::TimeAtAbpRecorded() {
 
    // Boolean to determine if achieveBy set.
    //
@@ -142,4 +143,12 @@ bool MaintainMetric::hasSamples() {
    //		   else false.
 
    return (spacingError.GetNumberOfSamples() > 0);
+}
+
+bool MaintainMetric::IsOutputEnabled() const {
+   return m_output_enabled;
+}
+
+void MaintainMetric::SetOutputEnabled(bool output_enabled) {
+   m_output_enabled = output_enabled;
 }

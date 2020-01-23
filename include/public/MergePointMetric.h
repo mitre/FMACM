@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -56,7 +56,8 @@ public:
    bool mergePointFound();
 
    bool willReportMetrics() const;
-
+   int GetImAcId() const;
+   int GetTargetAcId() const;
 
 private:
    static log4cplus::Logger logger;
@@ -64,6 +65,9 @@ private:
    // Checks if newest IM position closer to waypoint than the stored IM position.
    bool newPointCloser(double x,
                        double y);
+
+   int m_im_ac_id;
+   int m_target_ac_id;
 
    std::string mMergePointName;
    Units::Length mMergePointX;

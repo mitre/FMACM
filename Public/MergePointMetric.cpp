@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/MergePointMetric.h"
@@ -24,9 +24,11 @@ using namespace std;
 log4cplus::Logger MergePointMetric::logger = log4cplus::Logger::getInstance("MergePointMetric");
 
 MergePointMetric::MergePointMetric(void) {
+   m_im_ac_id = 0;
+   m_target_ac_id = 0;
    mReportMetrics = false;
    mMergePointName = "";
-   mIMDist = mMergeDist = Units::NauticalMilesLength(1000000000.0);
+   mIMDist = mMergeDist = Units::infinity();
    mTargY = mTargX = mIMY = mIMX = 0;
    mMergePointY = mMergePointX = Units::ZERO_LENGTH;
 }
@@ -46,15 +48,24 @@ void MergePointMetric::determineMergePoint(const AircraftIntent &imintent,
    // imintent:intent of IM aircraft containing the list of waypoints.
    // targintent:intent of target aircraft containing the list of waypoints.
 
+   m_im_ac_id = imintent.GetId();
+   m_target_ac_id = targintent.GetId();
+
+   // overwrite these if merge point is found
+   mReportMetrics = false;
+   mMergePointName = "";
+
    std::pair<const int, const int> indices = imintent.FindCommonWaypoint(targintent);
    const int index = indices.first;
 
-   if (index == -1) {
+   if (m_im_ac_id == m_target_ac_id) {
+      LOG4CPLUS_DEBUG(logger, "Target ID matches own for acid " << m_im_ac_id
+            << ". No merge metrics will be reported.");
+   }
+   else if (index == -1) {
       LOG4CPLUS_DEBUG(logger, "No merge point found for im acid " << imintent.GetId() <<
-                                                                  " and target acid " << targintent.GetId()
-                                                                  << ". No merge metrics will be reported.");
-      mReportMetrics = false; // do not report metrics...no merge point to report relative to
-      mMergePointName = "";
+            " and target acid " << targintent.GetId()
+            << ". No merge metrics will be reported.");
    } else {
       mMergePointName = imintent.GetWaypointName(index);
       mMergePointX = imintent.GetWaypointX(index);
@@ -175,4 +186,12 @@ void MergePointMetric::determineMetricsLocation(const AircraftIntent &imintent,
 
 bool MergePointMetric::willReportMetrics() const {
    return mReportMetrics;
+}
+
+int MergePointMetric::GetImAcId() const {
+   return m_im_ac_id;
+}
+
+int MergePointMetric::GetTargetAcId() const {
+   return m_target_ac_id;
 }

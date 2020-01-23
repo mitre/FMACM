@@ -57,6 +57,12 @@ set(SOURCE_FILES
         AlongPathDistanceCalculator.cpp
         DirectionOfFlightCourseCalculator.cpp
         WindZero.cpp
+        DataReader.cpp
+        EnvReader.cpp
+        ForeWindReader.cpp
+        HfpReader.cpp
+        RefReader.cpp
+        TvReader.cpp
         )
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)

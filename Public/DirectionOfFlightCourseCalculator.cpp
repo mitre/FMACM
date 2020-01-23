@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/AircraftCalculations.h>
@@ -75,8 +75,9 @@ bool DirectionOfFlightCourseCalculator::CalculateCourseAtAlongPathDistance(const
       UpdateCurrentIndex(resolved_index);
 
    } else if (distance_along_path + EXTENSION_LENGTH > Units::MetersLength(m_extended_horizontal_trajectory.back().m_path_length_cumulative_meters)) {
-      // distance_along_path si very large so off the back of the path. The old code allowed this sitaution to quietly
-      // happen. For now, it helps a lot to allow this. But, we should throw.
+      // distance_along_path is very large so off the back of the path. The old code allowed this situation to quietly
+      // happen. For now, it helps a lot to allow this. But, we should consider this deprecated behavior and throw in
+      // the future.
       char msg[300];
       std::sprintf(msg, "Very long distance_along_path encountered. Too long for path. Allowing for now: %f", Units::MetersLength(distance_along_path).value());
       LOG4CPLUS_ERROR(m_logger, msg);

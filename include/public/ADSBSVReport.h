@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -112,13 +112,14 @@ namespace Sensor {
 //Input Data:
          //none
 
-
+         Units::FeetLength m_x, m_y, m_z;
+         Units::FeetPerSecondSpeed m_xd, m_yd, m_zd;
 //Other Data:
       private:
          int m_id;
          Units::SecondsTime m_time;
-         Units::FeetLength m_x, m_y, m_z;
-         Units::FeetPerSecondSpeed m_xd, m_yd, m_zd;
+//         Units::FeetLength m_x, m_y, m_z;
+//         Units::FeetPerSecondSpeed m_xd, m_yd, m_zd;
          int m_nacp, m_nacv, m_nicp, m_nicv;
          bool m_has_position, m_has_velocity;
          Units::FeetLength m_horizontal_position_quantum, m_vertical_position_quantum;

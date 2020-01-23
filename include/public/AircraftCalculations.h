@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -83,6 +83,31 @@ public:
     * @return true if calculation succeeded, false otherwise
     */
    static bool CalculateDistanceAlongPathFromPosition(const Units::Length position_x,
+                                                      const Units::Length position_y,
+                                                      const std::vector<HorizontalPath> &horizontal_trajectory,
+                                                      const std::vector<HorizontalPath>::size_type starting_trajectory_index,
+                                                      Units::Length &distance_along_path,
+                                                      Units::Angle &course,
+                                                      std::vector<HorizontalPath>::size_type &resolved_trajectory_index);
+
+   /**
+    * Intentionally shadows the same-named method. But this one exposes finer control over the cross track error
+    * tolerance used in the algorithm. If you don't have a specific reason to control the tolerance, plesae use
+    * the other method that sets the tolerance for you.
+    *
+    * @see AircraftCalculations::CalculateDistanceAlongPathFromPosition
+    * @param cross_track_tolerance
+    * @param position_x
+    * @param position_y
+    * @param horizontal_trajectory
+    * @param starting_trajectory_index
+    * @param distance_along_path
+    * @param course
+    * @param resolved_trajectory_index
+    * @return
+    */
+   static bool CalculateDistanceAlongPathFromPosition(const Units::Length cross_track_tolerance,
+                                                      const Units::Length position_x,
                                                       const Units::Length position_y,
                                                       const std::vector<HorizontalPath> &horizontal_trajectory,
                                                       const std::vector<HorizontalPath>::size_type starting_trajectory_index,

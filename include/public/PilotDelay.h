@@ -12,11 +12,12 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <map>
 #include "utility/Logging.h"
 #include <Length.h>
 #include <Time.h>
@@ -57,6 +58,8 @@ public:
 
    void DumpParameters(std::string str);
 
+   void DumpStatistics();
+
    bool IsPilotDelayOn();
 
    std::pair<Units::Time, Units::Time> GetPilotDelayParameters() const;
@@ -64,6 +67,7 @@ public:
 private:
    Units::Time ComputeTimeToSpeedChange(Units::Length current_altitude,
                                         Units::Length altitude_at_end_of_route);
+   void SetInitialIAS(Units::Length current_altitude, Units::Speed fallback_IAS);
 
    // for speed conversion
    std::shared_ptr<Atmosphere> m_atmosphere;
@@ -75,6 +79,12 @@ private:
 
    double m_guidance_mach;
    bool m_pilot_delay_is_on;
+
+   // for statistical output
+   int m_delay_count;
+   double m_delay_sum;
+   double m_delay_square_sum;
+   std::map<double,int> m_delay_frequency;
 
    static const double STANDARD_DEVIATION_LIMIT;
    static log4cplus::Logger m_logger;

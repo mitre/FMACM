@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -35,17 +35,17 @@ public:
    ~MaintainMetric(void);
 
    // Adds data to be added for each pass through an IM::update method.
-   void addErr(double err);
+   void AddSpacingErrorSec(double err);
 
    // Sets time aircraft went by achieve by point.
-   void setAchieve(double time);
+   void SetTimeAtAbp(double time);
 
    // Boolean to determine if achieveBy set (achieveBy < 0.0)
-   bool hasAchieve();
+   bool TimeAtAbpRecorded();
 
    // Computes total maintain time subtracting the achieveByTime
    // from the current time.
-   void computeTotalMaintainTime(double cTime);
+   void ComputeTotalMaintainTime(double cTime);
 
    // Gets mean spacing error.
    double getMeanErr();
@@ -64,6 +64,8 @@ public:
 
    // Returns whether there are data samples to collect metrics from.
    bool hasSamples();
+   bool IsOutputEnabled() const;
+   void SetOutputEnabled(bool output_enabled);
 
 private:
    // Running sum of time spacing errors between IM and target ac.
@@ -77,4 +79,7 @@ private:
 
    // Number of cycles with a spacing error > 10 secs.
    int numCyclesOutsideThreshold;
+
+   /** Output should be enabled for IM aircraft */
+   bool m_output_enabled;
 };

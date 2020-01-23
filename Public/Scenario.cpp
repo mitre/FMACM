@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Scenario.h"
@@ -20,6 +20,7 @@
 using namespace std;
 
 const int Scenario::AIRCRAFT_ID_NOT_IN_MAP = -1;
+log4cplus::Logger Scenario::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Scenario"));
 
 map<string, int> Scenario::m_aircraft_string_int_map;
 RandomGenerator Scenario::m_rand;
@@ -52,5 +53,16 @@ void Scenario::SetScenarioName(const string in) {
    if (index != string::npos) {
       // erases the .txt from the string
       m_scenario_name.erase(index, 4);
+   }
+}
+
+void Scenario::DuplicateAcidCheck(const size_t aircraft_count) {
+   size_t aircraft_id_count(m_aircraft_string_int_map.size());
+   if (aircraft_count != aircraft_id_count) {
+      string msg = "Scenario has " +
+            std::to_string(aircraft_count) + " aircraft but " +
+            std::to_string(aircraft_id_count) + " aircraft IDs.";
+      LOG4CPLUS_FATAL(m_logger, msg);
+      throw runtime_error(msg);
    }
 }

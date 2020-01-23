@@ -12,7 +12,7 @@
 // contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 // McLean, VA  22102-7539, (703) 983-6000. 
 //
-// Copyright 2019 The MITRE Corporation. All Rights Reserved.
+// Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -85,6 +85,8 @@ public:
 
    void SetNumberOfWaypoints(unsigned int n);
 
+   const Waypoint &GetWaypoint(unsigned int i) const;
+
    const std::string &GetWaypointName(int i) const;
 
    Units::MetersLength GetWaypointX(int i) const;
@@ -92,6 +94,8 @@ public:
    Units::MetersLength GetWaypointY(int i) const;
 
    Units::MetersLength GetPlannedCruiseAltitude() const;
+
+   void SetPlannedCruiseAltitude(Units::Length altitude);
 
    const struct RouteData &GetFms() const;
 
@@ -108,6 +112,10 @@ public:
                           const Units::Length &x,
                           const Units::Length &y,
                           const int index);
+
+   void InsertWaypointAtIndex(const Waypoint &waypoint, const int index);
+
+   void ClearWaypoints();
 
    const std::shared_ptr<TangentPlaneSequence> &GetTangentPlaneSequence() const;
 
@@ -180,18 +188,6 @@ inline unsigned int AircraftIntent::GetNumberOfWaypoints() const {
 
 inline void AircraftIntent::SetNumberOfWaypoints(unsigned int n) {
    m_number_of_waypoints = n;
-}
-
-inline const std::string &AircraftIntent::GetWaypointName(int i) const {
-   return m_waypoint_name[i];
-}
-
-inline Units::MetersLength AircraftIntent::GetWaypointX(int i) const {
-   return m_waypoint_x[i];
-}
-
-inline Units::MetersLength AircraftIntent::GetWaypointY(int i) const {
-   return m_waypoint_y[i];
 }
 
 inline Units::MetersLength AircraftIntent::GetPlannedCruiseAltitude() const {

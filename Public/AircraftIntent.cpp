@@ -107,8 +107,6 @@ void AircraftIntent::LoadWaypointsFromList(std::list<Waypoint> &waypoint_list) {
    auto e = waypoint_list.end();
 
    while (i != e) {
-      assert((*i).GetName().size() < 16);
-
       m_waypoint_name[c] = (*i).GetName();
 
       // waypoint_x and waypoint_y are set after loading.
@@ -210,7 +208,7 @@ int AircraftIntent::GetWaypointIndexByName(const std::string &waypoint_name) con
    return ix;
 }
 
-void AircraftIntent::Dump(std::ofstream &fileOut) const {
+void AircraftIntent::Dump(std::ostream &fileOut) const {
    fileOut << "------------" << std::endl;
    fileOut << "Intent of aircraft  " << m_id << ":" << std::endl;
    fileOut << "mach_transition_cas " << Units::KnotsSpeed(m_mach_transition_cas).value() << std::endl;

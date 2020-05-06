@@ -13,7 +13,7 @@ permission of The MITRE Corporation. For further information, please
 contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
 McLean, VA  22102-7539, (703) 983-6000. 
 
-Copyright 2019 The MITRE Corporation. All Rights Reserved.
+Copyright 2020 The MITRE Corporation. All Rights Reserved.
 Approved for Public Release; Distribution Unlimited. 15-1482
 
 This project contains content developed by The MITRE Corporation. If this code is used in a deployment or embedded within another project, it is requested that you send an email to opensource@mitre.org in order to let us know where this software is being used. 
@@ -24,7 +24,7 @@ This project contains content developed by The MITRE Corporation. If this code i
 # Documentation
 Documentation is provided via two publications:
 - Model [technical documentation](https://www.mitre.org/publications/technical-papers/derivation-of-a-point-mass-aircraft-model-used-for-fast-time) in form of a paper available from MITRE
-- Official [RTCA SC-186](http://www.rtca.org/content.asp?pl=108&sl=33&contentid=88) documentation. In particular see DO-328A and DO-361. Please contact RTCA for more information.
+- Official [RTCA SC-186](http://www.rtca.org/content.asp?pl=108&sl=33&contentid=88) documentation. In particular see DO-328B and DO-361A. Please contact RTCA for more information.
 
 # Licensing questions
 Any questions related to MITRE Open Source technologies may be emailed to opensource@mitre.org
@@ -66,13 +66,38 @@ Assuming the software already compiles:
 ### Run
 A configuration file must be provided as the only command-line argument to the FMACM program. The file must be formatted as plain text and contain paths to each scenario that is to be run. The contents of the configuration file must look like this:
 
-> 1 # number of scenarios to run
-> 
-> path/to/scenario.txt # path to each scenario file, one per line, as many as the number above indicates
+```
+# number of scenarios to run
+2 
 
-Users may list as many scenario files as desired. The scenario file provides detailed instructions about the scenario that FMACM is to run. An example configuration and scenario file is provided in <root>/Run_Files/.
+# path to each scenario file, one per line, as many as the number above indicates
+path/to/scenario.txt 
+path/to/scenario2.txt 
+```
+
+Users may list as many scenario files as desired. The scenario file provides detailed instructions about the scenario that FMACM is to run. An example configuration and scenario file is provided in ```./Run_Files/```.
 
 The executable is then executed in this manner:
-> ./bin/FMACM configuration.txt 
+```
+./bin/FMACM configuration.txt 
+```
 
 Output is found in the run-time directory.
+
+### Inputs
+
+The format of the [horizontal flight path](../Run_Files/FimAcTv-P~W_JET_HFP.csv) input file has changed since the last release. There is a new script to convert any files you may have in the old format: 
+```
+./.python/convert_pre_april_2020_hfp_files.py
+```
+
+Navigate to the directory that you want your nex file to be generated in:
+```
+cd Run_Files/
+```
+
+Run the script with the path to the file you wish to convert, and the desired output filename as command line arguments:
+```
+../.python/convert_pre_april_2020_hfp_files.py path/to/input.csv output_filename
+
+```

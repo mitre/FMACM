@@ -101,6 +101,9 @@ void EllipsoidalEarthModel::convertAbsoluteToGeodetic(
 std::shared_ptr<LocalTangentPlane> EllipsoidalEarthModel::makeEnuConverter(
       const GeodeticPosition &pointOfTangencyGeo,
       const LocalPositionEnu &pointOfTangencyEnu) const {
+
+   LOG4CPLUS_TRACE(logger, "Making converter tangent at " << pointOfTangencyGeo << " and " << pointOfTangencyEnu);
+
    EarthModel::AbsolutePositionEcef ecef;
    convertGeodeticToAbsolute(pointOfTangencyGeo, ecef);
 

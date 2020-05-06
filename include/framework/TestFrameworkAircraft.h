@@ -60,6 +60,8 @@ public:
    void Initialize(Units::Length adsbReceptionRangeThreshold,
                    const WeatherTruth &weather);
 
+   DynamicsState GetCurrentDynamicsState() const;
+
    int m_start_time;
    int m_id;
    AircraftState m_truth_state_vector_old;
@@ -86,3 +88,6 @@ private:
    static log4cplus::Logger m_logger;
 };
 
+inline DynamicsState TestFrameworkAircraft::GetCurrentDynamicsState() const {
+   return m_dynamics.m_dynamics_state;
+}

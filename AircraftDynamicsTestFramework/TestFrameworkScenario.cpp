@@ -128,7 +128,7 @@ void TestFrameworkScenario::ProcessOneIteration() {
    }
    m_acstates = fopen(scenName.append("_AcStates.csv").c_str(), "w");
 
-   fprintf(m_acstates, "Time[sec], DTG[m], V(tas)[m/s], vRate[m/s], x[m], y[m], h[m], gs[fps]\n");
+   fprintf(m_acstates, "Time[sec],DTG[m],V(ias)[m/s],V(tas)[m/s],vRate[m/s],x[m],y[m],h[m],gs[mps]\n");
 
    SimulationTime time;
    time.init();
@@ -153,7 +153,7 @@ bool TestFrameworkScenario::ProcessAllAircraft(SimulationTime &time) {
 
       if (!aircraft_iteration_finished) {
          AircraftState state = aircraft.m_truth_state_vector_old;
-         RecordState(state);
+         RecordState(state, aircraft.GetCurrentDynamicsState() );
       }
 
       iteration_finished = iteration_finished && aircraft_iteration_finished;
@@ -161,19 +161,17 @@ bool TestFrameworkScenario::ProcessAllAircraft(SimulationTime &time) {
    return iteration_finished;
 }
 
-void TestFrameworkScenario::RecordState(const AircraftState &aircraft_state) const {
-   double v_mps = hypot(aircraft_state.m_xd * FEET_TO_METERS - aircraft_state.m_Vwx,
-                        aircraft_state.m_yd * FEET_TO_METERS - aircraft_state.m_Vwy)
-                  / cos(aircraft_state.m_gamma);
+void TestFrameworkScenario::RecordState(const AircraftState &aircraft_state, const DynamicsState &dynamics_state) const {
 
-   fprintf(m_acstates, "%.0f,%.5f,%.3f,%.3f,%.5f,%.5f,%.5f,%.5f\n",
+   fprintf(m_acstates, "%.0f,%.5f,%.3f,%.3f,%.3f,%.5f,%.5f,%.5f,%.5f\n",
            aircraft_state.m_time,
            aircraft_state.m_distance_to_go_meters,
-           v_mps,
-           aircraft_state.m_zd * FEET_TO_METERS,
-           aircraft_state.m_x * FEET_TO_METERS,
-           aircraft_state.m_y * FEET_TO_METERS,
-           aircraft_state.m_z * FEET_TO_METERS,
-           Units::FeetPerSecondSpeed(aircraft_state.GetGroundSpeed()).value());
+           Units::MetersPerSecondSpeed(dynamics_state.v_cas).value(),
+           dynamics_state.v_true_airspeed.value(),
+           Units::MetersPerSecondSpeed(aircraft_state.GetSpeedZd()).value(),
+           Units::MetersLength(aircraft_state.GetPositionX()).value(),
+           Units::MetersLength(aircraft_state.GetPositionY()).value(),
+           Units::MetersLength(aircraft_state.GetPositionZ()).value(),
+           Units::MetersPerSecondSpeed(aircraft_state.GetGroundSpeed()).value());
    fflush(m_acstates);
 }

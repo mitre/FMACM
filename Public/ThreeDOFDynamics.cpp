@@ -99,7 +99,7 @@ AircraftState ThreeDOFDynamics::Integrate(const Guidance &guidance,
    m_dynamics_state.x = m_equations_of_motion_state.enu_x;
    m_dynamics_state.y = m_equations_of_motion_state.enu_y;
    m_dynamics_state.h = m_equations_of_motion_state.enu_z;
-   m_dynamics_state.V = m_equations_of_motion_state.true_airspeed;
+   m_dynamics_state.v_true_airspeed = m_equations_of_motion_state.true_airspeed;
    m_dynamics_state.gamma = m_equations_of_motion_state.gamma; // flight-path angle NOTE: for gamma, down is
    // positive; up is negative
    m_dynamics_state.psi = m_equations_of_motion_state.psi; // heading angle measured from east counter-clockwise (rad)
@@ -116,7 +116,7 @@ AircraftState ThreeDOFDynamics::Integrate(const Guidance &guidance,
    m_dynamics_state.yd = ydot;
 
    // Check Thrust Limits and Limit Appropriately
-   m_dynamics_state.v_cas = m_true_weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(m_dynamics_state.V),
+   m_dynamics_state.v_cas = m_true_weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(m_dynamics_state.v_true_airspeed),
                                                                     Units::MetersLength(m_dynamics_state.h));
 
    double cd0, cd2;
@@ -156,7 +156,7 @@ AircraftState ThreeDOFDynamics::Integrate(const Guidance &guidance,
    result_state.SetPsi(m_dynamics_state.psi);
    result_state.m_xd = Units::FeetPerSecondSpeed(xdot).value();
    result_state.m_yd = Units::FeetPerSecondSpeed(ydot).value();
-   result_state.SetZd(-Units::FeetPerSecondSpeed(m_dynamics_state.V).value() * sin(m_dynamics_state.gamma));
+   result_state.SetZd(-Units::FeetPerSecondSpeed(m_dynamics_state.v_true_airspeed).value() * sin(m_dynamics_state.gamma));
    // Note: for gamma, heading down is positive
    result_state.m_gamma = Units::RadiansAngle(m_dynamics_state.gamma).value();
    result_state.m_Vwx = Units::MetersPerSecondSpeed(m_wind_velocity_x).value();
@@ -197,13 +197,13 @@ void ThreeDOFDynamics::Initialize(const double mass_percentile,
    m_dynamics_state.psi = initial_heading;  // Using psi from the next waypoint.
    m_dynamics_state.gamma = Units::RadiansAngle(0);
    m_dynamics_state.phi = Units::RadiansAngle(0);
-   m_dynamics_state.V = initial_tas;
+   m_dynamics_state.v_true_airspeed = initial_tas;
 
    // Actually initialize the state
    m_equations_of_motion_state.enu_x = Units::MetersLength(m_dynamics_state.x); // east (m)
    m_equations_of_motion_state.enu_y = Units::MetersLength(m_dynamics_state.y); // north (m)
    m_equations_of_motion_state.enu_z = Units::MetersLength(m_dynamics_state.h); // altitude (m)
-   m_equations_of_motion_state.true_airspeed = Units::MetersPerSecondSpeed(m_dynamics_state.V); // true airspeed (m/s)
+   m_equations_of_motion_state.true_airspeed = Units::MetersPerSecondSpeed(m_dynamics_state.v_true_airspeed); // true airspeed (m/s)
    m_equations_of_motion_state.gamma = Units::RadiansAngle(m_dynamics_state.gamma); // flight-path angle (rad); NOTE:
    // for gamma, heading down is positve
    m_equations_of_motion_state.thrust = Units::NewtonsForce(0.0); // thrust (N)
@@ -216,16 +216,16 @@ void ThreeDOFDynamics::Initialize(const double mass_percentile,
    m_dynamics_state.psi = m_equations_of_motion_state.psi; // heading angle measured from east counter-clockwise (rad)
 
    // Determine Groundspeed
-   m_dynamics_state.xd = m_dynamics_state.V * cos(m_dynamics_state.psi) * cos(m_dynamics_state.gamma) +
+   m_dynamics_state.xd = m_dynamics_state.v_true_airspeed * cos(m_dynamics_state.psi) * cos(m_dynamics_state.gamma) +
                          m_wind_velocity_x;
-   m_dynamics_state.yd = m_dynamics_state.V * sin(m_dynamics_state.psi) * cos(m_dynamics_state.gamma) +
+   m_dynamics_state.yd = m_dynamics_state.v_true_airspeed * sin(m_dynamics_state.psi) * cos(m_dynamics_state.gamma) +
                          m_wind_velocity_y;
 
    // Calculate initial Aircraft Thrust
    double cd0, cd2;
    int mode;
    double gear;
-   m_bada_calculator.getConfig(m_true_weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(m_dynamics_state.V),
+   m_bada_calculator.getConfig(m_true_weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(m_dynamics_state.v_true_airspeed),
                                                                        Units::MetersLength(m_dynamics_state.h)),
                                Units::MetersLength(m_dynamics_state.h),
                                m_altitude_msl_at_final_waypoint,

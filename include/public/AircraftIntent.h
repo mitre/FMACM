@@ -129,7 +129,7 @@ public:
 
    bool IsLoaded();
 
-   void Dump(std::ofstream &fileOut) const;
+   void Dump(std::ostream &fileOut) const;
 
    void DumpParms(std::string) const;
 

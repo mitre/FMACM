@@ -18,6 +18,7 @@
 #pragma once
 
 #include "public/PrecalcWaypoint.h"
+#include "public/AircraftSpeed.h"
 
 class Guidance
 {
@@ -29,6 +30,12 @@ public:
    void SetValid(bool value);
 
    const bool IsValid() const;
+
+   const AircraftSpeed& GetSelectedSpeed() const;
+
+   void SetSelectedSpeed(const AircraftSpeed& selected_speed);
+
+   int GetIasCommandIntegerKnots() const;
 
    PrecalcConstraint m_active_precalc_constraints;
 
@@ -44,6 +51,7 @@ public:
 
 private:
    bool m_valid;
+   AircraftSpeed m_selected_speed;
 };
 
 inline void Guidance::SetValid(bool value) {
@@ -53,3 +61,12 @@ inline void Guidance::SetValid(bool value) {
 inline const bool Guidance::IsValid() const {
    return m_valid;
 }
+
+inline const AircraftSpeed& Guidance::GetSelectedSpeed() const {
+   return m_selected_speed;
+}
+
+inline void Guidance::SetSelectedSpeed(const AircraftSpeed& selected_speed) {
+   m_selected_speed = selected_speed;
+}
+

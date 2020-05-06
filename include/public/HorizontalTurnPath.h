@@ -21,14 +21,22 @@
 #include <UnsignedAngle.h>
 #include <Length.h>
 
+class HorizontalPath;   // avoid recursive class defs
+
 class HorizontalTurnPath
 {
 public:
+
+   enum TURN_TYPE {UNKNOWN, PERFORMANCE, RADIUS_FIXED};
+   enum TURN_DIRECTION {NO_TURN, LEFT_TURN, RIGHT_TURN};
+
    HorizontalTurnPath(void);
 
    ~HorizontalTurnPath(void);
 
    bool operator==(const HorizontalTurnPath &that) const;
+
+   TURN_DIRECTION GetTurnDirection(const HorizontalPath &p0, const HorizontalPath &p1) const;
 
    double x_position_meters;
    double y_position_meters;
@@ -37,5 +45,6 @@ public:
    Units::MetersLength radius;
    Units::UnsignedRadiansAngle bankAngle;
    Units::MetersPerSecondSpeed groundspeed;
+   TURN_TYPE turn_type;
 };
 

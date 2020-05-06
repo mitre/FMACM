@@ -18,7 +18,7 @@
 #include "framework/TrajectoryFromFile.h"
 #include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
-#include "public/HfpReader.h"
+#include "public/HfpReader2020.h"
 #include "utility/CsvParser.h"
 
 #include "AngularSpeed.h"
@@ -40,7 +40,7 @@ TrajectoryFromFile::TrajectoryFromFile()
 
 TrajectoryFromFile::~TrajectoryFromFile() = default;
 
-bool TrajectoryFromFile::load(DecodedStream *input) {
+bool TrajectoryFromFile::load(DecodedStream* input) {
 
    set_stream(input);
 
@@ -57,8 +57,8 @@ bool TrajectoryFromFile::load(DecodedStream *input) {
    return m_loaded;
 }
 
-Guidance TrajectoryFromFile::Update(const AircraftState &state,
-                                    const Guidance &guidance_in) {
+Guidance TrajectoryFromFile::Update(const AircraftState& state,
+                                    const Guidance& guidance_in) {
    Guidance result = guidance_in;
 
    Units::UnsignedAngle estimated_course;
@@ -147,8 +147,7 @@ Guidance TrajectoryFromFile::Update(const AircraftState &state,
       // courseChange - positive is left turn, neg is right turn
       // if left turn, distance < radius is left of m_path_course, distance > radius is right of m_path_course
       // if right turn, distance < radius is right of m_path_course, distance > radius is left of m_path_course
-      if (turn_direction == LEFT)
-      {
+      if (turn_direction == LEFT) {
          result.m_reference_bank_angle =
                dimensionless_roll_factor * m_horizontal_trajectory[traj_index].m_turn_info.bankAngle;
 
@@ -183,7 +182,7 @@ Guidance TrajectoryFromFile::Update(const AircraftState &state,
    return result;
 }
 
-void TrajectoryFromFile::CalculateWaypoints(AircraftIntent &intent) {
+void TrajectoryFromFile::CalculateWaypoints(AircraftIntent& intent) {
    m_precalc_waypoints.clear();
 
    double prev_dist = 0;
@@ -292,42 +291,30 @@ void TrajectoryFromFile::ReadVerticalTrajectoryFile() {
 }
 
 void TrajectoryFromFile::ReadHorizontalTrajectoryFile() {
-   static const std::string STRAIGHT("straight"), TURN("turn");
+   testvector::HfpReader2020 hfp_reader(m_horizontal_trajectory_file, 1);
 
-   testvector::HfpReader hfpReader(m_horizontal_trajectory_file, 2);
+   while (hfp_reader.Advance()) {
+      HorizontalPath horizontal_path_segment;
 
-   while (hfpReader.Advance()) {
+      horizontal_path_segment.SetXYPositionMeters(Units::MetersLength(hfp_reader.GetX()).value(),
+                                                  Units::MetersLength(hfp_reader.GetY()).value());
 
-      HorizontalPath htrajseg;
+      horizontal_path_segment.m_path_length_cumulative_meters = Units::MetersLength(hfp_reader.GetDTG()).value();
+      horizontal_path_segment.m_segment_type = hfp_reader.GetSegmentType();
 
-      htrajseg.SetXYPositionMeters(
-            Units::MetersLength(hfpReader.GetX()).value(),
-            Units::MetersLength(hfpReader.GetY()).value());
+      horizontal_path_segment.m_path_course = Units::RadiansAngle(hfp_reader.GetCourse()).value();
 
-      htrajseg.m_path_length_cumulative_meters = Units::MetersLength(hfpReader.GetDTG()).value();
+      horizontal_path_segment.m_turn_info.x_position_meters = Units::MetersLength(hfp_reader.GetTurnCenterX()).value();
+      horizontal_path_segment.m_turn_info.y_position_meters = Units::MetersLength(hfp_reader.GetTurnCenterY()).value();
 
-      std::string fieldstr(hfpReader.GetSegmentType());
-      if (STRAIGHT == fieldstr) {
-         htrajseg.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-      } else if (TURN == fieldstr) {
-         htrajseg.m_segment_type = HorizontalPath::SegmentType::TURN;
-      } else {
-         htrajseg.m_segment_type = HorizontalPath::SegmentType::UNSET;
-      }
+      horizontal_path_segment.m_turn_info.q_start = hfp_reader.GetAngleStartOfTurn();
+      horizontal_path_segment.m_turn_info.q_end = hfp_reader.GetAngleEndOfTurn();
 
-      htrajseg.m_path_course = Units::RadiansAngle(hfpReader.GetCourse()).value();
+      horizontal_path_segment.m_turn_info.radius = hfp_reader.GetTurnRadius();
+      horizontal_path_segment.m_turn_info.groundspeed = hfp_reader.GetGroundSpeed();
+      horizontal_path_segment.m_turn_info.bankAngle = hfp_reader.GetBankAngle();
 
-      htrajseg.m_turn_info.x_position_meters = Units::MetersLength(hfpReader.GetTurnCenterX()).value();
-      htrajseg.m_turn_info.y_position_meters = Units::MetersLength(hfpReader.GetTurnCenterY()).value();
-
-      htrajseg.m_turn_info.q_start = hfpReader.GetAngleStartOfTurn();
-      htrajseg.m_turn_info.q_end = hfpReader.GetAngleEndOfTurn();
-
-      htrajseg.m_turn_info.radius = hfpReader.GetTurnRadius();
-      htrajseg.m_turn_info.groundspeed = hfpReader.GetGroundSpeed();
-      htrajseg.m_turn_info.bankAngle = hfpReader.GetBankAngle();
-
-      m_horizontal_trajectory.push_back(htrajseg);
+      m_horizontal_trajectory.push_back(horizontal_path_segment);
    }
 
    m_decrementing_distance_calculator = AlongPathDistanceCalculator(m_horizontal_trajectory,

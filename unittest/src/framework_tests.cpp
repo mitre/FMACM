@@ -21,8 +21,6 @@
 
 #include <framework/WeatherTruthByTime.h>
 #include "gtest/gtest.h"
-#include "utils/WindSpeedUtils.h"
-#include "utils/PreparatorsUtils.h"
 #include <framework/WeatherTruthByDistanceToGo.h>
 
 using namespace aaesim::test::utils;

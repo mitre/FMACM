@@ -10,6 +10,7 @@ set(SOURCE_FILES
         AircraftControl.cpp
         Aircraft.cpp
         AircraftIntent.cpp
+        AircraftSpeed.cpp
         AircraftState.cpp
         Atmosphere.cpp
         ClosestPointMetric.cpp
@@ -60,10 +61,10 @@ set(SOURCE_FILES
         DataReader.cpp
         EnvReader.cpp
         ForeWindReader.cpp
-        HfpReader.cpp
+        HfpReaderPre2020.cpp
         RefReader.cpp
         TvReader.cpp
-        )
+        HfpReader2020.cpp)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 

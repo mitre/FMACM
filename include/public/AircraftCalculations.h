@@ -155,7 +155,7 @@ public:
                                                                const Units::Length &y2);
 
    /**
-    * Standard cross-product calculation.
+    * Cross-product calculation of (p1-vertex) X (p2-vertex)
     */
    static Units::Area ComputeCrossProduct(const Units::Length &xvertex,
                                           const Units::Length &yvertex,

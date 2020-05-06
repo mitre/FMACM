@@ -37,7 +37,7 @@ private:
    /**
     * Implementation that takes the data from CSV and populates the parent's waypoint data sets.
     */
-   void PopulateWaypointsFromCsv(const std::string &csvfile);
+   void PopulateWaypointsFromCsv(const std::string &csv_file);
 
    double LocalStringToDouble(const std::string &s);
 

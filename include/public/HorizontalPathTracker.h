@@ -71,6 +71,8 @@ public:
 
    const std::vector<HorizontalPath> GetHorizontalPath() const;
 
+   void UpdateCurrentIndex(std::vector<HorizontalPath>::size_type new_index);
+
 protected:
    static const Units::Length EXTENSION_LENGTH;
    std::vector<HorizontalPath>::size_type m_current_index;
@@ -92,8 +94,6 @@ protected:
     * @return a copy of the original vector, but extended with straight segments at both ends
     */
    std::vector<HorizontalPath> ExtendHorizontalTrajectory(const std::vector<HorizontalPath> &horizontal_trajectory);
-
-   void UpdateCurrentIndex(std::vector<HorizontalPath>::size_type new_index);
 
    /**
     * @brief Checks the incoming location to determine if on a local horizontal path node.

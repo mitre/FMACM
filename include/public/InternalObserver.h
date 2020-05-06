@@ -31,7 +31,7 @@
 #include "public/MaintainMetric.h"
 #include "public/MergePointMetric.h"
 #include "public/ClosestPointMetric.h"
-#include "public/WindStack.h"
+#include "public/WeatherPrediction.h"
 
 class InternalObserver
 {
@@ -106,9 +106,7 @@ public:
    void processClosestPointMetric();
 
    // predicted wind matrix metric
-   void addPredictedWind(int id,
-                         const WindStack &predWindX,
-                         const WindStack &predWindY);
+   void addPredictedWind(int id, const WeatherPrediction &weatherPrediction);
 
    void dumpPredictedWind();
 
@@ -118,6 +116,11 @@ public:
                              int row,
                              std::string field,
                              const WindStack &mat);
+
+   std::string predTempData(int id,
+                            std::string field,
+                            const WeatherPrediction &weatherPrediction);
+
 
    // time to go metric
    void addAchieveRcd(size_t aircraftId,

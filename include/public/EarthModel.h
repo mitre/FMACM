@@ -76,3 +76,5 @@ protected:
    EarthModel();
 };
 
+std::ostream& operator<<(std::ostream &out, const EarthModel::GeodeticPosition &geo);
+std::ostream& operator<<(std::ostream &out, const EarthModel::LocalPositionEnu &local);

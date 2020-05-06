@@ -14,10 +14,9 @@
 //
 // Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
 #include "framework/AircraftIntentFromFile.h"
 
-#include "public/HfpReader.h"
+#include "public/HfpReader2020.h"
 
 using std::string;
 
@@ -25,7 +24,7 @@ AircraftIntentFromFile::AircraftIntentFromFile() = default;
 
 AircraftIntentFromFile::~AircraftIntentFromFile() = default;
 
-bool AircraftIntentFromFile::load(DecodedStream *input) {
+bool AircraftIntentFromFile::load(DecodedStream* input) {
    set_stream(input);
 
    std::string csvfile;
@@ -40,75 +39,75 @@ bool AircraftIntentFromFile::load(DecodedStream *input) {
    return loaded;
 }
 
-void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string &csvfile) {
+void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string& csv_file) {
+   testvector::HfpReader2020 hfp_reader(csv_file, 1);
 
-   testvector::HfpReader hfpReader(csvfile, 2);
+   Units::MetersLength x_waypoint_location[128];
+   Units::MetersLength y_waypoint_location[128];
+   Units::MetersLength distance_to_go[128];
+   Units::MetersLength x_turn_center[128];
+   Units::MetersLength y_turn_center[128];
+   Units::MetersLength turn_radius[128];
 
-   /*
-    * Notes on Loading:
-    * - note that the CSV file contains the waypoint information in reverse order from the way it is needed here
-    * - The first two rows may be skipped as header information
-    * - There is no way to know how many rows exist. Just read until the buffer is empty
-    * - Data structured like this:
-    *       HPT_j, x[m], y[m], DTG[m], Segment Type, Course[rad], Turn Center x[m], Turn Center y[m], Angle Start of Turn[rad], Angle End of Turn[rad], R[m], Lat[deg], Lon[deg], Turn Center Lat[deg], Turn Center Lon[deg]
-    *       1,  0.00,  0.00,  0.00,straight, 0.7918,  0.00,  0.00,  0.00,  0.00,  0.00,33.4286000,-111.8130000,0,0,
-    * - The course column contains 10000000.0000 when the value is irrelevant
-    * - The lat/lon pairs are in WGS-84 space
-    */
-   Units::MetersLength xwptlocation[128], ywptlocation[128], disttogo[128], xturncenter[128], yturncenter[128], turnradius[128];
-   string segmenttype[128];
-   Units::RadiansAngle course[128], startofturn[128], endofturn[128];
-   Units::DegreesAngle latwpt[128], lonwpt[128], latturncenter[128], lonturncenter[128];
+   Units::RadiansAngle course[128];
+   Units::RadiansAngle start_of_turn[128];
+   Units::RadiansAngle end_of_turn[128];
+
+   Units::DegreesAngle waypoint_latitude[128];
+   Units::DegreesAngle waypoint_longitude[128];
+   Units::DegreesAngle turn_center_latitude[128];
+   Units::DegreesAngle turn_center_longitude[128];
+
    int irow = -1;
-   while (hfpReader.Advance()) {
+   while (hfp_reader.Advance()) {
       irow++;
 
       // the value extracted from the CSV file is 1-based, we need 0-based
-      int rowindex = (int) hfpReader.GetDouble(0) - 1;
+      int row_index = static_cast<int>(hfp_reader.GetDouble(0));
 
-      xwptlocation[rowindex] = hfpReader.GetX();
-      ywptlocation[rowindex] = hfpReader.GetY();
+      x_waypoint_location[row_index] = hfp_reader.GetX();
+      y_waypoint_location[row_index] = hfp_reader.GetY();
 
-      disttogo[rowindex] = hfpReader.GetDTG();
-      segmenttype[rowindex] = hfpReader.GetSegmentType();
-      course[rowindex] = hfpReader.GetCourse();
+      distance_to_go[row_index] = hfp_reader.GetDTG();
+      course[row_index] = hfp_reader.GetCourse();
 
-      xturncenter[rowindex] = hfpReader.GetTurnCenterX();
-      yturncenter[rowindex] = hfpReader.GetTurnCenterY();
+      x_turn_center[row_index] = hfp_reader.GetTurnCenterX();
+      y_turn_center[row_index] = hfp_reader.GetTurnCenterY();
 
-      startofturn[rowindex] = hfpReader.GetAngleStartOfTurn();
-      endofturn[rowindex] = hfpReader.GetAngleEndOfTurn();
-      turnradius[rowindex] = hfpReader.GetTurnRadius();
+      start_of_turn[row_index] = hfp_reader.GetAngleStartOfTurn();
+      end_of_turn[row_index] = hfp_reader.GetAngleEndOfTurn();
+      turn_radius[row_index] = hfp_reader.GetTurnRadius();
 
-      latwpt[rowindex] = hfpReader.GetLatitude();
-      lonwpt[rowindex] = hfpReader.GetLongitude();
+      waypoint_latitude[row_index] = hfp_reader.GetLatitude();
+      waypoint_longitude[row_index] = hfp_reader.GetLongitude();
 
-      latturncenter[rowindex] = hfpReader.GetTurnCenterLatitude();
-      lonturncenter[rowindex] = hfpReader.GetTurnCenterLongitude();
+      turn_center_latitude[row_index] = hfp_reader.GetTurnCenterLatitude();
+      turn_center_longitude[row_index] = hfp_reader.GetTurnCenterLongitude();
    }
 
    // Now store all information into the public Fms struct in the appropriate order
-   int numberofrowsofdata = irow + 1, forwardrow = 0;
-   SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
-   SetNumberOfWaypoints(numberofrowsofdata);
-   for (int reverserow = numberofrowsofdata - 1; reverserow >= 0; --reverserow) {
-      m_fms.m_latitude[forwardrow] = latwpt[reverserow];
-      m_fms.m_longitude[forwardrow] = lonwpt[reverserow];
-      m_fms.m_x[forwardrow] = xwptlocation[reverserow];
-      m_fms.m_y[forwardrow] = ywptlocation[reverserow];
-      forwardrow++;
-   }
+   int number_of_data_rows = irow + 1;
+   int forward_row_index = 0;
 
+   SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
+   SetNumberOfWaypoints(number_of_data_rows);
+   for (int reverse_row_index = number_of_data_rows - 1; reverse_row_index >= 0; --reverse_row_index) {
+      m_fms.m_latitude[forward_row_index] = waypoint_latitude[reverse_row_index];
+      m_fms.m_longitude[forward_row_index] = waypoint_longitude[reverse_row_index];
+      m_fms.m_x[forward_row_index] = x_waypoint_location[reverse_row_index];
+      m_fms.m_y[forward_row_index] = y_waypoint_location[reverse_row_index];
+      forward_row_index++;
+   }
 }
 
-double AircraftIntentFromFile::LocalStringToDouble(const string &s) {
+double AircraftIntentFromFile::LocalStringToDouble(const string& s) {
    std::istringstream iss(s);
    double val = 0;
    iss >> val;
    return val;
 }
 
-int AircraftIntentFromFile::LocalStringToInt(const string &s) {
+int AircraftIntentFromFile::LocalStringToInt(const string& s) {
    std::istringstream iss(s);
    int val = 0;
    iss >> val;

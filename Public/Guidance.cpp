@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #include "public/Guidance.h"
+#include <cmath>
 
 Guidance::Guidance() {
    m_ias_command = Units::ZERO_SPEED;
@@ -31,4 +32,9 @@ Guidance::Guidance() {
 }
 
 Guidance::~Guidance() {
+}
+
+int Guidance::GetIasCommandIntegerKnots() const {
+   double result = round(Units::KnotsSpeed(m_ias_command).value());
+   return (int) result;
 }

@@ -16,6 +16,7 @@
 // ****************************************************************************
 
 #include "public/HorizontalTurnPath.h"
+#include "public/HorizontalPath.h"
 
 
 HorizontalTurnPath::HorizontalTurnPath(void) {
@@ -26,6 +27,7 @@ HorizontalTurnPath::HorizontalTurnPath(void) {
    radius = Units::MetersLength(0);
    bankAngle = Units::UnsignedRadiansAngle(0);
    groundspeed = Units::MetersPerSecondSpeed(0);
+   turn_type = UNKNOWN;
 }
 
 
@@ -38,4 +40,28 @@ bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
            (this->q_start == that.q_start) &&
            (this->q_end == that.q_end) &&
            (this->radius == that.radius));
+}
+
+/**
+ * Determine whether this is a right or left turn by using the
+ * two previous points in the trajectory to establish a line
+ * and finding whether the turn center is on the left or right.
+ * The HorizontalPath object which owns this HorizontalTurnPath
+ * would be p2.
+ */
+HorizontalTurnPath::TURN_DIRECTION HorizontalTurnPath::GetTurnDirection(const HorizontalPath& p0,
+      const HorizontalPath& p1) const {
+
+   // TODO replace this with a field and accessor, see AAES-1044
+
+   if (turn_type == UNKNOWN) return NO_TURN;
+
+   double dx1 = p1.GetXPositionMeters() - p0.GetXPositionMeters();
+   double dy1 = p1.GetYPositionMeters() - p0.GetYPositionMeters();
+   double dx2 = x_position_meters - p1.GetXPositionMeters();
+   double dy2 = y_position_meters - p1.GetYPositionMeters();
+
+   double cross_product = dx1 * dy2 - dy1 * dx2;
+
+   return (cross_product > 0) ? LEFT_TURN : RIGHT_TURN;
 }

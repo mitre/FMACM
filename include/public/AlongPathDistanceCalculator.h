@@ -36,6 +36,10 @@ public:
                                TrajectoryIndexProgressionDirection expected_index_progression,
                                bool use_large_cross_track_tolerance);
 
+   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
+                               TrajectoryIndexProgressionDirection expected_index_progression,
+                               Units::Length specified_cross_track_tolerance);
+
    virtual ~AlongPathDistanceCalculator();
 
    /**
@@ -53,6 +57,15 @@ public:
    bool CalculateAlongPathDistanceFromPosition(const Units::Length position_x,
                                                const Units::Length position_y,
                                                Units::Length &distance_along_path);
+
+   /**
+    * @brief Same as previous but includes the course into the next waypoint if in a turn.  Used for Capture IM-clearance.
+    */
+   bool CalculateAlongPathDistanceFromPosition(const Units::Length position_x,
+                                               const Units::Length position_y,
+                                               Units::Length &distance_along_path,
+                                               Units::UnsignedAngle &course,
+                                               Units::UnsignedAngle &pt_to_pt_course);
 
    void UpdateHorizontalTrajectory(const std::vector<HorizontalPath> &horizontal_trajectory) override;
 

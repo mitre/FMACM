@@ -44,7 +44,7 @@ typedef struct
    Units::MetersLength x; //aircraft position east coordinate (m)
    Units::MetersLength y; //aircraft position north coordinate (m)
    Units::MetersLength h; //aircraft altitude (m)
-   Units::MetersPerSecondSpeed V; // True airspeed (m/s)
+   Units::MetersPerSecondSpeed v_true_airspeed; // True airspeed (m/s)
    Units::KnotsSpeed v_cas;   // calibrated/indicated airspeed
    Units::RadiansAngle psi; //aircraft heading angle measured from east counter-clockwise (rad)
    Units::RadiansAngle phi;  //aircraft roll angle (rad)

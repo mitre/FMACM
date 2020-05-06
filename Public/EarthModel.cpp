@@ -25,11 +25,21 @@
 #include "public/EarthModel.h"
 
 EarthModel::EarthModel() {
-   // TODO Auto-generated constructor stub
-
 }
 
 EarthModel::~EarthModel() {
-   // TODO Auto-generated destructor stub
 }
 
+std::ostream& operator <<(std::ostream& out,
+      const EarthModel::GeodeticPosition& geo) {
+   out << "(" << Units::DegreesAngle(geo.latitude) << "," << Units::DegreesAngle(geo.longitude) << ")";
+   return out;
+}
+
+std::ostream& operator <<(std::ostream& out,
+      const EarthModel::LocalPositionEnu& local) {
+   out << "(" << Units::MetersLength(local.x) <<
+         "," << Units::MetersLength(local.y) <<
+         "," << Units::MetersLength(local.z) << ")";
+   return out;
+}

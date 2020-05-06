@@ -909,24 +909,23 @@ void InternalObserver::process_ptis_b_reports() // process the ADS-B reports
 
 }
 
-void InternalObserver::addPredictedWind(int id,
-                                        const WindStack &predWindX,
-                                        const WindStack &predWindY) {
+void InternalObserver::addPredictedWind(int id, const WeatherPrediction &weatherPrediction) {
    // Adds predicted wind entry for an aircraft.
    //
    // id:aircraft id.
-   // predWindX, predWindY:predicted wind data for aircraft.
+   // weatherPrediction.east_west, weatherPrediction.north_south:predicted wind data for aircraft.
    //                      altitudes in feet, wind speeds in knots.
 
    // Add header.
    if (predWinds.size() == 0) {
-      predWinds.push_back(predWindsHeading(predWindX.GetMaxRow()));
+      predWinds.push_back(predWindsHeading(weatherPrediction.east_west.GetMaxRow()));
    }
 
    // Add altitudes, x speed, y speed.
-   predWinds.push_back(predWindsData(id, 1, "Alt(feet)", predWindX));
-   predWinds.push_back(predWindsData(id, 2, "XSpeed(Knots)", predWindX));
-   predWinds.push_back(predWindsData(id, 2, "YSpeed(Knots)", predWindY));
+   predWinds.push_back(predWindsData(id, 1, "Alt(feet)", weatherPrediction.east_west));
+   predWinds.push_back(predWindsData(id, 2, "XSpeed(Knots)", weatherPrediction.east_west));
+   predWinds.push_back(predWindsData(id, 2, "YSpeed(Knots)", weatherPrediction.north_south));
+   predWinds.push_back(predTempData(id, "Temperature(C)", weatherPrediction));
 }
 
 string InternalObserver::predWindsHeading(int numVals) {
@@ -993,6 +992,52 @@ string InternalObserver::predWindsData(int id,
             sprintf(txt, ",%lf", mat.GetSpeed(i).value());
 
       }
+      str += txt;
+   }
+
+   delete[] txt;
+
+   return str;
+}
+
+string InternalObserver::predTempData(int id,
+                                       string field,
+                                       const WeatherPrediction &weatherPrediction) {
+   // Formats data line for predicted winds metric for an aircraft
+   // for a data row.  With respect between the data line output and
+   // how the wind matrices are setup, the rows and columns are
+   // inverted.  Altitudes output in meters, speeds in meters/second.
+   //
+   // id:aircraft id.
+   // field:field name.
+   // col:col of data being formatted-1 for altitude, 2 for speed.
+   // mat:matrix containing data to format into string.
+   //
+   // returns data line.
+
+   string str;
+
+   char *txt = new char[31];
+
+
+   // Aircraft id
+
+   sprintf(txt, "%d", id);
+   str = txt;
+
+
+   // Field
+
+   str += ",";
+   str += field.c_str();
+
+
+   // Data line-all in meters, meters/second.
+   const WindStack &mat(weatherPrediction.east_west);
+   for (int i = 1; i <= mat.GetMaxRow(); i++) {
+      Units::Length alt = mat.GetAltitude(i);
+      Units::KelvinTemperature temperature = weatherPrediction.GetForecastAtmosphere()->GetTemperature(alt);
+      sprintf(txt, ",%lf", temperature.value() - 273.15);
       str += txt;
    }
 

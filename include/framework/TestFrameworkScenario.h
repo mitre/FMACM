@@ -63,7 +63,7 @@ private:
                  bool blend_wind,
                  Units::Time simulation_time_step);
 
-   void RecordState(const AircraftState &aircraft_state) const;
+   void RecordState(const AircraftState &aircraft_state, const DynamicsState &dynamics_state) const;
 
    static const Units::SecondsTime mDefaultSimulationTimeStep;
    static const int number_of_iterations;

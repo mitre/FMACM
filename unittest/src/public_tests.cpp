@@ -24,6 +24,7 @@
 #include "public/AircraftIntent.h"
 #include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
+#include "public/Guidance.h"
 #include "public/HorizontalPathTracker.h"
 #include "public/PositionCalculator.h"
 #include "public/DirectionOfFlightCourseCalculator.h"
@@ -1264,4 +1265,16 @@ TEST(AircraftState, GetHeadingCcwFromEastRadians) {
       const Units::SignedRadiansAngle reported_heading = test_state.GetHeadingCcwFromEastRadians();
       EXPECT_NEAR(known_course_path[0].m_path_course, reported_heading.value(), 1e-3);
    }
+}
+
+TEST(Guidance, GetIasCommandIntegerKnots) {
+   Guidance guidance;
+
+   // test rounding up
+   guidance.m_ias_command = Units::KnotsSpeed(209.9);
+   EXPECT_EQ(210, guidance.GetIasCommandIntegerKnots());
+
+   // test rounding down
+   guidance.m_ias_command = Units::KnotsSpeed(209.1);
+   EXPECT_EQ(209, guidance.GetIasCommandIntegerKnots());
 }

@@ -73,6 +73,11 @@ public:
 
    void UpdateCurrentIndex(std::vector<HorizontalPath>::size_type new_index);
 
+   /**
+    * Logic to initialize the starting index.
+    */
+   void InitializeStartingIndex();
+
 protected:
    static const Units::Length EXTENSION_LENGTH;
    std::vector<HorizontalPath>::size_type m_current_index;
@@ -108,12 +113,6 @@ protected:
 private:
    static log4cplus::Logger m_logger;
    static const Units::MetersLength ON_NODE_TOLERANCE;
-
-   /**
-    * Logic to initialize the starting index.
-    */
-   void InitializeStartingIndex();
-
 };
 
 inline bool HorizontalPathTracker::IsPassedEndOfRoute() const {

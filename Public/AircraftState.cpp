@@ -29,6 +29,7 @@ AircraftState::AircraftState()
         m_z(0),
         m_xd(0),
         m_yd(0),
+        m_zd(0),
         m_xdd(0),
         m_ydd(0),
         m_zdd(0.0),
@@ -46,7 +47,32 @@ AircraftState::AircraftState()
 
 AircraftState::~AircraftState() = default;
 
-bool AircraftState::operator==(const AircraftState &in) const {
+void AircraftState::Clear() {
+   m_id = -1;
+   m_time = -1;
+   m_x = 0;
+   m_y = 0;
+   m_z = 0;
+   m_xd = 0;
+   m_yd = 0;
+   m_zd = 0;
+   m_xdd = 0;
+   m_ydd = 0;
+   m_zdd = 0;
+   m_gamma = 0;
+   m_Vwx = 0;
+   m_Vwy = 0;
+   m_Vw_para = 0;
+   m_Vw_perp = 0;
+   m_psi = Units::RadiansAngle(0);
+
+   SetZd(0);
+   m_Vwx_dh = Units::zero();
+   m_Vwy_dh = Units::zero();
+   m_distance_to_go_meters = -99999.99999;
+}
+
+bool AircraftState::operator==(const AircraftState& in) const {
 
    bool same = true;
 
@@ -63,7 +89,7 @@ bool AircraftState::operator==(const AircraftState &in) const {
    return same;
 }
 
-bool AircraftState::operator<(const AircraftState &in) const {
+bool AircraftState::operator<(const AircraftState& in) const {
    if (m_id < in.m_id || (m_id == in.m_id && m_time < in.m_time)) {
       return true;
    }
@@ -71,14 +97,13 @@ bool AircraftState::operator<(const AircraftState &in) const {
    return false;
 }
 
-const bool AircraftState::IsTurning() const
-{
-	//Determine if a turn is taking place: source nav_NSE.cpp of WinSS
+const bool AircraftState::IsTurning() const {
+   //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
 
-	double spd = sqrt(std::pow(m_xd, 2) + std::pow(m_yd, 2));
-	double turn_rate = (m_xd * m_ydd - m_yd * m_xdd) / spd;
+   double spd = sqrt(std::pow(m_xd, 2) + std::pow(m_yd, 2));
+   double turn_rate = (m_xd * m_ydd - m_yd * m_xdd) / spd;
 
-	return std::fabs(turn_rate) > 1.5;
+   return std::fabs(turn_rate) > 1.5;
 }
 
 const Units::UnsignedRadiansAngle AircraftState::GetHeadingCcwFromEastRadians() const {
@@ -90,7 +115,7 @@ const Units::Speed AircraftState::GetGroundSpeed() const {
    return Units::FeetPerSecondSpeed(sqrt(pow(m_xd, 2) + pow(m_yd, 2)));
 }
 
-AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport) {
+AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport& adsbsvReport) {
    AircraftState result;
    result.m_id = adsbsvReport.GetId();
    result.m_time = adsbsvReport.GetTime().value();
@@ -113,8 +138,9 @@ void AircraftState::DumpParms(std::string str) const {
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "speed      x " << m_xd << "  y " << m_yd << "  z " << m_zd);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vw_para      " << m_Vw_para << "  Vw_perp " << m_Vw_perp);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vwx      " << m_Vwx << "  Vwy " << m_Vwy);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vwx_dh     " << Units::HertzFrequency(m_Vwx_dh) << "  Vwy_dh "
-                                                    << Units::HertzFrequency(m_Vwy_dh));
+   LOG4CPLUS_DEBUG(AircraftState::logger,
+                   std::endl << "Vwx_dh     " << Units::HertzFrequency(m_Vwx_dh) << "  Vwy_dh "
+                             << Units::HertzFrequency(m_Vwy_dh));
 
 }
 
@@ -148,8 +174,8 @@ void AircraftState::CsvHdrDump(std::string str) const {
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState &AircraftState::Interpolate(const AircraftState &a,
-                                          const AircraftState &b,
+AircraftState& AircraftState::Interpolate(const AircraftState& a,
+                                          const AircraftState& b,
                                           const double time) {
 
    if (a.m_id != b.m_id) {
@@ -186,7 +212,7 @@ AircraftState &AircraftState::Interpolate(const AircraftState &a,
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState &AircraftState::Extrapolate(const AircraftState &in,
+AircraftState& AircraftState::Extrapolate(const AircraftState& in,
                                           const double time_in) {
    double dt = time_in - in.m_time;
 
@@ -202,8 +228,8 @@ AircraftState &AircraftState::Extrapolate(const AircraftState &in,
    return *this;
 }
 
-AircraftState &AircraftState::Extrapolate(const AircraftState &in,
-                                          const Units::SecondsTime &time) {
+AircraftState& AircraftState::Extrapolate(const AircraftState& in,
+                                          const Units::SecondsTime& time) {
    Extrapolate(in, time.value());
    return *this;
 }

@@ -175,6 +175,7 @@ void AircraftIntent::UpdateXYZFromLatLonWgs84() {
       geoPosition.latitude = Units::RadiansAngle(m_fms.m_latitude[var]);
       geoPosition.longitude = Units::RadiansAngle(m_fms.m_longitude[var]);
       m_tangent_plane_sequence->convertGeodeticToLocal(geoPosition, xyPosition);
+      LOG4CPLUS_TRACE(logger, "Waypoint " << var << " at " << geoPosition << " is " << xyPosition);
       m_waypoint_x[var] = m_fms.m_x[var] = xyPosition.x; // yup, waypoint_x always holds the same value as fms.xWp
       m_waypoint_y[var] = m_fms.m_y[var] = xyPosition.y; // yup, waypoint_y always holds the same value as fms.yWp
       m_fms.m_z[var] = xyPosition.z;
@@ -409,6 +410,14 @@ void AircraftIntent::InsertPairAtIndex(const std::string &wpname,
    wp.SetRfTurnArcRadius(Units::ZERO_LENGTH);
    wp.SetWaypointLatLon(lat, lon);
    wp.SetName(wpname);
+
+   // copy constraints -- high from previous waypoint and low from next
+   auto wp2 = std::next(m_waypoints.begin(), index-1);
+   wp.SetAltitudeConstraintHigh(wp2->GetAltitudeConstraintHigh());
+   wp.SetSpeedConstraintHigh(wp2->GetSpeedConstraintHigh());
+   ++wp2;
+   wp.SetAltitudeConstraintLow(wp2->GetAltitudeConstraintLow());
+   wp.SetSpeedConstraintLow(wp2->GetSpeedConstraintLow());
 
    InsertWaypointAtIndex(wp, index);
 }

@@ -267,6 +267,7 @@ SET(IM_BUILD_SRC
         ${IM_DIR}/IMAircraft.h
         ${IM_DIR}/IMAlgorithmLoader.cpp
         ${IM_DIR}/IMAlgorithmLoader.h
+        ${IM_DIR}/IMAlgorithmFile.h
         ${IM_DIR}/IMClearanceLoader.cpp
         ${IM_DIR}/IMClearanceLoader.h
         ${IM_DIR}/IMScenario.cpp

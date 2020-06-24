@@ -39,6 +39,8 @@ public:
 
    virtual ~AircraftState();
 
+   void Clear();
+
    const Units::UnsignedRadiansAngle GetHeadingCcwFromEastRadians() const;
 
    void SetPsi(const Units::Angle psi_in);

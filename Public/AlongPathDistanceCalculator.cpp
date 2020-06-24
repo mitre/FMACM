@@ -22,7 +22,8 @@
 
 log4cplus::Logger AlongPathDistanceCalculator::m_logger = log4cplus::Logger::getInstance("AlongPathDistanceCalculator");
 Units::Length AlongPathDistanceCalculator::CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(2.5);
-Units::Length AlongPathDistanceCalculator::EXTENDED_CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(4.0);
+Units::Length AlongPathDistanceCalculator::EXTENDED_CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(20.0);
+Units::Length AlongPathDistanceCalculator::CAPTURE_CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(20.0);
 
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                              TrajectoryIndexProgressionDirection expected_index_progression) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
@@ -48,6 +49,11 @@ AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<Horiz
    m_cross_track_tolerance = specified_cross_track_tolerance;
 }
 
+AlongPathDistanceCalculator AlongPathDistanceCalculator::CreateForCaptureClearance(const std::vector<HorizontalPath> &horizontal_path)   {
+   AlongPathDistanceCalculator result(horizontal_path, /*TrajectoryIndexProgressionDirection::*/UNDEFINED,
+           CAPTURE_CROSS_TRACK_TOLERANCE);
+   return result;
+}
 
 AlongPathDistanceCalculator::~AlongPathDistanceCalculator() = default;
 

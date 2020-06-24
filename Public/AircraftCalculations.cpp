@@ -490,8 +490,8 @@ bool AircraftCalculations::CalculateDistanceAlongPathFromPosition(const Units::L
        * must allow it to throw. Some callers will catch and handle the situation because
        * it is sometimes normal. See AAES-382, AAES-633
        */
-      char msg[150];
-      sprintf(msg, "Trajectory point with acceptable cross track error not found %lf nmi", cte.value());
+      char msg[500];
+      sprintf(msg, "Trajectory point with acceptable cross track error not found %lf nmi\nThis can occur for two reasons:\n\t1. Position cannot be projected onto a route segment (before beginning or after end),\n\t2. Position is farther than horizontal tolerance from horizontal trajectory.\nThe second can occur for clearance type of CAPTURE or MAINTAIN (see Issue AAES-1037)", cte.value());
       throw logic_error(msg);
    }
 

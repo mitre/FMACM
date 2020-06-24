@@ -28,6 +28,7 @@
 class AlongPathDistanceCalculator: public HorizontalPathTracker
 {
 public:
+   static AlongPathDistanceCalculator CreateForCaptureClearance(const std::vector<HorizontalPath> &horizontal_path);
    AlongPathDistanceCalculator();
    AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                                TrajectoryIndexProgressionDirection expected_index_progression);
@@ -35,10 +36,6 @@ public:
    AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                                TrajectoryIndexProgressionDirection expected_index_progression,
                                bool use_large_cross_track_tolerance);
-
-   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                               TrajectoryIndexProgressionDirection expected_index_progression,
-                               Units::Length specified_cross_track_tolerance);
 
    virtual ~AlongPathDistanceCalculator();
 
@@ -71,9 +68,13 @@ public:
 
 private:
    static log4cplus::Logger m_logger;
-   static Units::Length CROSS_TRACK_TOLERANCE, EXTENDED_CROSS_TRACK_TOLERANCE;
+   static Units::Length CROSS_TRACK_TOLERANCE, EXTENDED_CROSS_TRACK_TOLERANCE, CAPTURE_CROSS_TRACK_TOLERANCE;
    bool m_is_first_call;
    Units::NauticalMilesLength m_cross_track_tolerance;
+   // private constructor used to construct an AlongPathDistanceCalculator when clearance is CAPTURE
+   AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
+                               TrajectoryIndexProgressionDirection expected_index_progression,
+                               Units::Length specified_cross_track_tolerance);
 };
 
 

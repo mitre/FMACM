@@ -61,8 +61,7 @@ public:
 
    VerticalData GetVerticalData();
 
-   Guidance Update(const AircraftState &state,
-                   const Guidance &guidance_in);
+   Guidance Update(const AircraftState &state);
 
    void CalculateWaypoints(AircraftIntent &intent);
 

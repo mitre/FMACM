@@ -433,6 +433,22 @@ void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
    UpdateXYZFromLatLonWgs84();
 }
 
+void AircraftIntent::UpdateWaypoint(const Waypoint &waypoint) {
+   int update_count(0);
+   for (auto it = m_waypoints.begin(); it != m_waypoints.end(); ++it) {
+      if (it->GetName() == waypoint.GetName()) {
+         (*it) = waypoint;
+         update_count++;
+      }
+   }
+   if (update_count != 1) {
+      LOG4CPLUS_FATAL(logger, update_count << " waypoints updated.");
+      throw std::runtime_error("Wrong number of waypoints matched.");
+   }
+   LoadWaypointsFromList(m_waypoints);
+   UpdateXYZFromLatLonWgs84();
+}
+
 
 void AircraftIntent::ClearWaypoints() {
    m_waypoints.clear();
@@ -445,6 +461,16 @@ void AircraftIntent::ClearWaypoints() {
 const Waypoint &AircraftIntent::GetWaypoint(unsigned int i) const {
    std::list<Waypoint>::const_iterator itr = std::next(m_waypoints.begin(), i); // get an iterator pointing to index
    return *itr;
+}
+
+void AircraftIntent::SetNumberOfWaypoints(unsigned int n) {
+   m_number_of_waypoints = n;
+   if (n < m_waypoints.size()) {
+      std::list<Waypoint>::iterator it1 = std::next(m_waypoints.begin(), n); // get an iterator pointing to index
+      std::list<Waypoint>::iterator it2 = m_waypoints.end();
+      //--it2;
+      m_waypoints.erase(it1, it2);
+   }
 }
 
 std::ostream &operator<<(std::ostream &out,

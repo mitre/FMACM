@@ -32,7 +32,6 @@
 class StandardAtmosphere : public Atmosphere
 {
 public:
-   static const StandardAtmosphere ISA0;
    static StandardAtmosphere *MakeInstance(const Units::KelvinTemperature temperature, const Units::Length altitude);
 
    StandardAtmosphere(const Units::Temperature temperatureOffset);
@@ -57,13 +56,16 @@ public:
    Units::Density GetTropopauseDensity() const;
    Units::Pressure GetTropopausePressure() const;
 
+protected:
+   void SetTemperatureOffset(Units::Temperature temperature_offset);
+
 private:
    static log4cplus::Logger m_logger;
-   const Units::Temperature m_temperature_offset;
-   const Units::MetersLength m_tropopause_height;
-   const Units::Temperature m_sea_level_temperature;
-   const Units::Density m_sea_level_density;
-   const Units::Density m_tropopause_density;
-   const Units::Pressure m_tropopause_pressure;
+   Units::Temperature m_temperature_offset;
+   Units::MetersLength m_tropopause_height;
+   Units::Temperature m_sea_level_temperature;
+   Units::Density m_sea_level_density;
+   Units::Density m_tropopause_density;
+   Units::Pressure m_tropopause_pressure;
 };
 

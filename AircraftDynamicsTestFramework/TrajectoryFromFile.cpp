@@ -57,9 +57,8 @@ bool TrajectoryFromFile::load(DecodedStream* input) {
    return m_loaded;
 }
 
-Guidance TrajectoryFromFile::Update(const AircraftState& state,
-                                    const Guidance& guidance_in) {
-   Guidance result = guidance_in;
+Guidance TrajectoryFromFile::Update(const AircraftState& state) {
+   Guidance result;
 
    Units::UnsignedAngle estimated_course;
    m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(state.m_x),

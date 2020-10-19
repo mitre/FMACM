@@ -30,8 +30,6 @@ const Units::KelvinTemperature T_TROP(216.65);
 
 const Units::KelvinPerMeter TEMPERATURE_GRADIENT_TROPOSPHERE(-.0065);
 
-const StandardAtmosphere StandardAtmosphere::ISA0(Units::CelsiusTemperature(0));
-
 StandardAtmosphere* StandardAtmosphere::MakeInstance(
       const Units::KelvinTemperature temperature,
       const Units::Length altitude) {
@@ -51,21 +49,25 @@ StandardAtmosphere* StandardAtmosphere::MakeInstance(
 
    // sea_level_temperature = temperature + 6.5/1000 * altitude
    Units::KelvinTemperature sea_level_temperature = temperature - TEMPERATURE_GRADIENT_TROPOSPHERE * altitude;
-   Units::KelvinTemperature offset(sea_level_temperature - ISA0.GetSeaLevelTemperature());
+   Units::KelvinTemperature offset(sea_level_temperature - T0_ISA);
    LOG4CPLUS_TRACE(m_logger, "For StandardAtmosphere with " << temperature << " at " << Units::FeetLength(altitude) << ", offset is " << offset);
    return new StandardAtmosphere(offset);
 }
 
-StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset) :
-      m_temperature_offset(temperatureOffset),
-      // BADA_37_USER_MANUAL eq. 3.2-1
-      m_tropopause_height(Units::MetersLength(11000) + Units::MetersLength(1000)
-            * temperatureOffset / Units::CelsiusTemperature(6.5)),
-      m_sea_level_temperature(T0_ISA + m_temperature_offset),  // BADA_37_USER_MANUAL eq. 3.2-2
-      m_sea_level_density(RHO0_ISA * T0_ISA / m_sea_level_temperature), // BADA_37_USER_MANUAL eq. 3.2-7
-      m_tropopause_density(m_sea_level_density * pow(T_TROP / m_sea_level_temperature,RHO_T_EXPONENT)),
-      m_tropopause_pressure(P0_ISA * pow(T_TROP / m_sea_level_temperature, P_T_EXPONENT))
-{
+StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset) {
+   SetTemperatureOffset(temperatureOffset);
+}
+
+void StandardAtmosphere::SetTemperatureOffset(const Units::Temperature temperatureOffset) {
+   m_temperature_offset = temperatureOffset;
+   // BADA_37_USER_MANUAL eq. 3.2-1
+   m_tropopause_height = Units::MetersLength(11000) + Units::MetersLength(1000)
+            * m_temperature_offset / Units::CelsiusTemperature(6.5);
+   m_sea_level_temperature = T0_ISA + m_temperature_offset;  // BADA_37_USER_MANUAL eq. 3.2-2
+   m_sea_level_density = RHO0_ISA * T0_ISA / m_sea_level_temperature; // BADA_37_USER_MANUAL eq. 3.2-7
+   m_tropopause_density = m_sea_level_density * pow(T_TROP / m_sea_level_temperature, RHO_T_EXPONENT);
+   m_tropopause_pressure = P0_ISA * pow(T_TROP / m_sea_level_temperature, P_T_EXPONENT);
+   LOG4CPLUS_TRACE(m_logger, "Temperature offset set to " << Units::KelvinTemperature(temperatureOffset));
 }
 
 StandardAtmosphere::~StandardAtmosphere() {
@@ -90,7 +92,6 @@ Units::KelvinTemperature StandardAtmosphere::GetTemperature(const Units::Length 
 Units::KelvinTemperature StandardAtmosphere::GetSeaLevelTemperature() const {
    return m_sea_level_temperature;
 }
-
 
 Units::MetersLength StandardAtmosphere::GetTropopauseHeight() const {
    return m_tropopause_height;

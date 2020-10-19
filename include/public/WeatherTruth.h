@@ -27,7 +27,8 @@ public:
    WeatherTruth();
 
    WeatherTruth(std::shared_ptr<Wind> wind,
-                std::shared_ptr<Atmosphere> atmosphere);
+                std::shared_ptr<Atmosphere> atmosphere,
+                bool inhibit_weather_temperature);
 
    virtual ~WeatherTruth();
 

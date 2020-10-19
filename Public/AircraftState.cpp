@@ -241,3 +241,12 @@ void AircraftState::SetZd(double zd) {
    }
    m_zd = zd;
 }
+
+
+Units::Speed AircraftState::GetTrueAirspeed() const {
+   Units::MetersPerSecondSpeed tas_x, tas_y;
+   tas_x = Units::FeetPerSecondSpeed(m_xd) - Units::MetersPerSecondSpeed(m_Vwx);
+   tas_y = Units::FeetPerSecondSpeed(m_xd) - Units::MetersPerSecondSpeed(m_Vwy);
+   Units::MetersPerSecondSpeed tas(hypot(tas_x.value(), tas_y.value()));
+   return tas;
+}

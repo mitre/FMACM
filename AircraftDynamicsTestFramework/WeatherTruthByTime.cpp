@@ -34,7 +34,7 @@ WeatherTruthByTime::WeatherTruthByTime()
 
 WeatherTruthByTime::~WeatherTruthByTime() = default;
 
-void WeatherTruthByTime::SetWeatherFromTime(Units::Time time) {
+void WeatherTruthByTime::SetWeatherFromTime(const Units::Time time) {
    auto it = m_weather_by_time.lower_bound(time);
    Units::Time t1;
    if (it == m_weather_by_time.end()) {
@@ -44,6 +44,14 @@ void WeatherTruthByTime::SetWeatherFromTime(Units::Time time) {
       t1 = it->first;
    }
    m_weather = m_weather_by_time[t1];
+}
+
+Units::KelvinTemperature WeatherTruthByTime::CalculateTemperatureOffset(const Units::Length altitude) {
+   // Calculate a new temperature offset which agrees with this (Weather, altitude) pair
+   Units::Temperature offset_difference = GetTemperature(altitude) - StandardAtmosphere::GetTemperature(altitude);
+   Units::Temperature offset = GetTemperatureOffset() + offset_difference;
+   SetTemperatureOffset(offset);
+   return offset;
 }
 
 void WeatherTruthByTime::LoadEnvFile(const string &env_csv_file) {

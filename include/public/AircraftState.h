@@ -94,6 +94,8 @@ public:
 
    Units::Speed GetSpeedZd() const;
 
+   Units::Speed GetTrueAirspeed() const;
+
    bool operator==(const AircraftState &in) const;
 
    bool operator<(const AircraftState &in) const;
@@ -153,3 +155,4 @@ inline Units::Speed AircraftState::GetSpeedYd() const {
 inline Units::Speed AircraftState::GetSpeedZd() const {
    return Units::FeetPerSecondSpeed(m_zd);
 }
+

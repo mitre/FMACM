@@ -52,22 +52,22 @@ public:
 
    bool operator==(const VerticalPath &obj) const;
 
-   // Since you can't send a vector of Units::XXX over SDDF, these methods will convert to doubles and return a
-   // new vector that we can send. This is lab related only.
+   // These methods will convert to doubles and return a
+   // new vector of doubles (this is a convenience for lab-related integration).
    const std::vector<double> GetWindVelocityEast() const;
-
    const std::vector<double> GetWindVelocityNorth() const;
 
    // data member lists for the vertical path.  NOTE that the values are normally in METERS from descent predictors.
-   std::vector<double> x;
-   std::vector<double> h;
-   std::vector<double> v;
-   std::vector<double> h_dot;
-   std::vector<double> v_dot;
-   std::vector<double> theta;
-   std::vector<double> gs;
-   std::vector<double> time;
-   std::vector<double> mass;
+   std::vector<double> along_path_distance_m;
+   std::vector<double> altitude_m;
+   std::vector<double> cas_mps;
+   std::vector<double> altitude_rate_mps;
+   std::vector<Units::Speed> true_airspeed;
+   std::vector<double> tas_rate_mps;
+   std::vector<double> theta_radians;
+   std::vector<double> gs_mps;
+   std::vector<double> time_to_go_sec;
+   std::vector<double> mass_kg;
    std::vector<Units::MetersPerSecondSpeed> wind_velocity_east;
    std::vector<Units::MetersPerSecondSpeed> wind_velocity_north;
    std::vector<PredictionAlgorithmType> algorithm_type;

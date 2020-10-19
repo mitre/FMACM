@@ -286,31 +286,6 @@ operator/ (ValueType1 const lhs,
   return Unit<UNITS_UNIT_TEMPLATE_ARGS_INV_RESULT>(lhs/rhs._value);
 }
 
-    template <typename ValueType>
-    ValueType sqrComputer(ValueType x);
-
-    template <>
-    inline
-    double sqrComputer(double x)
-    {
-      return x * x;
-    }
-
-    template <>
-    inline
-    float sqrComputer(float x)
-    {
-      return x * x;
-    }
-
-    template <typename ValueType1,
-            UNITS_UNIT_TEMPLATE_EXP_DECL_ARGS(1)>
-    inline
-    Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>
-    sqr(Unit<UNITS_UNIT_TEMPLATE_ARGS1> const & value)
-    {
-      return Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>(sqrComputer(value._value));
-    }
 
 template <typename ValueType>
 ValueType sqrtComputer(ValueType x);

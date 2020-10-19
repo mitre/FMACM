@@ -36,15 +36,44 @@ using namespace aaesim::constants;
  */
 namespace Units {
 
+   /*
+    * New mathematical operations not provided by units.
+    */
+   // square operation -----------------------
+   template <typename ValueType>
+   ValueType sqrComputer(ValueType x);
+
+   template <>
+   inline
+   double sqrComputer(double x)
+   {
+      return x * x;
+   }
+
+   template <>
+   inline
+   float sqrComputer(float x)
+   {
+      return x * x;
+   }
+
+   template <typename ValueType1,
+      UNITS_UNIT_TEMPLATE_EXP_DECL_ARGS(1)>
+   inline
+   Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>
+      sqr(Unit<UNITS_UNIT_TEMPLATE_ARGS1> const & value)
+   {
+   return Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>(sqrComputer(value._value));
+   }
+   // end square operation -----------------------
+
+   // end new operations------------------------------------------------------------------------------------------------
+
+   /*
+    * New unit of measure concepts needed by aaesim.
+    */
 // Acceleration
    UNITS_DECLARE_SPECIFIC_UNIT(Acceleration, KnotsPerSecondAcceleration, "kts/s", 1852.0 / 3600.0);
-   const Units::Acceleration ONE_G_ACCELERATION = MetersSecondAcceleration(GRAVITY_METERS_PER_SECOND);
-
-// angle constants
-   const Units::Angle PI_RADIANS_ANGLE = DegreesAngle(180.0);
-   const Units::Angle ONE_RADIAN_ANGLE = RadiansAngle(1.0);
-   const Units::Angle DUMMY_DEGREES_ANGLE = DegreesAngle(-999.0);
-
 
 // change rate of force
    UNITS_DECLARE_BASE_UNIT(ForceChange, 1, 1, -3, 0, 0, 0, 0, 0);
@@ -94,7 +123,11 @@ namespace Units {
 
 // Speed / altitude gradient (same units as Frequency)
    UNITS_DECLARE_SPECIFIC_UNIT(Frequency, KnotsPerFootFrequency, "kts/ft", 1852. / (3600. * .3048));
+   // end new units of measure------------------------------------------------------------------------------------------
 
+   /*
+    * Convenience Constants
+    */
 // Time
    const Units::Time DUMMY_SECONDS_TIME = Units::SecondsTime(-999.0);
 
@@ -108,6 +141,15 @@ namespace Units {
 
    const InvertedLengthGain ZERO_INVERTED_LENGTH_GAIN = Units::SecondsSquaredPerMeterInvertedLengthGain(0.0);
    const InvertedSpeed ZERO_INVERTED_SPEED = Units::SecondsPerMeterInvertedSpeed(0.0);
+
+   const Units::Acceleration ONE_G_ACCELERATION = MetersSecondAcceleration(GRAVITY_METERS_PER_SECOND);
+
+   // angle constants
+   const Units::Angle PI_RADIANS_ANGLE = DegreesAngle(180.0);
+   const Units::Angle ONE_RADIAN_ANGLE = RadiansAngle(1.0);
+   const Units::Angle DUMMY_DEGREES_ANGLE = DegreesAngle(-999.0);
+   // end constants-----------------------------------------------------------------------------------------------------
+
 
 }
 #endif

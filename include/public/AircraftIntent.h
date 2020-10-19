@@ -115,6 +115,8 @@ public:
 
    void InsertWaypointAtIndex(const Waypoint &waypoint, const int index);
 
+   void UpdateWaypoint(const Waypoint &waypoint);
+
    void ClearWaypoints();
 
    const std::shared_ptr<TangentPlaneSequence> &GetTangentPlaneSequence() const;
@@ -184,10 +186,6 @@ inline void AircraftIntent::SetId(int id_in) {
 
 inline unsigned int AircraftIntent::GetNumberOfWaypoints() const {
    return m_number_of_waypoints;
-}
-
-inline void AircraftIntent::SetNumberOfWaypoints(unsigned int n) {
-   m_number_of_waypoints = n;
 }
 
 inline Units::MetersLength AircraftIntent::GetPlannedCruiseAltitude() const {

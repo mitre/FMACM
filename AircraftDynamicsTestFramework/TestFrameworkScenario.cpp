@@ -38,7 +38,8 @@ TestFrameworkScenario::TestFrameworkScenario() {
    m_stdev_inter_delivery_time = 0;
 
    m_weather = WeatherTruth(std::shared_ptr<Wind>(),
-                            std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0))));
+                            std::shared_ptr<Atmosphere>(new StandardAtmosphere(Units::CelsiusTemperature(0))),
+                            true);
    m_weather.east_west.SetBounds(1, 5);
    m_weather.north_south.SetBounds(1, 5);
 }

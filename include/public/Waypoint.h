@@ -85,6 +85,8 @@ public:
 
    Units::Speed GetNominalIas() const;
 
+   void SetMach(double mach);
+
    double GetMach() const;
 
    Units::Acceleration GetDescentRate() const;
@@ -116,6 +118,7 @@ public:
    void SetRfTurnArcRadius(const Units::Length &rf_turn_radius_in);
 
    Units::Length GetRfTurnArcRadius() const;
+
 
 private:
    std::string m_name;
@@ -193,6 +196,10 @@ inline void Waypoint::SetNominalIas(const Units::Speed &nominal_ias_in) {
 
 inline double Waypoint::GetMach() const {
    return m_mach;
+}
+
+inline void Waypoint::SetMach(double mach) {
+   m_mach = mach;
 }
 
 inline Units::Acceleration Waypoint::GetDescentRate() const {

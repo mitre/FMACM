@@ -88,18 +88,18 @@ void VerticalPathObserver::Initialize() {
 void VerticalPathObserver::AddTrajectory(int id,
                                          const VerticalPath& vertical_path) {
    if (out_stream.is_open()) {
-      for (unsigned int i = 0; i < vertical_path.x.size(); i++) {
+      for (unsigned int i = 0; i < vertical_path.along_path_distance_m.size(); i++) {
          out_stream << m_iteration << ",";
          out_stream << id << ",";
-         out_stream << vertical_path.time[i] << ",";
-         out_stream << vertical_path.x[i] / FEET_TO_METERS << ",";
-         out_stream << vertical_path.h[i] / FEET_TO_METERS << ",";
-         out_stream << vertical_path.v[i] / KNOTS_TO_METERS_PER_SECOND << ",";
-         out_stream << vertical_path.h_dot[i] << ",";
-         out_stream << vertical_path.v_dot[i] << ",";
-         out_stream << vertical_path.theta[i] << ",";
-         out_stream << Units::KnotsSpeed(Units::MetersPerSecondSpeed(vertical_path.gs[i])).value() << ",";
-         out_stream << vertical_path.mass[i] << ",";
+         out_stream << vertical_path.time_to_go_sec[i] << ",";
+         out_stream << vertical_path.along_path_distance_m[i] / FEET_TO_METERS << ",";
+         out_stream << vertical_path.altitude_m[i] / FEET_TO_METERS << ",";
+         out_stream << vertical_path.cas_mps[i] / KNOTS_TO_METERS_PER_SECOND << ",";
+         out_stream << vertical_path.altitude_rate_mps[i] << ",";
+         out_stream << vertical_path.tas_rate_mps[i] << ",";
+         out_stream << vertical_path.theta_radians[i] << ",";
+         out_stream << Units::KnotsSpeed(Units::MetersPerSecondSpeed(vertical_path.gs_mps[i])).value() << ",";
+         out_stream << vertical_path.mass_kg[i] << ",";
          out_stream << vertical_path.algorithm_type[i] << endl;
       }
    }

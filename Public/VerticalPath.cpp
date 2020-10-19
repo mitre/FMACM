@@ -25,16 +25,17 @@ VerticalPath::VerticalPath() = default;
 VerticalPath::~VerticalPath() = default;
 
 void VerticalPath::Append(const VerticalPath &in) {
-   for (int index = 0; index < in.x.size(); index++) {
-      x.push_back(in.x[index]);
-      h.push_back(in.h[index]);
-      v.push_back(in.v[index]);
-      h_dot.push_back(in.h_dot[index]);
-      v_dot.push_back(in.v_dot[index]);
-      theta.push_back(in.theta[index]);
-      gs.push_back(in.gs[index]);
-      time.push_back(in.time[index]);
-      mass.push_back(in.mass[index]);
+   for (int index = 0; index < in.along_path_distance_m.size(); index++) {
+      along_path_distance_m.push_back(in.along_path_distance_m[index]);
+      altitude_m.push_back(in.altitude_m[index]);
+      cas_mps.push_back(in.cas_mps[index]);
+      altitude_rate_mps.push_back(in.altitude_rate_mps[index]);
+      true_airspeed.push_back(in.true_airspeed[index]);
+      tas_rate_mps.push_back(in.tas_rate_mps[index]);
+      theta_radians.push_back(in.theta_radians[index]);
+      gs_mps.push_back(in.gs_mps[index]);
+      time_to_go_sec.push_back(in.time_to_go_sec[index]);
+      mass_kg.push_back(in.mass_kg[index]);
       wind_velocity_east.push_back(in.wind_velocity_east[index]);
       wind_velocity_north.push_back(in.wind_velocity_north[index]);
       algorithm_type.push_back(in.algorithm_type[index]);
@@ -47,62 +48,66 @@ void VerticalPath::operator+=(const VerticalPath &in) {
 
 bool VerticalPath::operator==(const VerticalPath &obj) const {
 
-   bool match = (x.size() == obj.x.size());
-   match = match && (h.size() == obj.h.size());
-   match = match && (v.size() == obj.v.size());
-   match = match && (h_dot.size() == obj.h_dot.size());
-   match = match && (v_dot.size() == obj.v_dot.size());
-   match = match && (theta.size() == obj.theta.size());
-   match = match && (gs.size() == obj.gs.size());
-   match = match && (time.size() == obj.time.size());
-   match = match && (mass.size() == obj.mass.size());
+   bool match = (along_path_distance_m.size() == obj.along_path_distance_m.size());
+   match = match && (altitude_m.size() == obj.altitude_m.size());
+   match = match && (cas_mps.size() == obj.cas_mps.size());
+   match = match && (altitude_rate_mps.size() == obj.altitude_rate_mps.size());
+   match = match && (true_airspeed.size() == obj.true_airspeed.size());
+   match = match && (tas_rate_mps.size() == obj.tas_rate_mps.size());
+   match = match && (theta_radians.size() == obj.theta_radians.size());
+   match = match && (gs_mps.size() == obj.gs_mps.size());
+   match = match && (time_to_go_sec.size() == obj.time_to_go_sec.size());
+   match = match && (mass_kg.size() == obj.mass_kg.size());
    match = match && (wind_velocity_east.size() == obj.wind_velocity_east.size());
    match = match && (wind_velocity_north.size() == obj.wind_velocity_north.size());
    match = match && (algorithm_type.size() == obj.algorithm_type.size());
 
 
-   for (auto ix = 0; match && (ix < x.size()); ix++) {
-      match = match && (x[ix] == obj.x[ix]);
+   for (auto ix = 0; match && (ix < along_path_distance_m.size()); ix++) {
+      match = match && (along_path_distance_m[ix] == obj.along_path_distance_m[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < h.size()); ix++) {
-      match = match && (h[ix] == obj.h[ix]);
+   for (auto ix = 0; match && (ix < altitude_m.size()); ix++) {
+      match = match && (altitude_m[ix] == obj.altitude_m[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < v.size()); ix++) {
-      match = match && (v[ix] == obj.v[ix]);
+   for (auto ix = 0; match && (ix < cas_mps.size()); ix++) {
+      match = match && (cas_mps[ix] == obj.cas_mps[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < h_dot.size()); ix++) {
-      match = match && (h_dot[ix] == obj.h_dot[ix]);
+   for (auto ix = 0; match && (ix < altitude_rate_mps.size()); ix++) {
+      match = match && (altitude_rate_mps[ix] == obj.altitude_rate_mps[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < v_dot.size()); ix++) {
-      match = match && (v_dot[ix] == obj.v_dot[ix]);
+   for (auto ix = 0; match && (ix < tas_rate_mps.size()); ix++) {
+      match = match && (tas_rate_mps[ix] == obj.tas_rate_mps[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < theta.size()); ix++) {
-      match = match && (theta[ix] == obj.theta[ix]);
+   for (auto ix = 0; match && (ix < theta_radians.size()); ix++) {
+      match = match && (theta_radians[ix] == obj.theta_radians[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < gs.size()); ix++) {
-      match = match && (gs[ix] == obj.gs[ix]);
+   for (auto ix = 0; match && (ix < gs_mps.size()); ix++) {
+      match = match && (gs_mps[ix] == obj.gs_mps[ix]);
+   }
+
+    for (auto ix = 0; match && (ix < true_airspeed.size()); ix++) {
+        match = match && (true_airspeed[ix] == obj.true_airspeed[ix]);
+    }
+
+   for (auto ix = 0; match && (ix < time_to_go_sec.size()); ix++) {
+      match = match && (time_to_go_sec[ix] == obj.time_to_go_sec[ix]);
    }
 
 
-   for (auto ix = 0; match && (ix < time.size()); ix++) {
-      match = match && (time[ix] == obj.time[ix]);
-   }
-
-
-   for (auto ix = 0; match && (ix < mass.size()); ix++) {
-      match = match && (mass[ix] == obj.mass[ix]);
+   for (auto ix = 0; match && (ix < mass_kg.size()); ix++) {
+      match = match && (mass_kg[ix] == obj.mass_kg[ix]);
    }
 
    for (auto ix = 0; match && (ix < wind_velocity_east.size()); ix++) {

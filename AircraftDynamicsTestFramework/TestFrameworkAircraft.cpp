@@ -100,6 +100,7 @@ void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold
 
    // Use the first line in the env file for initialization
    m_weather_truth->SetWeatherFromTime(Units::zero());
+   m_weather_truth->CalculateTemperatureOffset(m_initial_altitude);
 
    // initialize eom dynamics
    const TrajectoryFromFile::VerticalData verticalTrajectoryFromFile = m_precalc_traj.GetVerticalData();
@@ -168,13 +169,12 @@ bool TestFrameworkAircraft::Update(const SimulationTime &time) {
       return false;
    }
 
-   m_weather_truth->SetWeatherFromTime(time.get_current_simulation_time()); 
-
+   m_weather_truth->SetWeatherFromTime(time.get_current_simulation_time());
 
    m_fms.Update(m_truth_state_vector_old, m_precalc_traj.GetPrecalcWaypoint(),
                 m_precalc_traj.GetHorizontalTrajectory());
 
-   Guidance current_guidance = m_precalc_traj.Update(m_truth_state_vector_old, current_guidance);
+   Guidance current_guidance = m_precalc_traj.Update(m_truth_state_vector_old);
 
    if (m_airborne_app.IsLoaded()) {
       Guidance speed_guidance_from_application = m_airborne_app.Update(time,

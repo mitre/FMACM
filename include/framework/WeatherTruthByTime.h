@@ -35,7 +35,8 @@ public:
    WeatherTruthByTime();
    virtual ~WeatherTruthByTime();
 
-   void SetWeatherFromTime(Units::Time time);
+   Units::KelvinTemperature CalculateTemperatureOffset(const Units::Length altitude);
+   void SetWeatherFromTime(const Units::Time time);
    void LoadEnvFile(const std::string &env_csv_file);
    std::shared_ptr<WeatherTruthByTime> GetSharedPtr() const;
 

@@ -15,26 +15,25 @@
 // Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/WeatherTruth.h"
-#include "public/StandardAtmosphere.h"
+#pragma once
 
-WeatherTruth::WeatherTruth()
-      :
-      WeatherEstimate() {
-}
+#include "public/AircraftState.h"
+#include "public/WeatherPrediction.h"
 
-WeatherTruth::WeatherTruth(
-      std::shared_ptr<Wind> wind,
-      std::shared_ptr<Atmosphere> atmosphere,
-      bool inhibit_weather_temperature)
-      :
-      WeatherEstimate(wind, atmosphere) {
-   if (inhibit_weather_temperature) {
-      // inhibit 3-D temperature
-      m_temperature_checked = true;
-      m_temperature_available = false;
-   }
-}
+class PredictedWindEvaluator
+{
+public:
+   PredictedWindEvaluator() {
+   };
 
-WeatherTruth::~WeatherTruth() {
-}
+   virtual ~PredictedWindEvaluator() {
+   };
+
+   virtual bool ArePredictedWindsAccurate(
+         const AircraftState &state,
+         const WeatherPrediction &weather,
+         const Units::Speed reference_cas,
+         const Units::Length reference_altitude,
+         const Atmosphere *sensed_atmosphere = NULL) const = 0;
+};
+

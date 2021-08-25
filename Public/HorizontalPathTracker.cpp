@@ -19,7 +19,7 @@
 #include <public/AircraftCalculations.h>
 
 log4cplus::Logger HorizontalPathTracker::m_logger = log4cplus::Logger::getInstance("HorizontalPathTracker");
-const Units::Length HorizontalPathTracker::EXTENSION_LENGTH = Units::NauticalMilesLength(10.0);
+const Units::Length HorizontalPathTracker::EXTENSION_LENGTH = Units::NauticalMilesLength(1.0);
 const Units::MetersLength HorizontalPathTracker::ON_NODE_TOLERANCE = Units::MetersLength(1e-10);
 
 HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory, TrajectoryIndexProgressionDirection expected_index_progression) {

@@ -34,9 +34,8 @@ StandardAtmosphere* StandardAtmosphere::MakeInstance(
       const Units::KelvinTemperature temperature,
       const Units::Length altitude) {
    if (temperature < T_TROP) {
-      LOG4CPLUS_FATAL(m_logger, "Unable to create StandardAtmosphere with temperature " << temperature
+      LOG4CPLUS_DEBUG(m_logger, "Creating non-standard StandardAtmosphere with temperature " << temperature
             << " at " << Units::FeetLength(altitude) << ".  Tropopause temperature is " << T_TROP);
-      throw std::runtime_error("Invalid temperature");
    }
    if (altitude < Units::zero()) {
       LOG4CPLUS_FATAL(m_logger, "Specified altitude is below sea level:  " << Units::FeetLength(altitude));
@@ -52,6 +51,10 @@ StandardAtmosphere* StandardAtmosphere::MakeInstance(
    Units::KelvinTemperature offset(sea_level_temperature - T0_ISA);
    LOG4CPLUS_TRACE(m_logger, "For StandardAtmosphere with " << temperature << " at " << Units::FeetLength(altitude) << ", offset is " << offset);
    return new StandardAtmosphere(offset);
+}
+
+StandardAtmosphere* StandardAtmosphere::MakeInstanceFromTemperatureOffset(Units::CelsiusTemperature temperature_offset) {
+   return new StandardAtmosphere(temperature_offset);
 }
 
 StandardAtmosphere::StandardAtmosphere(const Units::Temperature temperatureOffset) {

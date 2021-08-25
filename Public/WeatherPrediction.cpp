@@ -20,6 +20,8 @@
 
 const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG, MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
 
+log4cplus::Logger WeatherPrediction::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherPrediction"));
+
 WeatherPrediction::WeatherPrediction()
       : WeatherEstimate(),
         m_predicted_wind_option(SINGLE_DTG),
@@ -40,11 +42,15 @@ WeatherPrediction::WeatherPrediction(PredictedWindOption option,
 WeatherPrediction::~WeatherPrediction() = default;
 
 const void WeatherPrediction::Dump() const {
+   LOG4CPLUS_DEBUG(m_logger, "m_predicted_wind_option: " << m_predicted_wind_option);
+   LOG4CPLUS_DEBUG(m_logger, "m_update_count: " << m_update_count );
+   LOG4CPLUS_DEBUG(m_logger, "m_temperature_checked: " << m_temperature_checked);
+   LOG4CPLUS_DEBUG(m_logger, "m_temperature_available: " << m_temperature_available);
+   LOG4CPLUS_DEBUG(m_logger, "altitude, eastvel, northvel");
    for (int iAlt = east_west.GetMinRow(); iAlt <= east_west.GetMaxRow(); iAlt++) {
-      std::cout << iAlt << ":  " <<
+      LOG4CPLUS_DEBUG(m_logger, iAlt << ":  " <<
                 east_west.GetAltitude(iAlt) << " " <<
                 east_west.GetSpeed(iAlt) << " " <<
-                north_south.GetSpeed(iAlt) << std::endl;
+                north_south.GetSpeed(iAlt));
    }
-   std::cout << std::endl;
 }

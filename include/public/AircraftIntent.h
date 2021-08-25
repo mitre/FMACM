@@ -73,7 +73,7 @@ public:
 
    bool load(DecodedStream *input);
 
-   void LoadWaypointsFromList(std::list<Waypoint> &waypoint_list);
+   virtual void LoadWaypointsFromList(std::list<Waypoint> &waypoint_list);
 
    void UpdateXYZFromLatLonWgs84();
 
@@ -84,6 +84,8 @@ public:
                          Units::Angle &lon);
 
    void SetNumberOfWaypoints(unsigned int n);
+
+   void SetWaypoints(std::list<Waypoint>& waypoint_list);
 
    const Waypoint &GetWaypoint(unsigned int i) const;
 
@@ -115,9 +117,9 @@ public:
 
    void InsertWaypointAtIndex(const Waypoint &waypoint, const int index);
 
-   void UpdateWaypoint(const Waypoint &waypoint);
+   virtual void UpdateWaypoint(const Waypoint &waypoint);
 
-   void ClearWaypoints();
+   virtual void ClearWaypoints();
 
    const std::shared_ptr<TangentPlaneSequence> &GetTangentPlaneSequence() const;
 
@@ -137,14 +139,7 @@ public:
 
 protected:
    struct RouteData m_fms;
-
-private:
-   friend std::ostream &operator<<(std::ostream &out,
-                                   const AircraftIntent &intent);
-
    std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
-
-   std::list<Waypoint> m_waypoints;
 
    std::string m_waypoint_name[MAX_NUM_WAYPOINTS];
    Units::MetersLength m_waypoint_y[MAX_NUM_WAYPOINTS];
@@ -154,18 +149,25 @@ private:
    Units::FeetPerSecondSpeed m_waypoint_nominal_ias[MAX_NUM_WAYPOINTS];
    Units::KnotsPerSecondAcceleration m_waypoint_descent_rate[MAX_NUM_WAYPOINTS];
    double m_waypoint_mach[MAX_NUM_WAYPOINTS];
-
    Units::Speed m_mach_transition_cas;
    Units::MetersLength m_planned_cruise_altitude;
    double m_planned_cruise_mach;
-
+   std::list<Waypoint> m_waypoints;
    unsigned int m_number_of_waypoints;
+
+private:
+   friend std::ostream &operator<<(std::ostream &out,
+                                   const AircraftIntent &intent);
+
    int m_id;
    bool m_is_loaded;
 
    static const int UNINITIALIZED_AIRCRAFT_ID;
 
    static log4cplus::Logger logger;
+
+   void ResetWaypoints(std::list<Waypoint> &waypoint_list);
+
 };
 
 inline const std::shared_ptr<TangentPlaneSequence> &AircraftIntent::GetTangentPlaneSequence() const {
@@ -182,6 +184,10 @@ inline int AircraftIntent::GetId() const {
 
 inline void AircraftIntent::SetId(int id_in) {
    m_id = id_in;
+}
+
+inline void AircraftIntent::SetWaypoints(std::list<Waypoint>& waypoint_list) {
+   m_waypoints = waypoint_list;
 }
 
 inline unsigned int AircraftIntent::GetNumberOfWaypoints() const {

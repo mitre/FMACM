@@ -37,6 +37,10 @@ public:
 
    int GetIasCommandIntegerKnots() const;
 
+   double GetMachCommand() const;
+
+   void SetMachCommand(double mach_value);
+
    PrecalcConstraint m_active_precalc_constraints;
 
    Units::Speed m_ias_command;
@@ -52,6 +56,7 @@ public:
 private:
    bool m_valid;
    AircraftSpeed m_selected_speed;
+   double m_mach_command;
 };
 
 inline void Guidance::SetValid(bool value) {
@@ -70,3 +75,10 @@ inline void Guidance::SetSelectedSpeed(const AircraftSpeed& selected_speed) {
    m_selected_speed = selected_speed;
 }
 
+inline double Guidance::GetMachCommand() const {
+   return m_mach_command;
+}
+
+inline void Guidance::SetMachCommand(double mach_value) {
+   m_mach_command = mach_value;
+}

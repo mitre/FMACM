@@ -25,7 +25,6 @@ speed_type AircraftSpeed::GetSpeedType() const {
 }
 
 void AircraftSpeed::SetSpeed(const speed_type type, const double value) {
-   // TODO range sanity checks -- perhaps allow MACH 0.1 to 10.0, IAS 20 to 2000
    m_speed_type = type;
    m_value = value;
 }

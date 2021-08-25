@@ -40,30 +40,26 @@ namespace Units {
     * New mathematical operations not provided by units.
     */
    // square operation -----------------------
-   template <typename ValueType>
-   ValueType sqrComputer(ValueType x);
 
-   template <>
-   inline
-   double sqrComputer(double x)
-   {
-      return x * x;
-   }
-
-   template <>
-   inline
-   float sqrComputer(float x)
-   {
-      return x * x;
-   }
+#define UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT1 \
+     ValueType1, \
+     2*massExp1, \
+     2*lengthExp1, \
+     2*timeExp1, \
+     2*currentExp1, \
+     2*temperatureExp1, \
+     2*amountExp1, \
+     2*intensityExp1, \
+     AngleExponent<2*angleExp1, \
+                   2*lengthExp1>::value
 
    template <typename ValueType1,
       UNITS_UNIT_TEMPLATE_EXP_DECL_ARGS(1)>
    inline
-   Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>
+   Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT1>
       sqr(Unit<UNITS_UNIT_TEMPLATE_ARGS1> const & value)
    {
-   return Unit<UNITS_UNIT_TEMPLATE_ARGS_SQR_RESULT>(sqrComputer(value._value));
+      return (value * value);
    }
    // end square operation -----------------------
 

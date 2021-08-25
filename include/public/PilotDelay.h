@@ -39,13 +39,13 @@ public:
 
    void IterationReset();
 
-   Units::Speed UpdateIAS(Units::Speed previous_im_speed_command_ias,
-                          Units::Speed input_im_speed_command_ias,
+   Units::Speed UpdateIAS(Units::Speed previous_im_speed_command_as_ias,
+                          Units::Speed im_speed_command_as_ias,
                           Units::Length current_altitude,
                           Units::Length altitude_at_end_of_route);
 
-   Units::Speed UpdateMach(double previous_im_speed_command_mach,
-                           double input_im_speed_command_mach,
+   Units::Speed UpdateMach(double previous_im_speed_command_as_mach,
+                           double im_speed_command_as_mach,
                            Units::Length current_altitude,
                            Units::Length altitude_at_end_of_route);
 
@@ -79,6 +79,8 @@ private:
 
    double m_guidance_mach;
    bool m_pilot_delay_is_on;
+
+   Units::Speed m_current_speed_command_mach_as_ias, m_next_speed_command_mach_as_ias;
 
    // for statistical output
    int m_delay_count;

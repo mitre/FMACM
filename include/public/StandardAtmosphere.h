@@ -34,6 +34,8 @@ class StandardAtmosphere : public Atmosphere
 public:
    static StandardAtmosphere *MakeInstance(const Units::KelvinTemperature temperature, const Units::Length altitude);
 
+   static StandardAtmosphere *MakeInstanceFromTemperatureOffset(Units::CelsiusTemperature temperature_offset);
+
    StandardAtmosphere(const Units::Temperature temperatureOffset);
 
    virtual ~StandardAtmosphere();

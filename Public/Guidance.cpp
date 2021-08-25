@@ -26,6 +26,7 @@ Guidance::Guidance() {
    m_cross_track_error = Units::ZERO_LENGTH;
    m_track_angle = Units::ZERO_ANGLE;
    m_reference_bank_angle = Units::ZERO_ANGLE;
+   m_mach_command = 0;
 
    m_use_cross_track = false;
    m_valid = false;

@@ -20,6 +20,11 @@
 #include <math.h>
 #include "SpecificUnit.h"
 
+#ifndef M_PI
+#define M_PI  3.14159265358979323846
+#endif
+
+
 namespace Units
 {
 
@@ -89,7 +94,7 @@ normalize(UNITS_ANGLE_TYPE(float) & angle);
 
 
 UNITS_DECLARE_SPECIFIC_UNIT(Angle, RadiansAngle, "rad", 1.0);
-UNITS_DECLARE_SPECIFIC_UNIT(Angle, DegreesAngle, "deg", 3.14159265358979323846/180.0);
+UNITS_DECLARE_SPECIFIC_UNIT(Angle, DegreesAngle, "deg", M_PI/180.0);
 
 
 } // namespace Units

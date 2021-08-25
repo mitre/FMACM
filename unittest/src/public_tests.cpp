@@ -262,10 +262,10 @@ TEST(AircraftCalculations, anglebetweenvectors) {
 }
 
 TEST(AircraftCalculations, ComputeCrossProduct_trivial) {
-   const Units::Length x_vertex(0.0), y_vertex(0.0);
-   const Units::Length vector1_x(1.0), vector1_y(0.0);
-   const Units::Length vector2_x(0.0), vector2_y(1.0);
-   const Units::Area expected(1.0);
+   const Units::MetersLength x_vertex(0.0), y_vertex(0.0);
+   const Units::MetersLength vector1_x(1.0), vector1_y(0.0);
+   const Units::MetersLength vector2_x(0.0), vector2_y(1.0);
+   const Units::MetersArea expected(1.0);
    Units::Area actual = AircraftCalculations::ComputeCrossProduct(x_vertex, y_vertex, vector1_x, vector1_y, vector2_x, vector2_y);
    ASSERT_EQ(expected, actual);
 }
@@ -1112,8 +1112,8 @@ TEST(AlongPathDistanceCalculator, consistency_check_two_public_methods) {
    Units::MetersLength actual_distance_to_go_method_1, actual_distance_to_go_method_2;
    distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.GetXPositionMeters()),Units::MetersLength(horizontal_path_node.GetYPositionMeters()),actual_distance_to_go_method_1, actual_crs);
    distance_calculator.CalculateAlongPathDistanceFromPosition(Units::MetersLength(horizontal_path_node.GetXPositionMeters()),Units::MetersLength(horizontal_path_node.GetYPositionMeters()),actual_distance_to_go_method_2);
-   EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_1.value(), 1e-13 );
-   EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_2.value(), 1e-13 );
+   EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_1.value(), 1e-12 );
+   EXPECT_NEAR(horizontal_path_node.m_path_length_cumulative_meters, actual_distance_to_go_method_2.value(), 1e-12 );
    EXPECT_NEAR(expected_reciprocal_course.value(),
                Units::SignedDegreesAngle(normalize(actual_crs)).value(),
                tol_crs.value());
@@ -1277,4 +1277,10 @@ TEST(Guidance, GetIasCommandIntegerKnots) {
    // test rounding down
    guidance.m_ias_command = Units::KnotsSpeed(209.1);
    EXPECT_EQ(209, guidance.GetIasCommandIntegerKnots());
+}
+
+TEST(StandardAtmosphere, MakeInstanceFromTemperatureOffset) {
+   auto zero_offset_sa = StandardAtmosphere::MakeInstanceFromTemperatureOffset(Units::CelsiusTemperature(0));
+
+   ASSERT_EQ(0, Units::CelsiusTemperature(zero_offset_sa->GetTemperatureOffset()).value());
 }

@@ -45,7 +45,7 @@ public:
 private:
    int m_iteration;
    int m_id; // aircraft id
-   Units::Time m_time;
+   Units::SecondsTime m_time;
    Units::Time m_targ_ttg_to_ach;
    Units::Time m_own_ttg_to_ach;
    Units::Length m_curr_dist;

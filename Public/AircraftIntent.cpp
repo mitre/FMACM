@@ -69,7 +69,7 @@ void AircraftIntent::Initialize() {
       m_waypoint_descent_angle[c] = Units::ZERO_ANGLE;
       m_waypoint_nominal_ias[c] = Units::ZERO_SPEED;
       m_waypoint_mach[c] = 0;
-      m_waypoint_descent_rate[c] = Units::Acceleration(0);
+      m_waypoint_descent_rate[c] = Units::MetersSecondAcceleration(0);
 
       m_fms.m_name[c] = "";
       m_fms.m_altitude[c] = Units::ZERO_LENGTH;
@@ -101,7 +101,7 @@ AircraftIntent &AircraftIntent::operator=(const AircraftIntent &in) {
    return *this;
 }
 
-void AircraftIntent::LoadWaypointsFromList(std::list<Waypoint> &waypoint_list) {
+void AircraftIntent::ResetWaypoints(std::list<Waypoint> &waypoint_list) {
    int c = 0;
    auto i = waypoint_list.begin();
    auto e = waypoint_list.end();
@@ -141,14 +141,14 @@ void AircraftIntent::LoadWaypointsFromList(std::list<Waypoint> &waypoint_list) {
          m_fms.m_nominal_ias[c] = m_mach_transition_cas;
          m_fms.m_mach[c] = m_waypoint_mach[c];
       } else if (c >= 1 && m_fms.m_mach[c - 1] != 0
-                 && ias.value() == 0) {
+         && ias.value() == 0) {
          m_fms.m_nominal_ias[c] = m_mach_transition_cas;
          m_fms.m_mach[c] = m_fms.m_mach[c - 1];
       } else if (c >= 1 && ias.value() != 0) {
          m_fms.m_nominal_ias[c] = ias;
          m_fms.m_mach[c] = 0;
       } else if (c >= 1 && m_fms.m_nominal_ias[c - 1].value() != 0
-                 && ias.value() == 0) {
+         && ias.value() == 0) {
          m_fms.m_nominal_ias[c] = m_fms.m_nominal_ias[c - 1];
          m_fms.m_mach[c] = 0;
       } else {
@@ -162,7 +162,10 @@ void AircraftIntent::LoadWaypointsFromList(std::list<Waypoint> &waypoint_list) {
 
    m_number_of_waypoints = static_cast<unsigned int>(waypoint_list.size());
    m_waypoints = waypoint_list;
+}
 
+void AircraftIntent::LoadWaypointsFromList(std::list<Waypoint> &waypoint_list) {
+   ResetWaypoints(waypoint_list);
    m_tangent_plane_sequence = std::shared_ptr<TangentPlaneSequence>(new SingleTangentPlaneSequence(waypoint_list));
 }
 
@@ -429,7 +432,7 @@ void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
    auto itr = std::next(m_waypoints.begin(), index);
    m_waypoints.insert(itr, wp);
 
-   LoadWaypointsFromList(m_waypoints);
+   ResetWaypoints(m_waypoints);
    UpdateXYZFromLatLonWgs84();
 }
 
@@ -445,7 +448,7 @@ void AircraftIntent::UpdateWaypoint(const Waypoint &waypoint) {
       LOG4CPLUS_FATAL(logger, update_count << " waypoints updated.");
       throw std::runtime_error("Wrong number of waypoints matched.");
    }
-   LoadWaypointsFromList(m_waypoints);
+   ResetWaypoints(m_waypoints);
    UpdateXYZFromLatLonWgs84();
 }
 
@@ -454,7 +457,7 @@ void AircraftIntent::ClearWaypoints() {
    m_waypoints.clear();
 
    // Re-initialize this object with no waypoints
-   LoadWaypointsFromList(m_waypoints);
+   ResetWaypoints(m_waypoints);
    UpdateXYZFromLatLonWgs84();
 }
 

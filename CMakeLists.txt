@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(aaesim VERSION 3.5.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 3.5.3.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -56,6 +56,7 @@ set (GTEST_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/unittest/gtest-1.7.0/)
 set (FRAMEWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1/
         ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1/scalar/)
 
 add_subdirectory(${UNITSLIB_DIR})

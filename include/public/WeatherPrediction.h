@@ -64,6 +64,7 @@ public:
    int GetUpdateCount() const;
 
 private:
+   static log4cplus::Logger m_logger;
    PredictedWindOption m_predicted_wind_option;
 
    int m_update_count;

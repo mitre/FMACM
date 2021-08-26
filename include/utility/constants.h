@@ -18,7 +18,7 @@
 #pragma once
 namespace aaesim {
    namespace constants {
-      const int MAX_NUM_WAYPOINTS = 100;
+      const int MAX_NUM_WAYPOINTS = 1000;
       const double PI = 3.14159265358979323846;
 
       const double DEGREES_PER_RADIAN = 180 / PI;

@@ -33,7 +33,7 @@ Waypoint::Waypoint() {
    m_altitude = Units::ZERO_LENGTH;
    m_nominal_ias = Units::ZERO_SPEED;
    m_mach = 0;
-   m_descent_rate = Units::Acceleration(0);
+   m_descent_rate = Units::MetersSecondAcceleration(0);
 
    m_altitude_constraint_high = Units::ZERO_LENGTH;
    m_altitude_constraint_low = Units::ZERO_LENGTH;
@@ -79,7 +79,7 @@ Waypoint::Waypoint(const std::string &name_in,
    m_rf_turn_arc_radius = Units::ZERO_LENGTH;
 
    m_mach = 0;
-   m_descent_rate = Units::Acceleration(0);
+   m_descent_rate = Units::MetersSecondAcceleration(0);
    m_descent_angle = Units::ZERO_ANGLE;
 }
 

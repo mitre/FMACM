@@ -15,6 +15,7 @@
 // Copyright 2020 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <iomanip>
 #include "public/AircraftCalculations.h"
 #include "math/CustomMath.h"
 
@@ -130,18 +131,13 @@ AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVRepo
 }
 
 void AircraftState::DumpParms(std::string str) const {
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "(Subset) Aircraft state parms for " << str.c_str());
-
-   LOG4CPLUS_DEBUG(AircraftState::logger,
-                   std::endl << "time " << m_time << "  id " << m_id << "  distToGo " << m_distance_to_go_meters);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "position   x " << m_x << "  y " << m_y << "  z " << m_z);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "speed      x " << m_xd << "  y " << m_yd << "  z " << m_zd);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vw_para      " << m_Vw_para << "  Vw_perp " << m_Vw_perp);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl << "Vwx      " << m_Vwx << "  Vwy " << m_Vwy);
-   LOG4CPLUS_DEBUG(AircraftState::logger,
-                   std::endl << "Vwx_dh     " << Units::HertzFrequency(m_Vwx_dh) << "  Vwy_dh "
-                             << Units::HertzFrequency(m_Vwy_dh));
-
+   LOG4CPLUS_DEBUG(AircraftState::logger, "aircraft state for " << str.c_str() << ":");
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "time " << m_time << ", id " << m_id << ", distToGo (m) " << m_distance_to_go_meters);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "position (ft): x " << m_x << ", y " << m_y << ", z " << m_z);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "speed (ft/s): x " << m_xd << ", y " << m_yd << ", z " << m_zd);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Horiz Components (m/s): vwpara " << m_Vw_para << ", vwperp " << m_Vw_perp << ", Vwx " << m_Vwx << ", Vwy " << m_Vwy);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Vert Components (1/s): vwx_dh " << Units::HertzFrequency(m_Vwx_dh) << ", vwy_dh " << Units::HertzFrequency(m_Vwy_dh));
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "psi_enu (deg): " << Units::SignedDegreesAngle (m_psi) << ", gamma (deg): " << Units::DegreesAngle(Units::RadiansAngle(m_gamma)) );
 }
 
 void AircraftState::CsvDataDump(std::string str) const {
@@ -246,7 +242,7 @@ void AircraftState::SetZd(double zd) {
 Units::Speed AircraftState::GetTrueAirspeed() const {
    Units::MetersPerSecondSpeed tas_x, tas_y;
    tas_x = Units::FeetPerSecondSpeed(m_xd) - Units::MetersPerSecondSpeed(m_Vwx);
-   tas_y = Units::FeetPerSecondSpeed(m_xd) - Units::MetersPerSecondSpeed(m_Vwy);
-   Units::MetersPerSecondSpeed tas(hypot(tas_x.value(), tas_y.value()));
+   tas_y = Units::FeetPerSecondSpeed(m_yd) - Units::MetersPerSecondSpeed(m_Vwy);
+   Units::MetersPerSecondSpeed tas = Units::sqrt(Units::sqr(tas_x) + Units::sqr(tas_y));
    return tas;
 }

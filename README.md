@@ -31,7 +31,7 @@ Any questions related to MITRE Open Source technologies may be emailed to openso
 # Developer Notice
 
 ### EUROCONTROL BADA Development Necessary
-This code uses [EUROCONTROL's BADA](https://eurocontrol.int/services/bada) for aircraft performance data that drive the aircraft dynamics modeling. However, BADA functionality and code cannot be provided due to licensing restrictions imposed by EUROCONTROL. Therefore, stub classes exist in this code repository that represent MITRE's suggested implementation in order to use this software. See /CoreII/bada.cpp and /CoreII/BadaWithCalc.cpp. Please complete the implementation in these classes before using the code.
+This code uses [EUROCONTROL's BADA](https://eurocontrol.int/services/bada) for aircraft performance data that drive the aircraft dynamics modeling. However, BADA functionality and code cannot be provided due to licensing restrictions imposed by EUROCONTROL. Therefore, stub classes exist in this code repository that represent MITRE's suggested implementation in order to use this software. See /CoreII/bada.cpp and /CoreII/BadaPerformanceCalculator.cpp. Please complete the implementation in these classes before using the code.
 
 ### Log4Cplus Dependency
 Log4Cplus is a logging application used by this code base. It needs to be installed prior to building this code. You can download it from [their GitHub repo](https://github.com/log4cplus/log4cplus).

@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -46,7 +48,7 @@ public:
 
    // stores and output the state-model report.
 
-   void storeStateModel(AircraftState asv,
+   void storeStateModel(aaesim::open_source::AircraftState asv,
                         int flapsConfig,
                         float speed_brake,
                         double ias);
@@ -132,29 +134,6 @@ public:
 
    void dumpAchieveList();
 
-   // Kinematic trajectory output.
-   void dumpOwnKinTraj(int id,
-                       const VerticalPath &fullTraj);
-
-   void dumpTargetKinTraj(int id,
-                          const VerticalPath &fullTraj);
-
-   void writeTrueWind(std::string str);
-
-   void setTrueWindHdrVals(double time,
-                           int id);
-
-   // TEST OUTPUT for cross-track output per second
-   void cross_output(double x_in,
-                     double y_in,
-                     double dynamic_cross,
-                     double commanded_cross,
-                     double psi_command,
-                     double phi,
-                     double limited_phi);
-
-   void process_cross();
-
 	static void FatalError(const char *str)
 	{
 		LOG4CPLUS_FATAL(logger, str);
@@ -183,8 +162,6 @@ public:
    void SetRecordMaintainMetrics(bool new_value);
 
    const bool GetRecordMaintainMetrics() const;
-   bool IsDebugTrueWind() const;
-   void SetDebugTrueWind(bool debug_true_wind);
    int GetScenarioIter() const;
    void SetScenarioIter(int scenario_iter);
    CrossTrackObserver& GetCrossEntry();
@@ -214,7 +191,7 @@ private:
    ~InternalObserver(void);
 
    // Formats state model report data.
-   std::string stateModelString(AircraftState asv,
+   std::string stateModelString(aaesim::open_source::AircraftState asv,
                                 int flapsConfig,
                                 float speed_brake,
                                 double ias);
@@ -234,10 +211,6 @@ private:
    CrossTrackObserver m_cross_entry;
 
    std::vector<std::string> predWinds;
-
-   typedef std::vector<AircraftState> listlist;
-   listlist isa;
-   std::vector<AircraftState> truth_state_vector_list;
 
    //Data for individual aircraft
    std::map<int,AircraftIterationStats> m_aircraft_iteration_stats;  // cleared between iterations
@@ -260,11 +233,5 @@ private:
    // file.
    VerticalPathObserver *mOwnKinVertPathObs;   // Outputs own kinematic predicted vertical paths.
    VerticalPathObserver *mTargKinVertPathObs;  // Outputs target kinematic predicted vertical paths.
-
-   // Some debug for winds from dynamics and speed_on_pitch_control_dynamics.
-   double trueTime;
-   int trueId;
-   bool debugTrueWind;
-
 
 };

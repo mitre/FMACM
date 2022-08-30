@@ -1,23 +1,27 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <iomanip>
 #include "public/AircraftCalculations.h"
 #include "math/CustomMath.h"
+
+using namespace aaesim::open_source;
 
 log4cplus::Logger AircraftState::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftState"));
 
@@ -131,13 +135,12 @@ AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVRepo
 }
 
 void AircraftState::DumpParms(std::string str) const {
-   LOG4CPLUS_DEBUG(AircraftState::logger, "aircraft state for " << str.c_str() << ":");
+   LOG4CPLUS_DEBUG(AircraftState::logger, "aircraft state for " << str.c_str());
    LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "time " << m_time << ", id " << m_id << ", distToGo (m) " << m_distance_to_go_meters);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "position (ft): x " << m_x << ", y " << m_y << ", z " << m_z);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "speed (ft/s): x " << m_xd << ", y " << m_yd << ", z " << m_zd);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Horiz Components (m/s): vwpara " << m_Vw_para << ", vwperp " << m_Vw_perp << ", Vwx " << m_Vwx << ", Vwy " << m_Vwy);
    LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Vert Components (1/s): vwx_dh " << Units::HertzFrequency(m_Vwx_dh) << ", vwy_dh " << Units::HertzFrequency(m_Vwy_dh));
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "psi_enu (deg): " << Units::SignedDegreesAngle (m_psi) << ", gamma (deg): " << Units::DegreesAngle(Units::RadiansAngle(m_gamma)) );
 }
 
 void AircraftState::CsvDataDump(std::string str) const {
@@ -232,12 +235,8 @@ AircraftState& AircraftState::Extrapolate(const AircraftState& in,
 
 
 void AircraftState::SetZd(double zd) {
-   if (fabs(zd) > 200) {
-      LOG4CPLUS_ERROR(logger, "zd out of range:  " << zd);
-   }
    m_zd = zd;
 }
-
 
 Units::Speed AircraftState::GetTrueAirspeed() const {
    Units::MetersPerSecondSpeed tas_x, tas_y;

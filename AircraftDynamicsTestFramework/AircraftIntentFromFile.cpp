@@ -1,19 +1,22 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
 #include "framework/AircraftIntentFromFile.h"
 
 #include "public/HfpReader2020.h"
@@ -92,10 +95,11 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string& csv_fil
    SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
    SetNumberOfWaypoints(number_of_data_rows);
    for (int reverse_row_index = number_of_data_rows - 1; reverse_row_index >= 0; --reverse_row_index) {
-      m_fms.m_latitude[forward_row_index] = waypoint_latitude[reverse_row_index];
-      m_fms.m_longitude[forward_row_index] = waypoint_longitude[reverse_row_index];
-      m_fms.m_x[forward_row_index] = x_waypoint_location[reverse_row_index];
-      m_fms.m_y[forward_row_index] = y_waypoint_location[reverse_row_index];
+      m_route_data.m_name.push_back(string("F") + string(std::to_string(forward_row_index)));
+      m_route_data.m_latitude.push_back(waypoint_latitude[reverse_row_index]);
+      m_route_data.m_longitude.push_back(waypoint_longitude[reverse_row_index]);
+      m_route_data.m_x.push_back(x_waypoint_location[reverse_row_index]);
+      m_route_data.m_y.push_back(y_waypoint_location[reverse_row_index]);
       forward_row_index++;
    }
 }

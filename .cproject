@@ -41,7 +41,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.base.1608362566" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.base">
 								<option id="gnu.c.compiler.option.include.paths.1651653207" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/aaesim/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/aaesim}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/framework}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/groundsystems}&quot;"/>
@@ -62,6 +61,7 @@
 								<option id="gnu.both.asm.option.include.paths.192643479" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/devel/caasdwind/release/v1.2/local/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/aaesim/include/aaesim}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1693076143" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>

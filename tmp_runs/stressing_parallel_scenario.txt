@@ -1,0 +1,39 @@
+#echo_file
+"input_echo.html"
+
+number_of_iterations 1
+
+number_of_aircraft 2
+
+seed 519317
+
+start_time_seed 12345
+
+
+mean_inter_delivery_time 0
+
+stdev_inter_delivery_time 0 
+
+start_time_is_overriden true
+
+wind_truth_file "/data/aaesim/regression_input_data/winds/rap_20180706_0700_000.grb2"
+wind_forecast_file "/data/aaesim/regression_input_data/winds/rap_20180706_0400_003.grb2"
+predicted_wind_opt 0
+blend_wind 0 
+use_wind false
+
+debug_true_wind false
+NM_output false
+debug_output true
+
+bada_data_path "/data/aaesim/regressionScens/bada"
+
+aircraft
+{
+    #include "./aircraft0.txt"
+}
+
+aircraft
+{
+    #include "./aircraft_case_2.txt"
+}

@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/InternalObserver.h"
@@ -42,14 +44,8 @@ void InternalObserver::clearInstance() {
 InternalObserver::InternalObserver(void) {
    m_save_maintain_metrics = true;
    m_scenario_iter = 0;
-   debugTrueWind = false;
-
-   trueTime = -99999.0;
-   trueId = -1;
-
    mOwnKinVertPathObs = NULL;
    mTargKinVertPathObs = NULL;
-
    outputNMFiles = true;
 }
 
@@ -72,26 +68,6 @@ void InternalObserver::reset(void) {
 
 void InternalObserver::process(void) {
 
-   FILE *fp = fopen((scenario_name + "-output-WinSS.csv").c_str(), "w");
-
-   vector<AircraftState>::iterator sv_report;
-   for (sv_report = truth_state_vector_list.begin(); sv_report != truth_state_vector_list.end(); ++sv_report) {
-      fprintf(fp, "%d,%f,%f,%f,%f,%f,%f,%f\n",
-              (*sv_report).m_id,
-              (*sv_report).m_time,
-              (*sv_report).m_x,
-              (*sv_report).m_y,
-              (*sv_report).m_z,
-              (*sv_report).m_xd,
-              (*sv_report).m_yd,
-              (*sv_report).m_zd
-      );
-   }
-
-   fprintf(fp, "\n");
-
-   fclose(fp);
-
    outputStateModel();
    dumpPredictedWind();
    process_IM_command();
@@ -111,7 +87,7 @@ void InternalObserver::set_scenario_name(string in) {
    scenario_name = in;
 }
 
-void InternalObserver::storeStateModel(AircraftState asv,
+void InternalObserver::storeStateModel(aaesim::open_source::AircraftState asv,
                                        int flapsConfig,
                                        float speed_brake,
                                        double ias) {
@@ -139,7 +115,7 @@ void InternalObserver::storeStateModel(AircraftState asv,
 }
 
 
-string InternalObserver::stateModelString(AircraftState asv,
+string InternalObserver::stateModelString(aaesim::open_source::AircraftState asv,
                                           int flapsConfig,
                                           float speed_brake,
                                           double ias) {
@@ -178,7 +154,6 @@ string InternalObserver::stateModelString(AircraftState asv,
    strm << asv.m_Vwy << ","; // true wind Vwy in MPS
    strm << asv.m_Vw_para << ","; // true wind Vw_para in MPS
    strm << asv.m_Vw_perp << ","; // true wind Vw_perp in MPS
-   strm << asv.m_distance_to_go_meters << ","; // output distance to go in meters
    strm << flapsConfig << ","; // configuration for flaps (mainly debug)
    strm << speed_brake << ",";
    strm << ias;
@@ -188,14 +163,6 @@ string InternalObserver::stateModelString(AircraftState asv,
    strm >> str;
 
    return str;
-}
-
-bool InternalObserver::IsDebugTrueWind() const {
-   return debugTrueWind;
-}
-
-void InternalObserver::SetDebugTrueWind(bool debug_true_wind) {
-   debugTrueWind = debug_true_wind;
 }
 
 MergePointMetric& InternalObserver::GetMergePointMetric(int id) {
@@ -464,61 +431,6 @@ void InternalObserver::process_NM_stats() {
    }
 }
 
-
-// TEST OUTPUT for cross-track output per second
-void InternalObserver::cross_output(double x_in,
-                                    double y_in,
-                                    double dynamic_cross,
-                                    double commanded_cross,
-                                    double psi_command,
-                                    double phi,
-                                    double limited_phi) {
-   m_cross_entry.x = x_in;
-   m_cross_entry.y = y_in;
-   m_cross_entry.dynamic_cross = dynamic_cross;
-   m_cross_entry.commanded_cross = commanded_cross;
-   m_cross_entry.psi_command = psi_command;
-   m_cross_entry.phi = phi;
-   m_cross_entry.limited_phi = limited_phi;
-
-}
-
-void InternalObserver::process_cross() {
-   string output_file_name = scenario_name + "-crosstrack-report.csv";
-   ofstream out;
-   if (m_cross_entry.time < 2) {
-      out.open(output_file_name.c_str());
-   } else {
-      out.open(output_file_name.c_str(), ios::out | ios::app);
-   }
-
-   if (out.is_open() == true) {
-      // if at the first time stamp create the header
-      if (m_cross_entry.time < 2) {
-         out <<
-             "Time,X(Meters),Y(Meters),Dynamics_Cross(Meters),Commanded_Cross(Meters),Unmodified_Cross,Psi_Command,Phi,Limited_Phi,Reported_Distance(Meters)"
-             <<
-             endl;
-      }
-
-      if (m_cross_entry.time >= 0.0) {
-         // add entry to the output file
-
-         out << m_cross_entry.time << ",";
-         out << m_cross_entry.x << ",";
-         out << m_cross_entry.y << ",";
-         out << m_cross_entry.dynamic_cross << ",";
-         out << m_cross_entry.commanded_cross << ",";
-         out << m_cross_entry.unmodified_cross << ",";
-         out << m_cross_entry.psi_command << ",";
-         out << m_cross_entry.phi << ",";
-         out << m_cross_entry.limited_phi << ",";
-         out << m_cross_entry.reported_distance << endl;
-      }
-
-      out.close(); // close output file
-   }
-}
 
 void InternalObserver::speed_command_count_output(vector<int> speed_change_list) {
    aircraft_speed_count_list.push_back(speed_change_list);
@@ -1120,91 +1032,6 @@ void InternalObserver::dumpAchieveList() {
    if (out.is_open())
       out.close();
 
-}
-
-
-void InternalObserver::dumpOwnKinTraj(int id,
-                                      const VerticalPath &fullTraj) {
-   // Dumps own kinematic trajectory after ensuring file initialized.
-   //
-   // id:own aircarft id.
-   // fullTraj:own aircraft kinematic trajectory.
-
-
-   // Check setup
-
-   if (mOwnKinVertPathObs == NULL) {
-      mOwnKinVertPathObs = new VerticalPathObserver(scenario_name,
-                                                    "own_precalc_4D_KinematicTM",
-                                                    false);
-   }
-
-
-   // Check iteration
-
-   if (mOwnKinVertPathObs->GetIterationNumber() != m_scenario_iter) {
-      mOwnKinVertPathObs->SetIterationNumber(m_scenario_iter);
-   }
-
-
-   // Write trajectory
-
-   mOwnKinVertPathObs->AddTrajectory(id, fullTraj);
-
-}
-
-
-void InternalObserver::dumpTargetKinTraj(int id,
-                                         const VerticalPath &fullTraj) {
-
-   // Dumps target kinematic trajectory after ensuring file initialized.
-   //
-   // id:target aircraft id.
-   // fullTraj:target aircraft kinematic trajectory.
-
-
-   // Check setup
-
-   if (mTargKinVertPathObs == NULL) {
-      mTargKinVertPathObs = new VerticalPathObserver(scenario_name,
-                                                     "target_precalc_4D_KinematicTM", true);
-   }
-
-
-   // Check iteration
-
-   if (mTargKinVertPathObs->GetIterationNumber() != m_scenario_iter) {
-      mTargKinVertPathObs->SetIterationNumber(m_scenario_iter);
-   }
-
-
-   // Write trajectory
-
-   mTargKinVertPathObs->AddTrajectory(id, fullTraj);
-
-}
-
-
-void InternalObserver::writeTrueWind(string str) {
-
-   // Outputs true wind .csv file.
-
-   string fileName = scenario_name + "-debug-true-wind.csv";
-   ofstream out;
-   out.open(fileName.c_str(), std::ios_base::app);
-
-   if (out.is_open()) {
-      out << "time " << trueTime << ",id " << trueId << endl;
-      out << str << endl;
-      out.close();
-   }
-
-}
-
-void InternalObserver::setTrueWindHdrVals(double time,
-                                          int id) {
-   trueTime = time;
-   trueId = id;
 }
 
 

@@ -1,38 +1,46 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include <Length.h>
-#include <Speed.h>
-#include <Angle.h>
-#include <Temperature.h>
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Angle.h>
+#include <scalar/Temperature.h>
 #include <string>
 #include "public/WeatherPrediction.h"
 #include "public/AircraftIntent.h"
 #include "public/AircraftState.h"
 
 class Wind;
-//class WeatherPrediction;
-//enum PredictedWindOption;
 
 // needed for WindSpeedUtils friend class
 namespace aaesim {
    namespace test {
+      class WindLegacy_readRAPWindFile_Test;
+      class Wind_interpolate_wind_Test;
+      class Wind_interpolate_wind_scalar_Test;
+      class Wind_interpolate_wind_matrix_Test;
+      class WindLegacy_check_box_Test;
+      class Wind_vertically_interpolate_wind_Test;
+      class Wind_readRAPTestDataWindFile_Test;
+      class Wind_interpolateTemp_Test;
       namespace utils {
          class WindSpeedUtils;
       }
@@ -57,21 +65,21 @@ enum WindFileType
 
 class Wind
 {
-   friend class WindLegacy_readRAPWindFile_Test;
+   friend class aaesim::test::WindLegacy_readRAPWindFile_Test;
 
-   friend class Wind_interpolateTemp_Test;
+   friend class aaesim::test::Wind_interpolateTemp_Test;
 
-   friend class Wind_interpolate_wind_Test;
+   friend class aaesim::test::Wind_interpolate_wind_Test;
 
-   friend class Wind_interpolate_wind_scalar_Test;
+   friend class aaesim::test::Wind_interpolate_wind_scalar_Test;
 
-   friend class Wind_interpolate_wind_matrix_Test;
+   friend class aaesim::test::Wind_interpolate_wind_matrix_Test;
 
-   friend class WindLegacy_check_box_Test;
+   friend class aaesim::test::WindLegacy_check_box_Test;
 
-   friend class Wind_vertically_interpolate_wind_Test;
+   friend class aaesim::test::Wind_vertically_interpolate_wind_Test;
 
-   friend class Wind_readRAPTestDataWindFile_Test;
+   friend class aaesim::test::Wind_readRAPTestDataWindFile_Test;
 
    friend class aaesim::test::utils::WindSpeedUtils;
 
@@ -90,7 +98,7 @@ public:
     * up to windBlendingAltitudeLimit above and below the current aircraft's altitude
     * and across all lat/longs.
     */
-   static void UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &current_state,
+   static void UpdatePredictedWindsAtAltitudeFromSensedWind(const aaesim::open_source::AircraftState &current_state,
                                                             WeatherPrediction &weather_prediction);
 
    void PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
@@ -114,6 +122,12 @@ public:
                                 const Units::Length altitude,
                                 Units::Speed &east_west,
                                 Units::Speed &north_south);
+
+   virtual void InterpolateWindScalar(Units::Angle lat_in,
+                                      Units::Angle lon_in,
+                                      Units::Length altitude,
+                                      Units::Speed &east_west,
+                                      Units::Speed &north_south) = 0;
 
    virtual Units::KelvinTemperature InterpolateTemperature(
          const Units::Angle latitude_in,
@@ -142,12 +156,6 @@ protected:
                                 Units::Length altitude,
                                 Units::Speed &u,
                                 Units::Speed &v) = 0;
-
-   virtual void InterpolateWindScalar(Units::Angle lat_in,
-                                      Units::Angle lon_in,
-                                      Units::Length altitude,
-                                      Units::Speed &east_west,
-                                      Units::Speed &north_south) = 0;
 
    virtual void InterpolateWindMatrix(Units::Angle lat_in,
                                       Units::Angle lon_in,

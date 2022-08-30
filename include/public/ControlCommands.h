@@ -1,26 +1,28 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-
-#include <Angle.h>
-#include <Force.h>
-#include <Speed.h>
+#include <scalar/Angle.h>
+#include <scalar/Force.h>
+#include <scalar/Speed.h>
+#include "BadaUtils.h"
 
 class ControlCommands
 {
@@ -30,7 +32,7 @@ public:
                    const Units::Angle &gamma,
                    const Units::Speed &trueAirspeed,
                    const double speedBrake,
-                   const int flapMode)
+                   const aaesim::open_source::bada_utils::FlapConfiguration flapMode)
          : phi(phi),
            thrust(thrust),
            gamma(gamma),
@@ -60,7 +62,7 @@ public:
       return speedBrake;
    }
 
-   int getFlapMode() const {
+   aaesim::open_source::bada_utils::FlapConfiguration getFlapMode() const {
       return flapMode;
    }
 
@@ -70,7 +72,7 @@ private:
    Units::Angle gamma;
    Units::Speed trueAirspeed;
    double speedBrake;
-   int flapMode;
+   aaesim::open_source::bada_utils::FlapConfiguration flapMode;
 };
 
 

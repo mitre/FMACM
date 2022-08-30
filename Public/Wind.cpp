@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <cstring>
@@ -30,6 +32,7 @@
 using std::cout;
 using std::shared_ptr;
 using std::string;
+using namespace aaesim::open_source;
 
 log4cplus::Logger Wind::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Wind"));
 
@@ -177,10 +180,10 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 void Wind::PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
                                          const vector<Units::Length> &predicted_wind_altitudes_in,
                                          WeatherPrediction &weather_prediction) {
-   double altitude_at_beginning_of_route_ft = Units::FeetLength(intent_in.GetFms().m_altitude[0]).value() + 1000;
+   double altitude_at_beginning_of_route_ft = Units::FeetLength(intent_in.GetRouteData().m_nominal_altitude[0]).value() + 1000;
 
    Units::FeetLength altitude_at_beginning_of_route(altitude_at_beginning_of_route_ft);
-   Units::FeetLength altitude_at_end_of_route = intent_in.GetFms().m_altitude[intent_in.GetNumberOfWaypoints() - 1];
+   Units::FeetLength altitude_at_end_of_route = intent_in.GetRouteData().m_nominal_altitude[intent_in.GetNumberOfWaypoints() - 1];
 
    std::vector<Units::FeetLength> end_point_altitudes;
    end_point_altitudes.push_back(altitude_at_beginning_of_route);
@@ -208,7 +211,7 @@ void Wind::PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
    weather_prediction.east_west.SetBounds(minimum_wind_index, maximum_wind_index);
    weather_prediction.north_south.SetBounds(minimum_wind_index, maximum_wind_index);
 
-   AddSensedWindsToWindStack(intent_in.GetTangentPlaneSequence(), intent_in.GetFms(),
+   AddSensedWindsToWindStack(intent_in.GetTangentPlaneSequence(), intent_in.GetRouteData(),
                              adjusted_altitude_at_beginning_of_route, wind_forecast_altitudes, weather_prediction,
                              current_wind_index);
 
@@ -241,7 +244,7 @@ Units::FeetLength Wind::GetAdjustedStartPointAltitude(Units::FeetLength altitude
       ss << "Route start point altitude " << altitude_at_beginning_of_route_ft <<
          " is not a multiple of 100. Adjusting to " << rounded_altitude_at_beginning_of_route_ft <<
          " to ensure that route is bounded by wind prediction.";
-      LOG4CPLUS_ERROR(m_logger, ss.str());
+      LOG4CPLUS_TRACE(m_logger, ss.str());
 
       return Units::FeetLength(rounded_altitude_at_beginning_of_route_ft);
    }
@@ -257,7 +260,7 @@ Units::FeetLength Wind::GetAdjustedEndPointAltitude(Units::FeetLength altitude_a
       std::stringstream ss;
       ss << "Route end point altitude " << altitude_at_end_of_route_ft << " is not a multiple of 100. Adjusting to " <<
          rounded_altitude_at_end_of_route_ft << " to ensure that route is bounded by wind prediction.";
-      LOG4CPLUS_ERROR(m_logger, ss.str());
+      LOG4CPLUS_TRACE(m_logger, ss.str());
 
       return Units::FeetLength(rounded_altitude_at_end_of_route_ft);
    }
@@ -273,7 +276,7 @@ std::set<Units::Length> Wind::AddRouteAltitudesToList(const std::set<Units::Leng
       std::stringstream ss;
       ss << "Route end point altitude " << altitude_at_end_of_route << " already in the list. Discarding "
                                                                        "this altitude.";
-      LOG4CPLUS_ERROR(m_logger, ss.str());
+      LOG4CPLUS_TRACE(m_logger, ss.str());
    }
 
    result = all_valid_altitudes.insert(altitude_at_beginning_of_route);
@@ -281,7 +284,7 @@ std::set<Units::Length> Wind::AddRouteAltitudesToList(const std::set<Units::Leng
       std::stringstream ss;
       ss << "Route start point altitude " << altitude_at_beginning_of_route << " already in the list. Discarding "
                                                                                "this altitude.";
-      LOG4CPLUS_ERROR(m_logger, ss.str());
+      LOG4CPLUS_TRACE(m_logger, ss.str());
    }
 
    return all_valid_altitudes;
@@ -297,12 +300,12 @@ std::set<Units::Length> Wind::ValidateWindAltitudeInputs(const std::vector<Units
          if (!result.second) {
             std::stringstream ss;
             ss << "Predicted wind altitude " << wind_altitude_ft << " already in the list. Discarding this altitude.";
-            LOG4CPLUS_ERROR(m_logger, ss.str());
+            LOG4CPLUS_TRACE(m_logger, ss.str());
          }
       } else {
          std::stringstream ss;
          ss << "Predicted wind altitude " << wind_altitude_ft << " is not a multiple of 100. Discarding this altitude.";
-         LOG4CPLUS_ERROR(m_logger, ss.str());
+         LOG4CPLUS_TRACE(m_logger, ss.str());
       }
    }
 
@@ -352,7 +355,7 @@ void Wind::AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence>
    ++current_wind_index;
 
    if (!forecast_wind_altitudes.erase(altitude_at_beginning_of_route)) {
-      LOG4CPLUS_WARN(m_logger, "Didn't erase altitude at beginning of route ("
+      LOG4CPLUS_ERROR(m_logger, "Didn't erase altitude at beginning of route ("
             << Units::FeetLength(altitude_at_beginning_of_route)
             << ") after loading sensed winds. Something may have gone wrong.");
    }
@@ -367,16 +370,16 @@ void Wind::CreatePredictionUsingCurrentWindOption(const AircraftIntent &aircraft
    Units::NauticalMilesLength total_linear_route_length(0.0);
    int last_ix = aircraft_intent.GetNumberOfWaypoints() - 1;
 
-   Units::FeetLength x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[last_ix]);
-   Units::FeetLength y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[last_ix]);
+   Units::FeetLength x_position = Units::MetersLength(aircraft_intent.GetRouteData().m_x[last_ix]);
+   Units::FeetLength y_position = Units::MetersLength(aircraft_intent.GetRouteData().m_y[last_ix]);
 
    AddPredictedWindAtPtpToWindStack(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position,
                                     altitude_at_end_of_route, forecast_wind_altitudes, weather_prediction,
                                     current_wind_index_in);
 
    for (int ix = (last_ix - 1); ix >= 0; ix--) {
-      Units::Length x_next = Units::MetersLength(aircraft_intent.GetFms().m_x[ix]);
-      Units::Length y_next = Units::MetersLength(aircraft_intent.GetFms().m_y[ix]);
+      Units::Length x_next = Units::MetersLength(aircraft_intent.GetRouteData().m_x[ix]);
+      Units::Length y_next = Units::MetersLength(aircraft_intent.GetRouteData().m_y[ix]);
 
       Units::Length distance_between_points = AircraftCalculations::PtToPtDist(x_position, y_position, x_next, y_next);
       Units::Length d_total_thru_next = total_linear_route_length + distance_between_points;
@@ -427,7 +430,7 @@ void Wind::AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSe
    ++current_wind_index;
 
    if (!forecast_wind_altitudes.erase(altitude_at_end_of_route)) {
-      LOG4CPLUS_WARN(m_logger, "Didn't erase altitude at end of route ("
+      LOG4CPLUS_ERROR(m_logger, "Didn't erase altitude at end of route ("
             << Units::FeetLength(altitude_at_end_of_route) <<
             ") after loading PTP winds. Something may have gone wrong.");
    }
@@ -465,12 +468,12 @@ void Wind::CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_w
    for (int jx = 0; jx < wind_altitudes.size(); jx++, ++altitude_iter) {
       Units::NauticalMilesLength total_dtg_from_end_of_route(0.0);
 
-      Units::Length x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[last_ix]);
-      Units::Length y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[last_ix]);
+      Units::Length x_position = Units::MetersLength(aircraft_intent.GetRouteData().m_x[last_ix]);
+      Units::Length y_position = Units::MetersLength(aircraft_intent.GetRouteData().m_y[last_ix]);
 
       for (int ix = (last_ix - 1); ix >= 0; ix--) {
-         Units::FeetLength next_x_position = Units::MetersLength(aircraft_intent.GetFms().m_x[ix]);
-         Units::FeetLength next_y_position = Units::MetersLength(aircraft_intent.GetFms().m_y[ix]);
+         Units::FeetLength next_x_position = Units::MetersLength(aircraft_intent.GetRouteData().m_x[ix]);
+         Units::FeetLength next_y_position = Units::MetersLength(aircraft_intent.GetRouteData().m_y[ix]);
 
          Units::FeetLength distance_between_points = AircraftCalculations::PtToPtDist(x_position, y_position,
                                                                                       next_x_position,
@@ -566,7 +569,7 @@ void Wind::ValidatePredictedOptOne(const AircraftIntent &aircraft_intent,
 
    for (unsigned int ix = 0; (ix < aircraft_intent.GetNumberOfWaypoints()) && !is_valid; ix++) {
       for (unsigned int jx = 0; jx < numSampWaypoints; jx++) {
-         if (samplingWaypoints[jx] == aircraft_intent.GetFms().m_name[ix]) {
+         if (samplingWaypoints[jx] == aircraft_intent.GetRouteData().m_name[ix]) {
             // We found validating waypoint-set outputs and terminate loops.
 
             predicted_wind_option = MULTIPLE_DTG_LEGACY;

@@ -1,35 +1,42 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <vector>
-#include <Time.h>
-#include <Length.h>
+#include <scalar/Time.h>
+#include <scalar/Length.h>
 
 #include "utility/Logging.h"
 #include "public/AircraftState.h"
 #include "public/HorizontalPath.h"
+#include "public/AircraftIntent.h"
+#include "public/LineOnEllipsoid.h"
 
 class CoreUtils
 {
 public:
 
-   /**
+  static const std::string INTERMEDIATE_WAYPOINT_ROOT_NAME;
+
+
+  /**
     * Find the index of a value in a vector. Uses STL upper_bound(), but with one modified return.
     *
     * @param value_to_find: value to search for
@@ -81,9 +88,44 @@ public:
     */
    static const int SignOfValue(double value);
 
-private:
+  /**
+   *
+   * @param ordered_waypoints
+   * @param maximum_allowable_length, default is CoreUtils::MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH
+   * @see CoreUtils::MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH
+   * @return
+   */
+  static std::list<Waypoint> ShortenLongLegs(const std::list<Waypoint> &ordered_waypoints,
+                                             Units::Length maximum_allowable_length=MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH);
 
-   static log4cplus::Logger m_logger;
+  /**
+   * Visible for testing.
+   *
+   * Update the static parameter value.
+   *
+   * @param new_value
+   */
+  static void UpdateMaximumAllowableSingleLegLength(Units::Length new_value);
+
+  /**
+   * Visible for testing.
+   */
+  static void ResetMaximumAllowableSingleLegLength();
+
+ private:
+  static log4cplus::Logger m_logger;
+  static Units::NauticalMilesLength MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH;
+
+  static std::list<Waypoint> GetIntermediateWaypointsForLongLeg(const aaesim::LineOnEllipsoid &line_on_ellipsoid,
+                                                                Units::Length maximum_allowable_single_leg_distance);
+
+
 };
 
+inline void CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::Length new_value) {
+  MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH = new_value;
+}
 
+inline void CoreUtils::ResetMaximumAllowableSingleLegLength() {
+  MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH = Units::NauticalMilesLength(10);
+}

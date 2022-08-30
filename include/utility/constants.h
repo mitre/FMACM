@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -32,11 +34,8 @@ namespace aaesim {
       const double KNOTS_TO_METERS_PER_SECOND = (NAUTICAL_MILES_TO_METERS / 3600.0);
 
       const double NAUTICAL_MILES_TO_FEET = 6076.115486;
-      const double FEET_PER_SECOND_TO_KNOTS = 0.592483801;
       const double KNOTS_TO_FEET_PER_SECOND = 1.687809857;
       const double BIGNUM = 9.9E99;
-// FIXME imprecise; METER2FOOT = 1/FT_M
-      const double METERS_TO_FEET = 3.2808399;
 
       const double BARO_ALT_SIG = 6.0;
       const double BARO_ALT_RATE_SIG = 2.5;
@@ -57,10 +56,6 @@ namespace aaesim {
 
       const int TRACKING = 1;
       const int TURNING = 2;
-
-
-      const double MAX_BANK_ANGLE_RADIAN = (25. * DEGREES_TO_RADIAN);
-      const double ROLL_RATE_RADIAN_PER_SECOND = (3.0 * DEGREES_TO_RADIAN);
 
       // Gravitational acceleration is defined by
       // International Committee on Weights and Measures (1901)

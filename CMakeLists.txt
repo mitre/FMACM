@@ -1,11 +1,24 @@
-cmake_minimum_required(VERSION 3.0)
-project(aaesim VERSION 3.5.3.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+cmake_minimum_required(VERSION 3.14)
+project(aaesim VERSION 4.0.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
 # Include a suite of helper functions for output and building the aaesim package
-include(.cmake/functions.cmake)
+include(${PROJECT_SOURCE_DIR}/.cmake/functions.cmake)
+include(${PROJECT_SOURCE_DIR}/.cmake/CPM.cmake)
 
+CPMAddPackage(
+        NAME cppmanifest
+        GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
+        GIT_TAG v1.3
+        DOWNLOAD_ONLY TRUE
+)
+if (cppmanifest_ADDED)
+    include(${cppmanifest_SOURCE_DIR}/cppmanifest_configure.cmake)
+    cppmanifest_configure(${PROJECT_SOURCE_DIR}/include/cppmanifest)
+endif()
+
+# cppmanifest does not do strings in the version, but we want them.
 # Append -SNAPSHOT to the version name if this is a pre-release version
 if (${PROJECT_VERSION_TWEAK})
     set(aaesim_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-SNAPSHOT)
@@ -14,27 +27,12 @@ else()
 endif()
 message("-- Generating build for ${PROJECT_NAME} version ${aaesim_VERSION}")
 
-# Gather git info if git exists
-find_package(Git)
-if(GIT_FOUND)
-    message("Git found: ${GIT_EXECUTABLE}")
-    include (.cmake/GetGitRevisionDescription.cmake)
-    get_git_head_revision(GIT_BRANCH GIT_HASH)
-    git_local_changes(GIT_LOCAL_CHANGES)
-endif()
-
-# Write the build_info
-set(USERN $ENV{USER})
-set(HOSTNAME $ENV{HOSTNAME})
-string(TIMESTAMP BUILDDATETIME %Y/%m/%d-%H:%M:%S) # example: 20160101.010101
-configure_file(${PROJECT_SOURCE_DIR}/.cmake/build_info.h.template ${PROJECT_SOURCE_DIR}/include/aaesim/build_info.h)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 # cmake -DCMAKE_BUILD_TYPE=Release ..
 # cmake -DCMAKE_BUILD_TYPE=Debug ..
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-sign-compare -O3 -g3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-function -Wno-sign-compare -O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-function -Wno-sign-compare -O3 -g3")
 
 # Add stuff to turn on code coverage only if a Debug build
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -42,9 +40,19 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     APPEND_COVERAGE_COMPILER_FLAGS()
 endif()
 
+# --- unitslib library ---
+CPMAddPackage(
+        NAME unitslib
+        GIT_REPOSITORY https://mustache.mitre.org/scm/uom/cpp-uom.git
+        GIT_TAG v2.1
+)
+# --- end unitslib library ---
+
 # Create some common paths
+if (unitslib_ADDED)
+    set(unitslib_INCLUDE_DIRS ${unitslib_SOURCE_DIR}/units-2.1/src/)
+endif ()
 set (LOADER_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
-set (UNITSLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib)
 set (UTILITY_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Utility)
 set (MATH_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Math)
 set (CORE_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/AAESim)
@@ -52,14 +60,10 @@ set (PUBLIC_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Public)
 set (GROUND_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/GroundSystems)
 set (IM_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/IntervalManagement)
 set (UNITTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
-set (GTEST_DIR    ${CMAKE_CURRENT_SOURCE_DIR}/unittest/gtest-1.7.0/)
 set (FRAMEWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1/
-        ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1/scalar/)
+        ${CMAKE_CURRENT_SOURCE_DIR}/include )
 
-add_subdirectory(${UNITSLIB_DIR})
 add_subdirectory(${LOADER_DIR})
 add_subdirectory(${UTILITY_DIR})
 add_subdirectory(${PUBLIC_DIR})

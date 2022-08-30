@@ -1,20 +1,23 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <iomanip>
 #include "public/PilotDelay.h"
 #include "public/Scenario.h"
 #include "math/CustomMath.h"
@@ -29,14 +32,12 @@ PilotDelay::PilotDelay()
         m_pilot_delay_is_on(true),
         m_delay_count(0),
         m_delay_sum(0),
-        m_delay_square_sum(0),
-        m_current_speed_command_mach_as_ias(Units::negInfinity()),
-        m_next_speed_command_mach_as_ias(Units::negInfinity()){
+        m_delay_square_sum(0) {
    IterationReset();
 }
 
 PilotDelay::~PilotDelay() {
-   if (m_delay_count > 0 && m_logger.isEnabledFor(log4cplus::TRACE_LOG_LEVEL)) {
+   if (m_delay_count > 0 && m_logger.getLogLevel() <= log4cplus::TRACE_LOG_LEVEL) {
       DumpStatistics();
    }
 }
@@ -51,29 +52,29 @@ void PilotDelay::IterationReset() {
  * Recomputes and updates mach as necessary according to the time delay
  * and recomputes ias accordingly.  Manages time to the next speed change.
  *
- * @param previous_im_speed_command_as_mach mach command from previous time.
- * @param im_speed_command_as_mach mach computed from calling method.
+ * @param previous_im_speed_command_mach mach command from previous time.
+ * @param input_im_speed_command_mach mach computed from calling method.
  * @param current_altitude altitude flight is at.
  * @param altitude_at_end_of_route altitude at the FAF or last point.
  *
  * @return recomputed guidance ias speed.
  */
-Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_as_mach,
-                                    double im_speed_command_as_mach,
+Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_mach,
+                                    double input_im_speed_command_mach,
                                     Units::Length current_altitude,
                                     Units::Length altitude_at_end_of_route) {
-   if ((im_speed_command_as_mach != previous_im_speed_command_as_mach) &&
+   if ((input_im_speed_command_mach != previous_im_speed_command_mach) &&
          (m_time_to_next_speed_change < Units::zero())) {
 
       // Reset time delay counter and set m_guidance_mach to previous speed.
       m_time_to_next_speed_change = ComputeTimeToSpeedChange(current_altitude, altitude_at_end_of_route);
-      m_guidance_mach = previous_im_speed_command_as_mach;
+      m_guidance_mach = previous_im_speed_command_mach;
    }
    else if (m_guidance_ias == Units::zero()) {
       // ias has not changed and guidance ias not set. Compute guidance ias
       // from guidance mach.
-      m_guidance_mach = previous_im_speed_command_as_mach;
-      SetInitialIAS(current_altitude, m_atmosphere->MachToIAS(previous_im_speed_command_as_mach, current_altitude));
+      m_guidance_mach = previous_im_speed_command_mach;
+      SetInitialIAS(current_altitude, m_atmosphere->MachToIAS(previous_im_speed_command_mach, current_altitude));
 
       if (m_time_to_next_speed_change < Units::zero()) {
          // past delay time-recompute new delay time and update guidance ias.
@@ -83,32 +84,31 @@ Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_as_mach,
 
    if (m_time_to_next_speed_change == Units::zero()) {
       // At time to change speed-set to input mach.
-      m_guidance_mach = im_speed_command_as_mach;
+      m_guidance_mach = input_im_speed_command_mach;
    }
 
    // Update time delay counter and return guidance speed in ias.
    m_time_to_next_speed_change -= Units::SecondsTime(1.0);
 
-   // Return the mach converted to IAS using the current conditions
    return m_atmosphere->MachToIAS(m_guidance_mach, current_altitude);
 }
 
 /**
  * Recomputes and updates ias as necessary.  The pilot delay time is also updated.
  *
- * @param previous_im_speed_command_as_ias Computed ias from the previous call
- * @param im_speed_command_as_ias computed ias from calling method.
+ * @param previous_im_speed_command_ias Computed ias from the last time.
+ * @param input_im_speed_command_ias computed ias from calling method.
  * @param current_altitude aircraft altitude.
  * @param altitude_at_end_of_route altitude at the FAF or last point.
  *
  * @return guidance ias speed.
  */
-Units::Speed PilotDelay::UpdateIAS(Units::Speed previous_im_speed_command_as_ias,
-                                   Units::Speed im_speed_command_as_ias,
+Units::Speed PilotDelay::UpdateIAS(Units::Speed previous_im_speed_command_ias,
+                                   Units::Speed input_im_speed_command_ias,
                                    Units::Length current_altitude,
                                    Units::Length altitude_at_end_of_route) {
 
-   if (im_speed_command_as_ias != previous_im_speed_command_as_ias) {
+   if (input_im_speed_command_ias != previous_im_speed_command_ias) {
       // ias has changed.
       if (m_time_to_next_speed_change < Units::zero()) {
          // past delay time-recompute new delay time and update guidance ias.
@@ -116,25 +116,25 @@ Units::Speed PilotDelay::UpdateIAS(Units::Speed previous_im_speed_command_as_ias
 
          if (m_guidance_ias == Units::zero()) {
             // compute first guidance ias
-            SetInitialIAS(current_altitude, previous_im_speed_command_as_ias);
+            SetInitialIAS(current_altitude, previous_im_speed_command_ias);
          } else {
             // set guidance ias from previous ias.
-            m_guidance_ias = previous_im_speed_command_as_ias;
+            m_guidance_ias = previous_im_speed_command_ias;
          }
       } else if ((m_time_to_next_speed_change > Units::zero()) && (m_guidance_ias == Units::zero())) {
          // not at delay time yet and guidance ias not set-compute guidance ias
          // from guidance mach.
-         SetInitialIAS(current_altitude, previous_im_speed_command_as_ias);
+         SetInitialIAS(current_altitude, previous_im_speed_command_ias);
       }
    } else if (m_guidance_ias == Units::zero()) {
       // ias has not changed and guidance ias not set-compute guidnace ias
       // from guidance mach.
-      SetInitialIAS(current_altitude, previous_im_speed_command_as_ias);
+      SetInitialIAS(current_altitude, previous_im_speed_command_ias);
    }
 
    if (m_time_to_next_speed_change == Units::zero()) {
       // time to process delay-set guidance ias from input ias.
-      m_guidance_ias = im_speed_command_as_ias;
+      m_guidance_ias = input_im_speed_command_ias;
    }
 
    // update delay time and return guidance ias.
@@ -231,24 +231,21 @@ void PilotDelay::SetInitialIAS(Units::Length current_altitude,
 }
 
 void PilotDelay::DumpStatistics() {
-   using namespace std;
-   cout << "****** PilotDelay statistics ******" << endl;
+   LOG4CPLUS_DEBUG(m_logger, "****** PilotDelay statistics ******");
    // This is the longest bar we want
-   const string BAR("************************************************************");
+   const std::string BAR("************************************************************");
 
    // horizontal histogram
    double max_delay = m_delay_frequency.rbegin()->first;
    for (double delay = 0; delay <= max_delay; delay++) {
       int count = m_delay_frequency[delay];
-      if (delay < 10) cout << " ";  // poor man's 2-digit formatting
-      cout << delay << ": " << BAR.substr(0, count) << " (" << count << ")" << endl;
+      LOG4CPLUS_DEBUG(m_logger, std::setprecision(3) << delay << ": " << BAR.substr(0, count) << " (" << count << ")");
    }
    double mean = m_delay_sum / m_delay_count;
    double standard_deviation = sqrt((m_delay_square_sum - m_delay_count * mean * mean) / m_delay_count);
-   cout << "Number of delays (all iterations):  " << m_delay_count << endl;
-   cout << "Average delay (all iterations):  " << mean << " seconds" <<
-         " (parameter value " << m_pilot_delay_mean << ")" << endl;
-   cout << "Standard deviation (all iterations):  " << standard_deviation << " seconds" <<
-         " (parameter value " << m_pilot_delay_standard_deviation << ")" << endl;
-
+   LOG4CPLUS_DEBUG(m_logger, "Number of delays (all iterations):  " << m_delay_count);
+   LOG4CPLUS_DEBUG(m_logger, "Average delay (all iterations):  " << mean << " seconds" <<
+         " (parameter value " << m_pilot_delay_mean << ")");
+   LOG4CPLUS_DEBUG(m_logger, "Standard deviation (all iterations):  " << standard_deviation << " seconds" <<
+         " (parameter value " << m_pilot_delay_standard_deviation << ")");
 }

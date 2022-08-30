@@ -1,22 +1,26 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/SpeedOnPitchControl.h"
 #include "public/AircraftCalculations.h"
+
+using namespace aaesim::open_source;
 
 Units::Frequency SpeedOnPitchControl::m_gain_alt = Units::HertzFrequency(0.20);
 Units::Frequency SpeedOnPitchControl::m_gain_gamma = Units::HertzFrequency(0.40);
@@ -25,175 +29,142 @@ double SpeedOnPitchControl::m_gain_speedbrake = 0.10;
 
 log4cplus::Logger SpeedOnPitchControl::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SpeedOnPitchControl"));
 
-SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speedThreshold,
-                                         const Units::Length altitudeThreshold) {
+SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold,
+                                         const Units::Length altitude_threshold) {
    // Map this class's gains to the parent class
    m_alt_gain = m_gain_alt;
    m_gamma_gain = m_gain_gamma;
    m_phi_gain = m_gain_phi;
    m_speed_brake_gain = m_gain_speedbrake;
-   m_thrust_gain = calculateThrustGain(); // use the parent's provided thrust gain calculation
+   m_thrust_gain = CalculateThrustGain(); // use the parent's provided thrust gain calculation
    m_gain_velocity = Units::sqr(m_natural_frequency) / m_thrust_gain;
 
-   m_speed_threshold = speedThreshold;
-   m_altitude_threshold = altitudeThreshold;
+   m_speed_threshold = speed_threshold;
+   m_altitude_threshold = altitude_threshold;
    m_is_level_flight = true;
    m_min_thrust_counter = 0.0;
    m_speed_brake_counter = 0.0;
    m_is_speed_brake_on = false;
 }
 
-void SpeedOnPitchControl::Initialize(BadaWithCalc &bada_calculator,
-                                     const Units::Length &altitude_msl_at_faf,
-                                     const Units::Angle &max_bank_angle,
-                                     const PrecalcWaypoint &final_waypoint) {
-   AircraftControl::Initialize(bada_calculator, altitude_msl_at_faf, max_bank_angle, final_waypoint);
+void SpeedOnPitchControl::Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> bada_calculator,
+                                     const Units::Angle &max_bank_angle) {
+   AircraftControl::Initialize(bada_calculator, max_bank_angle);
    m_is_level_flight = true;
    m_min_thrust_counter = 0.0;
    m_speed_brake_counter = 0.0;
    m_is_speed_brake_on = false;
-}
-
-
-ControlCommands SpeedOnPitchControl::CalculateControlCommands(const Guidance &guidance,
-                                                              const EquationsOfMotionState &eqmState,
-                                                              const WeatherTruth &wind) {
-
-   // Get Winds and Wind Gradients at altitude
-   calculateSensedWind(wind, Units::MetersLength(eqmState.enu_z));
-
-   // Lateral Control
-   Units::Angle phi_com = doLateralControl(guidance, eqmState);
-
-   // Vertical Control
-   double speedBrakeCom(0);
-   int flapConfig_new;
-   Units::Force T_com;
-   Units::Angle gamma_com;
-   Units::Speed tas_com;
-   DoVerticalControl(guidance, eqmState, T_com, gamma_com, tas_com, speedBrakeCom, flapConfig_new, wind);
-
-   ControlCommands controlCommands(phi_com, T_com, gamma_com, tas_com, speedBrakeCom, flapConfig_new);
-   return controlCommands;
 }
 
 void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
-                                            const EquationsOfMotionState &eqmState,
+                                            const EquationsOfMotionState &equations_of_motion_state,
                                             Units::Force &thrust_command,
                                             Units::Angle &gamma_command,
                                             Units::Speed &true_airspeed_command,
                                             double &speed_brake_command,
-                                            int &new_flap_config,
+                                            aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
                                             const WeatherTruth &true_weather) {
-
    // Estimate kinetic forces for this state
    Units::Force lift, drag;
-   estimateKineticForces(eqmState, lift, drag, new_flap_config, true_weather);
+   ConfigureFlapsAndEstimateKineticForces(equations_of_motion_state, lift, drag, new_flap_configuration, true_weather);
 
    // Commands
    const Units::Speed ias_com = guidance.m_ias_command;
-   true_airspeed_command = true_weather.CAS2TAS(ias_com, eqmState.enu_z);
-
-   const Units::Force maxThrust = Units::NewtonsForce(m_bada_calculator->getMaxThrust(eqmState.enu_z, new_flap_config, "cruise"));
-   const Units::Force minThrust = Units::NewtonsForce(
-         m_bada_calculator->getMaxThrust(eqmState.enu_z, new_flap_config, "descent"));
-
-   //Speed Management Method check
+   true_airspeed_command = true_weather.CAS2TAS(ias_com, equations_of_motion_state.altitude_msl);
+   const Units::Force max_thrust = Units::NewtonsForce(m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl,
+                                                                                       new_flap_configuration,
+                                                                                       aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CRUISE, Units::ZERO_CELSIUS));
+   const Units::Force min_thrust = Units::NewtonsForce(
+      m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::DESCENT, Units::ZERO_CELSIUS));
    const Units::Length alt_ref = Units::FeetLength(guidance.m_reference_altitude);
-   const Units::Length e_alt = eqmState.enu_z - alt_ref;
-   const Units::Speed h_dot = guidance.m_vertical_speed;
-   thrust_command = Units::NewtonsForce(0.0);
-   gamma_command = Units::RadiansAngle(0.0);
-   Units::Speed ev = true_airspeed_command - eqmState.true_airspeed;
+   const Units::Length error_alt = equations_of_motion_state.altitude_msl - alt_ref;
+   const Units::Speed guidance_vertical_speed = guidance.m_vertical_speed;
+   const Units::Speed error_tas = true_airspeed_command - equations_of_motion_state.true_airspeed;
 
-   // LEVEL FLIGHT - manage speed with thrust and altitude with pitch
    if (m_is_level_flight) {
-      Units::Acceleration vDotCom = m_gain_velocity * ev;
+      // manage speed with thrust and altitude with pitch
+      SpeedOnThrustControl::DoVerticalControl(guidance,
+                                              equations_of_motion_state,
+                                              thrust_command,
+                                              gamma_command,
+                                              true_airspeed_command,
+                                              speed_brake_command,
+                                              new_flap_configuration,
+                                              true_weather);
 
-      // calculate the Thrust Command
-      thrust_command = m_ac_mass * vDotCom
-              + drag
-              - m_ac_mass * Units::ONE_G_ACCELERATION * sin(eqmState.gamma)
-              - m_ac_mass * eqmState.true_airspeed * (m_dVwx_dh * cos(eqmState.psi) + m_dVwy_dh * sin(eqmState.psi))
-                * sin(eqmState.gamma) * cos(eqmState.gamma);
-
-      // command a level altitude
-      gamma_command = Units::RadiansAngle(0.0);
-
-      if (Units::MetersLength(eqmState.enu_z).value() - guidance.m_active_precalc_constraints.constraint_altLow > 200.0 * FEET_TO_METERS &&
-          Units::MetersPerSecondSpeed(h_dot).value() != 0.0) {
+      // determine if staying in level flight
+      const static Units::Length tolerance = Units::FeetLength(200);
+      const bool altitude_above_constraint = equations_of_motion_state.altitude_msl - guidance.m_active_precalc_constraints.constraint_altLow > tolerance;
+      const bool altitude_rate_nonzero = guidance_vertical_speed != Units::zero();
+      if (altitude_above_constraint && altitude_rate_nonzero) {
          m_is_level_flight = false;
-         thrust_command = minThrust;
+         thrust_command = min_thrust;
       }
 
    }
-      // DESCENDING FLIGHT - manage altitude with thrust, speed with pitch
    else {
-      double esf = true_weather.ESFconstantCAS(eqmState.true_airspeed, eqmState.enu_z);
+      // manage altitude with thrust, speed with pitch
+      double esf = true_weather.ESFconstantCAS(equations_of_motion_state.true_airspeed, equations_of_motion_state.altitude_msl);
 
       // adjust esf based on velocity error compared to the speed threshold
-      if (ev <= -m_speed_threshold) {
+      if (error_tas <= -m_speed_threshold) {
          esf = 0.3;
-      } else if (ev > -m_speed_threshold && ev < Units::ZERO_SPEED) {
-         esf = (esf - 0.3) / m_speed_threshold * ev + esf;
-      } else if (ev > Units::ZERO_SPEED && ev < m_speed_threshold) {
-         esf = (1.7 - esf) / m_speed_threshold * ev + esf;
-      } else if (ev >= m_speed_threshold) {
+      } else if (error_tas > -m_speed_threshold && error_tas < Units::ZERO_SPEED) {
+         esf = (esf - 0.3) / m_speed_threshold * error_tas + esf;
+      } else if (error_tas > Units::ZERO_SPEED && error_tas < m_speed_threshold) {
+         esf = (1.7 - esf) / m_speed_threshold * error_tas + esf;
+      } else if (error_tas >= m_speed_threshold) {
          esf = 1.7;
       }
 
       // descent rate
-      Units::Speed dh_dt = ((eqmState.thrust - drag) * eqmState.true_airspeed) / (m_ac_mass * Units::ONE_G_ACCELERATION) * esf;
+      Units::Speed dh_dt = ((equations_of_motion_state.thrust - drag) * equations_of_motion_state.true_airspeed) / (m_ac_mass * Units::ONE_G_ACCELERATION) * esf;
 
-      gamma_command = Units::RadiansAngle(asin(-dh_dt / eqmState.true_airspeed));
+      gamma_command = Units::RadiansAngle(asin(-dh_dt / equations_of_motion_state.true_airspeed));
 
-      //if(gamma_com > 4.0*PI/180)
-      //	gamma_com = 4.0*PI/180;
-
-      if (e_alt < -m_altitude_threshold) {
-         thrust_command = 0.50 * maxThrust;
-      } else if (e_alt > m_altitude_threshold) {
-         thrust_command = minThrust;
+      if (error_alt < -m_altitude_threshold) {
+         thrust_command = 0.50 * max_thrust;
+      } else if (error_alt > m_altitude_threshold) {
+         thrust_command = min_thrust;
       } else {
-         thrust_command = (minThrust - 0.50 * maxThrust) / (m_altitude_threshold * 2) * e_alt + (0.50 * maxThrust + minThrust) / 2.0;
+         thrust_command = (min_thrust - 0.50 * max_thrust) / (m_altitude_threshold * 2) * error_alt + (0.50 * max_thrust + min_thrust) / 2.0;
       }
 
       // Check if flight should level off
-      if (Units::MetersLength(eqmState.enu_z).value() - guidance.m_active_precalc_constraints.constraint_altLow < 100.0 * FEET_TO_METERS
-              || Units::MetersPerSecondSpeed(h_dot).value() == 0.0) {
+      const bool altitude_near_constraint_low = equations_of_motion_state.altitude_msl - guidance.m_active_precalc_constraints.constraint_altLow < Units::FeetLength(100);
+      const bool altitude_rate_is_zero = guidance_vertical_speed == Units::zero();
+      if (altitude_near_constraint_low || altitude_rate_is_zero) {
          m_is_level_flight = true;
       }
 
    }
 
    // limit thrust to max and min limits
-   if (thrust_command > maxThrust) {
-      thrust_command = maxThrust;
-   } else if (thrust_command < minThrust) {
-      thrust_command = minThrust;
+   if (thrust_command > max_thrust) {
+      thrust_command = max_thrust;
+   } else if (thrust_command < min_thrust) {
+      thrust_command = min_thrust;
    }
 
    // Determine if speed brake is needed
-   Units::Speed v_cas = true_weather.TAS2CAS(eqmState.true_airspeed, eqmState.enu_z);
+   Units::Speed v_cas = true_weather.TAS2CAS(equations_of_motion_state.true_airspeed, equations_of_motion_state.altitude_msl);
 
-   if (thrust_command == minThrust) {
+   if (thrust_command == min_thrust) {
 
-      int mode_new = 0;
+      aaesim::open_source::bada_utils::FlapConfiguration updated_flap_configuration = aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED;
 
-      if (m_is_level_flight || (e_alt > m_altitude_threshold))
+      if (m_is_level_flight || (error_alt > m_altitude_threshold))
       {
-         m_bada_calculator->getConfigForDrag(v_cas,
-                                         Units::MetersLength(eqmState.enu_z),
-                                         m_alt_at_FAF,
-                                         new_flap_config,
-                                         mode_new);
-         new_flap_config = mode_new;
+         m_bada_calculator->GetConfigurationForIncreasedDrag(v_cas,
+                                                             Units::MetersLength(equations_of_motion_state.altitude_msl),
+                                                             updated_flap_configuration);
+         new_flap_configuration = updated_flap_configuration;
       }
 
       // test for minThrustCounter > 14, because in SpeedOnThrustControl, minThrustCounter
       // is incremented before this test instead of after.
-      if (m_is_level_flight && m_min_thrust_counter > 14.0 && ev < Units::KnotsSpeed(-5.0)){
-         if (new_flap_config <= 2) {
+      if (m_is_level_flight && m_min_thrust_counter > 14.0 && error_tas < Units::KnotsSpeed(-5.0)){
+         if (new_flap_configuration <= aaesim::open_source::bada_utils::FlapConfiguration::LANDING) {
             if (!m_is_speed_brake_on) {
                m_speed_brake_counter = 0.0;
                speed_brake_command = 0.5;
@@ -211,20 +182,18 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
          }
       }
 
-      if (e_alt > m_altitude_threshold) {
-         m_bada_calculator->getConfigForDrag(v_cas,
-                                         Units::MetersLength(eqmState.enu_z),
-                                         m_alt_at_FAF,
-                                         new_flap_config,
-                                         mode_new);
+      if (error_alt > m_altitude_threshold) {
+         m_bada_calculator->GetConfigurationForIncreasedDrag(v_cas,
+                                                             Units::MetersLength(equations_of_motion_state.altitude_msl),
+                                                             updated_flap_configuration);
 
-         if (mode_new == new_flap_config && mode_new <= 2) {
+         if (updated_flap_configuration == new_flap_configuration && updated_flap_configuration <= aaesim::open_source::bada_utils::FlapConfiguration::LANDING) {
             speed_brake_command = 0.5;
             m_is_speed_brake_on = true;
             m_speed_brake_counter = m_speed_brake_counter + 1;
          }
 
-         new_flap_config = mode_new;
+         new_flap_configuration = updated_flap_configuration;
       }
       m_min_thrust_counter = m_min_thrust_counter + 1;
    } else {
@@ -245,5 +214,16 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
          speed_brake_command = 0.5;
       }
    }
+
+   LOG4CPLUS_TRACE(m_logger, "altitude_error," << Units::FeetLength(error_alt) << "," <<
+                             "is_level_flight," << m_is_level_flight << "," <<
+                             "thrust_command," << Units::NewtonsForce(thrust_command) << "," <<
+                             "dynamics_thrust," << Units::NewtonsForce(equations_of_motion_state.thrust) << "," <<
+                             "max_thrust," << Units::NewtonsForce(max_thrust) << "," <<
+                             "min_thrust," << Units::NewtonsForce(min_thrust) << "," <<
+                             "true_airspeed_error," << Units::KnotsSpeed(error_tas) << "," <<
+                             "speed_brake_command," << speed_brake_command << "," <<
+                             "new_flap_configuration," << bada_utils::GetFlapConfigurationAsString(new_flap_configuration) << "," <<
+                             "gamma_command," << Units::DegreesAngle(gamma_command) );
 
 }

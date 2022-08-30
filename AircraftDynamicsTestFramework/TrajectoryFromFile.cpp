@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TrajectoryFromFile.h"
@@ -21,7 +23,7 @@
 #include "public/HfpReader2020.h"
 #include "utility/CsvParser.h"
 
-#include "AngularSpeed.h"
+#include <scalar/AngularSpeed.h>
 
 
 TrajectoryFromFile::TrajectoryFromFile()
@@ -57,8 +59,8 @@ bool TrajectoryFromFile::load(DecodedStream* input) {
    return m_loaded;
 }
 
-Guidance TrajectoryFromFile::Update(const AircraftState& state) {
-   Guidance result;
+aaesim::open_source::Guidance TrajectoryFromFile::Update(const aaesim::open_source::AircraftState& state) {
+   aaesim::open_source::Guidance result;
 
    Units::UnsignedAngle estimated_course;
    m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(state.m_x),
@@ -112,7 +114,7 @@ Guidance TrajectoryFromFile::Update(const AircraftState& state) {
       traj_index--;
    }
 
-   result.m_track_angle = course_at_position;
+   result.m_enu_track_angle = course_at_position;
 
    double unsigned_cross_track_meters = sqrt(pow(state.m_x * FEET_TO_METERS - estimated_position_on_path_x.value(), 2) +
                                              pow(state.m_y * FEET_TO_METERS - estimated_position_on_path_y.value(), 2));
@@ -187,25 +189,25 @@ void TrajectoryFromFile::CalculateWaypoints(AircraftIntent& intent) {
    double prev_dist = 0;
 
    for (int loop = intent.GetNumberOfWaypoints() - 1; loop > 0; loop--) {
-      double delta_x = intent.GetFms().m_x[loop - 1].value() - intent.GetFms().m_x[loop].value();
-      double delta_y = intent.GetFms().m_y[loop - 1].value() - intent.GetFms().m_y[loop].value();
+      double delta_x = intent.GetRouteData().m_x[loop - 1].value() - intent.GetRouteData().m_x[loop].value();
+      double delta_y = intent.GetRouteData().m_y[loop - 1].value() - intent.GetRouteData().m_y[loop].value();
       double leg_length_meters = sqrt(pow(delta_x, 2) + pow(delta_y, 2));
       double course = atan2(delta_y, delta_x);
 
       PrecalcWaypoint new_waypoint;
       new_waypoint.m_leg_length = Units::MetersLength(leg_length_meters);
       new_waypoint.m_course_angle = Units::RadiansAngle(course);
-      new_waypoint.m_name = intent.GetFms().m_name[loop];
-      new_waypoint.m_x_pos_meters = intent.GetFms().m_x[loop];
-      new_waypoint.m_y_pos_meters = intent.GetFms().m_y[loop];
+      new_waypoint.m_name = intent.GetRouteData().m_name[loop];
+      new_waypoint.m_x_pos_meters = intent.GetRouteData().m_x[loop];
+      new_waypoint.m_y_pos_meters = intent.GetRouteData().m_y[loop];
 
-      new_waypoint.m_precalc_constraints.constraint_dist = leg_length_meters + prev_dist;
-      new_waypoint.m_precalc_constraints.constraint_altHi =
-            intent.GetFms().m_high_altitude_constraint[loop - 1].value();
+      new_waypoint.m_precalc_constraints.constraint_along_path_distance = Units::MetersLength(leg_length_meters + prev_dist);
+      /* new_waypoint.m_precalc_constraints.constraint_altHi =
+            intent.GetRouteData().m_high_altitude_constraint[loop - 1];
       new_waypoint.m_precalc_constraints.constraint_altLow =
-            intent.GetFms().m_low_altitude_constraint[loop - 1].value();
-      new_waypoint.m_precalc_constraints.constraint_speedHi = intent.GetFms().m_high_speed_constraint[loop - 1].value();
-      new_waypoint.m_precalc_constraints.constraint_speedLow = intent.GetFms().m_low_speed_constraint[loop - 1].value();
+            intent.GetRouteData().m_low_altitude_constraint[loop - 1];
+      new_waypoint.m_precalc_constraints.constraint_speedHi = intent.GetRouteData().m_high_speed_constraint[loop - 1];
+      new_waypoint.m_precalc_constraints.constraint_speedLow = intent.GetRouteData().m_low_speed_constraint[loop - 1]; */
 
       prev_dist += leg_length_meters;
 
@@ -214,16 +216,16 @@ void TrajectoryFromFile::CalculateWaypoints(AircraftIntent& intent) {
 
    // add the final waypoint
    PrecalcWaypoint new_waypoint;
-   new_waypoint.m_name = intent.GetFms().m_name[0];
+   new_waypoint.m_name = intent.GetRouteData().m_name[0];
    new_waypoint.m_leg_length = Units::MetersLength(0);
    new_waypoint.m_course_angle = m_precalc_waypoints.back().m_course_angle;
-   new_waypoint.m_x_pos_meters = intent.GetFms().m_x[0];
-   new_waypoint.m_y_pos_meters = intent.GetFms().m_y[0];
-   new_waypoint.m_precalc_constraints.constraint_dist = prev_dist;
-   new_waypoint.m_precalc_constraints.constraint_altHi = intent.GetFms().m_high_altitude_constraint[0].value();
-   new_waypoint.m_precalc_constraints.constraint_altLow = intent.GetFms().m_low_altitude_constraint[0].value();
-   new_waypoint.m_precalc_constraints.constraint_speedHi = intent.GetFms().m_high_speed_constraint[0].value();
-   new_waypoint.m_precalc_constraints.constraint_speedLow = intent.GetFms().m_low_speed_constraint[0].value();
+   new_waypoint.m_x_pos_meters = intent.GetRouteData().m_x[0];
+   new_waypoint.m_y_pos_meters = intent.GetRouteData().m_y[0];
+   new_waypoint.m_precalc_constraints.constraint_along_path_distance = Units::MetersLength(prev_dist);
+/*   new_waypoint.m_precalc_constraints.constraint_altHi = intent.GetRouteData().m_high_altitude_constraint[0];
+   new_waypoint.m_precalc_constraints.constraint_altLow = intent.GetRouteData().m_low_altitude_constraint[0];
+   new_waypoint.m_precalc_constraints.constraint_speedHi = intent.GetRouteData().m_high_speed_constraint[0];
+   new_waypoint.m_precalc_constraints.constraint_speedLow = intent.GetRouteData().m_low_speed_constraint[0];*/
    m_precalc_waypoints.push_back(new_waypoint);
 }
 

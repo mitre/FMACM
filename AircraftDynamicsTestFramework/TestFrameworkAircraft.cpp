@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkAircraft.h"
@@ -23,10 +25,9 @@
 #include "public/Guidance.h"
 #include "public/SpeedOnPitchControl.h"
 #include "public/SpeedOnThrustControl.h"
-#include <iostream>
-#include <stdio.h>
 
 using namespace std;
+using namespace aaesim::open_source;
 
 log4cplus::Logger TestFrameworkAircraft::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("IMAircraft"));
 
@@ -36,7 +37,7 @@ TestFrameworkAircraft::TestFrameworkAircraft() {
    m_initial_altitude = Units::FeetLength(0);
    m_initial_ias = Units::KnotsSpeed(0);
    m_initial_mach = 0.78;
-   m_aircraft_control.reset(new AircraftControl());
+   m_aircraft_control.reset(new SpeedOnThrustControl());
    m_weather_truth = (new WeatherTruthByTime())->GetSharedPtr();
 }
 
@@ -56,7 +57,6 @@ bool TestFrameworkAircraft::load(DecodedStream *input) {
    register_var("env_csv_file", &env_csv_file, false);
 
    register_loadable_with_brackets("aircraft_intent", &m_aircraft_intent, true);
-   register_loadable_with_brackets("dynamics", &m_dynamics, false);
    register_loadable_with_brackets("precalc_traj_file", &m_precalc_traj, true);
    register_loadable_with_brackets("airborne_app", &m_airborne_app, true);
 
@@ -81,22 +81,44 @@ bool TestFrameworkAircraft::load(DecodedStream *input) {
 void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold,
                                        const WeatherTruth &weather_truth) {
 
+   // We will use this struct several times, so keep a reference.
+   const struct AircraftIntent::RouteData &routeData = m_aircraft_intent.GetRouteData();
    // initial position and heading
    EarthModel::LocalPositionEnu initial_enu_position;
-   initial_enu_position.x = m_aircraft_intent.GetFms().m_x[0];
-   initial_enu_position.y = m_aircraft_intent.GetFms().m_y[0];
+   initial_enu_position.x = routeData.m_x[0];
+   initial_enu_position.y = routeData.m_y[0];
    initial_enu_position.z = m_initial_altitude;
    DirectionOfFlightCourseCalculator course_calculator = DirectionOfFlightCourseCalculator(m_precalc_traj.GetHorizontalTrajectory(), TrajectoryIndexProgressionDirection::UNDEFINED);
    Units::Angle initial_heading = course_calculator.GetCourseAtPathStart();
 
-   Waypoint wp0(m_aircraft_intent.GetFms().m_name[0],
-                m_aircraft_intent.GetFms().m_latitude[0],
-                m_aircraft_intent.GetFms().m_longitude[0],
+   // Waypoint at the start of the route, for initial_position
+   Waypoint wpStart(routeData.m_name[0],
+                routeData.m_latitude[0],
+                routeData.m_longitude[0],
+                Units::zero(), Units::zero(), Units::zero(), Units::zero(), Units::zero());
+   // Waypoint at the end of route, for TangentPlaneSequence (0,0) ENU
+   Waypoint wpEnd(routeData.m_name.back(),
+                routeData.m_latitude.back(),
+                routeData.m_longitude.back(),
                 Units::zero(), Units::zero(), Units::zero(), Units::zero(), Units::zero());
    list<Waypoint> waypoint_list;
-   waypoint_list.push_back(wp0);
+   waypoint_list.push_back(wpEnd);
    shared_ptr<TangentPlaneSequence> tangent_plane_sequence(
          new TangentPlaneSequence(waypoint_list));
+   for (int i = routeData.m_latitude.size()-1; i >= 0; --i) {
+       EarthModel::LocalPositionEnu enuFix;
+       EarthModel::GeodeticPosition geoFix;
+       geoFix.latitude = routeData.m_latitude[i];
+       geoFix.longitude = routeData.m_longitude[i];
+       tangent_plane_sequence->convertGeodeticToLocal(geoFix, enuFix);
+       LOG4CPLUS_DEBUG(m_logger, routeData.m_name[i] << " LL:(" <<
+               Units::DegreesAngle(geoFix.latitude) << "," <<
+               Units::DegreesAngle(geoFix.longitude) << "), XY_file:(" <<
+               routeData.m_x[i] << "," <<
+               routeData.m_y[i] << "), XY_calc:(" <<
+               Units::MetersLength(enuFix.x) << "," <<
+               Units::MetersLength(enuFix.y) << ")");
+   }
 
    // Use the first line in the env file for initialization
    m_weather_truth->SetWeatherFromTime(Units::zero());
@@ -104,25 +126,28 @@ void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold
 
    // initialize eom dynamics
    const TrajectoryFromFile::VerticalData verticalTrajectoryFromFile = m_precalc_traj.GetVerticalData();
-   const Units::MetersLength finalAltitude = Units::MetersLength(verticalTrajectoryFromFile.m_altitude_meters[0]);
    Units::KnotsSpeed initial_tas = m_weather_truth->getAtmosphere()->CAS2TAS(m_initial_ias, m_initial_altitude);
 
-   m_dynamics.Initialize(m_precalc_traj.GetMassPercentile(),
-                         finalAltitude,
-                         initial_tas,
-                         tangent_plane_sequence, // only used for Wind
-                         initial_enu_position,
-                         initial_heading,
-                         *m_weather_truth);
+   m_bada_calculator = std::shared_ptr<aaesim::BadaPerformanceCalculator>(
+      aaesim::BadaPerformanceCalculator::MakeBadaPerformance(
+         m_ac_type,
+         m_precalc_traj.GetMassPercentile(),
+         Units::FeetLength(1000),
+         bada_utils::FlapConfiguration::CRUISE));
 
-   m_bada_calculator.getAircraftParameters(m_ac_type, m_precalc_traj.GetMassPercentile());
-   m_bada_calculator.setFlapSpeeds(m_ac_type);
+   m_dynamics.Initialize(m_bada_calculator,
+                         wpStart,
+                         tangent_plane_sequence,
+                         m_initial_altitude,
+                         initial_tas,
+                         initial_heading,
+                         m_precalc_traj.GetMassPercentile(),
+                         *m_weather_truth,
+                         m_ac_type);
 
    static const Units::DegreesAngle max_bank_angle(30);
    m_aircraft_control->Initialize(m_bada_calculator,
-                                  finalAltitude,
-                                  max_bank_angle,
-                                  m_precalc_traj.GetPrecalcWaypoint().back());
+                                  max_bank_angle);
 
    InitTruthStateVectorOld();
 }
@@ -130,7 +155,7 @@ void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold
 void TestFrameworkAircraft::InitTruthStateVectorOld() {
    m_truth_state_vector_old.m_id = m_id;
 
-   const AircraftIntent::RouteData &fms(m_aircraft_intent.GetFms());
+   const AircraftIntent::RouteData &fms(m_aircraft_intent.GetRouteData());
    m_truth_state_vector_old.m_x = Units::FeetLength(fms.m_x[0]).value();
    m_truth_state_vector_old.m_y = Units::FeetLength(fms.m_y[0]).value();
    m_truth_state_vector_old.m_z = m_initial_altitude.value();
@@ -142,8 +167,8 @@ void TestFrameworkAircraft::InitTruthStateVectorOld() {
    m_truth_state_vector_old.m_distance_to_go_meters = distance_to_go.value();
 
    // copy groundspeed components from ThreeDOFDynamics
-   m_truth_state_vector_old.m_xd = Units::FeetPerSecondSpeed(m_dynamics.m_dynamics_state.xd).value();
-   m_truth_state_vector_old.m_yd = Units::FeetPerSecondSpeed(m_dynamics.m_dynamics_state.yd).value();
+   m_truth_state_vector_old.m_xd = Units::FeetPerSecondSpeed(m_dynamics.GetDynamicsState().xd).value();
+   m_truth_state_vector_old.m_yd = Units::FeetPerSecondSpeed(m_dynamics.GetDynamicsState().yd).value();
    m_truth_state_vector_old.m_zd = 0.;
 
    pair<Units::Speed,Units::Speed> wind_components = m_dynamics.GetWindComponents();
@@ -190,7 +215,7 @@ bool TestFrameworkAircraft::Update(const SimulationTime &time) {
    }
 
    // run aircraft dynamics model to process the next state
-   AircraftState state_result = m_dynamics.Update(m_truth_state_vector_old, current_guidance, m_aircraft_control);
+   AircraftState state_result = m_dynamics.Update(current_guidance, m_aircraft_control);
    state_result.m_id = m_id;
    state_result.m_time = time.get_sim_cycle();
    Units::MetersLength distance_to_go;
@@ -273,5 +298,4 @@ void TestFrameworkAircraft::PostLoad(Units::Time simulation_time_step,
       m_precalc_traj.CalculateWaypoints(m_aircraft_intent);
    }
 
-   m_dynamics.SetBadaAcType(m_ac_type);
 }

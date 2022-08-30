@@ -1,26 +1,26 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WeatherPrediction.h"
 #include "public/StandardAtmosphere.h"
 
 const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG, MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
-
-log4cplus::Logger WeatherPrediction::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherPrediction"));
 
 WeatherPrediction::WeatherPrediction()
       : WeatherEstimate(),
@@ -42,15 +42,11 @@ WeatherPrediction::WeatherPrediction(PredictedWindOption option,
 WeatherPrediction::~WeatherPrediction() = default;
 
 const void WeatherPrediction::Dump() const {
-   LOG4CPLUS_DEBUG(m_logger, "m_predicted_wind_option: " << m_predicted_wind_option);
-   LOG4CPLUS_DEBUG(m_logger, "m_update_count: " << m_update_count );
-   LOG4CPLUS_DEBUG(m_logger, "m_temperature_checked: " << m_temperature_checked);
-   LOG4CPLUS_DEBUG(m_logger, "m_temperature_available: " << m_temperature_available);
-   LOG4CPLUS_DEBUG(m_logger, "altitude, eastvel, northvel");
    for (int iAlt = east_west.GetMinRow(); iAlt <= east_west.GetMaxRow(); iAlt++) {
-      LOG4CPLUS_DEBUG(m_logger, iAlt << ":  " <<
+      std::cout << iAlt << ":  " <<
                 east_west.GetAltitude(iAlt) << " " <<
                 east_west.GetSpeed(iAlt) << " " <<
-                north_south.GetSpeed(iAlt));
+                north_south.GetSpeed(iAlt) << std::endl;
    }
+   std::cout << std::endl;
 }

@@ -1,18 +1,20 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcWaypoint.h"
@@ -29,9 +31,9 @@ PrecalcWaypoint::PrecalcWaypoint() {
    m_rf_leg_center_y = Units::MetersLength(0);
    m_radius_rf_leg = Units::MetersLength(0);
 
-   m_precalc_constraints.constraint_dist = 0.0; // distance constraints
-   m_precalc_constraints.constraint_altHi = 0.0; // altitude max constraints
-   m_precalc_constraints.constraint_altLow = 0.0; // altitude min constraints
+   m_precalc_constraints.constraint_along_path_distance = Units::MetersLength(0.0); // distance constraints
+   m_precalc_constraints.constraint_altHi = Units::MetersLength(0.0); // altitude max constraints
+   m_precalc_constraints.constraint_altLow = Units::MetersLength(0.0); // altitude min constraints
 
    m_bank_angle = Units::RadiansAngle(0);
    m_ground_speed = Units::MetersPerSecondSpeed(0.0);
@@ -71,23 +73,26 @@ bool PrecalcWaypoint::load(DecodedStream *input) {
    }
    m_course_angle = course_angle1;
 
-   f = load_datum(m_precalc_constraints.constraint_dist);
+   Units::NauticalMilesLength path_distance;
+   f = load_datum(path_distance);
    if (!f) {
       LoggingLoadable::report_error("could not load distance constraint");
    }
-   m_precalc_constraints.constraint_dist *= NAUTICAL_MILES_TO_METERS;
+   m_precalc_constraints.constraint_along_path_distance = path_distance;
 
-   f = load_datum(m_precalc_constraints.constraint_altHi);
+   Units::FeetLength in_altitude_high;
+   f = load_datum(in_altitude_high);
    if (!f) {
       LoggingLoadable::report_error("could not load max altitude constraint");
    }
-   m_precalc_constraints.constraint_altHi *= FEET_TO_METERS;
+   m_precalc_constraints.constraint_altHi = in_altitude_high;
 
-   f = load_datum(m_precalc_constraints.constraint_altLow);
+   Units::FeetLength in_altitude_low;
+   f = load_datum(in_altitude_low);
    if (!f) {
       LoggingLoadable::report_error("could not load min altitude constraint");
    }
-   m_precalc_constraints.constraint_altLow *= FEET_TO_METERS;
+   m_precalc_constraints.constraint_altLow = in_altitude_low;
 
    m_loaded = true;
 

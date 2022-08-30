@@ -8,7 +8,6 @@ SET(BUILD_SHARED_LIBS false)
 # Create some common paths
 SET(LOADER_DIR ./Loader)
 SET(UTILITY_DIR ./Utility)
-SET(UNITSLIB_DIR ./unitsLib)
 SET(MATH_DIR ./Math/)
 SET(CORE_DIR ./Core)
 SET(IM_DIR ./IntervalManagement)
@@ -26,7 +25,6 @@ set (CAASD_WIND_LIBS
 
 # Add subdirectories that will become libraries
 add_subdirectory(${LOADER_DIR}) # this will also build the utility library
-add_subdirectory(${UNITSLIB_DIR})
 # add_subdirectory(${IM_DIR})
 add_subdirectory(${UTILITY_DIR})
 
@@ -106,6 +104,8 @@ set(CORE_SRC
         ${CORE_DIR}/BadaWithCalc.h
         ${CORE_DIR}/CalcWindGradControl.cpp
         ${CORE_DIR}/CalcWindGradControl.h
+        $(CORE_DIR)/ClimbPrecalcConstraint.cpp
+        $(CORE_DIR)/ClimbPrecalcConstraint.h
         ${CORE_DIR}/constants.cpp
         ${CORE_DIR}/constants.h
         ${CORE_DIR}/ClosestPointMetric.h
@@ -233,6 +233,28 @@ set(CORE_SRC
         ${CORE_DIR}/Waypoint.h
         ${CORE_DIR}/WeatherPrediction.cpp
         ${CORE_DIR}/WeatherPrediction.h
+        $(CORE_DIR)/Wgs84Climb4DPredictor.cpp
+        $(CORE_DIR)/Wgs84Climb4DPredictor.h
+        ${CORE_DIR}/Wgs84DiveDescent4DPredictor.h
+        ${CORE_DIR}/Wgs84DiveDescent4DPredictor.cpp
+        ${CORE_DIR}/Wgs84DriveDescent4DPredictor.h
+        ${CORE_DIR}/Wgs84DriveDescent4DPredictor.cpp
+        ${CORE_DIR}/Wgs84GeometricDescent4DPredictor.h
+        ${CORE_DIR}/Wgs84GeometricDescent4DPredictor.cpp
+        ${CORE_DIR}/Wgs84HorizontalPath.cpp
+        ${CORE_DIR}/Wgs84HorizontalPath.h
+        ${CORE_DIR}/Wgs84HorizontalPathTracker.cpp
+        ${CORE_DIR}/Wgs84HorizontalPathTracker.h
+        ${CORE_DIR}/Wgs84DirectionOfFlightCourseCalculator.cpp
+        ${CORE_DIR}/Wgs84DirectionOfFlightCourseCalculator.h
+        ${CORE_DIR}/Wgs84HorizontalTurnPath.cpp
+        ${CORE_DIR}/Wgs84HorizontalTurnPath.h
+        ${CORE_DIR}/Wgs84KineticDescent4DPredictor.cpp
+        ${CORE_DIR}/Wgs84KineticDescent4DPredictor.h
+        ${CORE_DIR}/Wgs84KineticTrajectoryPredictor.cpp
+        ${CORE_DIR}/Wgs84KineticTrajectoryPredictor.h
+        ${CORE_DIR}/Wgs84PrecalcWaypoint.cpp
+        ${CORE_DIR}/Wgs84PrecalcWaypoint.h
         ${CORE_DIR}/Wind.h
         ${CORE_DIR}/Wind.cpp
         ${CORE_DIR}/WindAltitudes.h
@@ -289,32 +311,6 @@ SET(GROUND_SRC
         ${GROUND_DIR}/TISBTransmitter.h
         )
 
-SET(PA_SRC
-        ${PA_DIR}/PAScenario.cpp
-        ${PA_DIR}/PAScenario.h
-        ${PA_DIR}/Paired_Approach_Aircraft_Trajectory.cpp
-        ${PA_DIR}/Paired_Approach_Aircraft_Trajectory.h
-        ${PA_DIR}/PA_Internal_Observer.cpp
-        ${PA_DIR}/PA_Internal_Observer.h
-        ${PA_DIR}/airport_class.cpp
-        ${PA_DIR}/airport_class.h
-        ${PA_DIR}/Aircraft_State_Vector.cpp
-        ${PA_DIR}/Aircraft_State_Vector.h
-        ${PA_DIR}/Paired_Approach_Application.cpp
-        ${PA_DIR}/Paired_Approach_Application.h
-        ${PA_DIR}/approach_record_class.cpp
-        ${PA_DIR}/approach_record_class.h
-        ${PA_DIR}/empirical_dist.cpp
-        ${PA_DIR}/empirical_dist.h
-        ${PA_DIR}/avutil.cpp
-        ${PA_DIR}/avutil.h
-        ${PA_DIR}/separation_standard.h
-        ${PA_DIR}/sim_defs.h
-        ${PA_DIR}/ads_types.h
-        ${PA_DIR}/ads_defs.h
-        ${PA_DIR}/asg.h
-        )
-
 set(SOURCE_FILES ${MATH_SRC} ${PA_SRC} ${CORE_SRC} ${GROUND_SRC} )
 
 # include folders
@@ -328,7 +324,5 @@ INCLUDE_DIRECTORIES(
         ${GROUND_DIR}/
         ${PA_DIR}/
         ${FRAMEWORK_DIR}/
-        ${UNITSLIB_DIR}/units-2.1/scalar/
-        ${UNITSLIB_DIR}/units-2.1/system/
         ${CAASD_WIND_DIR}/include/
 )

@@ -1,31 +1,39 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <stdexcept>
+#include <cfloat>
+#include <iomanip>
 
 #include "public/CoreUtils.h"
 #include "public/Scenario.h"
 #include "public/AircraftCalculations.h"
 #include "public/SimulationTime.h"
+#include "public/GeolibUtils.h"
+#include "public/LatitudeLongitudePoint.h"
 
 using namespace std;
 
 
 log4cplus::Logger CoreUtils::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CoreUtils"));
+const std::string CoreUtils::INTERMEDIATE_WAYPOINT_ROOT_NAME = "intermediate";
+Units::NauticalMilesLength CoreUtils::MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH(10);
 
 int CoreUtils::FindNearestIndex(const double &value_to_find,
                                 const vector<double> &vector_to_search) {
@@ -93,4 +101,65 @@ const double CoreUtils::LimitOnInterval(double value,
 
 const int CoreUtils::SignOfValue(double value) {
    return (((value) == (0)) ? 0 : (((value) > (0)) ? (1) : (-1)));
+}
+
+
+std::list<Waypoint> CoreUtils::ShortenLongLegs(const std::list<Waypoint> &ordered_waypoints, Units::Length maximum_allowable_length) {
+
+  using namespace geolib_idealab;
+  using namespace aaesim;
+
+  std::list<Waypoint> replacement_waypoints = {};
+  Waypoint previous_waypoint = (ordered_waypoints).front();
+  for (const Waypoint &next_waypoint : ordered_waypoints) {
+    if (previous_waypoint.GetName() != next_waypoint.GetName()) {
+      if (next_waypoint.GetRfTurnArcRadius() == Units::zero()) {
+        const LatitudeLongitudePoint point1 = LatitudeLongitudePoint::CreateFromWaypoint(previous_waypoint);
+        const LatitudeLongitudePoint point2 = LatitudeLongitudePoint::CreateFromWaypoint(next_waypoint);
+        const LineOnEllipsoid line_on_ellipsoid = LineOnEllipsoid::CreateFromPoints(point1, point2);
+
+        if (line_on_ellipsoid.GetShapeLength() > maximum_allowable_length) {
+          // calculate intermediate waypoints
+          auto intermediate_waypoints =
+              GetIntermediateWaypointsForLongLeg(line_on_ellipsoid, maximum_allowable_length);
+          replacement_waypoints.insert(replacement_waypoints.end(), intermediate_waypoints.begin(),
+                                       intermediate_waypoints.end());
+        }
+      }
+    }
+    replacement_waypoints.push_back(next_waypoint);
+    previous_waypoint = next_waypoint;
+  }
+
+  return std::list<Waypoint>(replacement_waypoints);
+}
+
+std::list<Waypoint> CoreUtils::GetIntermediateWaypointsForLongLeg(const aaesim::LineOnEllipsoid &line_on_ellipsoid,
+                                                                  Units::Length maximum_allowable_single_leg_distance) {
+
+  using namespace geolib_idealab;
+  using namespace aaesim;
+
+  Units::NauticalMilesLength distance_to_end_point(line_on_ellipsoid.GetShapeLength());
+
+  std::list<Waypoint> intermediate_waypoints;
+  int loop_counter = 1;
+  static const Units::NauticalMilesLength five_nm(5);
+//  static const Units::NauticalMilesLength two_nm(2);
+  while (distance_to_end_point > maximum_allowable_single_leg_distance) {
+    LatitudeLongitudePoint new_intermediate_point_on_line = line_on_ellipsoid.CalculatePointAtDistanceFromStartPoint(maximum_allowable_single_leg_distance*static_cast<float>(loop_counter));
+    Waypoint new_waypoint(INTERMEDIATE_WAYPOINT_ROOT_NAME + std::to_string(loop_counter), new_intermediate_point_on_line.GetLatitude(), new_intermediate_point_on_line.GetLongitude());
+    distance_to_end_point = line_on_ellipsoid.GetDistanceToEndPoint(new_intermediate_point_on_line);
+    if (distance_to_end_point < five_nm) {
+    //if (distance_to_end_point < two_nm) {
+      // too close to the end point. exit loop
+      break;
+    } else {
+      intermediate_waypoints.push_back(new_waypoint);
+      loop_counter++;
+    }
+  }
+
+
+  return intermediate_waypoints;
 }

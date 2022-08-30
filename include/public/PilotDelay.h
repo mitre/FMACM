@@ -1,27 +1,29 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <map>
 #include "utility/Logging.h"
-#include <Length.h>
-#include <Time.h>
-#include <Speed.h>
+#include <scalar/Length.h>
+#include <scalar/Time.h>
+#include <scalar/Speed.h>
 #include "public/Atmosphere.h"
 
 
@@ -39,8 +41,8 @@ public:
 
    void IterationReset();
 
-   Units::Speed UpdateIAS(Units::Speed previous_im_speed_command_as_ias,
-                          Units::Speed im_speed_command_as_ias,
+   Units::Speed UpdateIAS(Units::Speed previous_im_speed_command_ias,
+                          Units::Speed input_im_speed_command_ias,
                           Units::Length current_altitude,
                           Units::Length altitude_at_end_of_route);
 
@@ -79,8 +81,6 @@ private:
 
    double m_guidance_mach;
    bool m_pilot_delay_is_on;
-
-   Units::Speed m_current_speed_command_mach_as_ias, m_next_speed_command_mach_as_ias;
 
    // for statistical output
    int m_delay_count;

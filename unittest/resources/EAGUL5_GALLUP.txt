@@ -1,9 +1,7 @@
-number_of_waypoints 13
-MachTransitionCas 270
-plannedCruiseMach 0.78
-plannedCruiseAltitude 35000
+planned_cruise_mach 0.78
+planned_cruise_altitude 35000
 
-waypoints
+descent_waypoints
 {
     GALLUP  35.53827    -108.8522   35000   0   270 0.78    0   50000   0   1000    0 0 0 0
     KIRKM   34.8360333  -109.6939222    35000   0   270 0.78    0   50000   0   1000    0 0 0 0

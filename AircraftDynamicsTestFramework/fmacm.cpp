@@ -1,22 +1,30 @@
 // ****************************************************************************
 // NOTICE
 //
-// This is the copyright work of The MITRE Corporation, and was produced
-// for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-// is subject to Federal Aviation Administration Acquisition Management
-// System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-// (Oct. 1996).  No other use other than that granted to the U. S.
-// Government, or to those acting on behalf of the U. S. Government,
-// under that Clause is authorized without the express written
-// permission of The MITRE Corporation. For further information, please
-// contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-// McLean, VA  22102-7539, (703) 983-6000. 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
+// and is subject to Federal Aviation Administration Acquisition Management System 
+// Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// Copyright 2020 The MITRE Corporation. All Rights Reserved.
+// The contents of this document reflect the views of the author and The MITRE 
+// Corporation and do not necessarily reflect the views of the Federal Aviation 
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// the content or accuracy of these views.
+//
+// For further information, please contact The MITRE Corporation, Contracts Management 
+// Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
+//
+// 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/version.h"
-#include "public/cppmanifest.h"
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <string>
+#include <unistd.h>
+#include "cppmanifest/version.h"
+#include "cppmanifest/cppmanifest.h"
 #include "public/RunFile.h"
 #include "public/InternalObserver.h"
 #include "public/Scenario.h"
@@ -24,12 +32,6 @@
 #include "loader/RunFileArchiveDirector.h"
 #include "loader/Loadable.h"
 #include "utility/Logging.h"
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-#include <string>
-#include <unistd.h>
 
 #ifndef _LINUX_
 #include <direct.h>
@@ -49,39 +51,23 @@ void process_scenarios(RunFile &run_file);
 void process_overall_output(InternalObserver &internal_observer);
 
 static log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
-const std::string versionFlag("--version");
-const std::string buildinfoFlag("--buildinfo");
+const std::string VERSION_FLAG("--version");
 
 int main(int argc,
          char *argv[]) {
    InitializeLogging();
-   string version = "aaesim version " + aaesim::getVersion();
-   LOG4CPLUS_INFO(logger, "running " << version);
-   HTMLDump::SetSoftwareVersion(version);
+   LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::getVersion());
+   HTMLDump::SetSoftwareVersion(aaesim::cppmanifest::getVersion());
 
    // handle command line flag --version, --buildinfo
    if (argc == 2) {
       std::string arg1(argv[1]);
-      if (arg1 == versionFlag) {
-         cout << "aaesim version " << aaesim::getVersion() << endl;
+      if (arg1 == VERSION_FLAG) {
+         cout << "aaesim version " << aaesim::cppmanifest::getVersion() << endl;
          return 0; // nothing else to do
-      } else if (arg1 == buildinfoFlag) {
-         cout << "aaesim build info:" << endl;
-         cout << "Build version: " << aaesim::getVersion() << endl;
-         cout << "Created by: " << cppmanifest::getUserName() << endl;
-         cout << "Created date-time: " << cppmanifest::getBuildTimeStamp() << endl;
-         cout << "Built with GCC version: " << cppmanifest::getBuildCompilerVersion() << endl;
-         cout << "Built on system name: " << cppmanifest::getBuildSystemName() << endl;
-         cout << "Built on system processor: " << cppmanifest::getBuildSystemProcessor() << endl;
-         cout << "Built with system ver: " << cppmanifest::getBuildSystemVersion() << endl;
-         cout << "Built on system host name: " << cppmanifest::getBuildHostName() << endl;
-         cout << "Built from git branch: " << cppmanifest::getGitBranch() << endl;
-         if (cppmanifest::getGitIsClean()) {
-            cout << "Built from git hash: " << cppmanifest::getGitHash() << endl;
-         } else {
-            cout << "Built from git hash: " << cppmanifest::getGitHash() << "-DIRTY" << endl;
-         }
-
+      } else if (arg1 == aaesim::cppmanifest::BUILDINFO_CLI_FLAG) {
+         cout << "fmacm build info:" << endl;
+         aaesim::cppmanifest::printMetaData();
          return 0; // nothing else to do
       }
    }
@@ -170,7 +156,7 @@ void read_runfile(RunFile &run_file,
          newPair.first = scenarioFileName;
          newPair.second = std::shared_ptr<TestFrameworkScenario>(new TestFrameworkScenario);
 
-         run_file.scenariosToRun.push_back(newPair);
+         run_file.scenarios.push_back(newPair);
       }
       fclose(fp);
    }
@@ -184,7 +170,7 @@ void process_scenarios(RunFile &run_file) {
 
    //iterating through all the scenarios:
    vector<pair<string, std::shared_ptr<Scenario> > >::const_iterator citr;
-   for (citr = run_file.scenariosToRun.begin(); citr != run_file.scenariosToRun.end(); ++citr) {
+   for (citr = run_file.scenarios.begin(); citr != run_file.scenarios.end(); ++citr) {
       std::string sFileName = citr->first;
 
       DecodedStream stream;
@@ -228,6 +214,3 @@ void process_scenarios(RunFile &run_file) {
 }
 
 
-void process_overall_output(InternalObserver &internal_observer) {
-
-}

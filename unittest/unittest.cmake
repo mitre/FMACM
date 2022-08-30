@@ -9,11 +9,16 @@ include(${UNITTEST_DIR}/non_public.cmake OPTIONAL)
 SET(TEST_SOURCE
         ${NONPUBLIC_TEST_SOURCE}
         ${UNITTEST_DIR}/src/main.cpp
-        ${UNITTEST_DIR}/src/public_tests.cpp)
+        ${UNITTEST_DIR}/src/public_tests.cpp
+        ${UNITTEST_DIR}/src/aircraft_intent_tests.cpp)
 
 SET(FMACM_SOURCE
         ${UNITTEST_DIR}/src/main.cpp
         ${UNITTEST_DIR}/src/framework_tests.cpp)
+
+SET(IMALGO_SOURCE
+        ${UNITTEST_DIR}/src/main.cpp
+        ${UNITTEST_DIR}/src/imalgo_tests.cpp)
 
 # Build aaesim_test
 add_executable(aaesim_test ${TEST_SOURCE})
@@ -37,14 +42,26 @@ set_target_properties(fmacm_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
         EXCLUDE_FROM_ALL TRUE)
 
+# Build imalgorithm_test
+add_executable(imalgorithm_test ${IMALGO_SOURCE})
+target_link_libraries(imalgorithm_test
+        unittest
+        gtest
+        imalgs
+        )
+set_target_properties(imalgorithm_test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
+        EXCLUDE_FROM_ALL TRUE)
+
 # add a target for running the unit tests
 add_custom_target(run
-        DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test
+        DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test ${CMAKE_SOURCE_DIR}/unittest/bin/imalgorithm_test
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
         )
 add_dependencies(run
         test_aaesim
-        test_fmacm)
+        test_fmacm
+        test_imalgo)
 
 add_custom_target(test_aaesim
         ${CMAKE_SOURCE_DIR}/unittest/bin/aaesim_test --gtest_output=xml:aaesim_unit_test_results.xml
@@ -55,6 +72,12 @@ add_custom_target(test_aaesim
 add_custom_target(test_fmacm
         ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test --gtest_output=xml:fmacm_unit_test_results.xml
         DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
+        )
+
+add_custom_target(test_imalgo
+        ${CMAKE_SOURCE_DIR}/unittest/bin/imalgorithm_test --gtest_output=xml:imalgorithm_unit_test_results.xml
+        DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/imalgorithm_test
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
         )
 

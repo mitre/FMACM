@@ -67,8 +67,7 @@ void EuclideanThreeDofDynamics::Initialize(std::shared_ptr<const BadaPerformance
                                            Units::Speed initial_true_airspeed,
                                            Units::Angle initial_ground_course_enu,
                                            double initial_mass_fraction,
-                                           const WeatherTruth &true_weather,
-                                           const string &aircraft_type) {
+                                           const WeatherTruth &true_weather) {
    // Handle Euclidean initializations
    this->m_tangent_plane_sequence = std::move(tangent_plane_sequence);
    EarthModel::LocalPositionEnu initial_enu_position;
@@ -87,8 +86,7 @@ void EuclideanThreeDofDynamics::Initialize(std::shared_ptr<const BadaPerformance
                                 initial_true_airspeed,
                                 initial_ground_course_enu,
                                 initial_mass_fraction,
-                                true_weather,
-                                aircraft_type);
+                                true_weather);
 
 }
 

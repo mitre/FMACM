@@ -52,8 +52,8 @@ namespace aaesim {
                                         aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
                                         const WeatherTruth &weather) override;
 
-         double m_min_thrust_counter;
-         double m_speedbrake_counter;
+         unsigned int m_min_thrust_counter;
+         unsigned int m_speedbrake_counter;
          bool m_is_speedbrake_on;
       };
    }

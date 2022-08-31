@@ -17,6 +17,7 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <nlohmann/json.hpp>
 #include "public/CoreUtils.h"
 #include "public/AircraftControl.h"
 #include "public/Environment.h"
@@ -69,9 +70,6 @@ void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMo
                                                                        cd2,
                                                                        gear,
                                                                        new_flap_configuration);
-   LOG4CPLUS_TRACE(m_logger, "calibrated_airspeed," << Units::KnotsSpeed(calibrated_airspeed) << ","
-                             "equations_of_motion_state.altitude_msl," << Units::FeetLength(equations_of_motion_state.altitude_msl) << ","
-                             "new_flap_configuration," << GetFlapConfigurationAsString(new_flap_configuration));
 
    // Lift and Drag Estimate Calculations
    double cL =
@@ -83,8 +81,17 @@ void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMo
 
    drag = 1. / 2. * rho * cD * Units::sqr(equations_of_motion_state.true_airspeed) * m_wing_area;
    lift = 1. / 2. * rho * cL * Units::sqr(equations_of_motion_state.true_airspeed) * m_wing_area;
-   LOG4CPLUS_TRACE(m_logger, "drag_newtons," << Units::NewtonsForce(drag) << ","
-                             "lift_newtons," << Units::NewtonsForce (lift));
+
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      using json = nlohmann::json;
+      json j;
+      j["calibrated_airspeed_kts"] = Units::KnotsSpeed(calibrated_airspeed).value();
+      j["equations_of_motion_state.altitude_msl_ft"] = Units::FeetLength(equations_of_motion_state.altitude_msl).value();
+      j["new_flap_configuration"] = GetFlapConfigurationAsString(new_flap_configuration);
+      j["drag_newtons"] = Units::NewtonsForce(drag).value();
+      j["lift_newtons"] = Units::NewtonsForce(lift).value();
+      LOG4CPLUS_TRACE(m_logger, j.dump());
+   }
 }
 
 /**
@@ -159,9 +166,14 @@ Units::Angle AircraftControl::DoLateralControl(const Guidance &guidance,
       roll_angle_command = m_max_bank_angle * sign_roll_command;
    }
 
-   LOG4CPLUS_TRACE(m_logger, "cross_track_error_ft," << Units::FeetLength(e_xtrk) << ","
-                             "track_angle_error_deg," << Units::DegreesAngle(e_trk) << ","
-                             "roll_command_deg," << Units::DegreesAngle(roll_angle_command));
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      using json = nlohmann::json;
+      json j;
+      j["cross_track_error_ft"] = Units::FeetLength(e_xtrk).value();
+      j["track_angle_error_deg"] = Units::DegreesAngle(e_trk).value();
+      j["roll_command_deg"] = Units::DegreesAngle(roll_angle_command).value();
+      LOG4CPLUS_TRACE(m_logger, j.dump());
+   }
 
    return roll_angle_command;
 }
@@ -269,14 +281,19 @@ void AircraftControl::DoClimbingControl(const Guidance &guidance,
    Units::Force min_thrust = Units::NewtonsForce(
       m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::DESCENT, Units::ZERO_CELSIUS));
 
-   LOG4CPLUS_TRACE(m_logger, "altitude_error," << Units::FeetLength(error_alt) << "," <<
-                             "thrust_command," << Units::NewtonsForce(thrust_command) << "," <<
-                             "dynamics_thrust," << Units::NewtonsForce(equations_of_motion_state.thrust) << "," <<
-                             "max_thrust," << Units::NewtonsForce(max_thrust) << "," <<
-                             "min_thrust," << Units::NewtonsForce(min_thrust) << "," <<
-                             "new_flap_configuration," << bada_utils::GetFlapConfigurationAsString(new_flap_configuration) << "," <<
-                             "true_airspeed_error," << Units::KnotsSpeed(error_tas) << "," <<
-                             "true_airspeed_command," << Units::KnotsSpeed(tas_command) << "," <<
-                             "gamma_command," << Units::DegreesAngle(gamma_command) );
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      using json = nlohmann::json;
+      json j;
+      j["altitude_error"] = Units::FeetLength(error_alt).value();
+      j["thrust_command"] = Units::NewtonsForce(thrust_command).value();
+      j["dynamics_thrust"] = Units::NewtonsForce(equations_of_motion_state.thrust).value();
+      j["max_thrust"] = Units::NewtonsForce(max_thrust).value();
+      j["min_thrust"] = Units::NewtonsForce(min_thrust).value();
+      j["new_flap_configuration"] = bada_utils::GetFlapConfigurationAsString(new_flap_configuration);
+      j["true_airspeed_error"] = Units::KnotsSpeed(error_tas).value();
+      j["true_airspeed_command"] = Units::KnotsSpeed(tas_command).value();
+      j["gamma_command"] = Units::DegreesAngle(gamma_command).value();
+      LOG4CPLUS_TRACE(m_logger, j.dump());
+   }
 }
 

@@ -18,8 +18,6 @@
 // ****************************************************************************
 
 #include "aaesim/BadaPerformanceCalculator.h"
-#include "public/AircraftCalculations.h"
-#include <cstdlib>
 
 using namespace aaesim;
 
@@ -95,7 +93,7 @@ Units::NewtonsForce BadaPerformanceCalculator::GetMaxThrust(const Units::Length 
 
 BadaPerformanceCalculator* BadaPerformanceCalculator::MakeBadaPerformance(
    std::string aircraft_type, /** Aircraft type */
-   double mass_percentile, /** Mass percentile: 0.0=mass.m_min, 1.0=mass.m_max */
+   BoundedValue<double,0,1> mass_percentile, /** Mass percentile: 0.0=mass.m_min, 1.0=mass.m_max */
    Units::Length faf_altitude_msl, /** Used to ensure flaps don't deploy too early */
    open_source::bada_utils::FlapConfiguration initial_flap_configuration /** Initialize flaps configuration */) {
    std::cout << "BadaPerformanceCalculator.cpp: Implement me!" << std::endl;

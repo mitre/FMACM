@@ -127,11 +127,11 @@ void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold
    // initialize eom dynamics
    const TrajectoryFromFile::VerticalData verticalTrajectoryFromFile = m_precalc_traj.GetVerticalData();
    Units::KnotsSpeed initial_tas = m_weather_truth->getAtmosphere()->CAS2TAS(m_initial_ias, m_initial_altitude);
-
+   const BoundedValue<double,0,1> mass_fraction(m_precalc_traj.GetMassPercentile());
    m_bada_calculator = std::shared_ptr<aaesim::BadaPerformanceCalculator>(
       aaesim::BadaPerformanceCalculator::MakeBadaPerformance(
          m_ac_type,
-         m_precalc_traj.GetMassPercentile(),
+         mass_fraction,
          Units::FeetLength(1000),
          bada_utils::FlapConfiguration::CRUISE));
 
@@ -142,8 +142,7 @@ void TestFrameworkAircraft::Initialize(Units::Length adsbReceptionRangeThreshold
                          initial_tas,
                          initial_heading,
                          m_precalc_traj.GetMassPercentile(),
-                         *m_weather_truth,
-                         m_ac_type);
+                         *m_weather_truth);
 
    static const Units::DegreesAngle max_bank_angle(30);
    m_aircraft_control->Initialize(m_bada_calculator,

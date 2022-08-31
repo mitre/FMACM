@@ -378,6 +378,46 @@ namespace aaesim
             AircraftIntent aircraft_intent;
             EXPECT_ANY_THROW(aircraft_intent.load(&stream));
          }
+
+         TEST(AircraftIntent, test_consistency_long_route)
+         {
+            SingleTangentPlaneSequence::clearStaticMembers();
+            CoreUtils::ResetMaximumAllowableSingleLegLength();
+
+            std::string test_file = "./resources/long_distance_route.txt";
+            FILE *fp;
+            fp = fopen(test_file.c_str(), "r");
+            if (fp == NULL)
+            {
+               std::cout << "Test resource file " << test_file << " not found." << std::endl;
+               FAIL();
+            }
+
+            DecodedStream stream;
+            bool r = stream.open_file(test_file);
+            if (!r)
+            {
+               std::cout << "Test resource file " << test_file << " could not be loaded." << std::endl;
+               FAIL();
+            }
+            stream.set_echo(false);
+
+            AircraftIntent aircraft_intent;
+            aircraft_intent.load(&stream);
+
+            for (Waypoint wp : aircraft_intent.GetWaypointList())
+            {
+               EarthModel::LocalPositionEnu enu_position;
+               EarthModel::GeodeticPosition geodetic_position;
+               aircraft_intent.GetTangentPlaneSequence()->convertGeodeticToLocal(EarthModel::GeodeticPosition::CreateFromWaypoint(wp), enu_position);
+               aircraft_intent.GetTangentPlaneSequence()->convertLocalToGeodetic(enu_position, geodetic_position);
+               std::cout << wp.GetName() << std::endl;
+               EXPECT_NEAR(Units::RadiansAngle(geodetic_position.latitude).value(), Units::RadiansAngle(wp.GetLatitude()).value(), 1e-5);
+               EXPECT_NEAR(Units::RadiansAngle(geodetic_position.longitude).value(), Units::RadiansAngle(wp.GetLongitude()).value(), 1e-5);
+            }
+
+         }
+
       }
    }
 }

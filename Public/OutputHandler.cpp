@@ -17,41 +17,11 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#pragma once
+#include "public/OutputHandler.h"
 
-#include "loader/Loadable.h"
-#include "utility/Logging.h"
+OutputHandler::OutputHandler(const std::string &scenario_name,
+                             const std::string &file_extension) {
+   filename.assign(scenario_name + file_extension);
+}
 
-
-class LoggingLoadable : public Loadable
-{
-public:
-   LoggingLoadable();
-
-   LoggingLoadable(const LoggingLoadable &in);
-
-   virtual ~LoggingLoadable();
-
-   virtual void operator=(const LoggingLoadable &in);
-
-
-   /**
-    * Call this after you finish registering things at it will load all the things it could and return false if it fails
-    *
-    * @return
-    * @see loaded_successfully()
-    */
-   virtual bool complete() override;
-
-   virtual void report_error(std::string error_message) override;
-
-   virtual void report_warning(std::string warning_message) override;
-
-protected:
-
-   virtual bool test_load() override;
-
-
-private:
-   static log4cplus::Logger m_logger;
-};
+OutputHandler::~OutputHandler() = default;

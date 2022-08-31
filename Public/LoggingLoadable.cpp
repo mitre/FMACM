@@ -99,12 +99,14 @@ bool LoggingLoadable::complete() {
             was_load_successful = test_load();
             cleanup();
             return was_load_successful;
-         } else {
-            // Create warning statement since the token was not expected.
-            warning_message = "\nThe unexpected tag \"" + token +
-                              "\" appeared in the run file. \nThis tag was not registered in the load function; it will be ignored.";
-            stream->report_warning(warning_message + "\n");
-            LOG4CPLUS_WARN(m_logger, warning_message);
+         } else { 
+            if (token.size() > 1) {
+               // Create warning statement since the token was not expected.
+               warning_message = "\nThe unexpected tag \"" + token +
+                                 "\" appeared in the run file. \nThis tag was not registered in the load function; it will be ignored.";
+               stream->report_warning(warning_message + "\n");
+               LOG4CPLUS_INFO(m_logger, warning_message);
+            }
             stream->get_next(); // skip over the next token also, assuming it is a value associated with the unknown tag
             continue;
          }
@@ -129,7 +131,7 @@ bool LoggingLoadable::complete() {
          }
 
          stream->report_warning(warning_message);
-         LOG4CPLUS_WARN(m_logger, warning_message);
+         LOG4CPLUS_INFO(m_logger, warning_message);
       }
 
 

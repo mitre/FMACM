@@ -96,9 +96,9 @@ void TangentPlaneSequence::convertLocalToGeodetic(
       EarthModel::LocalPositionEnu localPosition,
       EarthModel::GeodeticPosition &geoPosition) const {
 
-   // For the current localPostion, find the closest waypoint in the initialization information
+   // For the current localPosition, find the closest waypoint in the initialization information
    int ix = -1;
-   Units::Area minD2 = Units::KilometersArea(1e12);   // just a big number that should not be found on the earth
+   Units::Area minD2 = Units::KilometersArea(Units::infinity());
    for (unsigned int ind2 = 0; ind2 < tangentPlanesFromInitialization.size(); ind2++) {
       const EarthModel::LocalPositionEnu &pointOfTangency = tangentPlanesFromInitialization[ind2]->getPointOfTangencyEnu();
       Units::Length x = localPosition.x - pointOfTangency.x;
@@ -125,7 +125,7 @@ void TangentPlaneSequence::convertGeodeticToLocal(
    Environment::getInstance()->getEarthModel()->ConvertGeodeticToAbsolute(geoPosition, ecefPosition);
    int ix = -1;
    // find the closest waypoint
-   Units::Area minD2 = Units::KilometersArea(1e12);   // just a big number that should not be found on the earth
+   Units::Area minD2 = Units::KilometersArea(Units::infinity());
    for (unsigned int ind2 = 0; ind2 < tangentPlanesFromInitialization.size(); ind2++) {
       const EarthModel::AbsolutePositionEcef &pointOfTangency = tangentPlanesFromInitialization[ind2]->getPointOfTangencyEcef();
       Units::Length x = ecefPosition.x - pointOfTangency.x;

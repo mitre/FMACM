@@ -24,6 +24,7 @@
 #include "Bada.h"
 #include "public/BadaUtils.h"
 #include "utility/Logging.h"
+#include "utility/BoundedValue.h"
 
 namespace aaesim {
    class BadaPerformanceCalculator : public Bada {
@@ -102,18 +103,21 @@ namespace aaesim {
 
       bool IsFlapProgressionReversed();
 
+      void UpdateMassFraction(BoundedValue<double,0,1> mass_fraction);
+
       static void SetBadaDataPath(std::string path_to_data);
 
       static BadaPerformanceCalculator* MakeBadaPerformance(
          std::string aircraft_type, /** Aircraft type */
-         double mass_percentile, /** Mass percentile: 0.0=mass.m_min, 1.0=mass.m_max */
+         BoundedValue<double,0,1> mass_percentile, /** Mass percentile: 0.0=mass.m_min, 1.0=mass.m_max */
          Units::Length faf_altitude_msl, /** Used to ensure flaps don't deploy too early */
          open_source::bada_utils::FlapConfiguration initial_flap_configuration /** Initialize flaps configuration */);
+
     private:
       static log4cplus::Logger m_logger;
 
       BadaPerformanceCalculator(const Bada* bada,
-                                double mass_percentile,
+                                BoundedValue<double,0,1> mass_percentile,
                                 Units::Length faf_altitude_msl,
                                 open_source::bada_utils::FlapConfiguration initial_flap_configuration,
                                 bool perform_reverse_flap_progression);
@@ -244,5 +248,10 @@ namespace aaesim {
           }
       } // end while (advanced)
       return current_flap_configuration;
+   }
+
+   inline void BadaPerformanceCalculator::UpdateMassFraction(BoundedValue<double,0,1> mass_fraction) {
+      m_mass_percentile = mass_fraction;
+      m_aircraft_mass = (m_mass.m_max - m_mass.m_min) * m_mass_percentile + m_mass.m_min;
    }
 }

@@ -38,8 +38,7 @@ namespace aaesim {
                          Units::Speed initial_true_airspeed,
                          Units::Angle initial_ground_course_enu,
                          double initial_mass_fraction,
-                         const WeatherTruth &true_weather,
-                         const std::string &aircraft_type) override;
+                         const WeatherTruth &true_weather) override;
        protected:
          void CalculateEnvironmentalWind(WindStack &wind_east,
                                          WindStack &wind_north,

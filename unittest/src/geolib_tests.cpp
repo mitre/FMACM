@@ -17,14 +17,14 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/ArcOnEllipsoid.h>
-#include <public/EarthModel.h>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include "public/ArcOnEllipsoid.h"
+#include "public/EarthModel.h"
 #include "public/LatitudeLongitudePoint.h"
 #include "geolib/Geolib.h"
 #include "public/LineOnEllipsoid.h"
 #include "public/GeolibUtils.h"
-#include "aaesim/minicsv.h"
+#include "public/minicsv.h"
 
 using namespace geolib_idealab;
 using namespace aaesim;

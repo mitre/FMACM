@@ -17,6 +17,7 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <nlohmann/json.hpp>
 #include "public/SpeedOnPitchControl.h"
 #include "public/AircraftCalculations.h"
 
@@ -215,15 +216,20 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
       }
    }
 
-   LOG4CPLUS_TRACE(m_logger, "altitude_error," << Units::FeetLength(error_alt) << "," <<
-                             "is_level_flight," << m_is_level_flight << "," <<
-                             "thrust_command," << Units::NewtonsForce(thrust_command) << "," <<
-                             "dynamics_thrust," << Units::NewtonsForce(equations_of_motion_state.thrust) << "," <<
-                             "max_thrust," << Units::NewtonsForce(max_thrust) << "," <<
-                             "min_thrust," << Units::NewtonsForce(min_thrust) << "," <<
-                             "true_airspeed_error," << Units::KnotsSpeed(error_tas) << "," <<
-                             "speed_brake_command," << speed_brake_command << "," <<
-                             "new_flap_configuration," << bada_utils::GetFlapConfigurationAsString(new_flap_configuration) << "," <<
-                             "gamma_command," << Units::DegreesAngle(gamma_command) );
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      using json = nlohmann::json;
+      json j;
+      j["altitude_error_ft"] = Units::FeetLength(error_alt).value();
+      j["is_level_flight_bool"] = m_is_level_flight;
+      j["thrust_command_newtons"] = Units::NewtonsForce(thrust_command).value();
+      j["dynamics_thrust_newtons"] = Units::NewtonsForce(equations_of_motion_state.thrust).value();
+      j["max_thrust_newtons"] = Units::NewtonsForce(max_thrust).value();
+      j["min_thrust_newtons"] = Units::NewtonsForce(min_thrust).value();
+      j["true_airspeed_error_knots"] = Units::KnotsSpeed(error_tas).value();
+      j["speed_brake_command"] = speed_brake_command;
+      j["new_flap_configuration"] = bada_utils::GetFlapConfigurationAsString(new_flap_configuration);
+      j["gamma_command_deg"] = Units::DegreesAngle(gamma_command).value();
+      LOG4CPLUS_TRACE(m_logger, j.dump());
+   }
 
 }

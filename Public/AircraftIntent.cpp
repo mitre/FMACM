@@ -623,17 +623,17 @@ Units::MetersLength AircraftIntent::GetWaypointY(unsigned int i) const {
 }
 std::list<Waypoint> AircraftIntent::RemoveZeroLengthLegs(const std::list<Waypoint> &waypoints) {
    std::list<Waypoint> resolved_waypoints;
-   for (auto i = waypoints.begin(); i != waypoints.end(); ++i) {
-      const auto lat1 = i->GetLatitude();
-      const auto lon1 = i->GetLongitude();
-      const auto lat2 = std::next(i)->GetLatitude();
-      const auto lon2 = std::next(i)->GetLongitude();
-      const auto lat_diff = lat1-lat2;
-      const auto lon_diff = lon1-lon2;
+   for (auto wpt_itr = waypoints.begin(); wpt_itr != waypoints.end(); ++wpt_itr) {
+      const auto lat1 = wpt_itr->GetLatitude();
+      const auto lon1 = wpt_itr->GetLongitude();
+      const auto lat2 = std::next(wpt_itr)->GetLatitude();
+      const auto lon2 = std::next(wpt_itr)->GetLongitude();
+      const auto lat_diff = Units::abs(lat1-lat2);
+      const auto lon_diff = Units::abs(lon1-lon2);
       const auto tolerance = Units::DegreesAngle(1e-5);
       const bool skip_waypoint = lat_diff < tolerance && lon_diff < tolerance;
       if (!skip_waypoint)
-         resolved_waypoints.push_back(*i);
+         resolved_waypoints.push_back(*wpt_itr);
    }
    return resolved_waypoints;
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 4.0.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 4.1.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -40,13 +40,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     APPEND_COVERAGE_COMPILER_FLAGS()
 endif()
 
-# --- unitslib library ---
 CPMAddPackage(
-        NAME unitslib
-        GIT_REPOSITORY https://mustache.mitre.org/scm/uom/cpp-uom.git
-        GIT_TAG v2.1
+    NAME unitslib
+    GIT_REPOSITORY https://mustache.mitre.org/scm/uom/cpp-uom.git
+    GIT_TAG v2.1
 )
-# --- end unitslib library ---
 
 # Create some common paths
 if (unitslib_ADDED)

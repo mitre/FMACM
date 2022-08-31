@@ -17,6 +17,7 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <nlohmann/json.hpp>
 #include "public/SpeedOnThrustControl.h"
 #include "public/Environment.h"
 
@@ -74,12 +75,10 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
 
    // Speed Control
    tas_command = weather.CAS2TAS(guidance.m_ias_command, equations_of_motion_state.altitude_msl);
-   Units::Speed calibrated_airspeed = weather.getAtmosphere()->TAS2CAS(equations_of_motion_state.true_airspeed,
-                                                                       equations_of_motion_state.altitude_msl);
 
    // Speed Error
-   Units::Speed error_tas = tas_command - equations_of_motion_state.true_airspeed;
-   Units::Acceleration vel_dot_com = m_gain_velocity * error_tas;
+   const Units::Speed error_tas = tas_command - equations_of_motion_state.true_airspeed;
+   const Units::Acceleration vel_dot_com = m_gain_velocity * error_tas;
 
    // Estimate kinetic forces for this state
    Units::Force lift, drag;
@@ -87,53 +86,55 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
 
    // Thrust to maintain speed
    // Nominal Thrust (no acceleration) at desired speed
-   Units::Force thrust_nominal;
-   thrust_nominal = m_ac_mass * vel_dot_com
+   const Units::Force thrust_equilibrium = m_ac_mass * vel_dot_com
           + drag - m_ac_mass * Units::ONE_G_ACCELERATION * sin(equations_of_motion_state.gamma)
           - m_ac_mass * equations_of_motion_state.true_airspeed
             * (m_dVwx_dh * cos(equations_of_motion_state.psi_enu) + m_dVwy_dh * sin(equations_of_motion_state.psi_enu))
             * sin(equations_of_motion_state.gamma) * cos(equations_of_motion_state.gamma);
 
-   thrust_command = thrust_nominal;
-
    // Thrust Limits
-   Units::Force max_thrust = Units::NewtonsForce(
+   const Units::Force max_thrust = Units::NewtonsForce(
       m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CRUISE, Units::ZERO_CELSIUS));
-   Units::Force min_thrust = Units::NewtonsForce(
+   const Units::Force min_thrust = Units::NewtonsForce(
       m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::DESCENT, Units::ZERO_CELSIUS));
 
-   // Check Configuration if min_thrust is Commanded
-   if (thrust_command < min_thrust) {
+   // Check Configuration if min_thrust is commanded
+   thrust_command = thrust_equilibrium;
+   if (thrust_equilibrium < min_thrust) {
 
       thrust_command = min_thrust;
 
+      const Units::Speed calibrated_airspeed = weather.getAtmosphere()->TAS2CAS(equations_of_motion_state.true_airspeed,
+                                                                        equations_of_motion_state.altitude_msl);
+
       aaesim::open_source::bada_utils::FlapConfiguration updated_flap_configuration = aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED;
       m_bada_calculator->GetConfigurationForIncreasedDrag(calibrated_airspeed,
-                                                          Units::MetersLength(equations_of_motion_state.altitude_msl),
+                                                          equations_of_motion_state.altitude_msl,
                                                           updated_flap_configuration);
 
       new_flap_configuration = updated_flap_configuration;
 
-      m_min_thrust_counter = m_min_thrust_counter + 1;
+      m_min_thrust_counter++;
 
    } else {
-      m_min_thrust_counter = 0.0;
+      m_min_thrust_counter = 0;
 
       // Limit Thrust if thrust_command exceeds Max Thrust
-      if (thrust_command > max_thrust) {
+      if (thrust_equilibrium > max_thrust) {
          thrust_command = max_thrust;
       }
    }
 
    // Use speed brakes, if necessary
-   if (m_min_thrust_counter > 15.0 && error_tas < Units::KnotsSpeed(-5.0)) {
+   static const Units::KnotsSpeed tas_error_tolerance(-5);
+   if (m_min_thrust_counter > 15 && error_tas < tas_error_tolerance) {
       if (new_flap_configuration <= aaesim::open_source::bada_utils::FlapConfiguration::LANDING) {
          if (!m_is_speedbrake_on) {
-            m_speedbrake_counter = 0.0;
+            m_speedbrake_counter = 0;
             speed_brake_command = 0.5;
             m_is_speedbrake_on = true;
          } else {
-            m_speedbrake_counter = m_speedbrake_counter + 1;
+            m_speedbrake_counter++;
             speed_brake_command = 0.5;
          }
       } else {
@@ -144,30 +145,36 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
    }
 
    // If no longer commanding Min Thrust
-   if (m_is_speedbrake_on && m_speedbrake_counter <= 30.0) {
-      m_speedbrake_counter = m_speedbrake_counter + 1;
+   if (m_is_speedbrake_on && m_speedbrake_counter <= 30) {
+      m_speedbrake_counter++;
       speed_brake_command = 0.5;
-   } else if (m_is_speedbrake_on && m_speedbrake_counter > 30.0) {
+   } else if (m_is_speedbrake_on && m_speedbrake_counter > 30) {
       if (m_min_thrust_counter == 0) {
-         m_speedbrake_counter = 0.0;
+         m_speedbrake_counter = 0;
          speed_brake_command = 0.0;
          m_is_speedbrake_on = false;
       } else {
-         m_speedbrake_counter = m_speedbrake_counter + 1;
+         m_speedbrake_counter++;
          speed_brake_command = 0.5;
       }
    }
 
-   LOG4CPLUS_TRACE(m_logger, "altitude_error," << Units::FeetLength(error_alt) << "," <<
-                             "is_level_flight," << m_is_level_flight << "," <<
-                             "thrust_command," << Units::NewtonsForce(thrust_command) << "," <<
-                             "dynamics_thrust," << Units::NewtonsForce(equations_of_motion_state.thrust) << "," <<
-                             "max_thrust," << Units::NewtonsForce(max_thrust) << "," <<
-                             "min_thrust," << Units::NewtonsForce(min_thrust) << "," <<
-                             "speed_brake_command," << speed_brake_command << "," <<
-                             "new_flap_configuration," << bada_utils::GetFlapConfigurationAsString(new_flap_configuration) << "," <<
-                             "true_airspeed_error," << Units::KnotsSpeed(error_tas) << "," <<
-                             "true_airspeed_command," << Units::KnotsSpeed(tas_command) << "," <<
-                             "gamma_command," << Units::DegreesAngle(gamma_command) );
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      using json = nlohmann::json;
+      json j;
+      j["altitude_error_ft"] = Units::FeetLength(error_alt).value();
+      j["is_level_flight_bool"] = m_is_level_flight;
+      j["thrust_equilibrium_newtons"] = Units::NewtonsForce(thrust_equilibrium).value();
+      j["thrust_command_newtons"] = Units::NewtonsForce(thrust_command).value();
+      j["dynamics_thrust_newtons"] = Units::NewtonsForce(equations_of_motion_state.thrust).value();
+      j["max_thrust_newtons"] = Units::NewtonsForce(max_thrust).value();
+      j["min_thrust_newtons"] = Units::NewtonsForce(min_thrust).value();
+      j["speed_brake_command"] = speed_brake_command;
+      j["new_flap_configuration"] = bada_utils::GetFlapConfigurationAsString(new_flap_configuration);
+      j["true_airspeed_error_knots"] = Units::KnotsSpeed(error_tas).value();
+      j["true_airspeed_command_knots"] = Units::KnotsSpeed(tas_command).value();
+      j["gamma_command_deg"] = Units::DegreesAngle(gamma_command).value();
+      LOG4CPLUS_TRACE(m_logger, j.dump());
+   }
 }
 

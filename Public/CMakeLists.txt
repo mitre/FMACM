@@ -81,6 +81,7 @@ set(SOURCE_FILES
         TvReader.cpp
         HfpReader2020.cpp
         GeolibUtils.cpp
+        OutputHandler.cpp
         LatitudeLongitudePoint.cpp
         LineOnEllipsoid.cpp
         ArcOnEllipsoid.cpp)

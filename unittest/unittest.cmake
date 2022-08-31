@@ -10,6 +10,7 @@ SET(TEST_SOURCE
         ${NONPUBLIC_TEST_SOURCE}
         ${UNITTEST_DIR}/src/main.cpp
         ${UNITTEST_DIR}/src/public_tests.cpp
+        ${UNITTEST_DIR}/src/utility_tests.cpp
         ${UNITTEST_DIR}/src/aircraft_intent_tests.cpp)
 
 SET(FMACM_SOURCE

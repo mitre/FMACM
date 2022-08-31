@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <string>
+#include <map>
 #include "aaesim/BadaPerformanceCalculator.h"
 #include "public/EquationsOfMotionStateDeriv.h"
 #include "public/DynamicsState.h"
@@ -29,8 +31,6 @@
 #include "public/EquationsOfMotionState.h"
 #include "public/InternalObserver.h"
 #include "public/LoggingLoadable.h"
-#include <string>
-#include <map>
 #include <scalar/Angle.h>
 #include <scalar/Force.h>
 #include <scalar/Frequency.h>
@@ -61,10 +61,7 @@ namespace aaesim {
                                  Units::Speed initial_true_airspeed,
                                  Units::Angle initial_ground_course_enu,
                                  double initial_mass_fraction,
-                                 const WeatherTruth &true_weather,
-                                 const std::string &aircraft_type);
-
-         const std::string &GetBadaAcType() const;
+                                 const WeatherTruth &true_weather);
 
          /**
           * @return the pair <east-component, north-component>
@@ -97,7 +94,7 @@ namespace aaesim {
                                                               double k_speedBrake,
                                                               ControlCommands commands);
 
-         virtual EquationsOfMotionStateDeriv StatePropagationOnRunway(ControlCommands commands);
+         virtual EquationsOfMotionStateDeriv StatePropagationOnRunway(ControlCommands commands, const Guidance &guidance);
 
          virtual void CalculateKineticForces(Units::Force &lift, Units::Force &drag);
 
@@ -106,7 +103,6 @@ namespace aaesim {
                                                  Units::Frequency &dVwx_dh,
                                                  Units::Frequency &dVwy_dh) = 0;
 
-         std::string m_ac_type;
          std::shared_ptr<const aaesim::BadaPerformanceCalculator> m_bada_calculator;
          DynamicsState m_dynamics_state;
          EquationsOfMotionState m_equations_of_motion_state;
@@ -128,10 +124,6 @@ namespace aaesim {
 
       inline const WeatherTruth ThreeDOFDynamics::GetTruthWeather() const {
          return m_true_weather;
-      }
-
-      inline const std::string &ThreeDOFDynamics::GetBadaAcType() const {
-         return m_ac_type;
       }
 
       inline const DynamicsState ThreeDOFDynamics::GetDynamicsState() const {

@@ -1,0 +1,32 @@
+sudo: true
+dist: trusty
+language: cpp
+os:
+ - linux
+compiler:
+ - gcc
+addons:
+  apt:
+    packages: lcov
+before_install:
+ - git config core.filemode false   # this is needed to keep the next line from causing git to think the project has changed
+ - chmod +x ./configure
+install:
+ - ./configure
+script:
+ - mkdir build
+ - cd build
+ - cmake -DCMAKE_BUILD_TYPE=Debug ..
+ - make -j4
+ - cd ..
+after_script:
+ - export LD_LIBRARY_PATH=/usr/local/lib/   # this is needed to ensure run-time linking occurs
+ - bin/FMACM --buildinfo
+ - cd build
+ - make run  # run tests
+ - lcov --capture --directory . --output-file coverage.info  # Create lcov report
+ - lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter system-files
+ - lcov --remove coverage.info 'unitsLib/*' --output-file coverage.info # filter unitslib files
+ - lcov --remove coverage.info 'unittest/*' --output-file coverage.info # filter unitslib files
+ - lcov --list coverage.info # debug info
+ - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"  # Uploading report to CodeCov

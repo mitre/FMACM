@@ -6,7 +6,6 @@ Doxyfile
 *.swp
 html/*
 latex/*
-docs/*
 *.o
 *.h.gch
 .settings/

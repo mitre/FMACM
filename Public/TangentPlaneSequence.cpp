@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -30,19 +30,13 @@
 using namespace std;
 log4cplus::Logger TangentPlaneSequence::logger = log4cplus::Logger::getInstance("TangentPlaneSequence");
 
-TangentPlaneSequence::TangentPlaneSequence() {
-}
+TangentPlaneSequence::TangentPlaneSequence() {}
 
-TangentPlaneSequence::TangentPlaneSequence(list<Waypoint> &waypoint_list) {
-   initialize(waypoint_list);
-}
+TangentPlaneSequence::TangentPlaneSequence(list<Waypoint> &waypoint_list) { initialize(waypoint_list); }
 
-TangentPlaneSequence::~TangentPlaneSequence() {
-}
+TangentPlaneSequence::~TangentPlaneSequence() {}
 
-TangentPlaneSequence::TangentPlaneSequence(const TangentPlaneSequence &in) {
-   copy(in);
-}
+TangentPlaneSequence::TangentPlaneSequence(const TangentPlaneSequence &in) { copy(in); }
 
 void TangentPlaneSequence::copy(const TangentPlaneSequence &in) {
    this->localPositionsFromInitialization = in.localPositionsFromInitialization;
@@ -54,7 +48,7 @@ void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
    // Setup the private members that will facilitate future calls to the this class.
    EarthModel *earthModel = Environment::getInstance()->getEarthModel();
 
-   shared_ptr<LocalTangentPlane> plane = shared_ptr<LocalTangentPlane>((LocalTangentPlane *) NULL);
+   shared_ptr<LocalTangentPlane> plane = shared_ptr<LocalTangentPlane>((LocalTangentPlane *)NULL);
    EarthModel::LocalPositionEnu enu;
    enu.x = enu.y = enu.z = Units::MetersLength(0);
 
@@ -64,7 +58,7 @@ void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
    localPositionsFromInitialization.resize(ix + 1);
    // use reverse iterator so that last will be processed first
    for (list<Waypoint>::reverse_iterator it = waypoint_list.rbegin(); it != waypoint_list.rend(); it++) {
-      //Waypoint *wp = (*it);
+      // Waypoint *wp = (*it);
       EarthModel::GeodeticPosition geo;
       geo.altitude = Units::MetersLength(0);
       geo.latitude = (*it).GetLatitude();
@@ -91,22 +85,21 @@ void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
    }
 }
 
-
-void TangentPlaneSequence::convertLocalToGeodetic(
-      EarthModel::LocalPositionEnu localPosition,
-      EarthModel::GeodeticPosition &geoPosition) const {
+void TangentPlaneSequence::convertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
+                                                  EarthModel::GeodeticPosition &geoPosition) const {
 
    // For the current localPosition, find the closest waypoint in the initialization information
    int ix = -1;
    Units::Area minD2 = Units::KilometersArea(Units::infinity());
    for (unsigned int ind2 = 0; ind2 < tangentPlanesFromInitialization.size(); ind2++) {
-      const EarthModel::LocalPositionEnu &pointOfTangency = tangentPlanesFromInitialization[ind2]->getPointOfTangencyEnu();
+      const EarthModel::LocalPositionEnu &pointOfTangency =
+            tangentPlanesFromInitialization[ind2]->getPointOfTangencyEnu();
       Units::Length x = localPosition.x - pointOfTangency.x;
       Units::Length y = localPosition.y - pointOfTangency.y;
       Units::Area d2 = x * x + y * y;
       if (d2 < minD2) {
          minD2 = d2;
-         ix = (int) ind2;
+         ix = (int)ind2;
       }
    }
    if (ix < 0) {
@@ -117,9 +110,8 @@ void TangentPlaneSequence::convertLocalToGeodetic(
    tangentPlanesFromInitialization[ix]->convertLocalToGeodetic(localPosition, geoPosition);
 }
 
-void TangentPlaneSequence::convertGeodeticToLocal(
-      EarthModel::GeodeticPosition geoPosition,
-      EarthModel::LocalPositionEnu &localPosition) const {
+void TangentPlaneSequence::convertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
+                                                  EarthModel::LocalPositionEnu &localPosition) const {
 
    EarthModel::AbsolutePositionEcef ecefPosition;
    Environment::getInstance()->getEarthModel()->ConvertGeodeticToAbsolute(geoPosition, ecefPosition);
@@ -127,14 +119,15 @@ void TangentPlaneSequence::convertGeodeticToLocal(
    // find the closest waypoint
    Units::Area minD2 = Units::KilometersArea(Units::infinity());
    for (unsigned int ind2 = 0; ind2 < tangentPlanesFromInitialization.size(); ind2++) {
-      const EarthModel::AbsolutePositionEcef &pointOfTangency = tangentPlanesFromInitialization[ind2]->getPointOfTangencyEcef();
+      const EarthModel::AbsolutePositionEcef &pointOfTangency =
+            tangentPlanesFromInitialization[ind2]->getPointOfTangencyEcef();
       Units::Length x = ecefPosition.x - pointOfTangency.x;
       Units::Length y = ecefPosition.y - pointOfTangency.y;
       Units::Length z = ecefPosition.z - pointOfTangency.z;
       Units::Area d2 = x * x + y * y + z * z;
       if (d2 < minD2) {
          minD2 = d2;
-         ix = (int) ind2;
+         ix = (int)ind2;
       }
    }
    if (ix < 0) {
@@ -153,7 +146,7 @@ const std::vector<Waypoint> &TangentPlaneSequence::getWaypointsFromInitializatio
    return waypointsFromInitialization;
 }
 
-const std::vector<std::shared_ptr<LocalTangentPlane> > &
-TangentPlaneSequence::getTangentPlanesFromInitialization() const {
+const std::vector<std::shared_ptr<LocalTangentPlane> > &TangentPlaneSequence::getTangentPlanesFromInitialization()
+      const {
    return tangentPlanesFromInitialization;
 }

@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -21,11 +21,9 @@
 
 #include "loader/LoaderLink.h"
 
-template<class DATA>
-class ListLoaderLink : public LoaderLink
-{
-public:
-
+template <class DATA>
+class ListLoaderLink : public LoaderLink {
+  public:
    ListLoaderLink(std::list<DATA> *address) {
       var_address = address;
       must_load_only_once = false;
@@ -56,11 +54,11 @@ public:
             return false;
          }
 
-         if (token.compare("}") == 0) // look for the } at the end of the list
+         if (token.compare("}") == 0)  // look for the } at the end of the list
          {
-            return true; // dun
+            return true;  // dun
          } else {
-            ds->push_back(); // need to put the token back
+            ds->push_back();  // need to put the token back
          }
 
          // load the entry
@@ -74,13 +72,11 @@ public:
          // add it to the list
 
          var_address->push_back(temp);
-
       }
 
       return true;
    }
 
-private:
-
+  private:
    std::list<DATA> *var_address;
 };

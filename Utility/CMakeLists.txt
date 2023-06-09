@@ -18,7 +18,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(utility STATIC ${SOURCE_FILES})
 target_include_directories(utility PUBLIC
+        ${LOG4CPLUS_DIRS}
         ${aaesim_INCLUDE_DIRS}
         ${nlohmann_json_SOURCE_DIR}/include)
-target_link_libraries(utility log4cplus nlohmann_json::nlohmann_json)
+target_link_libraries(utility log4cplusS nlohmann_json::nlohmann_json)
 target_compile_definitions(utility PUBLIC -D_LINUX_ -Dunix)

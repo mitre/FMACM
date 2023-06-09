@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -22,18 +22,15 @@
 
 using namespace std;
 
-DecodedStream::DecodedStream(void) {
-}
+DecodedStream::DecodedStream(void) {}
 
 //----------------------------------------------------------------------------------
 
-DecodedStream::~DecodedStream(void) {
-}
+DecodedStream::~DecodedStream(void) {}
 
 //----------------------------------------------------------------------------------
 
-bool find_num(string temp,
-              int j) {
+bool find_num(string temp, int j) {
    if (!(('0' <= temp[0] && temp[0] <= '9') || temp[0] == '-')) {
       return false;
    }
@@ -57,7 +54,7 @@ bool find_num(string temp,
 bool DecodedStream::get_datum(string &s) {
    s = get_next().get_Data();
 
-   if (!DecodedStream::ok()) //if not ok return false
+   if (!DecodedStream::ok())  // if not ok return false
    {
       return false;
    }
@@ -77,7 +74,7 @@ bool DecodedStream::get_datum(short &s) {
    static const short big = numeric_limits<short>::max();
    static const short small = numeric_limits<short>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -86,11 +83,11 @@ bool DecodedStream::get_datum(short &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be short
+   if (atoi(temp.c_str()) == big)  // too big to be short
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be short
+   if (atoi(temp.c_str()) == small)  // too small to be short
    {
       return false;
    }
@@ -116,7 +113,7 @@ bool DecodedStream::get_datum(unsigned short &s) {
    static const unsigned short big = numeric_limits<unsigned short>::max();
    static const unsigned short small = numeric_limits<unsigned short>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -125,11 +122,11 @@ bool DecodedStream::get_datum(unsigned short &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be unsigned short
+   if (atoi(temp.c_str()) == big)  // too big to be unsigned short
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be unsigned short
+   if (atoi(temp.c_str()) == small)  // too small to be unsigned short
    {
       return false;
    }
@@ -155,7 +152,7 @@ bool DecodedStream::get_datum(int &s) {
    static const int big = numeric_limits<int>::max();
    static const int small = numeric_limits<int>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -164,11 +161,11 @@ bool DecodedStream::get_datum(int &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be int
+   if (atoi(temp.c_str()) == big)  // too big to be int
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be int
+   if (atoi(temp.c_str()) == small)  // too small to be int
    {
       return false;
    }
@@ -194,7 +191,7 @@ bool DecodedStream::get_datum(unsigned int &s) {
    static const unsigned int big = numeric_limits<unsigned int>::max();
    static const unsigned int small = numeric_limits<unsigned int>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -203,11 +200,11 @@ bool DecodedStream::get_datum(unsigned int &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be unsigned int
+   if (atoi(temp.c_str()) == big)  // too big to be unsigned int
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be unsigned int
+   if (atoi(temp.c_str()) == small)  // too small to be unsigned int
    {
       return false;
    }
@@ -226,12 +223,11 @@ bool DecodedStream::get_datum(unsigned int &s) {
 bool DecodedStream::get_datum(double &s) {
    string temp = get_next().get_Data();
 
-   //wont be necessary- double goes out to 308 digits precision
-   //double big = numeric_limits<double>::max();
-   //double small = numeric_limits<double>::min();
+   // wont be necessary- double goes out to 308 digits precision
+   // double big = numeric_limits<double>::max();
+   // double small = numeric_limits<double>::min();
 
-
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -261,7 +257,7 @@ bool DecodedStream::get_datum(bool &s) {
    testbool.push_back("0");
    testbool.push_back("1");
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -290,7 +286,7 @@ bool DecodedStream::get_datum(long &s) {
    static const long big = numeric_limits<long>::max();
    static const long small = numeric_limits<long>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -299,11 +295,11 @@ bool DecodedStream::get_datum(long &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be int
+   if (atoi(temp.c_str()) == big)  // too big to be int
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be int
+   if (atoi(temp.c_str()) == small)  // too small to be int
    {
       return false;
    }
@@ -322,7 +318,7 @@ bool DecodedStream::get_datum(float &s) {
    static const long big = numeric_limits<float>::max();
    static const long small = numeric_limits<float>::min();
 
-   if (temp.empty() || !DecodedStream::ok()) //if temp is empty or stream not ok
+   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {
       return false;
    }
@@ -331,11 +327,11 @@ bool DecodedStream::get_datum(float &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big) //too big to be int
+   if (atoi(temp.c_str()) == big)  // too big to be int
    {
       return false;
    }
-   if (atoi(temp.c_str()) == small)//too small to be int
+   if (atoi(temp.c_str()) == small)  // too small to be int
    {
       return false;
    }

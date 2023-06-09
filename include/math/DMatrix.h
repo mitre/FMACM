@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -22,19 +22,17 @@
 #include "math/DVector.h"
 #include <exception>
 
-class DMatrix
-{
-public:
-   class IncompatibleDimensionsException : public std::exception
-   {
-   public:
+class DMatrix {
+  public:
+   class IncompatibleDimensionsException : public std::exception {
+     public:
       IncompatibleDimensionsException(char *explanation);
 
       virtual ~IncompatibleDimensionsException() throw();
 
       virtual const char *what() const throw();
 
-   private:
+     private:
       const char *m_explanation;
    };
 
@@ -44,33 +42,19 @@ public:
 
    DMatrix(const DMatrix &in);
 
-   DMatrix(double **array_in,
-           int row_min,
-           int row_max,
-           int column_min,
-           int column_max);
-   
-   DMatrix(int row_min,
-           int row_max,
-           int column_min,
-           int column_max);
+   DMatrix(double **array_in, int row_min, int row_max, int column_min, int column_max);
 
-   double Get(const int row,
-              const int column) const;
+   DMatrix(int row_min, int row_max, int column_min, int column_max);
 
-   void Set(const int row,
-            const int column,
-            const double value);
+   double Get(const int row, const int column) const;
+
+   void Set(const int row, const int column, const double value);
 
    void AscendSort();
-   
-   void SetBounds(int row_min,
-                  int row_max,
-                  int column_min,
-                  int column_max);
-   
-   bool InRange(const int row,
-                const int colomn) const;
+
+   void SetBounds(int row_min, int row_max, int column_min, int column_max);
+
+   bool InRange(const int row, const int colomn) const;
 
    bool InRange(const int row) const;
 
@@ -90,8 +74,7 @@ public:
 
    int GetMaxColumn() const;
 
-
-private:
+  private:
    static char *MULTIPLICATION_DIMENSIONS_MESSAGE;
    DVector *m_rows;
    int m_min_row;

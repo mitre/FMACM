@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,32 +26,31 @@
 
 #include "public/DataReader.h"
 
-namespace testvector {
+namespace aaesim {
+namespace open_source {
 
 const Units::SecondsTime DataReader::UNDEFINED_TIME(-9999);
 
 log4cplus::Logger DataReader::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("DataReader"));
 
-DataReader::DataReader(std::string file_name, int header_lines, size_t expected_columns) :
-         m_expected_column_count(expected_columns) {
+DataReader::DataReader(std::string file_name, int header_lines, size_t expected_columns)
+   : m_expected_column_count(expected_columns) {
    OpenFile(file_name, header_lines);
 }
 
-DataReader::DataReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns) :
-         m_expected_column_count(expected_columns) {
+DataReader::DataReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns)
+   : m_expected_column_count(expected_columns) {
    OpenStream(input_stream, header_lines);
 }
 
-DataReader::~DataReader() {
-}
+DataReader::~DataReader() {}
 
 void DataReader::OpenFile(std::string file_name, int header_lines) {
    std::shared_ptr<std::istream> input_stream(new std::ifstream(file_name));
    OpenStream(input_stream, header_lines);
 }
 
-void DataReader::OpenStream(std::shared_ptr<std::istream> input_stream,
-      int header_lines) {
+void DataReader::OpenStream(std::shared_ptr<std::istream> input_stream, int header_lines) {
    m_input_stream = input_stream;
    SkipLines(header_lines);
 }
@@ -83,13 +82,9 @@ double DataReader::GetDouble(int column) const {
    return val;
 }
 
-std::string DataReader::GetString(int column) const {
-   return m_csv_row[column];
-}
+std::string DataReader::GetString(int column) const { return m_csv_row[column]; }
 
-size_t DataReader::GetColumnCount() const {
-   return m_csv_row.Size();
-}
+size_t DataReader::GetColumnCount() const { return m_csv_row.Size(); }
 
 void DataReader::SetExpectedColumnCount(size_t expected_column_count) {
    m_expected_column_count = expected_column_count;
@@ -112,7 +107,7 @@ void DataReader::BuildColumnIndex() {
    }
 }
 
-int DataReader::GetColumnNumber(const std::string& column_name) {
+int DataReader::GetColumnNumber(const std::string &column_name) {
    int column_count0 = m_column_index.size();
    int index = m_column_index[column_name];
    int column_count1 = m_column_index.size();
@@ -122,4 +117,5 @@ int DataReader::GetColumnNumber(const std::string& column_name) {
    return index;
 }
 
-} // namespace testvector
+}  // namespace open_source
+}  // namespace aaesim

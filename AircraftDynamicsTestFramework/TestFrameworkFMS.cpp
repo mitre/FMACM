@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,25 +26,24 @@
 Units::DegreesAngle TestFrameworkFMS::MAX_BANK_ANGLE(25.0);
 
 TestFrameworkFMS::TestFrameworkFMS()
-      : m_decrementing_distance_calculator(),
-        m_number_of_waypoints(),
-        m_psi(),
-        m_waypoint_altitude(),
-        m_waypoint_x(),
-        m_waypoint_y(),
-        m_mode(),
-        m_delta_track(),
-        m_turn_radius(),
-        m_range_start_turn(),
-        m_previous_range_to_next_waypoint(),
-        m_range_to_next_waypoint(),
-        m_track(),
-        m_length(),
-        m_next_waypoint_ix(),
-        m_nominal_ias_at_waypoint(),
-        m_mach_at_waypoint(),
-        m_constraints() {
-}
+   : m_decrementing_distance_calculator(),
+     m_number_of_waypoints(),
+     m_psi(),
+     m_waypoint_altitude(),
+     m_waypoint_x(),
+     m_waypoint_y(),
+     m_mode(),
+     m_delta_track(),
+     m_turn_radius(),
+     m_range_start_turn(),
+     m_previous_range_to_next_waypoint(),
+     m_range_to_next_waypoint(),
+     m_track(),
+     m_length(),
+     m_next_waypoint_ix(),
+     m_nominal_ias_at_waypoint(),
+     m_mach_at_waypoint(),
+     m_constraints() {}
 
 TestFrameworkFMS::~TestFrameworkFMS() = default;
 
@@ -109,14 +108,12 @@ void TestFrameworkFMS::Update(const aaesim::open_source::AircraftState &state,
          m_delta_track = m_track[m_next_waypoint_ix + 1] - m_track[m_next_waypoint_ix];
       }
 
-      double bank_angle_rad = CoreUtils::LimitOnInterval(m_delta_track,
-                                                         Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
+      double bank_angle_rad = CoreUtils::LimitOnInterval(m_delta_track, Units::RadiansAngle(-MAX_BANK_ANGLE).value(),
                                                          Units::RadiansAngle(MAX_BANK_ANGLE).value());
 
       if (bank_angle_rad != 0.00) {
          double gs = Units::FeetPerSecondSpeed(state.GetGroundSpeed()).value();
-         m_turn_radius = gs * gs /
-                         (GRAVITY_METERS_PER_SECOND / FEET_TO_METERS * tan(bank_angle_rad));
+         m_turn_radius = gs * gs / (GRAVITY_METERS_PER_SECOND / FEET_TO_METERS * tan(bank_angle_rad));
 
          m_range_start_turn = fabs(m_turn_radius * tan(0.5 * m_delta_track));
       } else {
@@ -182,10 +179,8 @@ void TestFrameworkFMS::Update(const aaesim::open_source::AircraftState &state,
    }
 
    Units::MetersLength current_distance_to_go;
-   m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(Units::FeetLength(state.m_x),
-                                                                             Units::FeetLength(state.m_y),
-                                                                             current_distance_to_go);
-
+   m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(
+         Units::FeetLength(state.m_x), Units::FeetLength(state.m_y), current_distance_to_go);
 
    for (auto ix = 0; (ix < precalc_waypoints.size()); ix++) {
       if (current_distance_to_go <= precalc_waypoints[ix].m_precalc_constraints.constraint_along_path_distance) {
@@ -202,16 +197,14 @@ void TestFrameworkFMS::CopyWaypointsFromIntent(const AircraftIntent &intent_in) 
    for (int j = 0; j < m_number_of_waypoints; j++) {
       m_waypoint_x[j] = Units::FeetLength(fms.m_x[j]).value();
       m_waypoint_y[j] = Units::FeetLength(fms.m_y[j]).value();
-      //m_waypoint_altitude[j] = Units::FeetLength(fms.m_nominal_altitude[j]).value();
-      //m_nominal_ias_at_waypoint[j] = fms.m_nominal_ias[j].value();
-      //m_mach_at_waypoint[j] = fms.m_mach[j];
-      //m_constraints[j].constraint_altHi = fms.m_high_altitude_constraint[j];
-      //m_constraints[j].constraint_altLow = fms.m_low_altitude_constraint[j];
-      //m_constraints[j].constraint_speedHi = fms.m_high_speed_constraint[j];
-      //m_constraints[j].constraint_speedLow = fms.m_low_speed_constraint[j];
+      // m_waypoint_altitude[j] = Units::FeetLength(fms.m_nominal_altitude[j]).value();
+      // m_nominal_ias_at_waypoint[j] = fms.m_nominal_ias[j].value();
+      // m_mach_at_waypoint[j] = fms.m_mach[j];
+      // m_constraints[j].constraint_altHi = fms.m_high_altitude_constraint[j];
+      // m_constraints[j].constraint_altLow = fms.m_low_altitude_constraint[j];
+      // m_constraints[j].constraint_speedHi = fms.m_high_speed_constraint[j];
+      // m_constraints[j].constraint_speedLow = fms.m_low_speed_constraint[j];
    }
 }
 
-bool TestFrameworkFMS::IsFinished() {
-   return m_decrementing_distance_calculator.IsPassedEndOfRoute();
-}
+bool TestFrameworkFMS::IsFinished() { return m_decrementing_distance_calculator.IsPassedEndOfRoute(); }

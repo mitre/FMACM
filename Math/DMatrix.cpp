@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -21,7 +21,7 @@
 #include "math/InvalidIndexException.h"
 #include <algorithm>
 
-char *DMatrix::MULTIPLICATION_DIMENSIONS_MESSAGE = (char *) "Cannot multiply DMatrix unless inner dimensions match.";
+char *DMatrix::MULTIPLICATION_DIMENSIONS_MESSAGE = (char *)"Cannot multiply DMatrix unless inner dimensions match.";
 
 DMatrix::DMatrix() {
    m_min_row = 0;
@@ -47,10 +47,7 @@ DMatrix::DMatrix(const DMatrix &in) {
    }
 }
 
-DMatrix::DMatrix(int inRowMin,
-                 int inRowMax,
-                 int inColMin,
-                 int inColMax) {
+DMatrix::DMatrix(int inRowMin, int inRowMax, int inColMin, int inColMax) {
    // calculates the size of the DMatrix
    int size = inRowMax - inRowMin + 1;
 
@@ -67,11 +64,7 @@ DMatrix::DMatrix(int inRowMin,
    }
 }
 
-DMatrix::DMatrix(double **array_in,
-                 int inRowMin,
-                 int inRowMax,
-                 int inColMin,
-                 int inColMax) {
+DMatrix::DMatrix(double **array_in, int inRowMin, int inRowMax, int inColMin, int inColMax) {
    // calculates the size of the DMatrix
    int size = inRowMax - inRowMin + 1;
 
@@ -91,18 +84,17 @@ DMatrix::DMatrix(double **array_in,
    // failure to match the bounds given will cause dangerous memory access!!!
    // this only works because 2d arrays are stored in sequential memory addresses
    // if the array is dynamically allocated this WILL cause dangerous memory access!!!
-   double *memory_pointer; // pointer to point to the memory address of the 2d array
-   memory_pointer = (double *) array_in; // accesses the the memory address of the first element
+   double *memory_pointer;               // pointer to point to the memory address of the 2d array
+   memory_pointer = (double *)array_in;  // accesses the the memory address of the first element
    for (int outer = 0; outer < size; outer++) {
       for (int inner = inColMin; inner <= inColMax; inner++) {
          m_rows[outer].Set(inner, (*memory_pointer));
-         memory_pointer++; // iterates the memory address
+         memory_pointer++;  // iterates the memory address
       }
    }
 }
 
-double DMatrix::Get(const int row,
-                    const int column) const {
+double DMatrix::Get(const int row, const int column) const {
    // check if in valid range of DMatrix
    if (InRange(row)) {
       // uses the DVectors overloaded array operator to get the value
@@ -113,9 +105,7 @@ double DMatrix::Get(const int row,
    throw InvalidIndexException(row, m_min_row, m_max_row);
 }
 
-void DMatrix::Set(const int row,
-                  const int column,
-                  const double value) {
+void DMatrix::Set(const int row, const int column, const double value) {
    // check if in valid range of DMatrix
    if (InRange(row)) {
       // uses the DVector overloaded array operator to set the value
@@ -126,10 +116,7 @@ void DMatrix::Set(const int row,
    }
 }
 
-void DMatrix::SetBounds(int row_min,
-                        int row_max,
-                        int column_min,
-                        int column_max) {
+void DMatrix::SetBounds(int row_min, int row_max, int column_min, int column_max) {
    // calculates the size of the DMatrix
    int size = row_max - row_min + 1;
 
@@ -147,8 +134,7 @@ void DMatrix::SetBounds(int row_min,
    }
 }
 
-bool DMatrix::InRange(const int row,
-                      const int colomn) const {
+bool DMatrix::InRange(const int row, const int colomn) const {
    // initializes results to false
    bool results = false;
 
@@ -230,8 +216,7 @@ DMatrix &DMatrix::operator*(const DMatrix &that) const {
    int colEnd2 = that.GetMaxColumn();
    if (colStart1 != rowStart2 || colEnd1 != rowEnd2) {
       // cannot be multiplied because inner dimensions don't match
-      throw IncompatibleDimensionsException(
-            MULTIPLICATION_DIMENSIONS_MESSAGE);
+      throw IncompatibleDimensionsException(MULTIPLICATION_DIMENSIONS_MESSAGE);
    }
    DMatrix *result = new DMatrix(rowStart1, rowEnd1, colStart2, colEnd2);
    for (int i = rowStart1; i <= rowEnd1; i++) {
@@ -246,35 +231,19 @@ DMatrix &DMatrix::operator*(const DMatrix &that) const {
    return *result;
 }
 
-void DMatrix::AscendSort() {
-   std::sort(&m_rows[0], &m_rows[m_max_row - m_min_row + 1]);
-}
+void DMatrix::AscendSort() { std::sort(&m_rows[0], &m_rows[m_max_row - m_min_row + 1]); }
 
-int DMatrix::GetMinRow() const {
-   return m_min_row;
-}
+int DMatrix::GetMinRow() const { return m_min_row; }
 
-int DMatrix::GetMaxRow() const {
-   return m_max_row;
-}
+int DMatrix::GetMaxRow() const { return m_max_row; }
 
-int DMatrix::GetMinColumn() const {
-   return m_rows[0].GetMin();
-}
+int DMatrix::GetMinColumn() const { return m_rows[0].GetMin(); }
 
-
-int DMatrix::GetMaxColumn() const {
-   return m_rows[0].GetMax();
-}
+int DMatrix::GetMaxColumn() const { return m_rows[0].GetMax(); }
 
 DMatrix::IncompatibleDimensionsException::IncompatibleDimensionsException(char *explanation)
-      : exception(),
-        m_explanation(explanation) {
-}
+   : exception(), m_explanation(explanation) {}
 
-DMatrix::IncompatibleDimensionsException::~IncompatibleDimensionsException() throw() {
-}
+DMatrix::IncompatibleDimensionsException::~IncompatibleDimensionsException() throw() {}
 
-const char *DMatrix::IncompatibleDimensionsException::what() const throw() {
-   return m_explanation;
-}
+const char *DMatrix::IncompatibleDimensionsException::what() const throw() { return m_explanation; }

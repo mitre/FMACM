@@ -19,7 +19,8 @@ SET(FMACM_SOURCE
 
 SET(IMALGO_SOURCE
         ${UNITTEST_DIR}/src/main.cpp
-        ${UNITTEST_DIR}/src/imalgo_tests.cpp)
+        ${UNITTEST_DIR}/src/imalgo_tests.cpp
+        ${UNITTEST_DIR}/src/predicted_wind_evaluator_tests.cpp)
 
 # Build aaesim_test
 add_executable(aaesim_test ${TEST_SOURCE})

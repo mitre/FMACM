@@ -17,38 +17,46 @@ if (geolib_idealab_ADDED)
 endif ()
 # --- end geolib ---
 
+CPMAddPackage(
+        NAME minicsv
+        GIT_REPOSITORY https://github.com/shaovoon/minicsv.git
+        GIT_TAG v1.8.1
+        DOWNLOAD_ONLY TRUE
+)
+if (minicsv_ADDED)
+        set(minicsv_INCLUDE_DIR ${minicsv_SOURCE_DIR})
+endif ()
+
 set(SOURCE_FILES
-        AchieveObserver.cpp
         ADSBSVReport.cpp
         AircraftCalculations.cpp
         AircraftControl.cpp
-        Aircraft.cpp
         AircraftIntent.cpp
         AircraftSpeed.cpp
         AircraftState.cpp
         Atmosphere.cpp
-        ClosestPointMetric.cpp
+        CalcWindGradControl.cpp
         ControlCommands.cpp
         CoreUtils.cpp
-        CrossTrackObserver.cpp
-        DynamicsObserver.cpp
         EarthModel.cpp
         EllipsoidalEarthModel.cpp
         Environment.cpp
+        EuclideanTrajectoryPredictor.cpp
         EuclideanThreeDofDynamics.cpp
+        FlightEnvelopeSpeedLimiter.cpp
+        FmsWaypointSequenceFile.cpp
         Guidance.cpp
         HorizontalPath.cpp
         HorizontalTurnPath.cpp
-        IMCommandObserver.cpp
-        InternalObserver.cpp
+        KinematicDescent4DPredictor.cpp
+        KinematicTrajectoryPredictor.cpp
         LocalTangentPlane.cpp
         LoggingLoadable.cpp
-        MaintainMetric.cpp
-        MergePointMetric.cpp
-        NMObserver.cpp
-        NMObserverEntry.cpp
+        NullSpeedLimiter.cpp
+        NullWindEvaluator.cpp
         PrecalcConstraint.cpp
         PrecalcWaypoint.cpp
+        PredictionFileBase.cpp
         PilotDelay.cpp
         RunFile.cpp
         Scenario.cpp
@@ -60,8 +68,9 @@ set(SOURCE_FILES
         StereographicProjection.cpp
         TangentPlaneSequence.cpp
         ThreeDOFDynamics.cpp
+        VectorDifferenceWindEvaluator.cpp
         VerticalPath.cpp
-        VerticalPathObserver.cpp
+        VerticalPredictor.cpp
         Waypoint.cpp
         WeatherEstimate.cpp
         WeatherPrediction.cpp
@@ -74,24 +83,21 @@ set(SOURCE_FILES
         DirectionOfFlightCourseCalculator.cpp
         WindZero.cpp
         DataReader.cpp
-        EnvReader.cpp
-        ForeWindReader.cpp
-        HfpReaderPre2020.cpp
-        RefReader.cpp
         TvReader.cpp
-        HfpReader2020.cpp
         GeolibUtils.cpp
         OutputHandler.cpp
         LatitudeLongitudePoint.cpp
         LineOnEllipsoid.cpp
-        ArcOnEllipsoid.cpp)
+        ArcOnEllipsoid.cpp
+        EuclideanWaypointMonitor.cpp)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(pub STATIC ${SOURCE_FILES})
 target_include_directories(pub PUBLIC
         ${geolib_idealab_INCLUDE_DIRS}
-        ${aaesim_INCLUDE_DIRS})
+        ${aaesim_INCLUDE_DIRS}
+        ${minicsv_INCLUDE_DIR})
 target_link_libraries(pub
         loader utility math geolib)
 target_compile_definitions(pub PUBLIC -D_LINUX_ -Dunix)

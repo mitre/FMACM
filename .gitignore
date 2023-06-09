@@ -25,4 +25,4 @@ include/build_info.h
 cmake-build-debug/
 CPackConfig.cmake
 CPackSourceConfig.cmake
-.DS_Store
+**/.DS_Store

@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -25,29 +25,27 @@ using namespace aaesim::open_source;
 
 log4cplus::Logger AircraftState::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftState"));
 
-
 AircraftState::AircraftState()
-      : m_id(-1),
-        m_time(-1),
-        m_x(0),
-        m_y(0),
-        m_z(0),
-        m_xd(0),
-        m_yd(0),
-        m_zd(0),
-        m_xdd(0),
-        m_ydd(0),
-        m_zdd(0.0),
-        m_gamma(0.0),
-        m_Vwx(0.0),
-        m_Vwy(0.0),
-        m_Vw_para(0.0),
-        m_Vw_perp(0.0),
-        m_psi(0.0) {
-   SetZd(0);   // assumed to be in FPS
+   : m_id(-1),
+     m_time(-1),
+     m_x(0),
+     m_y(0),
+     m_z(0),
+     m_xd(0),
+     m_yd(0),
+     m_zd(0),
+     m_xdd(0),
+     m_ydd(0),
+     m_zdd(0.0),
+     m_gamma(0.0),
+     m_Vwx(0.0),
+     m_Vwy(0.0),
+     m_Vw_para(0.0),
+     m_Vw_perp(0.0),
+     m_psi(0.0) {
+   SetZd(0);  // assumed to be in FPS
    m_Vwx_dh = Units::zero();
    m_Vwy_dh = Units::zero();
-   m_distance_to_go_meters = -99999.99999;
 }
 
 AircraftState::~AircraftState() = default;
@@ -74,10 +72,9 @@ void AircraftState::Clear() {
    SetZd(0);
    m_Vwx_dh = Units::zero();
    m_Vwy_dh = Units::zero();
-   m_distance_to_go_meters = -99999.99999;
 }
 
-bool AircraftState::operator==(const AircraftState& in) const {
+bool AircraftState::operator==(const AircraftState &in) const {
 
    bool same = true;
 
@@ -89,12 +86,12 @@ bool AircraftState::operator==(const AircraftState& in) const {
    same = same && (m_Vwx == in.m_Vwx) && (m_Vwy == in.m_Vwy);
    same = same && (m_Vw_para == in.m_Vw_para) && (m_Vw_perp == in.m_Vw_perp);
    same = same && (m_Vwx_dh == in.m_Vwx_dh) && (m_Vwy_dh == in.m_Vwy_dh);
-   same = same && (m_psi == in.m_psi) && (m_distance_to_go_meters == in.m_distance_to_go_meters);
+   same = same && (m_psi == in.m_psi);
 
    return same;
 }
 
-bool AircraftState::operator<(const AircraftState& in) const {
+bool AircraftState::operator<(const AircraftState &in) const {
    if (m_id < in.m_id || (m_id == in.m_id && m_time < in.m_time)) {
       return true;
    }
@@ -103,7 +100,7 @@ bool AircraftState::operator<(const AircraftState& in) const {
 }
 
 const bool AircraftState::IsTurning() const {
-   //Determine if a turn is taking place: source nav_NSE.cpp of WinSS
+   // Determine if a turn is taking place: source nav_NSE.cpp of WinSS
 
    double spd = sqrt(std::pow(m_xd, 2) + std::pow(m_yd, 2));
    double turn_rate = (m_xd * m_ydd - m_yd * m_xdd) / spd;
@@ -120,7 +117,7 @@ const Units::Speed AircraftState::GetGroundSpeed() const {
    return Units::FeetPerSecondSpeed(sqrt(pow(m_xd, 2) + pow(m_yd, 2)));
 }
 
-AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport& adsbsvReport) {
+AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVReport &adsbsvReport) {
    AircraftState result;
    result.m_id = adsbsvReport.GetId();
    result.m_time = adsbsvReport.GetTime().value();
@@ -136,33 +133,37 @@ AircraftState AircraftState::CreateFromADSBReport(const Sensor::ADSB::ADSBSVRepo
 
 void AircraftState::DumpParms(std::string str) const {
    LOG4CPLUS_DEBUG(AircraftState::logger, "aircraft state for " << str.c_str());
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "time " << m_time << ", id " << m_id << ", distToGo (m) " << m_distance_to_go_meters);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "position (ft): x " << m_x << ", y " << m_y << ", z " << m_z);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "speed (ft/s): x " << m_xd << ", y " << m_yd << ", z " << m_zd);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Horiz Components (m/s): vwpara " << m_Vw_para << ", vwperp " << m_Vw_perp << ", Vwx " << m_Vwx << ", Vwy " << m_Vwy);
-   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Vert Components (1/s): vwx_dh " << Units::HertzFrequency(m_Vwx_dh) << ", vwy_dh " << Units::HertzFrequency(m_Vwy_dh));
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "time " << m_time << ", id " << m_id);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12)
+                                                << "position (ft): x " << m_x << ", y " << m_y << ", z " << m_z);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12)
+                                                << "speed (ft/s): x " << m_xd << ", y " << m_yd << ", z " << m_zd);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12)
+                                                << "Wind Horiz Components (m/s): vwpara " << m_Vw_para << ", vwperp "
+                                                << m_Vw_perp << ", Vwx " << m_Vwx << ", Vwy " << m_Vwy);
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::setprecision(12) << "Wind Vert Components (1/s): vwx_dh "
+                                                                << Units::HertzFrequency(m_Vwx_dh) << ", vwy_dh "
+                                                                << Units::HertzFrequency(m_Vwy_dh));
 }
 
 void AircraftState::CsvDataDump(std::string str) const {
 
-   LOG4CPLUS_DEBUG(AircraftState::logger,
-                   std::endl << str.c_str() << ","
-                             << m_time << "," << m_id << "," << m_x << "," << m_y << ","
-                             << m_z << "," << m_xd << "," << m_yd << "," << m_zd << ","
-                             << m_xdd << "," << m_ydd << "," << m_zdd << "," << m_gamma << ","
-                             << m_Vwx << "," << m_Vwy << "," << m_Vw_para << "," << m_Vw_perp << ","
-                             << Units::HertzFrequency(m_Vwx_dh) << "," << Units::HertzFrequency(m_Vwy_dh) << ","
-                             << m_psi << "," << m_distance_to_go_meters << "," << std::endl);
-
+   LOG4CPLUS_DEBUG(AircraftState::logger, std::endl
+                                                << str.c_str() << "," << m_time << "," << m_id << "," << m_x << ","
+                                                << m_y << "," << m_z << "," << m_xd << "," << m_yd << "," << m_zd << ","
+                                                << m_xdd << "," << m_ydd << "," << m_zdd << "," << m_gamma << ","
+                                                << m_Vwx << "," << m_Vwy << "," << m_Vw_para << "," << m_Vw_perp << ","
+                                                << Units::HertzFrequency(m_Vwx_dh) << ","
+                                                << Units::HertzFrequency(m_Vwy_dh) << "," << m_psi << "," << std::endl);
 }
 
 void AircraftState::CsvHdrDump(std::string str) const {
 
    LOG4CPLUS_DEBUG(AircraftState::logger, std::endl
-         << str.c_str()
-         << ",time,id,x,y,z,x_Speed,y_Speed,z_Speed,x_Accel,y_Accel,z_Accel,gamma,Vwx,Vwy,Vw_para,Vw_perp,psi,distToGo"
-         << std::endl);
-
+                                                << str.c_str()
+                                                << ",time,id,x,y,z,x_Speed,y_Speed,z_Speed,x_Accel,y_Accel,z_Accel,"
+                                                   "gamma,Vwx,Vwy,Vw_para,Vw_perp,psi"
+                                                << std::endl);
 }
 
 /**
@@ -173,13 +174,11 @@ void AircraftState::CsvHdrDump(std::string str) const {
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState& AircraftState::Interpolate(const AircraftState& a,
-                                          const AircraftState& b,
-                                          const double time) {
+AircraftState &AircraftState::Interpolate(const AircraftState &a, const AircraftState &b, const double time) {
 
    if (a.m_id != b.m_id) {
-      LOG4CPLUS_ERROR(logger, "Interpolating between states that have different ids:  "
-            << a.m_id + " and " << b.m_id << ".");
+      LOG4CPLUS_ERROR(logger,
+                      "Interpolating between states that have different ids:  " << a.m_id + " and " << b.m_id << ".");
    }
 
    const double baTimeDiff = b.m_time - a.m_time;
@@ -211,8 +210,7 @@ AircraftState& AircraftState::Interpolate(const AircraftState& a,
  * Other fields, such as acceleration, orientation, and wind,
  * are left unchanged.
  */
-AircraftState& AircraftState::Extrapolate(const AircraftState& in,
-                                          const double time_in) {
+AircraftState &AircraftState::Extrapolate(const AircraftState &in, const double time_in) {
    double dt = time_in - in.m_time;
 
    m_time = Units::SecondsTime(time_in).value();
@@ -227,16 +225,12 @@ AircraftState& AircraftState::Extrapolate(const AircraftState& in,
    return *this;
 }
 
-AircraftState& AircraftState::Extrapolate(const AircraftState& in,
-                                          const Units::SecondsTime& time) {
+AircraftState &AircraftState::Extrapolate(const AircraftState &in, const Units::SecondsTime &time) {
    Extrapolate(in, time.value());
    return *this;
 }
 
-
-void AircraftState::SetZd(double zd) {
-   m_zd = zd;
-}
+void AircraftState::SetZd(double zd) { m_zd = zd; }
 
 Units::Speed AircraftState::GetTrueAirspeed() const {
    Units::MetersPerSecondSpeed tas_x, tas_y;

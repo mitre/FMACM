@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,13 +26,13 @@ const double PilotDelay::STANDARD_DEVIATION_LIMIT(3);
 log4cplus::Logger PilotDelay::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("PilotDelay"));
 
 PilotDelay::PilotDelay()
-      : m_atmosphere(nullptr),
-        m_pilot_delay_mean(Units::SecondsTime(12.0)),
-        m_pilot_delay_standard_deviation(Units::SecondsTime(0.0)),
-        m_pilot_delay_is_on(true),
-        m_delay_count(0),
-        m_delay_sum(0),
-        m_delay_square_sum(0) {
+   : m_atmosphere(nullptr),
+     m_pilot_delay_mean(Units::SecondsTime(12.0)),
+     m_pilot_delay_standard_deviation(Units::SecondsTime(0.0)),
+     m_pilot_delay_is_on(true),
+     m_delay_count(0),
+     m_delay_sum(0),
+     m_delay_square_sum(0) {
    IterationReset();
 }
 
@@ -59,18 +59,15 @@ void PilotDelay::IterationReset() {
  *
  * @return recomputed guidance ias speed.
  */
-Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_mach,
-                                    double input_im_speed_command_mach,
-                                    Units::Length current_altitude,
-                                    Units::Length altitude_at_end_of_route) {
+Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_mach, double input_im_speed_command_mach,
+                                    Units::Length current_altitude, Units::Length altitude_at_end_of_route) {
    if ((input_im_speed_command_mach != previous_im_speed_command_mach) &&
-         (m_time_to_next_speed_change < Units::zero())) {
+       (m_time_to_next_speed_change < Units::zero())) {
 
       // Reset time delay counter and set m_guidance_mach to previous speed.
       m_time_to_next_speed_change = ComputeTimeToSpeedChange(current_altitude, altitude_at_end_of_route);
       m_guidance_mach = previous_im_speed_command_mach;
-   }
-   else if (m_guidance_ias == Units::zero()) {
+   } else if (m_guidance_ias == Units::zero()) {
       // ias has not changed and guidance ias not set. Compute guidance ias
       // from guidance mach.
       m_guidance_mach = previous_im_speed_command_mach;
@@ -103,10 +100,8 @@ Units::Speed PilotDelay::UpdateMach(double previous_im_speed_command_mach,
  *
  * @return guidance ias speed.
  */
-Units::Speed PilotDelay::UpdateIAS(Units::Speed previous_im_speed_command_ias,
-                                   Units::Speed input_im_speed_command_ias,
-                                   Units::Length current_altitude,
-                                   Units::Length altitude_at_end_of_route) {
+Units::Speed PilotDelay::UpdateIAS(Units::Speed previous_im_speed_command_ias, Units::Speed input_im_speed_command_ias,
+                                   Units::Length current_altitude, Units::Length altitude_at_end_of_route) {
 
    if (input_im_speed_command_ias != previous_im_speed_command_ias) {
       // ias has changed.
@@ -178,20 +173,17 @@ Units::Time PilotDelay::ComputeTimeToSpeedChange(Units::Length current_altitude,
    return tval;
 }
 
-void PilotDelay::SetPilotDelayParameters(const Units::Time mean,
-                                         const Units::Time standard_deviation) {
+void PilotDelay::SetPilotDelayParameters(const Units::Time mean, const Units::Time standard_deviation) {
    m_pilot_delay_mean = mean;
    m_pilot_delay_standard_deviation = standard_deviation;
    if (m_pilot_delay_is_on && (m_pilot_delay_standard_deviation * STANDARD_DEVIATION_LIMIT > m_pilot_delay_mean)) {
       Units::SecondsTime low = m_pilot_delay_mean - m_pilot_delay_standard_deviation * STANDARD_DEVIATION_LIMIT;
       Units::SecondsTime high = m_pilot_delay_mean + m_pilot_delay_standard_deviation * STANDARD_DEVIATION_LIMIT;
-      LOG4CPLUS_WARN(m_logger,
-                     "Pilot delay can range from " << low << " to "
-                                                   << high << " based on mean=" << m_pilot_delay_mean
-                                                   << ", standard deviation=" << m_pilot_delay_standard_deviation
-                                                   << ", and standard deviation cap=" << STANDARD_DEVIATION_LIMIT
-                                                   << "." << std::endl
-                                                   << "Computed negative delays will be flipped to positive.");
+      LOG4CPLUS_WARN(m_logger, "Pilot delay can range from "
+                                     << low << " to " << high << " based on mean=" << m_pilot_delay_mean
+                                     << ", standard deviation=" << m_pilot_delay_standard_deviation
+                                     << ", and standard deviation cap=" << STANDARD_DEVIATION_LIMIT << "." << std::endl
+                                     << "Computed negative delays will be flipped to positive.");
    }
 }
 
@@ -202,30 +194,29 @@ void PilotDelay::SetPilotDelayParameters(const Units::Time mean,
  * @param str Header string for output.
  */
 void PilotDelay::DumpParameters(std::string str) {
-   LOG4CPLUS_DEBUG(PilotDelay::m_logger, std::endl << "Pilot delay parms for "
-                                                   << str.c_str() << std::endl << std::endl);
+   LOG4CPLUS_DEBUG(PilotDelay::m_logger, std::endl
+                                               << "Pilot delay parms for " << str.c_str() << std::endl
+                                               << std::endl);
    LOG4CPLUS_DEBUG(PilotDelay::m_logger, "m_pilot_delay_is_on          " << m_pilot_delay_is_on << std::endl);
-   LOG4CPLUS_DEBUG(PilotDelay::m_logger, "m_pilot_delay_mean        "
-         << Units::SecondsTime(m_pilot_delay_mean).value() << std::endl);
+   LOG4CPLUS_DEBUG(PilotDelay::m_logger,
+                   "m_pilot_delay_mean        " << Units::SecondsTime(m_pilot_delay_mean).value() << std::endl);
 
-   LOG4CPLUS_DEBUG(PilotDelay::m_logger, "mTimetoNextSpeedChange "
-         << Units::SecondsTime(m_time_to_next_speed_change).value() << std::endl);
-   LOG4CPLUS_DEBUG(PilotDelay::m_logger, "m_guidance_ias           "
-         << Units::MetersPerSecondSpeed(m_guidance_ias).value() << std::endl);
+   LOG4CPLUS_DEBUG(PilotDelay::m_logger,
+                   "mTimetoNextSpeedChange " << Units::SecondsTime(m_time_to_next_speed_change).value() << std::endl);
+   LOG4CPLUS_DEBUG(PilotDelay::m_logger,
+                   "m_guidance_ias           " << Units::MetersPerSecondSpeed(m_guidance_ias).value() << std::endl);
    LOG4CPLUS_DEBUG(PilotDelay::m_logger, "m_guidance_mach          " << m_guidance_mach << std::endl);
 }
 
 /**
  * Sets the guidance IAS to the converted Mach if known; otherwise the provided fallback.
  */
-void PilotDelay::SetInitialIAS(Units::Length current_altitude,
-      Units::Speed fallback_IAS) {
+void PilotDelay::SetInitialIAS(Units::Length current_altitude, Units::Speed fallback_IAS) {
 
    // Have we been using Mach?
    if (m_guidance_mach != 0) {
       m_guidance_ias = m_atmosphere->MachToIAS(m_guidance_mach, current_altitude);
-   }
-   else {
+   } else {
       m_guidance_ias = fallback_IAS;
    }
 }
@@ -244,8 +235,9 @@ void PilotDelay::DumpStatistics() {
    double mean = m_delay_sum / m_delay_count;
    double standard_deviation = sqrt((m_delay_square_sum - m_delay_count * mean * mean) / m_delay_count);
    LOG4CPLUS_DEBUG(m_logger, "Number of delays (all iterations):  " << m_delay_count);
-   LOG4CPLUS_DEBUG(m_logger, "Average delay (all iterations):  " << mean << " seconds" <<
-         " (parameter value " << m_pilot_delay_mean << ")");
-   LOG4CPLUS_DEBUG(m_logger, "Standard deviation (all iterations):  " << standard_deviation << " seconds" <<
-         " (parameter value " << m_pilot_delay_standard_deviation << ")");
+   LOG4CPLUS_DEBUG(m_logger, "Average delay (all iterations):  " << mean << " seconds"
+                                                                 << " (parameter value " << m_pilot_delay_mean << ")");
+   LOG4CPLUS_DEBUG(m_logger, "Standard deviation (all iterations):  " << standard_deviation << " seconds"
+                                                                      << " (parameter value "
+                                                                      << m_pilot_delay_standard_deviation << ")");
 }

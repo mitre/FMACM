@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -19,7 +19,6 @@
 
 #include "public/HorizontalTurnPath.h"
 #include "public/HorizontalPath.h"
-
 
 HorizontalTurnPath::HorizontalTurnPath(void) {
    x_position_meters = 0;
@@ -32,16 +31,11 @@ HorizontalTurnPath::HorizontalTurnPath(void) {
    turn_type = UNKNOWN;
 }
 
-
-HorizontalTurnPath::~HorizontalTurnPath(void) {
-}
+HorizontalTurnPath::~HorizontalTurnPath(void) {}
 
 bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
-   return ((this->x_position_meters == that.x_position_meters) &&
-           (this->y_position_meters == that.y_position_meters) &&
-           (this->q_start == that.q_start) &&
-           (this->q_end == that.q_end) &&
-           (this->radius == that.radius));
+   return ((this->x_position_meters == that.x_position_meters) && (this->y_position_meters == that.y_position_meters) &&
+           (this->q_start == that.q_start) && (this->q_end == that.q_end) && (this->radius == that.radius));
 }
 
 /**
@@ -51,8 +45,8 @@ bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
  * The HorizontalPath object which owns this HorizontalTurnPath
  * would be p2.
  */
-HorizontalTurnPath::TURN_DIRECTION HorizontalTurnPath::GetTurnDirection(const HorizontalPath& p0,
-      const HorizontalPath& p1) const {
+HorizontalTurnPath::TURN_DIRECTION HorizontalTurnPath::GetTurnDirection(const HorizontalPath &p0,
+                                                                        const HorizontalPath &p1) const {
 
    // TODO replace this with a field and accessor, see AAES-1044
 

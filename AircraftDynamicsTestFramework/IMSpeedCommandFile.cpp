@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -23,11 +23,9 @@
 #include <stdlib.h>
 #include "utility/CsvParser.h"
 
-IMSpeedCommandFile::IMSpeedCommandFile()
-      : m_ias_hist(),
-        m_apply_pilot_delay(false) {
+IMSpeedCommandFile::IMSpeedCommandFile() : m_ias_hist(), m_apply_pilot_delay(false) {
 
-   for (double& i : m_ias_hist) {
+   for (double &i : m_ias_hist) {
       i = 0.0;
    }
 
@@ -87,23 +85,21 @@ void IMSpeedCommandFile::ReadData() {
          } else if (fieldix == 1) {
             m_speed_data[ix].mSpeed = Units::MetersPerSecondSpeed(val);
          } else {
-            std::cout << "Extra number of fields found in record "
-                      << (ix + 1) << " of " << m_file_path.c_str() << std::endl;
+            std::cout << "Extra number of fields found in record " << (ix + 1) << " of " << m_file_path.c_str()
+                      << std::endl;
             exit(-47);
          }
       }
    }
 
    file.close();
-
 }
 
 aaesim::open_source::Guidance IMSpeedCommandFile::Update(Units::Time time) {
    aaesim::open_source::Guidance guidance;
 
    Units::Time lookup_time(time);
-   if (m_apply_pilot_delay)
-      lookup_time = time - m_pilot_delay_seconds;
+   if (m_apply_pilot_delay) lookup_time = time - m_pilot_delay_seconds;
 
    const Units::Time final_time_available = m_speed_data[(m_speed_data.size() - 1)].mTime;
    guidance.SetValid(false);
@@ -131,7 +127,6 @@ aaesim::open_source::Guidance IMSpeedCommandFile::Update(Units::Time time) {
          guidance.m_ias_command = Units::FeetPerSecondSpeed(interpolatedspeed);
       }
       guidance.SetValid(true);
-
    }
 
    return guidance;
@@ -142,16 +137,15 @@ void IMSpeedCommandFile::dump() {
    std::cout << "Dumping data read from " << m_file_path.c_str() << std::endl << std::endl;
    std::cout << "Number of records " << m_speed_data.size() << std::endl << std::endl;
 
-   for (auto& ix : m_speed_data) {
-      std::cout << (int) Units::SecondsTime(ix.mTime).value() << ","
-                << Units::MetersPerSecondSpeed(ix.mSpeed).value() << std::endl;
+   for (auto &ix : m_speed_data) {
+      std::cout << (int)Units::SecondsTime(ix.mTime).value() << "," << Units::MetersPerSecondSpeed(ix.mSpeed).value()
+                << std::endl;
    }
 }
 
 IMSpeedCommandFile::SpeedRecord::SpeedRecord() = default;
 
-IMSpeedCommandFile::SpeedRecord::SpeedRecord(Units::Time t,
-                                             Units::Speed s) {
+IMSpeedCommandFile::SpeedRecord::SpeedRecord(Units::Time t, Units::Speed s) {
    mTime = t;
    mSpeed = s;
 }

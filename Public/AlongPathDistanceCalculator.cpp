@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -28,15 +28,17 @@ Units::Length AlongPathDistanceCalculator::EXTENDED_CROSS_TRACK_TOLERANCE = Unit
 Units::Length AlongPathDistanceCalculator::CAPTURE_CROSS_TRACK_TOLERANCE = Units::NauticalMilesLength(20.0);
 
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                             TrajectoryIndexProgressionDirection expected_index_progression) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
+                                                         TrajectoryIndexProgressionDirection expected_index_progression)
+   : HorizontalPathTracker(horizontal_path, expected_index_progression) {
 
    m_is_first_call = true;
    m_cross_track_tolerance = CROSS_TRACK_TOLERANCE;
 }
 
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                             TrajectoryIndexProgressionDirection expected_index_progression,
-                             bool use_large_cross_track_tolerance) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
+                                                         TrajectoryIndexProgressionDirection expected_index_progression,
+                                                         bool use_large_cross_track_tolerance)
+   : HorizontalPathTracker(horizontal_path, expected_index_progression) {
    m_is_first_call = true;
    if (use_large_cross_track_tolerance)
       m_cross_track_tolerance = EXTENDED_CROSS_TRACK_TOLERANCE;
@@ -45,15 +47,17 @@ AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<Horiz
 }
 
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                            TrajectoryIndexProgressionDirection expected_index_progression,
-                            Units::Length specified_cross_track_tolerance) : HorizontalPathTracker(horizontal_path, expected_index_progression) {
+                                                         TrajectoryIndexProgressionDirection expected_index_progression,
+                                                         Units::Length specified_cross_track_tolerance)
+   : HorizontalPathTracker(horizontal_path, expected_index_progression) {
    m_is_first_call = true;
    m_cross_track_tolerance = specified_cross_track_tolerance;
 }
 
-AlongPathDistanceCalculator AlongPathDistanceCalculator::CreateForCaptureClearance(const std::vector<HorizontalPath> &horizontal_path)   {
-   AlongPathDistanceCalculator result(horizontal_path, /*TrajectoryIndexProgressionDirection::*/UNDEFINED,
-           CAPTURE_CROSS_TRACK_TOLERANCE);
+AlongPathDistanceCalculator AlongPathDistanceCalculator::CreateForCaptureClearance(
+      const std::vector<HorizontalPath> &horizontal_path) {
+   AlongPathDistanceCalculator result(horizontal_path, /*TrajectoryIndexProgressionDirection::*/ UNDEFINED,
+                                      CAPTURE_CROSS_TRACK_TOLERANCE);
    return result;
 }
 
@@ -81,23 +85,23 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
    Units::Length calculated_distance_along_path;
    bool return_boolean = IsPositionOnNode(position_x, position_y, resolved_index);
    if (!return_boolean) {
-      if (m_is_first_call)
-         UpdateCurrentIndex(0);
+      if (m_is_first_call) UpdateCurrentIndex(0);
 
-      return_boolean = AircraftCalculations::CalculateDistanceAlongPathFromPosition(m_cross_track_tolerance, position_x, position_y,
-                                                                                    m_extended_horizontal_trajectory,
-                                                                                    m_current_index,
-                                                                                    calculated_distance_along_path,
-                                                                                    course,
-                                                                                    resolved_index);
+      return_boolean = AircraftCalculations::CalculateDistanceAlongPathFromPosition(
+            m_cross_track_tolerance, position_x, position_y, m_extended_horizontal_trajectory, m_current_index,
+            calculated_distance_along_path, course, resolved_index);
       HorizontalTurnPath::TURN_TYPE turn_type = m_extended_horizontal_trajectory[resolved_index].m_turn_info.turn_type;
       if (turn_type == HorizontalTurnPath::TURN_TYPE::PERFORMANCE) {
-         Units::MetersLength half_turn_dist = Units::MetersLength((m_extended_horizontal_trajectory[resolved_index].m_path_length_cumulative_meters
-                 + m_extended_horizontal_trajectory[resolved_index+1].m_path_length_cumulative_meters) / 2);
-         if (calculated_distance_along_path > half_turn_dist) // first half of turn
+         Units::MetersLength half_turn_dist = Units::MetersLength(
+               (m_extended_horizontal_trajectory[resolved_index].m_path_length_cumulative_meters +
+                m_extended_horizontal_trajectory[resolved_index + 1].m_path_length_cumulative_meters) /
+               2);
+         if (calculated_distance_along_path > half_turn_dist)  // first half of turn
             pt_to_pt_course = course;
          else
-            pt_to_pt_course = Units::UnsignedRadiansAngle(Units::UnsignedRadiansAngle(m_extended_horizontal_trajectory[resolved_index].m_path_course) + Units::PI_RADIANS_ANGLE);
+            pt_to_pt_course = Units::UnsignedRadiansAngle(
+                  Units::UnsignedRadiansAngle(m_extended_horizontal_trajectory[resolved_index].m_path_course) +
+                  Units::PI_RADIANS_ANGLE);
       } else {
          // for RADIUS_FIXED only use tangent == course
          // for UNKNOWN (straight segment) pt_to_pt == course
@@ -105,13 +109,15 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
       }
 
    } else {
-      calculated_distance_along_path = Units::MetersLength(m_extended_horizontal_trajectory[resolved_index].m_path_length_cumulative_meters);
-      course = Units::RadiansAngle(m_extended_horizontal_trajectory[resolved_index].m_path_course) + Units::PI_RADIANS_ANGLE;
+      calculated_distance_along_path =
+            Units::MetersLength(m_extended_horizontal_trajectory[resolved_index].m_path_length_cumulative_meters);
+      course = Units::RadiansAngle(m_extended_horizontal_trajectory[resolved_index].m_path_course) +
+               Units::PI_RADIANS_ANGLE;
       pt_to_pt_course = course;
    }
 
    if (m_is_first_call) {
-      UpdateCurrentIndex(resolved_index); // force validate to succeed
+      UpdateCurrentIndex(resolved_index);  // force validate to succeed
       m_is_first_call = false;
    }
 
@@ -129,16 +135,15 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
       // resolved_index looks incorrect. Throw.
       char msg[300];
       std::sprintf(msg,
-                   "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index %lu, resolved_index %lu",
+                   "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
+                   "%lu, resolved_index %lu",
                    m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
       auto high_index = std::max(m_current_index, resolved_index) + 1;
       auto low_index = std::min(m_current_index, resolved_index);
       for (auto i = low_index; i <= high_index; i++) {
-         LOG4CPLUS_TRACE(m_logger, "" << i << ": (" <<
-               m_extended_horizontal_trajectory[i].GetXPositionMeters() << "," <<
-               m_extended_horizontal_trajectory[i].GetYPositionMeters() << ")");
-
+         LOG4CPLUS_TRACE(m_logger, "" << i << ": (" << m_extended_horizontal_trajectory[i].GetXPositionMeters() << ","
+                                      << m_extended_horizontal_trajectory[i].GetYPositionMeters() << ")");
       }
       throw std::logic_error(msg);
    }
@@ -146,7 +151,7 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
    return return_boolean;
 }
 
-AlongPathDistanceCalculator::AlongPathDistanceCalculator() : HorizontalPathTracker(), m_is_first_call(true) { }
+AlongPathDistanceCalculator::AlongPathDistanceCalculator() : HorizontalPathTracker(), m_is_first_call(true) {}
 
 bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const Units::Length position_x,
                                                                          const Units::Length position_y,
@@ -159,4 +164,3 @@ void AlongPathDistanceCalculator::UpdateHorizontalTrajectory(const std::vector<H
    HorizontalPathTracker::UpdateHorizontalTrajectory(horizontal_trajectory);
    m_is_first_call = true;
 }
-

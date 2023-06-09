@@ -15,6 +15,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 add_library(math STATIC ${SOURCE_FILES})
 target_include_directories(math PUBLIC
+        ${LOG4CPLUS_DIRS}
         ${unitslib_INCLUDE_DIRS}
         ${aaesim_INCLUDE_DIRS})
 

@@ -1,24 +1,23 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /* CustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
-
 
 #include <math.h>
 #include <stdlib.h>
@@ -28,17 +27,16 @@
 
 using namespace aaesim::constants;
 
-//generate a uniform random number between 0 and 1
-//From "Numerical Recipe"
+// generate a uniform random number between 0 and 1
+// From "Numerical Recipe"
 
-double atan3(double x,
-             double y) {
+double atan3(double x, double y) {
 
    // returns arc tangent as an angle measured from north in the range 0, 2pi
 
    double temp;
 
-   temp = (double) atan2(x, y);
+   temp = (double)atan2(x, y);
 
    if (temp < 0.0) {
       temp = temp + 2.0 * PI;
@@ -46,10 +44,9 @@ double atan3(double x,
 
    return (temp);
 
-} // atan3
+}  // atan3
 
-double quantize(double value,
-                double lsb) {
+double quantize(double value, double lsb) {
    // quantizes value to lsb (least significant bit)
    if (lsb == 0) return value;
    double r = round(value / lsb);
@@ -57,11 +54,9 @@ double quantize(double value,
       r = 0;
    }
    return (lsb * r);
-} // quantize
+}  // quantize
 
-
-Units::Length quantize(Units::Length value,
-                       Units::Length lsb) {
+Units::Length quantize(Units::Length value, Units::Length lsb) {
    // quantizes value to lsb (least significant bit)
    if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
@@ -71,9 +66,7 @@ Units::Length quantize(Units::Length value,
    return (lsb * r);
 }
 
-
-Units::Speed quantize(Units::Speed value,
-                      Units::Speed lsb) {
+Units::Speed quantize(Units::Speed value, Units::Speed lsb) {
    // quantizes value to lsb (least significant bit)
    if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
@@ -83,8 +76,7 @@ Units::Speed quantize(Units::Speed value,
    return (lsb * r);
 }
 
-Units::Time quantize(Units::Time value,
-                     Units::Time lsb) {
+Units::Time quantize(Units::Time value, Units::Time lsb) {
    // quantizes value to lsb (least significant bit)
    if (lsb == Units::zero()) return value;
    double r = round(value / lsb);
@@ -94,8 +86,7 @@ Units::Time quantize(Units::Time value,
    return (lsb * r);
 }
 
-double subtract_headings(double hd1,
-                         double hd2) {
+double subtract_headings(double hd1, double hd2) {
    // subtract heading 2 from heading 1 with the following convention:
    // negative (counterclockwise) deltas are indicated by being greater than pi.
    // positive (clockwise) deltas are less than pi.
@@ -110,18 +101,15 @@ double subtract_headings(double hd1,
 
    return (t);
 
-} // subtract_headings
-
+}  // subtract_headings
 
 //-------------------------------------------------------------
 // Speed conversion using MACH & altitude as inputs; unit of output is FPS
 //-------------------------------------------------------------
-double MachToTas(double mach,
-                 double altitude) {
+double MachToTas(double mach, double altitude) {
 
    float speedOfSound;
    double tas;
-
 
    if (0 <= altitude && altitude <= 36000) {
       speedOfSound = 662.4 - 243.0 * altitude / 100000.0;
@@ -137,18 +125,16 @@ double MachToTas(double mach,
 
    tas = (mach * speedOfSound);
 
-   //before this point tas is in knots
-   //gwang 2009-03
+   // before this point tas is in knots
+   // gwang 2009-03
    tas *= KNOTS_TO_FEET_PER_SECOND;
-   //end gwang
+   // end gwang
 
-   return (tas); //FPS
+   return (tas);  // FPS
 }
 
-
-//output CAS in FPS
-double MachToCas_MITRE(double mach,
-                       double alt) {
+// output CAS in FPS
+double MachToCas_MITRE(double mach, double alt) {
    double cas, thetas, deltam;
 
    if (alt < 36089.24) {
@@ -160,9 +146,8 @@ double MachToCas_MITRE(double mach,
       // FIXME use exp() instead of pow()
       deltam = 0.2233609 * pow(2.718, (-((alt - 36089.24) / 20806.0)));
    }
-   cas = 661.4786 * sqrt(5.0 * ((pow((1.0 + deltam *
-                                            ((pow((1.0 + 0.2 * mach * mach), 3.5) - 1.0))),
-                                     (2.0 / 7.0))) - 1.0));
+   cas = 661.4786 *
+         sqrt(5.0 * ((pow((1.0 + deltam * ((pow((1.0 + 0.2 * mach * mach), 3.5) - 1.0))), (2.0 / 7.0))) - 1.0));
 
    cas *= KNOTS_TO_FEET_PER_SECOND;
 
@@ -170,11 +155,9 @@ double MachToCas_MITRE(double mach,
 
 } /* MachToCas_MITRE */
 
-//inverse = inverse(in)
+// inverse = inverse(in)
 /* Gauss-Jordan elimination from Numerical recipe:*/
-bool inverse(DMatrix &in,
-             int n,
-             DMatrix &out) {
+bool inverse(DMatrix &in, int n, DMatrix &out) {
    int irow = -1, icol = -1;
 
    DVector indxc(1, n);
@@ -182,7 +165,7 @@ bool inverse(DMatrix &in,
    DVector ipiv(1, n);
    DMatrix a(1, n, 1, n);
 
-   //copy the "in" matrix into the "a" matrix:
+   // copy the "in" matrix into the "a" matrix:
    int in_min_row = in.GetMinRow();
    int in_min_column = in.GetMinColumn();
    for (int i = 1; i <= n; i++) {
@@ -190,7 +173,6 @@ bool inverse(DMatrix &in,
          a.Set(i, j, in.Get(i - 1 + in_min_row, j - 1 + in_min_column));
       }
    }
-
 
    for (int j = 1; j <= n; j++) {
       ipiv.Set(j, 0.);
@@ -208,27 +190,27 @@ bool inverse(DMatrix &in,
                      icol = k;
                   }
                } else if (ipiv.Get(k) > 1.) {
-                  //singular matrix
+                  // singular matrix
                   printf("\nWarning: Inversion of a singular matrix in the inverse() function (> 1 val).\n");
                   return false;
                }
-            } //end for(int k=1; k<=n; k++)
-         } //end if(ipiv.get(j) != 1.)
-      } //end for(int j=1; i<=n; j++)
+            }  // end for(int k=1; k<=n; k++)
+         }     // end if(ipiv.get(j) != 1.)
+      }        // end for(int j=1; i<=n; j++)
       ipiv.Set(icol, ipiv.Get(icol) + 1);
       if (irow != icol) {
-         //swap
+         // swap
          for (int l = 1; l <= n; l++) {
             double temp_swap;
             temp_swap = a.Get(irow, l);
             a.Set(irow, l, a.Get(icol, l));
             a.Set(icol, l, temp_swap);
-         } //end for(int l=1; l<=n; l++)
-      } //end if(irow != icol)
-      indxr.Set(i, (double) irow);
-      indxc.Set(i, (double) icol);
+         }  // end for(int l=1; l<=n; l++)
+      }     // end if(irow != icol)
+      indxr.Set(i, (double)irow);
+      indxc.Set(i, (double)icol);
       if (a.Get(icol, icol) == 0.0) {
-         //singular matrix
+         // singular matrix
          printf("\nWarning: Inversion of a singular matrix in the inverse() function (0 val).\n");
          return false;
       }
@@ -236,7 +218,7 @@ bool inverse(DMatrix &in,
       a.Set(icol, icol, 1.);
       for (int l = 1; l <= n; l++) {
          a.Set(icol, l, pivinv * a.Get(icol, l));
-      }//end for(int l=1; l<=n; l++)
+      }  // end for(int l=1; l<=n; l++)
 
       for (int ll = 1; ll <= n; ll++) {
          if (ll != icol) {
@@ -244,28 +226,24 @@ bool inverse(DMatrix &in,
             a.Set(ll, icol, 0.);
             for (int l = 1; l <= n; l++) {
                a.Set(ll, l, a.Get(ll, l) - dum * a.Get(icol, l));
-            } //end for(int l=1; l<=n; l++)
-         } //end if(ll != icol)
-      }//end for(int ll=1; ll<=n; ll++)
-   }//end for(int i=1; i<=n; i++)
-
-
+            }  // end for(int l=1; l<=n; l++)
+         }     // end if(ll != icol)
+      }        // end for(int ll=1; ll<=n; ll++)
+   }           // end for(int i=1; i<=n; i++)
 
    for (int l = n; l >= 1; l--) {
       if (indxr.Get(l) != indxc.Get(l)) {
          for (int k = 1; k <= n; k++) {
-            //swap:
+            // swap:
             double temp;
-            temp = a.Get(k, (int) indxr.Get(l));
-            a.Set(k, (int) indxr.Get(l), a.Get(k, (int) indxc.Get(l)));
-            a.Set(k, (int) indxc.Get(l), temp);
+            temp = a.Get(k, (int)indxr.Get(l));
+            a.Set(k, (int)indxr.Get(l), a.Get(k, (int)indxc.Get(l)));
+            a.Set(k, (int)indxc.Get(l), temp);
          }
-      }//end if(indxr.get(l) != indxc.get(l))
-   }//end for(int l=n; l>=1; l--)
+      }  // end if(indxr.get(l) != indxc.get(l))
+   }     // end for(int l=n; l>=1; l--)
 
-
-
-   //copy the "a" matrix into the "out" matrix:
+   // copy the "a" matrix into the "out" matrix:
    int out_min_row = out.GetMinRow();
    int out_min_column = out.GetMinColumn();
    for (int i = 1; i <= n; i++) {
@@ -276,27 +254,20 @@ bool inverse(DMatrix &in,
    return true;
 }
 
-
-void matrix_times_vector(DMatrix &matrix_in,
-                         DVector &vector_in,
-                         int n,
-                         DVector &vector_out) {
-
+void matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector &vector_out) {
 
    for (int i = 0; i < n; i++) {
       int ii = i + vector_out.GetMin();
       vector_out[ii] = 0.0;
       for (int j = 0; j < n; j++) {
-         vector_out[ii] += matrix_in[i + matrix_in.GetMinRow()][j + matrix_in.GetMinColumn()] *
-                           vector_in[j + vector_in.GetMin()];
+         vector_out[ii] +=
+               matrix_in[i + matrix_in.GetMinRow()][j + matrix_in.GetMinColumn()] * vector_in[j + vector_in.GetMin()];
       }
    }
 }
 
-
 #ifndef _LINUX_
-int roundToInt(double d)
-{
+int roundToInt(double d) {
    // Rounds double to int, away from 0 for the midpoint values.
    //
    // d:double value to be rounded
@@ -309,8 +280,7 @@ int roundToInt(double d)
    if (val > 0) {
       val = val + 0.5;
       i = floor(val);
-   }
-   else if (val < 0) {
+   } else if (val < 0) {
       val = val - 0.5;
       i = ceil(val);
    }
@@ -325,10 +295,7 @@ int roundToInt(double d)
  * matrix [x y z] is post-multiplied by the rotation
  * matrix.
  */
-DMatrix &createRotationMatrix(double l,
-                              double m,
-                              double n,
-                              const Units::Angle theta) {
+DMatrix &createRotationMatrix(double l, double m, double n, const Units::Angle theta) {
 
    // basic formula acquired from:
    // https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
@@ -348,11 +315,9 @@ DMatrix &createRotationMatrix(double l,
    double sinT = sin(theta);
    double cosT1 = 1 - cosT;
 
-   double a[3][3] = {
-         {l * l * cosT1 + cosT,     m * l * cosT1 + n * sinT, n * l * cosT1 - m * sinT},
-         {l * m * cosT1 - n * sinT, m * m * cosT1 + cosT,     n * m * cosT1 + l * sinT},
-         {l * n * cosT1 + m * sinT, m * n * cosT1 - l * sinT, n * n * cosT1 + cosT}
-   };
-   DMatrix *result = new DMatrix((double **) &a, 0, 2, 0, 2);
+   double a[3][3] = {{l * l * cosT1 + cosT, m * l * cosT1 + n * sinT, n * l * cosT1 - m * sinT},
+                     {l * m * cosT1 - n * sinT, m * m * cosT1 + cosT, n * m * cosT1 + l * sinT},
+                     {l * n * cosT1 + m * sinT, m * n * cosT1 - l * sinT, n * n * cosT1 + cosT}};
+   DMatrix *result = new DMatrix((double **)&a, 0, 2, 0, 2);
    return *result;
 }

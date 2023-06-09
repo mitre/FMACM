@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -20,45 +20,28 @@
 #include <sstream>
 #include "public/SimulationTime.h"
 
-
 Units::SecondsTime SimulationTime::simulation_time_step(1.0);
 log4cplus::Logger SimulationTime::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SimulationTime"));
 
-SimulationTime::SimulationTime(void) {
-   cycle = 0;
-}
+SimulationTime::SimulationTime() : cycle(0), current_time(Units::SecondsTime(0.0)) {}
 
-SimulationTime::~SimulationTime(void) {
+SimulationTime::~SimulationTime() = default;
 
-}
-
-void SimulationTime::init(void) {
-   cycle = 0;
-   this->current_time = Units::SecondsTime(0.0);
-   simulation_time_step = Units::SecondsTime(1.0);
-}
-
-void SimulationTime::increment(void) {
-   cycle++;
+void SimulationTime::increment() {
+   ++cycle;
    current_time += simulation_time_step;
 }
 
-Units::SecondsTime SimulationTime::get_current_simulation_time() const {
-   return current_time;
-}
+Units::SecondsTime SimulationTime::get_current_simulation_time() const { return current_time; }
 
-int SimulationTime::get_sim_cycle() const {
-   return cycle;
-}
+int SimulationTime::get_sim_cycle() const { return cycle; }
 
 void SimulationTime::set_cycle(int cycle_in) {
    cycle = cycle_in;
    current_time = simulation_time_step * cycle;
 }
 
-SimulationTime::SimulationTime(const SimulationTime &in) {
-   copy(in);
-}
+SimulationTime::SimulationTime(const SimulationTime &in) { copy(in); }
 
 SimulationTime &SimulationTime::operator=(const SimulationTime &in) {
    if (this != &in) {
@@ -68,24 +51,15 @@ SimulationTime &SimulationTime::operator=(const SimulationTime &in) {
 }
 
 const SimulationTime SimulationTime::make(const Units::SecondsTime time) {
-
-   // Computes cycle from time and returns SimulationTime object from time
-   // and cycle.  Warning produced if cycle calculation does not give exact
-   // calculation using time and time step.
-   //
-   // time:input time
-   //
-   // returns simulation time object.
+   int cyc = static_cast<int>(Units::SecondsTime(time / simulation_time_step).value());
 
    SimulationTime simtime;
-
-   int cyc = (int) (time / simulation_time_step);
-
    simtime.set_cycle(cyc);
 
    if (time != simtime.get_current_simulation_time()) {
       LOG4CPLUS_WARN(SimulationTime::logger, "Inconsistent SimulationTime::make result computing cycle from time "
-            << time.value() << " for step " << SimulationTime::get_simulation_time_step().value() << std::endl);
+                                                   << time.value() << " for step "
+                                                   << SimulationTime::get_simulation_time_step().value() << std::endl);
    }
 
    return simtime;

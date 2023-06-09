@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -27,10 +27,7 @@ using namespace aaesim::open_source;
 
 log4cplus::Logger AircraftControl::m_logger = log4cplus::Logger::getInstance("AircraftControl");
 
-AircraftControl::AircraftControl()
-      : m_speed_brake_gain(0.0),
-        m_bada_calculator(nullptr) {
-}
+AircraftControl::AircraftControl() : m_speed_brake_gain(0.0), m_bada_calculator(nullptr) {}
 
 void AircraftControl::Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> aircraft_performance,
                                  const Units::Angle &max_bank_angle) {
@@ -48,13 +45,12 @@ Units::Frequency AircraftControl::CalculateThrustGain() {
    return thrustGain;
 }
 
-void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMotionState &equations_of_motion_state,
-                                                             Units::Force &lift,
-                                                             Units::Force &drag,
-                                                             aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
-                                                             const WeatherTruth &weather) {
-   Units::Speed calibrated_airspeed = weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(equations_of_motion_state.true_airspeed), Units::MetersLength(
-      equations_of_motion_state.altitude_msl));
+void AircraftControl::ConfigureFlapsAndEstimateKineticForces(
+      const EquationsOfMotionState &equations_of_motion_state, Units::Force &lift, Units::Force &drag,
+      aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration, const WeatherTruth &weather) {
+   Units::Speed calibrated_airspeed =
+         weather.getAtmosphere()->TAS2CAS(Units::MetersPerSecondSpeed(equations_of_motion_state.true_airspeed),
+                                          Units::MetersLength(equations_of_motion_state.altitude_msl));
 
    // Get temp, density, and pressure
    Units::KilogramsMeterDensity rho;
@@ -64,16 +60,13 @@ void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMo
    // Get AC Configuration
    double cd0, cd2;
    double gear;
-   m_bada_calculator->GetDragCoefficientsAndIncrementFlapConfiguration(calibrated_airspeed,
-                                                                       equations_of_motion_state.altitude_msl,
-                                                                       cd0,
-                                                                       cd2,
-                                                                       gear,
-                                                                       new_flap_configuration);
+   m_bada_calculator->GetDragCoefficientsAndIncrementFlapConfiguration(
+         calibrated_airspeed, equations_of_motion_state.altitude_msl, cd0, cd2, gear, new_flap_configuration);
 
    // Lift and Drag Estimate Calculations
    double cL =
-         (2. * m_ac_mass * Units::ONE_G_ACCELERATION) / (rho * Units::sqr(equations_of_motion_state.true_airspeed) * m_wing_area * cos(equations_of_motion_state.phi));
+         (2. * m_ac_mass * Units::ONE_G_ACCELERATION) /
+         (rho * Units::sqr(equations_of_motion_state.true_airspeed) * m_wing_area * cos(equations_of_motion_state.phi));
    double cD = cd0 + gear + cd2 * pow(cL, 2);
    if (equations_of_motion_state.speedBrake != 0.0) {
       cD = (1.0 + 0.6 * equations_of_motion_state.speedBrake) * cD;
@@ -86,7 +79,8 @@ void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMo
       using json = nlohmann::json;
       json j;
       j["calibrated_airspeed_kts"] = Units::KnotsSpeed(calibrated_airspeed).value();
-      j["equations_of_motion_state.altitude_msl_ft"] = Units::FeetLength(equations_of_motion_state.altitude_msl).value();
+      j["equations_of_motion_state.altitude_msl_ft"] =
+            Units::FeetLength(equations_of_motion_state.altitude_msl).value();
       j["new_flap_configuration"] = GetFlapConfigurationAsString(new_flap_configuration);
       j["drag_newtons"] = Units::NewtonsForce(drag).value();
       j["lift_newtons"] = Units::NewtonsForce(lift).value();
@@ -100,23 +94,21 @@ void AircraftControl::ConfigureFlapsAndEstimateKineticForces(const EquationsOfMo
  *
  * Override this method to provide alternate implemenations.
  */
-void AircraftControl::CalculateSensedWind(const WeatherTruth &wind,
-                                          const Units::MetersLength &altitude_msl) {
+void AircraftControl::CalculateSensedWind(const WeatherTruth &wind, const Units::MetersLength &altitude_msl) {
    // Get Winds and Wind Gradients at altitude_msl
    wind.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_msl, wind.east_west, m_Vwx, m_dVwx_dh);
    wind.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_msl, wind.north_south, m_Vwy, m_dVwy_dh);
-
 }
 
 Units::Angle AircraftControl::DoLateralControl(const Guidance &guidance,
                                                const EquationsOfMotionState &equations_of_motion_state) {
    const Units::InvertedLength k_xtrk = Units::PerMeterInvertedLength(5e-4);  // meters^-1
-   const double k_trk = 3;      // unitless
+   const double k_trk = 3;                                                    // unitless
 
    // States
-   const Units::Speed tas = equations_of_motion_state.true_airspeed;    // true airspeed
+   const Units::Speed tas = equations_of_motion_state.true_airspeed;  // true airspeed
    const Units::Angle gamma = equations_of_motion_state.gamma;        // flight-path angle
-   const Units::Angle psi = equations_of_motion_state.psi_enu;        // heading angle measured from east counter-clockwise
+   const Units::Angle psi = equations_of_motion_state.psi_enu;  // heading angle measured from east counter-clockwise
 
    const Units::Speed Vw_para = m_Vwx * cos(guidance.m_enu_track_angle) + m_Vwy * sin(guidance.m_enu_track_angle);
    const Units::Speed Vw_perp = -m_Vwx * sin(guidance.m_enu_track_angle) + m_Vwy * cos(guidance.m_enu_track_angle);
@@ -124,7 +116,8 @@ Units::Angle AircraftControl::DoLateralControl(const Guidance &guidance,
    const Units::Speed wind_magnitude = sqrt(Units::sqr(m_Vwx) + Units::sqr(m_Vwy));
    const Units::Speed estimated_ground_speed = sqrt(Units::sqr(tas * cos(gamma)) - Units::sqr(Vw_perp)) + Vw_para;
 
-   double temp = (Units::sqr(tas * cos(gamma)) + Units::sqr(estimated_ground_speed) - Units::sqr(wind_magnitude)) / (tas * 2 * cos(gamma) * estimated_ground_speed);
+   double temp = (Units::sqr(tas * cos(gamma)) + Units::sqr(estimated_ground_speed) - Units::sqr(wind_magnitude)) /
+                 (tas * 2 * cos(gamma) * estimated_ground_speed);
 
    // Limit temp so acos function doesn't give undefined value.
    if (temp > 1.0) {
@@ -190,31 +183,19 @@ ControlCommands AircraftControl::CalculateControlCommands(const Guidance &guidan
    Units::Force thrust_command;
    Units::Angle gamma_command;
    Units::Speed true_airspeed_command;
-   if (guidance.m_active_guidance_phase==CLIMB) {
+   if (guidance.m_active_guidance_phase == CLIMB) {
       phi_command = DoLateralControl(guidance, equations_of_motion_state);
-      DoClimbingControl(guidance,
-                        equations_of_motion_state,
-                        thrust_command,
-                        gamma_command,
-                        true_airspeed_command,
-                        new_flap_config,
-                        truth_wind);
-   } else if (guidance.m_active_guidance_phase==CRUISE_DESCENT) {
+      DoClimbingControl(guidance, equations_of_motion_state, thrust_command, gamma_command, true_airspeed_command,
+                        new_flap_config, truth_wind);
+   } else if (guidance.m_active_guidance_phase == CRUISE_DESCENT) {
       phi_command = DoLateralControl(guidance, equations_of_motion_state);
-      DoVerticalControl(guidance,
-                        equations_of_motion_state,
-                        thrust_command,
-                        gamma_command,
-                        true_airspeed_command,
-                        speed_brake_command,
-                        new_flap_config,
-                        truth_wind);
-   } else if (guidance.m_active_guidance_phase==TAKEOFF_ROLL) {
+      DoVerticalControl(guidance, equations_of_motion_state, thrust_command, gamma_command, true_airspeed_command,
+                        speed_brake_command, new_flap_config, truth_wind);
+   } else if (guidance.m_active_guidance_phase == TAKEOFF_ROLL) {
       phi_command = Units::zero();
-      thrust_command = m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl,
-                                                       bada_utils::FlapConfiguration::TAKEOFF,
-                                                       bada_utils::EngineThrustMode::MAXIMUM_CLIMB,
-                                                       Units::ZERO_CELSIUS);
+      thrust_command = m_bada_calculator->GetMaxThrust(
+            equations_of_motion_state.altitude_msl, bada_utils::FlapConfiguration::TAKEOFF,
+            bada_utils::EngineThrustMode::MAXIMUM_CLIMB, Units::ZERO_CELSIUS);
       gamma_command = Units::zero();
       speed_brake_command = 0;
       new_flap_config = bada_utils::TAKEOFF;
@@ -223,18 +204,17 @@ ControlCommands AircraftControl::CalculateControlCommands(const Guidance &guidan
       throw std::runtime_error("Design Error: Missing phase of flight implementation");
    }
 
-
-   ControlCommands controlCommands(phi_command, thrust_command, gamma_command, true_airspeed_command, speed_brake_command, new_flap_config);
+   ControlCommands controlCommands(phi_command, thrust_command, gamma_command, true_airspeed_command,
+                                   speed_brake_command, new_flap_config);
    return controlCommands;
 }
 
 void AircraftControl::DoClimbingControl(const Guidance &guidance,
-                        const EquationsOfMotionState &equations_of_motion_state,
-                        Units::Force &thrust_command,
-                        Units::Angle &gamma_command,
-                        Units::Speed &tas_command,
-                        aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
-                        const WeatherTruth &weather_truth) {
+                                        const EquationsOfMotionState &equations_of_motion_state,
+                                        Units::Force &thrust_command, Units::Angle &gamma_command,
+                                        Units::Speed &tas_command,
+                                        aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
+                                        const WeatherTruth &weather_truth) {
 
    const Units::Frequency gain_altitude = Units::HertzFrequency(0.20);
    const Units::Frequency thrust_gain = CalculateThrustGain();
@@ -244,7 +224,8 @@ void AircraftControl::DoClimbingControl(const Guidance &guidance,
    const Units::Length alt_ref = guidance.m_reference_altitude;
    const Units::Length error_alt = alt_ref - equations_of_motion_state.altitude_msl;
 
-   double temp_gamma = -(hdot_ref + gain_altitude * error_alt) / equations_of_motion_state.true_airspeed; // calculate change in altitude
+   double temp_gamma = -(hdot_ref + gain_altitude * error_alt) /
+                       equations_of_motion_state.true_airspeed;  // calculate change in altitude
    // if fabs(change) > 1 set to 1 required for asin calculation
    if (temp_gamma > 1.0) {
       temp_gamma = 1.0;
@@ -267,19 +248,22 @@ void AircraftControl::DoClimbingControl(const Guidance &guidance,
    // Thrust to maintain speed
    // Nominal Thrust (no acceleration) at desired speed
    Units::Force thrust_nominal;
-   thrust_nominal = m_ac_mass * vel_dot_com
-      + drag - m_ac_mass * Units::ONE_G_ACCELERATION * sin(equations_of_motion_state.gamma)
-      - m_ac_mass * equations_of_motion_state.true_airspeed
-         * (m_dVwx_dh * cos(equations_of_motion_state.psi_enu) + m_dVwy_dh * sin(equations_of_motion_state.psi_enu))
-         * sin(equations_of_motion_state.gamma) * cos(equations_of_motion_state.gamma);
+   thrust_nominal = m_ac_mass * vel_dot_com + drag -
+                    m_ac_mass * Units::ONE_G_ACCELERATION * sin(equations_of_motion_state.gamma) -
+                    m_ac_mass * equations_of_motion_state.true_airspeed *
+                          (m_dVwx_dh * cos(equations_of_motion_state.psi_enu) +
+                           m_dVwy_dh * sin(equations_of_motion_state.psi_enu)) *
+                          sin(equations_of_motion_state.gamma) * cos(equations_of_motion_state.gamma);
 
    thrust_command = thrust_nominal;
 
    // Thrust Limits
-   Units::Force max_thrust = Units::NewtonsForce(
-      m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CLIMB, Units::ZERO_CELSIUS));
-   Units::Force min_thrust = Units::NewtonsForce(
-      m_bada_calculator->GetMaxThrust(equations_of_motion_state.altitude_msl, new_flap_configuration, aaesim::open_source::bada_utils::EngineThrustMode::DESCENT, Units::ZERO_CELSIUS));
+   Units::Force max_thrust = Units::NewtonsForce(m_bada_calculator->GetMaxThrust(
+         equations_of_motion_state.altitude_msl, new_flap_configuration,
+         aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CLIMB, Units::ZERO_CELSIUS));
+   Units::Force min_thrust = Units::NewtonsForce(m_bada_calculator->GetMaxThrust(
+         equations_of_motion_state.altitude_msl, new_flap_configuration,
+         aaesim::open_source::bada_utils::EngineThrustMode::DESCENT, Units::ZERO_CELSIUS));
 
    if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
       using json = nlohmann::json;
@@ -296,4 +280,3 @@ void AircraftControl::DoClimbingControl(const Guidance &guidance,
       LOG4CPLUS_TRACE(m_logger, j.dump());
    }
 }
-

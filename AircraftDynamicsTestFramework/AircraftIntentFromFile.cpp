@@ -1,25 +1,24 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/AircraftIntentFromFile.h"
-
-#include "public/HfpReader2020.h"
+#include "framework/HfpReader2020.h"
 
 using std::string;
 
@@ -27,7 +26,7 @@ AircraftIntentFromFile::AircraftIntentFromFile() = default;
 
 AircraftIntentFromFile::~AircraftIntentFromFile() = default;
 
-bool AircraftIntentFromFile::load(DecodedStream* input) {
+bool AircraftIntentFromFile::load(DecodedStream *input) {
    set_stream(input);
 
    std::string csvfile;
@@ -42,7 +41,7 @@ bool AircraftIntentFromFile::load(DecodedStream* input) {
    return loaded;
 }
 
-void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string& csv_file) {
+void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string &csv_file) {
    testvector::HfpReader2020 hfp_reader(csv_file, 1);
 
    Units::MetersLength x_waypoint_location[128];
@@ -92,7 +91,7 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string& csv_fil
    int number_of_data_rows = irow + 1;
    int forward_row_index = 0;
 
-   SetId(0); // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
+   SetId(0);  // hardcoding in this test framework, must match the id in TestFrameworkAircraft.cpp
    SetNumberOfWaypoints(number_of_data_rows);
    for (int reverse_row_index = number_of_data_rows - 1; reverse_row_index >= 0; --reverse_row_index) {
       m_route_data.m_name.push_back(string("F") + string(std::to_string(forward_row_index)));
@@ -104,14 +103,14 @@ void AircraftIntentFromFile::PopulateWaypointsFromCsv(const std::string& csv_fil
    }
 }
 
-double AircraftIntentFromFile::LocalStringToDouble(const string& s) {
+double AircraftIntentFromFile::LocalStringToDouble(const string &s) {
    std::istringstream iss(s);
    double val = 0;
    iss >> val;
    return val;
 }
 
-int AircraftIntentFromFile::LocalStringToInt(const string& s) {
+int AircraftIntentFromFile::LocalStringToInt(const string &s) {
    std::istringstream iss(s);
    int val = 0;
    iss >> val;

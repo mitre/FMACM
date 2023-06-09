@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -21,12 +21,9 @@
 
 using namespace std;
 
+FilePath::FilePath() {}
 
-FilePath::FilePath() {
-}
-
-FilePath::~FilePath() {
-}
+FilePath::~FilePath() {}
 
 FilePath::FilePath(const string &name) {
    m_error = false;
@@ -97,29 +94,17 @@ bool FilePath::operator==(const FilePath &rhs) const {
    return false;
 }
 
-string FilePath::GetFullPath() const {
-   return m_full_path;
-}
+string FilePath::GetFullPath() const { return m_full_path; }
 
-string FilePath::GetType() const {
-   return m_type;
-}
+string FilePath::GetType() const { return m_type; }
 
-string FilePath::GetDisk() const {
-   return m_drive;
-}
+string FilePath::GetDisk() const { return m_drive; }
 
-string FilePath::RemoveLastDirectory() const {
-   return m_last_directory;
-}
+string FilePath::RemoveLastDirectory() const { return m_last_directory; }
 
-int FilePath::GetNumberOfDirectories() const {
-   return m_number_of_directories;
-}
+int FilePath::GetNumberOfDirectories() const { return m_number_of_directories; }
 
-vector<string> FilePath::ListDirectories() const {
-   return m_list_of_directories;
-}
+vector<string> FilePath::ListDirectories() const { return m_list_of_directories; }
 
 FilePath FilePath::Pop() const {
    FilePath out = FilePath(m_last_directory);
@@ -169,8 +154,8 @@ int FilePath::ExtractDisk(const string &name) {
    if (name.find_first_of(":") != string::npos) {
       m_drive = name.substr(0, name.find_first_of(":"));
       if ((name.length() - 1) == name.find_first_of(":")) {
-         m_error = true; //return error if path is just C:
-         return -1; // added by ADM jan 24 2011
+         m_error = true;  // return error if path is just C:
+         return -1;       // added by ADM jan 24 2011
       } else {
          return name.find_first_of(":") + 1;
       }
@@ -178,7 +163,6 @@ int FilePath::ExtractDisk(const string &name) {
       m_drive = "";
       return 0;
    }
-
 }
 
 int FilePath::ExtractType(const string &name) {
@@ -188,7 +172,7 @@ int FilePath::ExtractType(const string &name) {
       m_type = "";
       return name.length();
    } else {
-      //a path cannot have a period at the end
+      // a path cannot have a period at the end
       if (found == name.length() - 1) {
          m_error = true;
       }
@@ -197,9 +181,7 @@ int FilePath::ExtractType(const string &name) {
    }
 }
 
-void FilePath::ExtractPath(const string &name,
-                           int &index,
-                           int end) {
+void FilePath::ExtractPath(const string &name, int &index, int end) {
    m_number_of_directories = 0;
    string temp = name;
    while (index < end) {

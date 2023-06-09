@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -27,8 +27,8 @@
 #include "public/EllipsoidalEarthModel.h"
 #include <iomanip>
 
-log4cplus::Logger EllipsoidalEarthModel::m_logger = log4cplus::Logger::getInstance(
-      LOG4CPLUS_TEXT("EllipsoidalEarthModel"));
+log4cplus::Logger EllipsoidalEarthModel::m_logger =
+      log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("EllipsoidalEarthModel"));
 
 /*
  * Developers Note:
@@ -41,40 +41,30 @@ const double EllipsoidalEarthModel::m_wgs84_eccentricity_squared = 0.00669437999
 //-----------------------------------------------------------------------------------------
 
 EllipsoidalEarthModel::EllipsoidalEarthModel()
-      :
-   m_semi_major_radius(m_wgs84_semimajor_radius),
-   m_semi_major_radius_squared(m_wgs84_semimajor_radius * m_wgs84_semimajor_radius),
-   m_eccentricity_squared(m_wgs84_eccentricity_squared),
-   m_eccentricity_4(m_wgs84_eccentricity_squared * m_wgs84_eccentricity_squared) {
+   : m_semi_major_radius(m_wgs84_semimajor_radius),
+     m_semi_major_radius_squared(m_wgs84_semimajor_radius * m_wgs84_semimajor_radius),
+     m_eccentricity_squared(m_wgs84_eccentricity_squared),
+     m_eccentricity_4(m_wgs84_eccentricity_squared * m_wgs84_eccentricity_squared) {}
 
-}
+EllipsoidalEarthModel::~EllipsoidalEarthModel() {}
 
-EllipsoidalEarthModel::~EllipsoidalEarthModel() {
-}
-
-void EllipsoidalEarthModel::ConvertGeodeticToAbsolute(
-      const EarthModel::GeodeticPosition &geo,
-      EarthModel::AbsolutePositionEcef &ecef) const {
+void EllipsoidalEarthModel::ConvertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
+                                                      EarthModel::AbsolutePositionEcef &ecef) const {
 
    // FIXME incoming altitude is ignored
    const double sinLat = sin(geo.latitude);
    const double cosLat = cos(geo.latitude);
-   const Units::Length N = this->m_semi_major_radius /
-                           sqrt(1.0 - this->m_eccentricity_squared * sinLat * sinLat);
+   const Units::Length N = this->m_semi_major_radius / sqrt(1.0 - this->m_eccentricity_squared * sinLat * sinLat);
    ecef.x = N * cosLat * cos(geo.longitude);
    ecef.y = N * cosLat * sin(geo.longitude);
    ecef.z = N * (1.0 - this->m_eccentricity_squared) * sinLat;
-   LOG4CPLUS_TRACE(m_logger, "(" << std::setprecision(15) <<
-                                 Units::DegreesAngle(geo.latitude) << "," << Units::DegreesAngle(geo.longitude)
-                                 << ") --> (" <<
-                                 Units::MetersLength(ecef.x) << "," << Units::MetersLength(ecef.y) << ","
-                                 << Units::MetersLength(ecef.z)
-                                 << ")");
+   LOG4CPLUS_TRACE(m_logger, "(" << std::setprecision(15) << Units::DegreesAngle(geo.latitude) << ","
+                                 << Units::DegreesAngle(geo.longitude) << ") --> (" << Units::MetersLength(ecef.x)
+                                 << "," << Units::MetersLength(ecef.y) << "," << Units::MetersLength(ecef.z) << ")");
 }
 
-void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(
-      const EarthModel::AbsolutePositionEcef &ecef,
-      EarthModel::GeodeticPosition &geo) const {
+void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
+                                                      EarthModel::GeodeticPosition &geo) const {
 
    // Convert ECEF to Geodetic
    Units::Length z = ecef.z;
@@ -93,23 +83,19 @@ void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(
 
    // Now solve for lat & lon
    double latRadians = atan(kappa * z / p);
-   double lonRadians = atan2(Units::MetersLength(ecef.y).value(),
-                             Units::MetersLength(ecef.x).value());
+   double lonRadians = atan2(Units::MetersLength(ecef.y).value(), Units::MetersLength(ecef.x).value());
    geo.latitude = Units::SignedRadiansAngle(latRadians);
    geo.longitude = Units::SignedRadiansAngle(lonRadians);
-   geo.altitude = Units::MetersLength(0);   // FIXME
+   geo.altitude = Units::MetersLength(0);  // FIXME
 
-   LOG4CPLUS_TRACE(m_logger, "(" << std::setprecision(15) <<
-                                 Units::MetersLength(ecef.x) << "," << Units::MetersLength(ecef.y) << ","
-                                 << Units::MetersLength(ecef.z)
-                                 << ") --> (" <<
-                                 Units::DegreesAngle(geo.latitude) << "," << Units::DegreesAngle(geo.longitude)
+   LOG4CPLUS_TRACE(m_logger, "(" << std::setprecision(15) << Units::MetersLength(ecef.x) << ","
+                                 << Units::MetersLength(ecef.y) << "," << Units::MetersLength(ecef.z) << ") --> ("
+                                 << Units::DegreesAngle(geo.latitude) << "," << Units::DegreesAngle(geo.longitude)
                                  << ")");
 }
 
 std::shared_ptr<LocalTangentPlane> EllipsoidalEarthModel::MakeEnuConverter(
-      const GeodeticPosition &pointOfTangencyGeo,
-      const LocalPositionEnu &pointOfTangencyEnu) const {
+      const GeodeticPosition &pointOfTangencyGeo, const LocalPositionEnu &pointOfTangencyEnu) const {
 
    LOG4CPLUS_TRACE(m_logger, "Making converter tangent at " << pointOfTangencyGeo << " and " << pointOfTangencyEnu);
 

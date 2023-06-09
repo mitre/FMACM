@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -31,21 +31,17 @@
 #include "public/AlongPathDistanceCalculator.h"
 #include "public/PositionCalculator.h"
 
+class TrajectoryFromFile : Loadable {
 
-class TrajectoryFromFile : Loadable
-{
-
-public:
-
-   struct VerticalData
-   {
+  public:
+   struct VerticalData {
       VerticalData()
-            : m_time_to_go_sec(),
-              m_distance_to_go_meters(),
-              m_altitude_meters(),
-              m_ias_mps(),
-              m_vertical_speed_mps(),
-              m_ground_speed_mps() {}
+         : m_time_to_go_sec(),
+           m_distance_to_go_meters(),
+           m_altitude_meters(),
+           m_ias_mps(),
+           m_vertical_speed_mps(),
+           m_ground_speed_mps() {}
 
       std::vector<double> m_time_to_go_sec;
       std::vector<double> m_distance_to_go_meters;
@@ -67,7 +63,6 @@ public:
 
    void CalculateWaypoints(AircraftIntent &intent);
 
-
    const Units::MetersLength GetEstimatedDistanceAlongPath() const;
 
    AlongPathDistanceCalculator &GetDecrementingDistanceCalculator();
@@ -80,9 +75,8 @@ public:
 
    const bool IsLoaded() const;
 
-private:
-   enum VerticalFields
-   {
+  private:
+   enum VerticalFields {
       TIME_TO_GO_SEC = 0,
       DISTANCE_TO_GO_VERT_M,
       ALTITUDE_M,
@@ -92,8 +86,7 @@ private:
       NUM_VERTICAL_TRAJ_FIELDS
    };
 
-   enum HorizontalFields
-   {
+   enum HorizontalFields {
       IX = 0,
       X_M,
       Y_M,
@@ -114,10 +107,7 @@ private:
       NUM_HORIZONTAL_TRAJ_FIELDS
    };
 
-   enum TurnDirection {
-      LEFT,
-      RIGHT
-   };
+   enum TurnDirection { LEFT, RIGHT };
 
    TurnDirection GetTurnDirection(const Units::Angle course_change);
 
@@ -153,21 +143,15 @@ inline const std::vector<HorizontalPath> &TrajectoryFromFile::GetHorizontalTraje
    return m_horizontal_trajectory;
 }
 
-inline double TrajectoryFromFile::GetMassPercentile() const {
-   return m_mass_percentile;
-}
+inline double TrajectoryFromFile::GetMassPercentile() const { return m_mass_percentile; }
 
 inline const std::vector<PrecalcWaypoint> &TrajectoryFromFile::GetPrecalcWaypoint() const {
    return m_precalc_waypoints;
 }
 
-inline const bool TrajectoryFromFile::IsLoaded() const {
-   return m_loaded;
-}
+inline const bool TrajectoryFromFile::IsLoaded() const { return m_loaded; }
 
-inline TrajectoryFromFile::VerticalData TrajectoryFromFile::GetVerticalData() {
-   return m_vertical_data;
-}
+inline TrajectoryFromFile::VerticalData TrajectoryFromFile::GetVerticalData() { return m_vertical_data; }
 
 inline TrajectoryFromFile::TurnDirection TrajectoryFromFile::GetTurnDirection(const Units::Angle course_change) {
    if (course_change > Units::SignedRadiansAngle(0.0)) {

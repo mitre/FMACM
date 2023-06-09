@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -40,9 +40,8 @@
 #include <scalar/Speed.h>
 #include <scalar/Length.h>
 
-class TestFrameworkAircraft : public Aircraft
-{
-public:
+class TestFrameworkAircraft : public aaesim::open_source::Aircraft {
+  public:
    TestFrameworkAircraft();
 
    virtual ~TestFrameworkAircraft();
@@ -54,13 +53,9 @@ public:
 
    bool Update(const SimulationTime &time);
 
-   void PostLoad(Units::Time simulation_time_step,
-                 int predicted_wind_opt,
-                 bool blend_wind,
-                 WeatherTruth weather_truth);
+   void PostLoad(Units::Time simulation_time_step, int predicted_wind_opt, bool blend_wind, WeatherTruth weather_truth);
 
-   void Initialize(Units::Length adsbReceptionRangeThreshold,
-                   const WeatherTruth &weather);
+   void Initialize(Units::Length adsbReceptionRangeThreshold, const WeatherTruth &weather);
 
    aaesim::open_source::DynamicsState GetCurrentDynamicsState() const;
 
@@ -76,7 +71,7 @@ public:
    std::string m_ac_type;
    std::shared_ptr<aaesim::BadaPerformanceCalculator> m_bada_calculator;
 
-private:
+  private:
    void InitTruthStateVectorOld();
 
    double CalculateEndTime(aaesim::open_source::AircraftState state_in);

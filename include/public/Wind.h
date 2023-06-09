@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -32,39 +32,33 @@ class Wind;
 
 // needed for WindSpeedUtils friend class
 namespace aaesim {
-   namespace test {
-      class WindLegacy_readRAPWindFile_Test;
-      class Wind_interpolate_wind_Test;
-      class Wind_interpolate_wind_scalar_Test;
-      class Wind_interpolate_wind_matrix_Test;
-      class WindLegacy_check_box_Test;
-      class Wind_vertically_interpolate_wind_Test;
-      class Wind_readRAPTestDataWindFile_Test;
-      class Wind_interpolateTemp_Test;
-      namespace utils {
-         class WindSpeedUtils;
-      }
-   }
+namespace test {
+class WindLegacy_readRAPWindFile_Test;
+class Wind_interpolate_wind_Test;
+class Wind_interpolate_wind_scalar_Test;
+class Wind_interpolate_wind_matrix_Test;
+class WindLegacy_check_box_Test;
+class Wind_vertically_interpolate_wind_Test;
+class Wind_readRAPTestDataWindFile_Test;
+class Wind_interpolateTemp_Test;
+namespace utils {
+class WindSpeedUtils;
 }
+}  // namespace test
+}  // namespace aaesim
 
-enum WindDataFormat
-{
+enum WindDataFormat {
    /** 46 x 40 x 70 CSV file from MATLAB */
-         RUC_FORMAT,
+   RUC_FORMAT,
    /** 50 x 337 x 451 CSV file from MATLAB */
-         RAP_FORMAT,
+   RAP_FORMAT,
    /** Binary file to be detected by CAASD Wind API */
-         BINARY
+   BINARY
 };
 
-enum WindFileType
-{
-   FORECAST_FILE,
-   TRUTH_FILE
-};
+enum WindFileType { FORECAST_FILE, TRUTH_FILE };
 
-class Wind
-{
+class Wind {
    friend class aaesim::test::WindLegacy_readRAPWindFile_Test;
 
    friend class aaesim::test::Wind_interpolateTemp_Test;
@@ -83,7 +77,7 @@ class Wind
 
    friend class aaesim::test::utils::WindSpeedUtils;
 
-public:
+  public:
    static const Units::NauticalMilesLength SAMPLING_DISTANCE_FROM_END_OF_ROUTE;
    static const Units::FeetLength MAXIMUM_ALTITUDE_LIMIT;
    static const Units::FeetLength MINIMUM_ALTITUDE_LIMIT;
@@ -106,38 +100,25 @@ public:
                                       WeatherPrediction &weather_prediction);
 
    static void ValidatePredictedOptOne(const AircraftIntent &aircraft_intent,
-                                       PredictedWindOption &predicted_wind_option,
-                                       double &altitude_coefficient,
+                                       PredictedWindOption &predicted_wind_option, double &altitude_coefficient,
                                        Units::Length &distance_constant);
 
-   void InterpolateTrueWind(const Units::Angle lat_in,
-                            const Units::Angle lon_in,
-                            const Units::Length altitude,
-                            WindStack &east_west,
-                            WindStack &north_south);
+   void InterpolateTrueWind(const Units::Angle lat_in, const Units::Angle lon_in, const Units::Length altitude,
+                            WindStack &east_west, WindStack &north_south);
 
    void InterpolateForecastWind(const std::shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
-                                const Units::Length x_in,
-                                const Units::Length y_in,
-                                const Units::Length altitude,
-                                Units::Speed &east_west,
-                                Units::Speed &north_south);
+                                const Units::Length x_in, const Units::Length y_in, const Units::Length altitude,
+                                Units::Speed &east_west, Units::Speed &north_south);
 
-   virtual void InterpolateWindScalar(Units::Angle lat_in,
-                                      Units::Angle lon_in,
-                                      Units::Length altitude,
-                                      Units::Speed &east_west,
-                                      Units::Speed &north_south) = 0;
+   virtual void InterpolateWindScalar(Units::Angle lat_in, Units::Angle lon_in, Units::Length altitude,
+                                      Units::Speed &east_west, Units::Speed &north_south) = 0;
 
-   virtual Units::KelvinTemperature InterpolateTemperature(
-         const Units::Angle latitude_in,
-         const Units::Angle longitude_in,
-         const Units::Length altitude) = 0;
+   virtual Units::KelvinTemperature InterpolateTemperature(const Units::Angle latitude_in,
+                                                           const Units::Angle longitude_in,
+                                                           const Units::Length altitude) = 0;
 
-   virtual Units::Pressure InterpolatePressure(
-         const Units::Angle latitude_in,
-         const Units::Angle longitude_in,
-         const Units::Length altitude) = 0;
+   virtual Units::Pressure InterpolatePressure(const Units::Angle latitude_in, const Units::Angle longitude_in,
+                                               const Units::Length altitude) = 0;
 
    static WeatherPrediction CreateZeroWindPrediction();
 
@@ -149,53 +130,40 @@ public:
 
    static bool UseWind();
 
-protected:
+  protected:
+   virtual void InterpolateWind(Units::Angle latitude_in, Units::Angle longitude_in, Units::Length altitude,
+                                Units::Speed &u, Units::Speed &v) = 0;
 
-   virtual void InterpolateWind(Units::Angle latitude_in,
-                                Units::Angle longitude_in,
-                                Units::Length altitude,
-                                Units::Speed &u,
-                                Units::Speed &v) = 0;
+   virtual void InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
+                                      WindStack &east_west, WindStack &north_south) = 0;
 
-   virtual void InterpolateWindMatrix(Units::Angle lat_in,
-                                      Units::Angle lon_in,
-                                      Units::Length alt_in,
-                                      WindStack &east_west,
-                                      WindStack &north_south) = 0;
-
-private:
-
+  private:
    static bool m_use_wind;
 
    void CreatePredictionUsingCurrentWindOption(const AircraftIntent &aircraft_intent,
                                                const Units::FeetLength altitude_at_end_of_route,
                                                const int maximum_wind_index,
                                                std::set<Units::Length> &forecast_wind_altitudes,
-                                               int current_wind_index_in,
-                                               WeatherPrediction &weather_prediction);
+                                               int current_wind_index_in, WeatherPrediction &weather_prediction);
 
    void CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_wind_option_in,
                                               const std::set<Units::Length> &wind_altitudes,
                                               const AircraftIntent &aircraft_intent,
                                               const Units::Length altitude_at_beginning_of_route,
-                                              const int current_wind_index_in,
-                                              const int maximum_wind_index,
+                                              const int current_wind_index_in, const int maximum_wind_index,
                                               WeatherPrediction &weather_prediction);
 
    void AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
                                   const AircraftIntent::RouteData &fms,
                                   const Units::FeetLength altitude_at_beginning_of_route,
                                   std::set<Units::Length> &forecast_wind_altitudes,
-                                  WeatherPrediction &weather_prediction,
-                                  int &current_wind_index);
+                                  WeatherPrediction &weather_prediction, int &current_wind_index);
 
    void AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
-                                         const Units::FeetLength x_position,
-                                         const Units::FeetLength y_position,
+                                         const Units::FeetLength x_position, const Units::FeetLength y_position,
                                          const Units::FeetLength altitude_at_end_of_route,
                                          std::set<Units::Length> &forecast_wind_altitudes,
-                                         WeatherPrediction &weather_prediction,
-                                         int &current_wind_index);
+                                         WeatherPrediction &weather_prediction, int &current_wind_index);
 
    Units::FeetLength GetAdjustedEndPointAltitude(Units::FeetLength altitude_at_end_of_route);
 
@@ -218,14 +186,8 @@ inline void Wind::SetWindTruthInstance(std::shared_ptr<Wind> &truth_instance) {
    m_wind_truth_instance = truth_instance;
 }
 
-inline std::shared_ptr<Wind> Wind::GetWindTruthInstance() {
-   return m_wind_truth_instance;
-}
+inline std::shared_ptr<Wind> Wind::GetWindTruthInstance() { return m_wind_truth_instance; }
 
-inline void Wind::SetUseWind(const bool useWind) {
-   m_use_wind = useWind;
-}
+inline void Wind::SetUseWind(const bool useWind) { m_use_wind = useWind; }
 
-inline bool Wind::UseWind() {
-   return m_use_wind;
-}
+inline bool Wind::UseWind() { return m_use_wind; }

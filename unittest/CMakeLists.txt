@@ -28,7 +28,7 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 add_library(unittest
 		${TEST_SUPPORT_SOURCE})
 
-target_link_libraries(unittest PRIVATE log4cplus math pub utility loader gtest )
+target_link_libraries(unittest PRIVATE log4cplusS math pub utility loader gtest )
 
 target_include_directories(unittest PUBLIC
 		${aaesim_INCLUDE_DIRS}

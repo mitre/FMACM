@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -55,39 +55,30 @@ const double P_T_EXPONENT(-Units::ONE_G_ACCELERATION / (K_T * R));
 // exponent for eq. 3.2-6, about 4.25583
 const double RHO_T_EXPONENT(P_T_EXPONENT - 1);
 
-class Atmosphere
-{
-public:
+class Atmosphere {
+  public:
    Atmosphere();
 
    virtual ~Atmosphere();
 
    virtual Units::KelvinTemperature GetTemperature(const Units::Length altitude_msl) const = 0;
 
-   void AirDensity(const Units::Length h,
-                   Units::Density &rho,
-                   Units::Pressure &P) const;
+   void AirDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const;
 
-   void CalculateWindGradientAtAltitude(const Units::Length altitude_in,
-                                        const WindStack &wind_stack,
-                                        Units::Speed &wind_speed,
-                                        Units::Frequency &wind_gradient) const;
+   void CalculateWindGradientAtAltitude(const Units::Length altitude_in, const WindStack &wind_stack,
+                                        Units::Speed &wind_speed, Units::Frequency &wind_gradient) const;
 
    static Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Pressure p, const Units::Density rho);
 
-   Units::Speed CAS2TAS(const Units::Speed vcas,
-                        const Units::Length alt) const;
+   Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Length alt) const;
 
    static Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Pressure p, const Units::Density rho);
 
-   Units::Speed TAS2CAS(const Units::Speed vtas,
-                        const Units::Length alt) const;
+   Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Length alt) const;
 
-   virtual Units::Length GetMachIASTransition(const Units::Speed &ias,
-                                      const double &mach) const;
+   virtual Units::Length GetMachIASTransition(const Units::Speed &ias, const double &mach) const;
 
-   Units::Speed MachToIAS(const double mach,
-                          const Units::Length alt) const;
+   Units::Speed MachToIAS(const double mach, const Units::Length alt) const;
 
    static Units::Speed SpeedOfSound(Units::KelvinTemperature temperature);
    Units::Speed SpeedOfSound(Units::Length altitude) const;
@@ -102,12 +93,9 @@ public:
    /**
     * Calculate the Calibrated Airspeed BADA Energy Share Factor
     */
-   double ESFconstantCAS(const Units::Speed true_airspeed,
-                                const Units::Length altitude_msl,
-                                const Units::KelvinTemperature temperature);
+   double ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude_msl,
+                         const Units::KelvinTemperature temperature);
 
-
-
-private:
+  private:
    static log4cplus::Logger m_logger;
 };

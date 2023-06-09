@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,22 +26,19 @@
 log4cplus::Logger PositionCalculator::m_logger = log4cplus::Logger::getInstance("PositionCalculator");
 
 PositionCalculator::PositionCalculator(const std::vector<HorizontalPath> &horizontal_path,
-                                       TrajectoryIndexProgressionDirection expected_index_progression) : DirectionOfFlightCourseCalculator(horizontal_path, expected_index_progression) {
-}
+                                       TrajectoryIndexProgressionDirection expected_index_progression)
+   : DirectionOfFlightCourseCalculator(horizontal_path, expected_index_progression) {}
 
-
-PositionCalculator::PositionCalculator() : DirectionOfFlightCourseCalculator() {
-
-}
+PositionCalculator::PositionCalculator() : DirectionOfFlightCourseCalculator() {}
 
 PositionCalculator::~PositionCalculator() = default;
 
 bool PositionCalculator::CalculatePositionFromAlongPathDistance(const Units::Length &distance_along_path,
-                                                                Units::Length &position_x,
-                                                                Units::Length &position_y,
+                                                                Units::Length &position_x, Units::Length &position_y,
                                                                 Units::UnsignedAngle &course) {
    std::vector<HorizontalPath>::size_type resolved_index;
-   bool return_value = CalculatePosition(distance_along_path + EXTENSION_LENGTH, m_extended_horizontal_trajectory, m_current_index, position_x, position_y, course, resolved_index);
+   bool return_value = CalculatePosition(distance_along_path + EXTENSION_LENGTH, m_extended_horizontal_trajectory,
+                                         m_current_index, position_x, position_y, course, resolved_index);
 
    // Check for end of route is based on passed in distance_along_path
    switch (m_index_progression_direction) {
@@ -71,18 +68,23 @@ bool PositionCalculator::CalculatePositionFromAlongPathDistance(const Units::Len
       // resolved_index looks correct. Update class member.
       UpdateCurrentIndex(resolved_index);
 
-   } else if (distance_along_path + EXTENSION_LENGTH > Units::MetersLength(m_extended_horizontal_trajectory.back().m_path_length_cumulative_meters)) {
+   } else if (distance_along_path + EXTENSION_LENGTH >
+              Units::MetersLength(m_extended_horizontal_trajectory.back().m_path_length_cumulative_meters)) {
       // distance_along_path is very large so off the back of the path. The old code allowed this situation to quietly
       // happen. For now, it helps a lot to allow this. But, we should consider this deprecated behavior and throw in
       // the future.
       char msg[300];
-      std::sprintf(msg, "Very long distance_along_path encountered. Too long for path. Allowing for now: %f", Units::MetersLength(distance_along_path).value());
+      std::sprintf(msg, "Very long distance_along_path encountered. Too long for path. Allowing for now: %f",
+                   Units::MetersLength(distance_along_path).value());
       LOG4CPLUS_ERROR(m_logger, msg);
 
    } else {
       // resolved_index looks incorrect. Throw.
       char msg[300];
-      std::sprintf(msg, "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index %lu, resolved_index %lu", m_current_index,  resolved_index);
+      std::sprintf(msg,
+                   "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
+                   "%lu, resolved_index %lu",
+                   m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
       throw std::logic_error(msg);
    }
@@ -93,8 +95,7 @@ bool PositionCalculator::CalculatePositionFromAlongPathDistance(const Units::Len
 bool PositionCalculator::CalculatePosition(const Units::Length &distance_along_path,
                                            const std::vector<HorizontalPath> &horizontal_trajectory,
                                            const std::vector<HorizontalPath>::size_type starting_trajectory_index,
-                                           Units::Length &x_position,
-                                           Units::Length &y_position,
+                                           Units::Length &x_position, Units::Length &y_position,
                                            Units::UnsignedAngle &course,
                                            std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
 
@@ -110,23 +111,33 @@ bool PositionCalculator::CalculatePosition(const Units::Length &distance_along_p
 
          // calculate output values
          x_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].GetXPositionMeters()) +
-                 ((distance_along_path - Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) * cos(crs));
+                      ((distance_along_path -
+                        Units::MetersLength(
+                              horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) *
+                       cos(crs));
          y_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].GetYPositionMeters()) +
-                 ((distance_along_path - Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) * sin(crs));
+                      ((distance_along_path -
+                        Units::MetersLength(
+                              horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) *
+                       sin(crs));
       } else if (horizontal_trajectory[resolved_trajectory_index].m_segment_type == HorizontalPath::SegmentType::TURN) {
-         if ((distance_along_path - Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) < Units::MetersLength(3)) {
+         if ((distance_along_path -
+              Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_path_length_cumulative_meters)) <
+             Units::MetersLength(3)) {
             x_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].GetXPositionMeters());
             y_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].GetYPositionMeters());
          } else {
             const Units::Length radius = turn_radius;
             const Units::Angle theta = turn_theta;
-            x_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_turn_info.x_position_meters) + radius * cos(theta);
-            y_position = Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_turn_info.y_position_meters) + radius * sin(theta);
+            x_position =
+                  Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_turn_info.x_position_meters) +
+                  radius * cos(theta);
+            y_position =
+                  Units::MetersLength(horizontal_trajectory[resolved_trajectory_index].m_turn_info.y_position_meters) +
+                  radius * sin(theta);
          }
       }
    }
 
    return found;
-
 }
-

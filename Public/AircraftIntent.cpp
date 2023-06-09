@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -30,27 +30,25 @@ log4cplus::Logger AircraftIntent::m_logger = log4cplus::Logger::getInstance(LOG4
 const int AircraftIntent::UNINITIALIZED_AIRCRAFT_ID = -1;
 
 AircraftIntent::AircraftIntent()
-      : m_route_data(),
-        m_tangent_plane_sequence(nullptr),
-        m_all_waypoints(),
-        m_number_of_waypoints(0),
-        m_id(UNINITIALIZED_AIRCRAFT_ID),
-        m_is_loaded(false) {
+   : m_route_data(),
+     m_tangent_plane_sequence(nullptr),
+     m_planned_cruise_mach(0),
+     m_all_waypoints(),
+     m_id(UNINITIALIZED_AIRCRAFT_ID),
+     m_is_loaded(false) {
    Initialize();
 }
 
 AircraftIntent::AircraftIntent(const AircraftIntent &in)
-      : m_route_data(),
-        m_tangent_plane_sequence(nullptr),
-        m_all_waypoints(),
-        m_number_of_waypoints(0),
-        m_id(UNINITIALIZED_AIRCRAFT_ID),
-        m_is_loaded(false) {
+   : m_route_data(),
+     m_tangent_plane_sequence(nullptr),
+     m_all_waypoints(),
+     m_id(UNINITIALIZED_AIRCRAFT_ID),
+     m_is_loaded(false) {
    Initialize();
 
    Copy(in);
 }
-
 
 AircraftIntent::~AircraftIntent() = default;
 
@@ -80,14 +78,22 @@ void AircraftIntent::Initialize() {
 
    m_planned_cruise_altitude = Units::ZERO_LENGTH;
 
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("IF", AircraftIntent::Arinc424LegType::IF));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("UNSET", AircraftIntent::Arinc424LegType::UNSET));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("RF", AircraftIntent::Arinc424LegType::RF));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("TF", AircraftIntent::Arinc424LegType::TF));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("VI", AircraftIntent::Arinc424LegType::VI));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("CF", AircraftIntent::Arinc424LegType::CF));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("VA", AircraftIntent::Arinc424LegType::VA));
-   m_arinc424_dictionary.insert(std::pair<std::string, AircraftIntent::Arinc424LegType>("CA", AircraftIntent::Arinc424LegType::CA));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("IF", AircraftIntent::Arinc424LegType::IF));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("UNSET", AircraftIntent::Arinc424LegType::UNSET));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("RF", AircraftIntent::Arinc424LegType::RF));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("TF", AircraftIntent::Arinc424LegType::TF));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("VI", AircraftIntent::Arinc424LegType::VI));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("CF", AircraftIntent::Arinc424LegType::CF));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("VA", AircraftIntent::Arinc424LegType::VA));
+   m_arinc424_dictionary.insert(
+         std::pair<std::string, AircraftIntent::Arinc424LegType>("CA", AircraftIntent::Arinc424LegType::CA));
 }
 
 AircraftIntent &AircraftIntent::operator=(const AircraftIntent &in) {
@@ -166,8 +172,7 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
             m_route_data.m_mach[vector_current_index] = 0;
          }
       } else {
-         if (m_route_data.m_mach[vector_current_index - 1] != 0 && 
-             nominal_ias == Units::zero()) {
+         if (m_route_data.m_mach[vector_current_index - 1] != 0 && nominal_ias == Units::zero()) {
             // use previous mach because ias is unspecified
             m_route_data.m_nominal_ias[vector_current_index] = Units::ZERO_SPEED;
             m_route_data.m_mach[vector_current_index] = m_route_data.m_mach[vector_current_index - 1];
@@ -175,8 +180,7 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
             // use ias because it is specified
             m_route_data.m_nominal_ias[vector_current_index] = nominal_ias;
             m_route_data.m_mach[vector_current_index] = 0;
-         } else if (m_route_data.m_nominal_ias[vector_current_index - 1].value() != 0 && 
-                    nominal_ias == Units::zero()) {
+         } else if (m_route_data.m_nominal_ias[vector_current_index - 1].value() != 0 && nominal_ias == Units::zero()) {
             // use previous ias
             m_route_data.m_nominal_ias[vector_current_index] = m_route_data.m_nominal_ias[vector_current_index - 1];
             m_route_data.m_mach[vector_current_index] = 0;
@@ -189,8 +193,6 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
       ++waypoint_itr;
       ++vector_current_index;
    }
-
-   m_number_of_waypoints = m_route_data.m_name.size();
 }
 
 void AircraftIntent::LoadWaypointsFromList(const std::list<Waypoint> &ascent_waypoints,
@@ -205,19 +207,22 @@ void AircraftIntent::LoadWaypointsFromList(const std::list<Waypoint> &ascent_way
       if (has_cruise) {
          cruise_waypoints_with_connection_added = AddConnectingLeg(ascent_waypoints, cruise_waypoints);
          if (has_descent)
-            descent_waypoints_with_connection_added = AddConnectingLeg(cruise_waypoints_with_connection_added, descent_waypoints);
+            descent_waypoints_with_connection_added =
+                  AddConnectingLeg(cruise_waypoints_with_connection_added, descent_waypoints);
       } else if (has_descent) {
          descent_waypoints_with_connection_added = AddConnectingLeg(ascent_waypoints, descent_waypoints);
       }
    } else if (has_cruise) {
       cruise_waypoints_with_connection_added = cruise_waypoints;
       if (has_descent)
-         descent_waypoints_with_connection_added = AddConnectingLeg(cruise_waypoints_with_connection_added, descent_waypoints);
+         descent_waypoints_with_connection_added =
+               AddConnectingLeg(cruise_waypoints_with_connection_added, descent_waypoints);
    } else {
       descent_waypoints_with_connection_added = descent_waypoints;
    }
 
-   std::list<Waypoint> ascent_waypoints_shortened_legs, cruise_waypoints_shortened_legs, descent_waypoints_shortened_legs;
+   std::list<Waypoint> ascent_waypoints_shortened_legs, cruise_waypoints_shortened_legs,
+         descent_waypoints_shortened_legs;
    if (!has_ascent) {
       ascent_waypoints_shortened_legs = ascent_waypoints;
    } else {
@@ -238,11 +243,12 @@ void AircraftIntent::LoadWaypointsFromList(const std::list<Waypoint> &ascent_way
                                  AircraftIntent::ConvertListToVector(cruise_waypoints_shortened_legs),
                                  AircraftIntent::ConvertListToVector(descent_waypoints_shortened_legs));
 
-
-   const auto all_waypoints_as_list = AircraftIntent::RemoveZeroLengthLegs(AircraftIntent::ConvertVectorToList(m_all_waypoints));
-   m_tangent_plane_sequence = std::shared_ptr<TangentPlaneSequence>(new SingleTangentPlaneSequence(all_waypoints_as_list));
+   const auto all_waypoints_as_list =
+         AircraftIntent::RemoveZeroLengthLegs(AircraftIntent::ConvertVectorToList(m_all_waypoints));
+   m_tangent_plane_sequence =
+         std::shared_ptr<TangentPlaneSequence>(new SingleTangentPlaneSequence(all_waypoints_as_list));
    UpdateXYZFromLatLonWgs84();
-
+   DoRouteDataLogging();
 }
 
 void AircraftIntent::UpdateXYZFromLatLonWgs84() {
@@ -262,7 +268,6 @@ void AircraftIntent::UpdateXYZFromLatLonWgs84() {
       m_route_data.m_x.emplace_back(xyPosition.x);
       m_route_data.m_y.emplace_back(xyPosition.y);
       m_route_data.m_z.emplace_back(xyPosition.z);
-      LOG4CPLUS_TRACE(m_logger, "Waypoint " << var << " (" << m_route_data.m_name[var] << ") at " << geoPosition << " is " << xyPosition);
 
       if (m_route_data.m_rf_radius[var] == Units::zero()) {
          m_route_data.m_x_rf_center.emplace_back(Units::zero());
@@ -285,14 +290,13 @@ int AircraftIntent::GetWaypointIndexByName(const std::string &waypoint_name) con
    bool found_waypoint = false;
    for (Waypoint wp : m_all_waypoints) {
       ++ix;
-      if (wp.GetName().compare(waypoint_name) == 0 ) {
+      if (wp.GetName().compare(waypoint_name) == 0) {
          found_waypoint = true;
          break;
       }
    }
 
-   if (!found_waypoint)
-      ix = -1;
+   if (!found_waypoint) ix = -1;
 
    return ix;
 }
@@ -318,7 +322,6 @@ void AircraftIntent::Copy(const AircraftIntent &in) {
    m_id = in.m_id;
    m_planned_cruise_altitude = in.m_planned_cruise_altitude;
    m_planned_cruise_mach = in.m_planned_cruise_mach;
-   m_number_of_waypoints = in.m_number_of_waypoints;
    m_is_loaded = in.m_is_loaded;
 
    DeleteRouteDataContent();
@@ -343,17 +346,19 @@ bool AircraftIntent::load(DecodedStream *input) {
    unsigned int waypoint_count_loaded;
 
    // register all the variables used by the Aircraft Intent
-   const LoaderDeprecatedMetaInfo deprecated_waypoints_count_input = (LoaderDeprecatedMetaInfo){true, "This input variable is no longer needed"};
+   const LoaderDeprecatedMetaInfo deprecated_waypoints_count_input =
+         (LoaderDeprecatedMetaInfo){true, "This input variable is no longer needed"};
    register_var("number_of_waypoints", &waypoint_count_loaded, deprecated_waypoints_count_input);
    register_var("planned_cruise_mach", &cruise_mach_loaded, true);
    register_var("planned_cruise_altitude", &cruise_alt_loaded, true);
-   const LoaderDeprecatedMetaInfo deprecated_waypoints_input = (LoaderDeprecatedMetaInfo){true, "Use a 'descent_waypoints' input block instead of 'waypoints'"};
+   const LoaderDeprecatedMetaInfo deprecated_waypoints_input =
+         (LoaderDeprecatedMetaInfo){true, "Use a 'descent_waypoints' input block instead of 'waypoints'"};
    register_named_list("waypoints", &waypoints, deprecated_waypoints_input);
    register_named_list("descent_waypoints", &descent_waypoints, false);
    register_named_list("cruise_waypoints", &cruise_waypoints, false);
    register_named_list("ascent_waypoints", &ascent_waypoints, false);
 
-   //do the actual reading:
+   // do the actual reading:
    m_is_loaded = complete();
 
    m_planned_cruise_altitude = cruise_alt_loaded;
@@ -363,7 +368,8 @@ bool AircraftIntent::load(DecodedStream *input) {
       descent_waypoints = waypoints;
    }
    if (waypoints.empty() && descent_waypoints.empty() && ascent_waypoints.empty() && cruise_waypoints.empty()) {
-      LOG4CPLUS_ERROR(m_logger, "No waypoints were found in the scenario file. Check the aircraft_intent{} input block.");
+      LOG4CPLUS_ERROR(m_logger,
+                      "No waypoints were found in the scenario file. Check the aircraft_intent{} input block.");
       throw std::runtime_error("Must provide waypoints.");
    } else {
       LoadWaypointsFromList(ascent_waypoints, cruise_waypoints, descent_waypoints);
@@ -373,44 +379,12 @@ bool AircraftIntent::load(DecodedStream *input) {
 }
 
 void AircraftIntent::DumpParms(std::string str) const {
-   LOG4CPLUS_DEBUG(AircraftIntent::m_logger, str.c_str());
-
-   LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "Waypoint count " << m_number_of_waypoints);
-
-   for (unsigned int i = 0; i < m_all_waypoints.size(); i++) {
-      Waypoint wp = GetWaypoint(i);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "----");
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "Waypoint name " << GetWaypointName(i));
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "y   x   " << m_route_data.m_y[i] << "  " << m_route_data.m_x[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "Alt     " << Units::FeetLength(wp.GetAltitude()).value());
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "nom IAS " << Units::FeetPerSecondSpeed(wp.GetNominalIas()).value());
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "wpt mch " << wp.GetMach());
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "FMS name    " << m_route_data.m_name[i].c_str());
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger,
-                      "FMS Lat Lon " << Units::DegreesAngle(m_route_data.m_latitude[i]) << "  " << Units::DegreesAngle(m_route_data.m_longitude[i]));
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "FMS y   x   " << m_route_data.m_y[i] << "  " << m_route_data.m_x[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "FMS alt z   " << m_route_data.m_nominal_altitude[i] << "  " << m_route_data.m_z[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger,
-                      "FMS ias mch " << m_route_data.m_nominal_ias[i] << "  " << m_route_data.m_mach[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "FMS alt h l " << m_route_data.m_high_altitude_constraint[i] << "  "
-                                                               << m_route_data.m_low_altitude_constraint[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger,
-                      "FMS spd h l " << m_route_data.m_high_speed_constraint[i] << "  " << m_route_data.m_low_speed_constraint[i]
-                                    );
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger,
-                      "FMS CP Lat Lon " << Units::DegreesAngle(m_route_data.m_rf_latitude[i]) << "  " << Units::DegreesAngle(m_route_data.m_rf_longitude[i]));
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger,
-                      "FMS CP y   x   " << m_route_data.m_y_rf_center[i] << "  " << m_route_data.m_x_rf_center[i]);
-      LOG4CPLUS_DEBUG(AircraftIntent::m_logger, "FMS CP radius   " << m_route_data.m_rf_radius[i] << "  ");
-   }
-
+   LOG4CPLUS_TRACE(AircraftIntent::m_logger, str.c_str());
+   DoRouteDataLogging();
 }
 
-void AircraftIntent::GetLatLonFromXYZ(const Units::Length &xMeters,
-                                      const Units::Length &yMeters,
-                                      const Units::Length &zMeters,
-                                      Units::Angle &lat,
-                                      Units::Angle &lon) const {
+void AircraftIntent::GetLatLonFromXYZ(const Units::Length &xMeters, const Units::Length &yMeters,
+                                      const Units::Length &zMeters, Units::Angle &lat, Units::Angle &lon) const {
 
    // use the ellipsoidal model
    EarthModel::LocalPositionEnu localPos;
@@ -451,9 +425,7 @@ std::pair<int, int> AircraftIntent::FindCommonWaypoint(const AircraftIntent &int
    return std::make_pair(thisIndex, thatIndex);
 }
 
-void AircraftIntent::InsertPairAtIndex(const std::string &wpname,
-                                       const Units::Length &x,
-                                       const Units::Length &y,
+void AircraftIntent::InsertPairAtIndex(const std::string &wpname, const Units::Length &x, const Units::Length &y,
                                        const int index) {
    /*
     * The incoming point must have been validated by the caller.
@@ -470,7 +442,7 @@ void AircraftIntent::InsertPairAtIndex(const std::string &wpname,
    wp.SetName(wpname);
 
    // copy constraints -- high from previous waypoint and low from next
-   auto wp2 = std::next(m_all_waypoints.begin(), index-1);
+   auto wp2 = std::next(m_all_waypoints.begin(), index - 1);
    wp.SetAltitudeConstraintHigh(wp2->GetAltitudeConstraintHigh());
    wp.SetSpeedConstraintHigh(wp2->GetSpeedConstraintHigh());
    ++wp2;
@@ -479,8 +451,6 @@ void AircraftIntent::InsertPairAtIndex(const std::string &wpname,
 
    InsertWaypointAtIndex(wp, index);
 }
-
-
 
 void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
 
@@ -491,18 +461,17 @@ void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
       ClearAndResetRouteDataContent(new_vector, m_cruise_waypoints, m_descent_waypoints);
    } else if (index < m_ascent_waypoints.size() + m_cruise_waypoints.size()) {
       std::vector<Waypoint> new_vector(m_cruise_waypoints);
-      auto itr = std::next(new_vector.begin(), index-m_ascent_waypoints.size());
+      auto itr = std::next(new_vector.begin(), index - m_ascent_waypoints.size());
       new_vector.insert(itr, wp);
       ClearAndResetRouteDataContent(m_ascent_waypoints, new_vector, m_descent_waypoints);
    } else {
       std::vector<Waypoint> new_vector(m_descent_waypoints);
-      auto itr = std::next(new_vector.begin(), index-m_ascent_waypoints.size() - m_cruise_waypoints.size());
+      auto itr = std::next(new_vector.begin(), index - m_ascent_waypoints.size() - m_cruise_waypoints.size());
       new_vector.insert(itr, wp);
       ClearAndResetRouteDataContent(m_ascent_waypoints, m_cruise_waypoints, new_vector);
    }
 
    UpdateXYZFromLatLonWgs84();
-
 }
 
 void AircraftIntent::UpdateWaypoint(const Waypoint &waypoint) {
@@ -524,7 +493,6 @@ void AircraftIntent::UpdateWaypoint(const Waypoint &waypoint) {
    UpdateXYZFromLatLonWgs84();
 }
 
-
 void AircraftIntent::ClearWaypoints() {
    m_all_waypoints.clear();
 
@@ -536,57 +504,46 @@ void AircraftIntent::ClearWaypoints() {
 const Waypoint &AircraftIntent::GetWaypoint(unsigned int i) const {
    if (i >= m_all_waypoints.size()) {
       LOG4CPLUS_FATAL(m_logger, "Index " << i << " is out of range for size " << m_all_waypoints.size());
-      throw InvalidIndexException(i, 0, m_all_waypoints.size()-1);
+      throw InvalidIndexException(i, 0, m_all_waypoints.size() - 1);
    }
    return m_all_waypoints[i];
 }
 
 void AircraftIntent::SetNumberOfWaypoints(unsigned int n) {
-   m_number_of_waypoints = n;
    if (n < m_all_waypoints.size()) {
-      std::vector<Waypoint>::iterator it1 = std::next(m_all_waypoints.begin(), n); // get an iterator pointing to index
+      std::vector<Waypoint>::iterator it1 = std::next(m_all_waypoints.begin(), n);  // get an iterator pointing to index
       std::vector<Waypoint>::iterator it2 = m_all_waypoints.end();
       m_all_waypoints.erase(it1, it2);
    }
 }
 
 bool AircraftIntent::operator==(const AircraftIntent &obj) const {
-   if (
-           m_id == obj.m_id &&
-           m_planned_cruise_altitude == obj.m_planned_cruise_altitude &&
-           m_planned_cruise_mach == obj.m_planned_cruise_mach &&
-           m_number_of_waypoints == obj.m_number_of_waypoints &&
-           m_is_loaded == obj.m_is_loaded &&
-           m_tangent_plane_sequence == obj.m_tangent_plane_sequence &&
-           m_route_data.m_name == obj.m_route_data.m_name &&
-           m_route_data.m_x == obj.m_route_data.m_x &&
-           m_route_data.m_y == obj.m_route_data.m_y &&
-           m_route_data.m_z == obj.m_route_data.m_z &&
-           m_route_data.m_latitude == obj.m_route_data.m_latitude &&
-           m_route_data.m_longitude == obj.m_route_data.m_longitude &&
-           m_route_data.m_nominal_altitude == obj.m_route_data.m_nominal_altitude &&
-           m_route_data.m_nominal_ias == obj.m_route_data.m_nominal_ias &&
-           m_route_data.m_mach == obj.m_route_data.m_mach &&
-           m_route_data.m_high_altitude_constraint == obj.m_route_data.m_high_altitude_constraint &&
-           m_route_data.m_low_altitude_constraint == obj.m_route_data.m_low_altitude_constraint &&
-           m_route_data.m_high_speed_constraint == obj.m_route_data.m_high_speed_constraint &&
-           m_route_data.m_low_speed_constraint == obj.m_route_data.m_low_speed_constraint &&
-           m_route_data.m_rf_latitude == obj.m_route_data.m_rf_latitude &&
-           m_route_data.m_rf_longitude == obj.m_route_data.m_rf_longitude &&
-           m_route_data.m_x_rf_center == obj.m_route_data.m_x_rf_center &&
-           m_route_data.m_y_rf_center == obj.m_route_data.m_y_rf_center &&
-           m_route_data.m_rf_radius == obj.m_route_data.m_rf_radius
-      ) {
+   if (m_id == obj.m_id && m_planned_cruise_altitude == obj.m_planned_cruise_altitude &&
+       m_planned_cruise_mach == obj.m_planned_cruise_mach && m_is_loaded == obj.m_is_loaded &&
+       m_route_data.m_name == obj.m_route_data.m_name && m_route_data.m_x == obj.m_route_data.m_x &&
+       m_route_data.m_y == obj.m_route_data.m_y && m_route_data.m_z == obj.m_route_data.m_z &&
+       m_route_data.m_latitude == obj.m_route_data.m_latitude &&
+       m_route_data.m_longitude == obj.m_route_data.m_longitude &&
+       m_route_data.m_nominal_altitude == obj.m_route_data.m_nominal_altitude &&
+       m_route_data.m_nominal_ias == obj.m_route_data.m_nominal_ias && m_route_data.m_mach == obj.m_route_data.m_mach &&
+       m_route_data.m_high_altitude_constraint == obj.m_route_data.m_high_altitude_constraint &&
+       m_route_data.m_low_altitude_constraint == obj.m_route_data.m_low_altitude_constraint &&
+       m_route_data.m_high_speed_constraint == obj.m_route_data.m_high_speed_constraint &&
+       m_route_data.m_low_speed_constraint == obj.m_route_data.m_low_speed_constraint &&
+       m_route_data.m_rf_latitude == obj.m_route_data.m_rf_latitude &&
+       m_route_data.m_rf_longitude == obj.m_route_data.m_rf_longitude &&
+       m_route_data.m_x_rf_center == obj.m_route_data.m_x_rf_center &&
+       m_route_data.m_y_rf_center == obj.m_route_data.m_y_rf_center &&
+       m_route_data.m_rf_radius == obj.m_route_data.m_rf_radius) {
       return true;
    }
    return false;
 }
 
-std::ostream &operator<<(std::ostream &out,
-                         const AircraftIntent &intent) {
+std::ostream &operator<<(std::ostream &out, const AircraftIntent &intent) {
    out << "aircraft_intent {" << std::endl;
    out << "number_of_waypoints " << intent.GetNumberOfWaypoints() << std::endl;
-   out << "plannedCruiseMach 0" << std::endl;  
+   out << "plannedCruiseMach 0" << std::endl;
    out << "plannedCruiseAltitude " << Units::FeetLength(intent.GetPlannedCruiseAltitude()).value() << std::endl;
    out << "waypoints {" << std::endl;
    for (Waypoint wp : intent.m_all_waypoints) {
@@ -597,19 +554,14 @@ std::ostream &operator<<(std::ostream &out,
    return out;
 }
 
+void AircraftIntent::SetPlannedCruiseAltitude(Units::Length altitude) { this->m_planned_cruise_altitude = altitude; }
 
-void AircraftIntent::SetPlannedCruiseAltitude(Units::Length altitude) {
-   this->m_planned_cruise_altitude = altitude;
-}
-
-const std::string &AircraftIntent::GetWaypointName(unsigned int i) const {
-   return GetWaypoint(i).GetName();
-}
+const std::string &AircraftIntent::GetWaypointName(unsigned int i) const { return GetWaypoint(i).GetName(); }
 
 Units::MetersLength AircraftIntent::GetWaypointX(unsigned int i) const {
    if (i >= m_route_data.m_x.size()) {
       LOG4CPLUS_FATAL(m_logger, "Index " << i << " is out of range for size " << m_route_data.m_x.size());
-      throw InvalidIndexException(i, 0, m_route_data.m_x.size()-1);
+      throw InvalidIndexException(i, 0, m_route_data.m_x.size() - 1);
    }
    return m_route_data.m_x[i];
 }
@@ -617,10 +569,11 @@ Units::MetersLength AircraftIntent::GetWaypointX(unsigned int i) const {
 Units::MetersLength AircraftIntent::GetWaypointY(unsigned int i) const {
    if (i >= m_route_data.m_y.size()) {
       LOG4CPLUS_FATAL(m_logger, "Index " << i << " is out of range for size " << m_route_data.m_y.size());
-      throw InvalidIndexException(i, 0, m_route_data.m_y.size()-1);
+      throw InvalidIndexException(i, 0, m_route_data.m_y.size() - 1);
    }
    return m_route_data.m_y[i];
 }
+
 std::list<Waypoint> AircraftIntent::RemoveZeroLengthLegs(const std::list<Waypoint> &waypoints) {
    std::list<Waypoint> resolved_waypoints;
    for (auto wpt_itr = waypoints.begin(); wpt_itr != waypoints.end(); ++wpt_itr) {
@@ -628,13 +581,55 @@ std::list<Waypoint> AircraftIntent::RemoveZeroLengthLegs(const std::list<Waypoin
       const auto lon1 = wpt_itr->GetLongitude();
       const auto lat2 = std::next(wpt_itr)->GetLatitude();
       const auto lon2 = std::next(wpt_itr)->GetLongitude();
-      const auto lat_diff = Units::abs(lat1-lat2);
-      const auto lon_diff = Units::abs(lon1-lon2);
+      const auto lat_diff = Units::abs(lat1 - lat2);
+      const auto lon_diff = Units::abs(lon1 - lon2);
       const auto tolerance = Units::DegreesAngle(1e-5);
       const bool skip_waypoint = lat_diff < tolerance && lon_diff < tolerance;
-      if (!skip_waypoint)
-         resolved_waypoints.push_back(*wpt_itr);
+      if (!skip_waypoint) resolved_waypoints.push_back(*wpt_itr);
    }
    return resolved_waypoints;
 }
 
+AircraftIntent AircraftIntent::CopyAndTrimAfterNamedWaypoint(const AircraftIntent &aircraft_intent,
+                                                             const std::string &waypoint_name) {
+   AircraftIntent aircraft_intent_copy(aircraft_intent);
+   const std::string final_waypoint_name =
+         aircraft_intent.GetWaypoint(aircraft_intent.GetNumberOfWaypoints() - 1).GetName();
+   if (aircraft_intent.ContainsWaypointName(waypoint_name) && final_waypoint_name != waypoint_name) {
+      auto name_comparator = [waypoint_name](Waypoint waypoint_to_test) {
+         return waypoint_to_test.GetName() == waypoint_name;
+      };
+      auto trim_vector = [waypoint_name, name_comparator](std::vector<Waypoint> waypoints) {
+         std::vector<Waypoint> trimmed_vector;
+         for (Waypoint wp : waypoints) {
+            trimmed_vector.push_back(wp);
+            if (name_comparator(wp)) {
+               break;
+            }
+         }
+         return trimmed_vector;
+      };
+      std::vector<Waypoint> ascent_waypoints = aircraft_intent.GetAscentWaypoints();
+      std::vector<Waypoint> cruise_waypoints = aircraft_intent.GetCruiseWaypoints();
+      std::vector<Waypoint> descent_waypoints = aircraft_intent.GetDescentWaypoints();
+      if (std::any_of(ascent_waypoints.rbegin(), ascent_waypoints.rend(), name_comparator)) {
+         cruise_waypoints.clear();
+         descent_waypoints.clear();
+         ascent_waypoints = trim_vector(ascent_waypoints);
+      } else if (std::any_of(cruise_waypoints.rbegin(), cruise_waypoints.rend(), name_comparator)) {
+         cruise_waypoints = trim_vector(cruise_waypoints);
+         descent_waypoints.clear();
+      } else {
+         descent_waypoints = trim_vector(descent_waypoints);
+      }
+      auto to_list = [](std::vector<Waypoint> waypoints) {
+         std::list<Waypoint> dest;
+         std::copy(waypoints.begin(), waypoints.end(), std::back_inserter(dest));
+         return dest;
+      };
+      aircraft_intent_copy.ClearWaypoints();
+      aircraft_intent_copy.LoadWaypointsFromList(to_list(ascent_waypoints), to_list(cruise_waypoints),
+                                                 to_list(descent_waypoints));
+   }
+   return aircraft_intent_copy;
+}

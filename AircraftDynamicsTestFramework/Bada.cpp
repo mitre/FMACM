@@ -1,22 +1,23 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include "public/BadaUtils.h"
 #include "aaesim/Bada.h"
 
 #include <string.h>
@@ -30,35 +31,27 @@ char Bada::input_path[512];
  * Maps the aircraft type to an 8-character file name (no extension).
  * Multiple type codes may map to the same value.
  */
-string Bada::get_file(char *type_code /** aircraft type abbreviation, e.g. B737 */) {
-   return (char *) NULL;
-}
+string Bada::get_file(char *type_code /** aircraft type abbreviation, e.g. B737 */) { return (char *)NULL; }
 
 /**
  * Reads the .OPF file, which contains all the thrust,
  * drag and fuel coefficients to be used in TEM together
  * with information on weights, speeds, maximum altitude, etc.
  */
-bool Bada::read_OPF() {
-   return false;
-}
+bool Bada::read_OPF() { return false; }
 
 /**
  * Reads the .APF file, which contains a default operational
  * climb, cruise and descent speed schedule that is likely
  * to be used by an airline.
  */
-bool Bada::read_APF() {
-   return false;
-}
+bool Bada::read_APF() { return false; }
 
 /**
  * Reads the .PTF file, which contains a table of performance
  * data.
  */
-bool Bada::read_PTF() {
-   return false;
-}
+bool Bada::read_PTF() { return false; }
 
 /**
  * The init() function reads in new data from somewhere
@@ -66,8 +59,7 @@ bool Bada::read_PTF() {
  * type to a file name and then read_APF, read_OPF, and
  * read_PTF.
  */
-void Bada::init(char *type_code /** aircraft type abbreviation, e.g. B737 */ ) {
-}
+void Bada::init(char *type_code /** aircraft type abbreviation, e.g. B737 */) {}
 
 const Bada &Bada::operator=(const Bada &obj) {
 
@@ -94,17 +86,15 @@ const Bada &Bada::operator=(const Bada &obj) {
 
       m_performance.speed = obj.m_performance.speed;
       m_performance.mass = obj.m_performance.mass;
-      for (auto ix = 0; ix < FL_NMAX; ix++) {
+      for (auto ix = 0; ix < aaesim::open_source::bada_utils::FL_NMAX; ix++) {
          m_performance.cruise[ix] = obj.m_performance.cruise[ix];
          m_performance.climb[ix] = obj.m_performance.climb[ix];
          m_performance.descent[ix] = obj.m_performance.descent[ix];
       }
-
    }
 
    return *this;
 }
-
 
 bool Bada::operator==(const Bada &obj) const {
    bool match(true);
@@ -119,13 +109,11 @@ bool Bada::operator==(const Bada &obj) const {
 
    match = match && (base_name == obj.base_name);
 
-
    // aircraft type
 
    match = match && (m_aircraft_type.n_eng == obj.m_aircraft_type.n_eng);
    match = match && (m_aircraft_type.engine_type == obj.m_aircraft_type.engine_type);
    match = match && (m_aircraft_type.wake_category == obj.m_aircraft_type.wake_category);
-
 
    // mass
 
@@ -134,7 +122,6 @@ bool Bada::operator==(const Bada &obj) const {
    match = match && (m_mass.m_max == obj.m_mass.m_max);
    match = match && (m_mass.m_pyld == obj.m_mass.m_pyld);
 
-
    // flight envelope
 
    match = match && (m_flight_envelope.V_mo == obj.m_flight_envelope.V_mo);
@@ -142,7 +129,6 @@ bool Bada::operator==(const Bada &obj) const {
    match = match && (m_flight_envelope.h_mo == obj.m_flight_envelope.h_mo);
    match = match && (m_flight_envelope.h_max == obj.m_flight_envelope.h_max);
    match = match && (m_flight_envelope.G_w == obj.m_flight_envelope.G_w);
-
 
    // m_aerodynamics
 
@@ -173,7 +159,6 @@ bool Bada::operator==(const Bada &obj) const {
 
    match = match && (m_aerodynamics.landing_gear.cd0 == obj.m_aerodynamics.landing_gear.cd0);
 
-
    // engine thrust
 
    match = match && (m_engine_thrust.max_climb.CT_c1 == obj.m_engine_thrust.max_climb.CT_c1);
@@ -190,7 +175,6 @@ bool Bada::operator==(const Bada &obj) const {
    match = match && (m_engine_thrust.descent.V_ref == obj.m_engine_thrust.descent.V_ref);
    match = match && (m_engine_thrust.descent.M_ref == obj.m_engine_thrust.descent.M_ref);
 
-
    // fuel flow
 
    match = match && (m_fuel_flow.C_f1 == obj.m_fuel_flow.C_f1);
@@ -199,14 +183,12 @@ bool Bada::operator==(const Bada &obj) const {
    match = match && (m_fuel_flow.C_f4 == obj.m_fuel_flow.C_f4);
    match = match && (m_fuel_flow.C_fcr == obj.m_fuel_flow.C_fcr);
 
-
    // ground movement
 
    match = match && (m_ground_movement.TOL == obj.m_ground_movement.TOL);
    match = match && (m_ground_movement.LDL == obj.m_ground_movement.LDL);
    match = match && (m_ground_movement.span == obj.m_ground_movement.span);
    match = match && (m_ground_movement.length == obj.m_ground_movement.length);
-
 
    // procedures
 
@@ -223,7 +205,6 @@ bool Bada::operator==(const Bada &obj) const {
       match = match && (m_procedures[ix].descent.V2 == obj.m_procedures[ix].descent.V2);
       match = match && (m_procedures[ix].descent.M == obj.m_procedures[ix].descent.M);
    }
-
 
    // performance
 
@@ -243,8 +224,7 @@ bool Bada::operator==(const Bada &obj) const {
    match = match && (m_performance.mass.nominal == obj.m_performance.mass.nominal);
    match = match && (m_performance.mass.high == obj.m_performance.mass.high);
 
-
-   for (auto ix = 0; match && (ix < FL_NMAX); ix++) {
+   for (auto ix = 0; match && (ix < aaesim::open_source::bada_utils::FL_NMAX); ix++) {
       match = match && (m_performance.cruise[ix].FL == obj.m_performance.cruise[ix].FL);
       match = match && ((isnan(Units::MetersPerSecondSpeed(m_performance.cruise[ix].TAS).value()) &&
                          isnan(Units::MetersPerSecondSpeed(obj.m_performance.cruise[ix].TAS).value())) ||
@@ -259,7 +239,6 @@ bool Bada::operator==(const Bada &obj) const {
       match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(m_performance.cruise[ix].fuel.hi).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.m_performance.cruise[ix].fuel.hi).value())) ||
                         (m_performance.cruise[ix].fuel.hi == obj.m_performance.cruise[ix].fuel.hi));
-
 
       match = match && (m_performance.climb[ix].FL == obj.m_performance.climb[ix].FL);
       match = match && ((isnan(Units::MetersPerSecondSpeed(m_performance.climb[ix].TAS).value()) &&
@@ -280,7 +259,6 @@ bool Bada::operator==(const Bada &obj) const {
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.m_performance.climb[ix].fuel).value())) ||
                         (m_performance.climb[ix].fuel == obj.m_performance.climb[ix].fuel));
 
-
       match = match && (m_performance.descent[ix].FL == obj.m_performance.descent[ix].FL);
 
       match = match && ((isnan(Units::MetersPerSecondSpeed(m_performance.descent[ix].TAS).value()) &&
@@ -294,7 +272,6 @@ bool Bada::operator==(const Bada &obj) const {
       match = match && ((isnan(Units::KilogramsPerHourMassFlowRate(m_performance.descent[ix].fuel).value()) &&
                          isnan(Units::KilogramsPerHourMassFlowRate(obj.m_performance.descent[ix].fuel).value())) ||
                         (m_performance.descent[ix].fuel == obj.m_performance.descent[ix].fuel));
-
    }
 
    return match;

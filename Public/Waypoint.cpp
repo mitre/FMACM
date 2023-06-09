@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -44,14 +44,9 @@ Waypoint::Waypoint() {
    m_rf_turn_arc_radius = Units::ZERO_LENGTH;
 }
 
-Waypoint::Waypoint(const std::string &name,
-                   Units::Angle latitude,
-                   Units::Angle longitude,
-                   Units::Length altitude_constraint_upper,
-                   Units::Length altitude_constraint_lower,
-                   Units::Speed speed_constraint,
-                   Units::Length nominal_altitude,
-                   Units::Speed nominal_ias,
+Waypoint::Waypoint(const std::string &name, Units::Angle latitude, Units::Angle longitude,
+                   Units::Length altitude_constraint_upper, Units::Length altitude_constraint_lower,
+                   Units::Speed speed_constraint, Units::Length nominal_altitude, Units::Speed nominal_ias,
                    std::string arinc424_leg_type) {
    m_name = name;
    m_arinc424_leg_type = arinc424_leg_type;
@@ -70,8 +65,7 @@ Waypoint::Waypoint(const std::string &name,
       speed_constraint = UNDEFINED_SPEED_CONSTRAINT;
    }
 
-   ProcessAltitudeConstraints(altitude_constraint_upper,
-                              altitude_constraint_lower);
+   ProcessAltitudeConstraints(altitude_constraint_upper, altitude_constraint_lower);
 
    ProcessSpeedConstraints(speed_constraint);
 
@@ -81,8 +75,7 @@ Waypoint::Waypoint(const std::string &name,
    m_mach = 0;
 }
 
-void Waypoint::ProcessAltitudeConstraints(Units::Length altitude_upper,
-                                          Units::Length altitude_lower) {
+void Waypoint::ProcessAltitudeConstraints(Units::Length altitude_upper, Units::Length altitude_lower) {
    if (altitude_upper == UNDEFINED_ALTITUDE_CONSTRAINT && altitude_lower == UNDEFINED_ALTITUDE_CONSTRAINT) {
       m_altitude_constraint_high = MAX_ALTITUDE_CONSTRAINT;
       m_altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
@@ -196,7 +189,7 @@ bool Waypoint::load(DecodedStream *input) {
          m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
          m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[11]);
          m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[12]);
-         m_rf_turn_center_latitude = Units::DegreesAngle(std::strtod(uninterpreted_next_value.c_str(), NULL) );
+         m_rf_turn_center_latitude = Units::DegreesAngle(std::strtod(uninterpreted_next_value.c_str(), NULL));
          f = load_datum(uninterpreted_loaded_values[14]);
          if (!f) {
             LoggingLoadable::report_error("could not load a waypoint parameter");
@@ -209,9 +202,7 @@ bool Waypoint::load(DecodedStream *input) {
    }
 }
 
-
-std::ostream &operator<<(std::ostream &out,
-                         const Waypoint &waypoint) {
+std::ostream &operator<<(std::ostream &out, const Waypoint &waypoint) {
    out << waypoint.GetName() << " ";
    out << Units::DegreesAngle(waypoint.GetLatitude()).value() << " ";
    out << Units::DegreesAngle(waypoint.GetLongitude()).value() << " ";
@@ -230,8 +221,7 @@ std::ostream &operator<<(std::ostream &out,
    return out;
 }
 
-std::ostream &operator<<(std::ostream &out,
-                         const std::list<Waypoint> &waypoints) {
+std::ostream &operator<<(std::ostream &out, const std::list<Waypoint> &waypoints) {
    for (std::list<Waypoint>::const_iterator i = waypoints.begin(); i != waypoints.end(); ++i) {
       out << *i;
    }

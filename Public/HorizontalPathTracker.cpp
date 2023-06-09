@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -24,7 +24,8 @@ log4cplus::Logger HorizontalPathTracker::m_logger = log4cplus::Logger::getInstan
 const Units::Length HorizontalPathTracker::EXTENSION_LENGTH = Units::NauticalMilesLength(1.0);
 const Units::MetersLength HorizontalPathTracker::ON_NODE_TOLERANCE = Units::MetersLength(1e-10);
 
-HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory, TrajectoryIndexProgressionDirection expected_index_progression) {
+HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory,
+                                             TrajectoryIndexProgressionDirection expected_index_progression) {
    m_index_progression_direction = expected_index_progression;
    m_unmodified_horizontal_trajectory = horizontal_trajectory;
    m_extended_horizontal_trajectory = ExtendHorizontalTrajectory(horizontal_trajectory);
@@ -34,22 +35,22 @@ HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &
       m_is_passed_end_of_route = false;
    }
    InitializeStartingIndex();
-
 }
 
 HorizontalPathTracker::~HorizontalPathTracker() = default;
 
-std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(const std::vector<HorizontalPath> &horizontal_trajectory) {
+std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(
+      const std::vector<HorizontalPath> &horizontal_trajectory) {
 
    // add one more straight segment to end
    std::vector<HorizontalPath> extended_trajectory;
    Units::RadiansAngle crs(horizontal_trajectory[0].m_path_course);
    HorizontalPath hp;
    hp.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-   hp.SetXYPositionMeters(horizontal_trajectory[0].GetXPositionMeters()
-         - Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs),
-         horizontal_trajectory[0].GetYPositionMeters()
-         - Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs));  // meter
+   hp.SetXYPositionMeters(horizontal_trajectory[0].GetXPositionMeters() -
+                                Units::MetersLength(EXTENSION_LENGTH).value() * Units::cos(crs),
+                          horizontal_trajectory[0].GetYPositionMeters() -
+                                Units::MetersLength(EXTENSION_LENGTH).value() * Units::sin(crs));  // meter
    hp.m_path_length_cumulative_meters = 0;
    hp.m_path_course = horizontal_trajectory[0].m_path_course;
    extended_trajectory.push_back(hp);
@@ -65,11 +66,13 @@ std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(co
    Units::RadiansAngle crs_back(horizontal_trajectory.back().m_path_course);
    HorizontalPath hp_beginning;
    hp_beginning.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
-   hp_beginning.SetXYPositionMeters(horizontal_trajectory.back().GetXPositionMeters()
-         + Units::MetersLength(EXTENSION_LENGTH).value()*Units::cos(crs_back),
-         horizontal_trajectory.back().GetYPositionMeters()
-         + Units::MetersLength(EXTENSION_LENGTH).value()*Units::sin(crs_back));  // meter
-   hp_beginning.m_path_length_cumulative_meters = horizontal_trajectory.back().m_path_length_cumulative_meters + 2 * Units::MetersLength(EXTENSION_LENGTH).value();
+   hp_beginning.SetXYPositionMeters(
+         horizontal_trajectory.back().GetXPositionMeters() +
+               Units::MetersLength(EXTENSION_LENGTH).value() * Units::cos(crs_back),
+         horizontal_trajectory.back().GetYPositionMeters() +
+               Units::MetersLength(EXTENSION_LENGTH).value() * Units::sin(crs_back));  // meter
+   hp_beginning.m_path_length_cumulative_meters = horizontal_trajectory.back().m_path_length_cumulative_meters +
+                                                  2 * Units::MetersLength(EXTENSION_LENGTH).value();
    hp_beginning.m_path_course = horizontal_trajectory.back().m_path_course;
    extended_trajectory.push_back(hp_beginning);
 
@@ -104,8 +107,7 @@ bool HorizontalPathTracker::ValidateIndexProgression(std::vector<HorizontalPath>
    bool is_progress_valid;
    switch (m_index_progression_direction) {
       case TrajectoryIndexProgressionDirection::DECREMENTING:
-         is_progress_valid = m_current_index == index_to_check ||
-                             m_current_index - 1 == index_to_check;
+         is_progress_valid = m_current_index == index_to_check || m_current_index - 1 == index_to_check;
          break;
 
       case TrajectoryIndexProgressionDirection::UNDEFINED:
@@ -113,8 +115,7 @@ bool HorizontalPathTracker::ValidateIndexProgression(std::vector<HorizontalPath>
          break;
 
       case TrajectoryIndexProgressionDirection::INCREMENTING:
-         is_progress_valid = m_current_index == index_to_check ||
-                             m_current_index + 1 == index_to_check;
+         is_progress_valid = m_current_index == index_to_check || m_current_index + 1 == index_to_check;
          break;
 
       default:
@@ -138,11 +139,13 @@ void HorizontalPathTracker::UpdateHorizontalTrajectory(const std::vector<Horizon
    m_extended_horizontal_trajectory = ExtendHorizontalTrajectory(horizontal_trajectory);
 }
 
-bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
-                                             const Units::Length position_y,
+bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x, const Units::Length position_y,
                                              std::vector<HorizontalPath>::size_type &node_index) {
-   bool is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetXPositionMeters()) - position_x) < ON_NODE_TOLERANCE &&
-         Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetYPositionMeters()) - position_y) < ON_NODE_TOLERANCE;
+   bool is_on_node =
+         Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetXPositionMeters()) -
+                    position_x) < ON_NODE_TOLERANCE &&
+         Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetYPositionMeters()) -
+                    position_y) < ON_NODE_TOLERANCE;
 
    if (!is_on_node) {
       std::vector<HorizontalPath>::size_type next_index;
@@ -150,18 +153,26 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
          case TrajectoryIndexProgressionDirection::DECREMENTING:
             if (m_current_index > 0) {
                next_index = m_current_index - 1;  // can go UB
-               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) - position_x);
-               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) - position_y);
+               auto x_diff =
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) -
+                                position_x);
+               auto y_diff =
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) -
+                                position_y);
                is_on_node = x_diff < ON_NODE_TOLERANCE && y_diff < ON_NODE_TOLERANCE;
                if (is_on_node) node_index = next_index;
             }
             break;
 
          case TrajectoryIndexProgressionDirection::INCREMENTING:
-            if (m_current_index < m_extended_horizontal_trajectory.size()-1) {
+            if (m_current_index < m_extended_horizontal_trajectory.size() - 1) {
                next_index = m_current_index + 1;
-               auto x_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) - position_x);
-               auto y_diff = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) - position_y);
+               auto x_diff =
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) -
+                                position_x);
+               auto y_diff =
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetYPositionMeters()) -
+                                position_y);
                is_on_node = x_diff < ON_NODE_TOLERANCE && y_diff < ON_NODE_TOLERANCE;
                if (is_on_node) node_index = next_index;
             }
@@ -169,8 +180,11 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
 
          case TrajectoryIndexProgressionDirection::UNDEFINED:
             for (auto index = 0; index < m_extended_horizontal_trajectory.size(); ++index) {
-               is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetXPositionMeters()) - position_x) < ON_NODE_TOLERANCE &&
-                            Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetYPositionMeters()) - position_y) < ON_NODE_TOLERANCE;
+               is_on_node =
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetXPositionMeters()) -
+                                position_x) < ON_NODE_TOLERANCE &&
+                     Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].GetYPositionMeters()) -
+                                position_y) < ON_NODE_TOLERANCE;
                if (is_on_node) {
                   node_index = index;
                   break;
@@ -192,26 +206,37 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x,
 bool HorizontalPathTracker::IsDistanceAlongPathOnNode(const Units::Length distance_along_path,
                                                       std::vector<HorizontalPath>::size_type &node_index) {
    const Units::Length distance_to_check = distance_along_path + EXTENSION_LENGTH;
-   bool is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].m_path_length_cumulative_meters) - distance_to_check) < ON_NODE_TOLERANCE;
+   bool is_on_node =
+         Units::abs(
+               Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].m_path_length_cumulative_meters) -
+               distance_to_check) < ON_NODE_TOLERANCE;
 
    if (!is_on_node) {
       std::vector<HorizontalPath>::size_type next_index;
       switch (m_index_progression_direction) {
          case TrajectoryIndexProgressionDirection::DECREMENTING:
             next_index = m_current_index - 1;
-            is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_path_length_cumulative_meters) - distance_to_check) < ON_NODE_TOLERANCE;
+            is_on_node =
+                  Units::abs(Units::MetersLength(
+                                   m_extended_horizontal_trajectory[next_index].m_path_length_cumulative_meters) -
+                             distance_to_check) < ON_NODE_TOLERANCE;
             if (is_on_node) node_index = next_index;
             break;
 
          case TrajectoryIndexProgressionDirection::INCREMENTING:
             next_index = m_current_index + 1;
-            is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].m_path_length_cumulative_meters) - distance_to_check) < ON_NODE_TOLERANCE;
+            is_on_node =
+                  Units::abs(Units::MetersLength(
+                                   m_extended_horizontal_trajectory[next_index].m_path_length_cumulative_meters) -
+                             distance_to_check) < ON_NODE_TOLERANCE;
             if (is_on_node) node_index = next_index;
             break;
 
          case TrajectoryIndexProgressionDirection::UNDEFINED:
             for (int index = 0; index < m_extended_horizontal_trajectory.size(); ++index) {
-               is_on_node = Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[index].m_path_length_cumulative_meters) - distance_to_check) < ON_NODE_TOLERANCE;
+               is_on_node = Units::abs(Units::MetersLength(
+                                             m_extended_horizontal_trajectory[index].m_path_length_cumulative_meters) -
+                                       distance_to_check) < ON_NODE_TOLERANCE;
                if (is_on_node) {
                   node_index = index;
                   break;
@@ -229,5 +254,3 @@ bool HorizontalPathTracker::IsDistanceAlongPathOnNode(const Units::Length distan
 
    return is_on_node;
 }
-
-

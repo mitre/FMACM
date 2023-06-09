@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 4.1.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 4.2.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -46,10 +46,24 @@ CPMAddPackage(
     GIT_TAG v2.1
 )
 
+CPMAddPackage(
+    NAME log4cplus
+    GITHUB_REPOSITORY log4cplus/log4cplus
+    GIT_TAG REL_1_2_2
+    OPTIONS
+     "BUILD_SHARED_LIBS FALSE"
+)
+
 # Create some common paths
 if (unitslib_ADDED)
     set(unitslib_INCLUDE_DIRS ${unitslib_SOURCE_DIR}/units-2.1/src/)
 endif ()
+if (log4cplus_ADDED)
+    set (LOG4CPLUS_DIRS 
+        ${log4cplus_BINARY_DIR}/include
+        ${log4cplus_SOURCE_DIR}/include)
+endif ()
+
 set (LOADER_DIR   ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
 set (UTILITY_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Utility)
 set (MATH_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/Math)

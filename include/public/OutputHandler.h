@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -21,62 +21,53 @@
 
 #include <string>
 #include <scalar/Time.h>
-#include <scalar/Length.h>
-#include <scalar/Speed.h>
-#include <scalar/Angle.h>
-#include <scalar/Temperature.h>
-#include "public/minicsv.h"
+#include "MiniCSV/minicsv.h"
+#include "utility/Logging.h"
 
-/**
- * This class serves as a parent for the two most recent file writer classes,
- * TrajectoryFile and PredictionFile. As more of the file output capability in AAESim
- * is migrated away from the Internal and External observers, this class should expand to hold
- * the common data members and data gathering capability for these, and any future classes. May
- * be expanded to include input.
- */
+struct OutputHandler {
 
-class OutputHandler
-{
-
-public:
-
+  public:
    /*
     * The constructor takes the scenario name, and the desired file extension to describe the
     * type of output contained in this file.
     */
-   OutputHandler(const std::string &scenario_name,
-                 const std::string &file_extension);
+   OutputHandler(const std::string &scenario_name, const std::string &file_suffix);
 
-   // Does nothing at this level. All file writing is done in the destructor in a derived class.
    virtual ~OutputHandler();
 
-protected:
+   /**
+    * Writes the file, closes it, and clears data stores to save memory.
+    * Must also set m_finished to true.
+    * Not implemented at the OutputHandler level, must be done in a subclass.
+    * Finish() should only be called once during the life cycle of the object,
+    * to avoid overwriting the file.
+    */
+   virtual void Finish() = 0;
 
-   // Structure to contain data that is generally common to output files.
-   // Derived classes should also derive from this structure, and add the
-   // additional necessary members to match the desired output.
-   struct CommonSimData
-   {
-      CommonSimData() {
-         iteration_number = -1;
-         simulation_time = Units::SecondsTime(-1.0);
-         acid.assign("");
-      };
+   /**
+    * Implementations which don't open the output file immediately can
+    * use a dummy scenario name in the constructor and set it later
+    * using this function.
+    */
+   void SetScenarioName(const std::string &scenario_name);
 
-      // The current iteration number
-      int iteration_number;
+  protected:
+   // Everything in the filename after the scenario name, e.g. "-waypoints.csv"
+   std::string m_file_suffix;
 
-      // The time when this data was generated
-      Units::Time simulation_time;
-
-      // The Aircraft ID
-      std::string acid;
-
-   };
-
-   // Name of file to be written
+   // Full name of file to be written, including suffix
    std::string filename;
 
    // Output stream that handles writing when object is destroyed
    mini::csv::ofstream os;
+
+   // indicates whether Finish() has been called, to complete writing
+   bool m_finished;
+
+  private:
+   static log4cplus::Logger m_logger;
 };
+
+inline void OutputHandler::SetScenarioName(const std::string &scenario_name) {
+   filename.assign(scenario_name + m_file_suffix);
+}

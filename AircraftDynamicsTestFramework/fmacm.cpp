@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,7 +26,6 @@
 #include "cppmanifest/version.h"
 #include "cppmanifest/cppmanifest.h"
 #include "public/RunFile.h"
-#include "public/InternalObserver.h"
 #include "public/Scenario.h"
 #include "framework/TestFrameworkScenario.h"
 #include "loader/RunFileArchiveDirector.h"
@@ -39,22 +38,16 @@
 
 using namespace std;
 
-
 #define _MAX_PATH 260
 
-
-void read_runfile(RunFile &run_file,
-                  std::string str);
+void read_runfile(RunFile &run_file, std::string str);
 
 void process_scenarios(RunFile &run_file);
-
-void process_overall_output(InternalObserver &internal_observer);
 
 static log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
 const std::string VERSION_FLAG("--version");
 
-int main(int argc,
-         char *argv[]) {
+int main(int argc, char *argv[]) {
    InitializeLogging();
    LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::getVersion());
    HTMLDump::SetSoftwareVersion(aaesim::cppmanifest::getVersion());
@@ -64,11 +57,11 @@ int main(int argc,
       std::string arg1(argv[1]);
       if (arg1 == VERSION_FLAG) {
          cout << "aaesim version " << aaesim::cppmanifest::getVersion() << endl;
-         return 0; // nothing else to do
+         return 0;  // nothing else to do
       } else if (arg1 == aaesim::cppmanifest::BUILDINFO_CLI_FLAG) {
          cout << "fmacm build info:" << endl;
          aaesim::cppmanifest::printMetaData();
-         return 0; // nothing else to do
+         return 0;  // nothing else to do
       }
    }
 
@@ -83,15 +76,13 @@ int main(int argc,
    process_scenarios(run_file);
 }
 
-void read_runfile(RunFile &run_file,
-                  std::string arg) {
+void read_runfile(RunFile &run_file, std::string arg) {
    // Gets list of run scenario files from configuration file.
    //
    // run_file:output list of scenario files.
    // arg:argument from run command.  If set, contains
    //     configuration file name for Linux runs, (can
    //     include directory).
-
 
    // Set configuration filename to be opened.
 
@@ -126,7 +117,6 @@ void read_runfile(RunFile &run_file,
       // Argument not set-use default directory and name.
 
       configFile = "../Run_Files/config-loader.txt";
-
    }
 
 #else
@@ -162,13 +152,12 @@ void read_runfile(RunFile &run_file,
    }
 }
 
-
 void process_scenarios(RunFile &run_file) {
    bool r;
 
    list<string>::iterator i;
 
-   //iterating through all the scenarios:
+   // iterating through all the scenarios:
    vector<pair<string, std::shared_ptr<Scenario> > >::const_iterator citr;
    for (citr = run_file.scenarios.begin(); citr != run_file.scenarios.end(); ++citr) {
       std::string sFileName = citr->first;
@@ -182,7 +171,7 @@ void process_scenarios(RunFile &run_file) {
          throw runtime_error(msg);
       }
 
-      stream.set_echo(false); // default set to false, must turn it on in input file
+      stream.set_echo(false);  // default set to false, must turn it on in input file
 
       char CurrentPath[_MAX_PATH];
 
@@ -197,7 +186,7 @@ void process_scenarios(RunFile &run_file) {
       stream.set_Archive_Director(rfad);
 
       // Set scenario name here, before load, for time to go output.
-      citr->second->SetScenarioName(sFileName); // sets the scenario name
+      citr->second->SetScenarioName(sFileName);  // sets the scenario name
 
       // So user can tell which scenario is being processed during regression testing
       LOG4CPLUS_INFO(logger, "Processing Scenario File: " << sFileName << std::endl);
@@ -212,5 +201,3 @@ void process_scenarios(RunFile &run_file) {
       citr->second->ClearAircraftIdMap();
    }
 }
-
-

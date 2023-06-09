@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -27,306 +27,107 @@
 #include <scalar/MassFlowRate.h>
 #include <scalar/Speed.h>
 #include "utility/CustomUnits.h"
+#include "public/BadaUtils.h"
 
 namespace aaesim {
-   enum ENGINE_TYPE {
-      JET,
-      TURBOPROP,
-      PISTON
-   };
-   enum WAKE_CATEGORY {
-      HEAVY_,
-      MEDIUM_,
-      LIGHT_
-   };
-#define FL_NMAX 40
 
-   typedef struct {
-      int FL;
-      Units::Speed TAS;
-      struct {
-         Units::Speed lo;
-         Units::Speed nom;
-         Units::Speed hi;
-      } ROCD;
-      Units::MassFlowRate fuel;
-   } climb_struct;
+class Bada {
+  public:
+   static const std::string BADA_VERSION;
+   static const Bada *LoadDataForAircraftType(std::string aircraft_type);
+   Bada() = default;
+   ~Bada() = default;
 
-   typedef struct {
-      int FL;
-      Units::Speed TAS;
-      struct {
-         Units::MassFlowRate lo;
-         Units::MassFlowRate nom;
-         Units::MassFlowRate hi;
-      } fuel;
-   } cruise_struct;
+   aaesim::open_source::bada_utils::AircraftType GetAircraftTypeInformation() const;
 
-   typedef struct {
-      int FL;
-      Units::Speed TAS;
-      Units::Speed ROCD;
-      Units::MassFlowRate fuel;
-   } descent_struct;
+   aaesim::open_source::bada_utils::Mass GetAircraftMassInformation() const;
 
-   typedef struct {
-      struct {
-         int LO;
-         int HI;
-      } CAS;
-      double Mach;
-   } perf_speed_struct;
+   aaesim::open_source::bada_utils::FlightEnvelope GetFlightEnvelopeInformation() const;
 
-   class Bada {
-    public:
-      static const std::string BADA_VERSION;
-      static const Bada* LoadDataForAircraftType(std::string aircraft_type);
-      Bada() = default;
-      ~Bada() = default;
+   aaesim::open_source::bada_utils::Aerodynamics GetAerodynamicsInformation() const;
 
-      struct AircraftType {
-         int n_eng;  // number of engines
-         ENGINE_TYPE engine_type;
-         WAKE_CATEGORY wake_category;
-      };
+   aaesim::open_source::bada_utils::EngineThrust GetEngineThrustInformation() const;
 
-      Bada::AircraftType GetAircraftTypeInformation() const;
+   aaesim::open_source::bada_utils::FuelFlow GetFuelFlowInformation() const;
 
-      // Mass
-      struct Mass {
-         Units::Mass m_ref;  // reference mass
-         Units::Mass m_min;  // minimum mass
-         Units::Mass m_max;  // maximum mass
-         Units::Mass m_pyld; // maximum payload mass
-      };
+   aaesim::open_source::bada_utils::GroundMovement GetGroundMovementInformation() const;
 
-      Bada::Mass GetAircraftMassInformation() const;
+   aaesim::open_source::bada_utils::Procedure GetProcedureInformation(unsigned int index) const;
 
-      // Flight Envelope
-      struct FlightEnvelope {
-         Units::Speed V_mo;   // maximum operating speed (CAS).
-         double M_mo;         // maximum operating Mach number
-         Units::Length h_mo;  // maximum operating altitude
-         Units::Length h_max; // maximum altitude at MTOW and ISA
-         Units::LengthToMassGradient G_w; // weight gradient on max. altitude
-         double G_t;     // temperature gradient on max. altitude (feet/C)
-      };
+   aaesim::open_source::bada_utils::AircraftPerformance GetAircraftPerformanceInformation() const;
 
-      Bada::FlightEnvelope GetFlightEnvelopeInformation() const;
+   const Bada &operator=(const Bada &obj);
 
-      // Aerodynamics
-      struct Aerodynamics {
-         Units::Area S; // Reference wing surface area.
-         double C_Lbo;  // Buffet onset lift coeff.  (jet only)
-         double K;    // Buffeting gradient (jet only)
-         double C_M16;    // No idea, but it's in the OPF
+   bool operator==(const Bada &obj) const;
 
-         struct {
-            Units::Speed V_stall; // CAS
-            double cd0;           // parasitic drag coeff.
-            double cd2;           // induced drag coeff.
-         } cruise;
+  protected:
+   static char input_path[512];
 
-         struct {
-            Units::Speed V_stall; // CAS
-            double cd0;           // parasitic drag coeff.
-            double cd2;           // induced drag coeff.
-         } initial_climb;
+   // Aircraft Type
+   char *type_name;
 
-         struct {
-            Units::Speed V_stall; // CAS
-            double cd0;           // parasitic drag coeff.
-            double cd2;           // induced drag coeff.
-         } take_off;
+   // Base file name
+   std::string base_name;
 
-         struct {
-            Units::Speed V_stall; // CAS
-            double cd0;           // parasitic drag coeff.
-            double cd2;           // induced drag coeff.
-         } approach;
+   aaesim::open_source::bada_utils::AircraftType m_aircraft_type;
+   aaesim::open_source::bada_utils::AircraftPerformance m_performance;
+   aaesim::open_source::bada_utils::GroundMovement m_ground_movement;
+   aaesim::open_source::bada_utils::EngineThrust m_engine_thrust;
+   aaesim::open_source::bada_utils::FuelFlow m_fuel_flow;
+   aaesim::open_source::bada_utils::Mass m_mass;
+   aaesim::open_source::bada_utils::Aerodynamics m_aerodynamics;
+   aaesim::open_source::bada_utils::FlightEnvelope m_flight_envelope;
+   aaesim::open_source::bada_utils::Procedure m_procedures[3];
 
-         struct {
-            Units::Speed V_stall; // CAS
-            double cd0;           // parasitic drag coeff.
-            double cd2;           // induced drag coeff.
-         } landing;
+   void init(char *type_code);
 
-         struct {
-            double cd0;  // parasitic drag coeff.
-         } landing_gear;
+   /**
+    * Maps the aircraft type to an 8-character file name (no extension).
+    * Multiple type codes may map to the same value.
+    */
+   std::string get_file(char *type_code /** aircraft type abbreviation, e.g. B737 */);
 
-      };
+   bool read_OPF();
 
-      Bada::Aerodynamics GetAerodynamicsInformation() const;
+   bool read_APF();
 
-      // Engine Thrust
-      struct EngineThrust {
-         struct {
-            double CT_c1;                // 1st max. climb thrust coeff. (N, jet/piston)
-            //                              (kt-N, turboprop)
-            Units::Length CT_c2;         // 2nd max. climb thrust coeff.
-            double CT_c3;                // 3rd max. climb thrust coeff. (1/feet^2, jet)
-            //                              (N, turboprop)
-            //                              (kt-N, piston)
-            Units::AbsCelsiusTemperature CT_c4; // 1st thrust temperature coeff.
-            double CT_c5;                // 2nd thrust temperature coeff. (1/deg. C)
-         } max_climb;
-         struct {
-            double CT_low;      // low altitude descent thrust coeff.
-            double CT_high;     // high altitude descent thrust coeff.
-            Units::Length h;    // Transition altitude (feet)
-            double CT_app;      // approach thrust coeff.
-            double CT_ld;       // landing thrust coeff.
-            Units::Speed V_ref; // reference descent speed (kt)
-            double M_ref;       // reference descent Mach number
-         } descent;
-      };
+   bool read_PTF();
 
-      Bada::EngineThrust GetEngineThrustInformation() const;
+  private:
+   static std::map<std::string, Bada *> m_loaded_bada_performance;
+};
 
-      // fuel flow
-      struct FuelFlow {
-         double C_f1;              // 1st Thrust specific fuel consumption coeff.
-         // (kg/min*kN) (jet)
-         // (kg/min*kN*knot) (turboprop)
-         // (kg/min)  (piston)
-         Units::Speed C_f2;        // 2nd Thrust specific fuel consumption coeff.
-         Units::MassFlowRate C_f3; // 1st descent thrust fuel flow coeff.
-         Units::Length C_f4;       // 2nd descent thrust fuel flow coeff.
-         double C_fcr;             // Cruise fuel flow coeff. (dimensionless)
-      };
-
-      Bada::FuelFlow GetFuelFlowInformation() const;
-
-      // Ground movement
-      struct GroundMovement {
-         Units::Length TOL;     // Take-off length (m)
-         Units::Length LDL;     // Landing length (m)
-         Units::Length span;    // Wingspan (m)
-         Units::Length length;  // Length (m)
-      };
-
-      Bada::GroundMovement GetGroundMovementInformation() const;
-
-      // Procedure Specifications
-      struct Procedure {
-         struct {
-            int V1;
-            int V2;
-            int M;
-         } climb;
-         struct {
-            int V1;
-            int V2;
-            int M;
-         } cruise;
-         struct {
-            int V1;
-            int V2;
-            int M;
-         } descent;
-      };
-
-      Bada::Procedure GetProcedureInformation(unsigned int index) const;
-
-      struct AircraftPerformance {
-         struct {
-            perf_speed_struct climb;
-            perf_speed_struct cruise;
-            perf_speed_struct descent;
-         } speed;
-
-         struct {
-            Units::Mass low;
-            Units::Mass nominal;
-            Units::Mass high;
-         } mass;
-
-         cruise_struct cruise[FL_NMAX];
-         climb_struct climb[FL_NMAX];
-         descent_struct descent[FL_NMAX];
-      };
-
-      Bada::AircraftPerformance GetAircraftPerformanceInformation() const;
-
-      const Bada &operator=(const Bada &obj);
-
-      bool operator==(const Bada &obj) const;
-
-    protected:
-      static char input_path[512];
-
-      // Aircraft Type
-      char *type_name;
-
-      // Base file name
-      std::string base_name;
-
-      Bada::AircraftType m_aircraft_type;
-      Bada::AircraftPerformance m_performance;
-      Bada::GroundMovement m_ground_movement;
-      Bada::EngineThrust m_engine_thrust;
-      Bada::FuelFlow m_fuel_flow;
-      Bada::Mass m_mass;
-      Bada::Aerodynamics m_aerodynamics;
-      Bada::FlightEnvelope m_flight_envelope;
-      Bada::Procedure m_procedures[3];
-
-      void init(char *type_code);
-
-      /**
-        * Maps the aircraft type to an 8-character file name (no extension).
-        * Multiple type codes may map to the same value.
-        */
-      std::string get_file(char *type_code /** aircraft type abbreviation, e.g. B737 */);
-
-      bool read_OPF();
-
-      bool read_APF();
-
-      bool read_PTF();
-
-    private:
-      static std::map<std::string, Bada*> m_loaded_bada_performance;
-   };
-
-   inline Bada::AircraftType Bada::GetAircraftTypeInformation() const {
-      return m_aircraft_type;
-   }
-
-   inline Bada::AircraftPerformance Bada::GetAircraftPerformanceInformation() const {
-      return m_performance;
-   }
-
-   inline Bada::GroundMovement Bada::GetGroundMovementInformation() const {
-      return m_ground_movement;
-   }
-
-   inline Bada::EngineThrust Bada::GetEngineThrustInformation() const {
-      return m_engine_thrust;
-   }
-
-   inline Bada::FuelFlow Bada::GetFuelFlowInformation() const {
-      return m_fuel_flow;
-   }
-
-   inline Bada::Mass Bada::GetAircraftMassInformation() const {
-      return m_mass;
-   }
-
-   inline Bada::Aerodynamics Bada::GetAerodynamicsInformation() const {
-      return m_aerodynamics;
-   }
-
-   inline Bada::FlightEnvelope Bada::GetFlightEnvelopeInformation() const {
-      return m_flight_envelope;
-   }
-
-   inline Bada::Procedure Bada::GetProcedureInformation(unsigned int index) const {
-      if (index >= sizeof(m_procedures)) {
-         throw std::runtime_error("invalid array index");
-      }
-      return m_procedures[index];
-   }
-
+inline aaesim::open_source::bada_utils::AircraftType Bada::GetAircraftTypeInformation() const {
+   return m_aircraft_type;
 }
+
+inline aaesim::open_source::bada_utils::AircraftPerformance Bada::GetAircraftPerformanceInformation() const {
+   return m_performance;
+}
+
+inline aaesim::open_source::bada_utils::GroundMovement Bada::GetGroundMovementInformation() const {
+   return m_ground_movement;
+}
+
+inline aaesim::open_source::bada_utils::EngineThrust Bada::GetEngineThrustInformation() const {
+   return m_engine_thrust;
+}
+
+inline aaesim::open_source::bada_utils::FuelFlow Bada::GetFuelFlowInformation() const { return m_fuel_flow; }
+
+inline aaesim::open_source::bada_utils::Mass Bada::GetAircraftMassInformation() const { return m_mass; }
+
+inline aaesim::open_source::bada_utils::Aerodynamics Bada::GetAerodynamicsInformation() const { return m_aerodynamics; }
+
+inline aaesim::open_source::bada_utils::FlightEnvelope Bada::GetFlightEnvelopeInformation() const {
+   return m_flight_envelope;
+}
+
+inline aaesim::open_source::bada_utils::Procedure Bada::GetProcedureInformation(unsigned int index) const {
+   if (index >= sizeof(m_procedures)) {
+      throw std::runtime_error("invalid array index");
+   }
+   return m_procedures[index];
+}
+
+}  // namespace aaesim

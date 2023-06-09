@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -23,16 +23,12 @@
 #include "loader/HTMLDump.h"
 #include <stdexcept>
 
-template<class PARENT>
-class EchoStream : public PARENT
-{
-public:
+template <class PARENT>
+class EchoStream : public PARENT {
+  public:
+   EchoStream(void) {}
 
-   EchoStream(void) {
-   }
-
-   ~EchoStream(void) {
-   }
+   ~EchoStream(void) {}
 
    Token get_next() {
       Token out;
@@ -79,7 +75,6 @@ public:
       return out;
    }
 
-
    bool open_echo_file(const std::string &my_echo_file) {
       echo_file.open(my_echo_file.c_str());
 
@@ -89,12 +84,10 @@ public:
       return false;
    }
 
-   void close_echo_file() {
-      echo_file.close();
-   }
+   void close_echo_file() { echo_file.close(); }
 
    void report_error(std::string message) {
-      PARENT::report_error(message); // reports the error to the parent class
+      PARENT::report_error(message);  // reports the error to the parent class
 
       if (echo_file.is_open()) {
          // outputs the error to the echo_file if open
@@ -105,7 +98,7 @@ public:
    }
 
    void report_warning(std::string message) {
-      PARENT::report_warning(message); // reports the warning to the parent class
+      PARENT::report_warning(message);  // reports the warning to the parent class
 
       if (echo_file.is_open()) {
          // outputs the error to the echo_file if open
@@ -115,7 +108,6 @@ public:
       }
    }
 
-private:
+  private:
    HTMLDump echo_file;
-
 };

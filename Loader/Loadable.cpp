@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -28,9 +28,7 @@ Loadable::Loadable(void) {
    was_load_successful = false;
 }
 
-Loadable::~Loadable(void) {
-   cleanup();
-}
+Loadable::~Loadable(void) { cleanup(); }
 
 Loadable::Loadable(const Loadable &in) {
    was_load_successful = in.was_load_successful;
@@ -42,9 +40,7 @@ void Loadable::operator=(const Loadable &in) {
    stream = in.stream;
 }
 
-void Loadable::cleanup() {
-   lookup_table.clear();
-}
+void Loadable::cleanup() { lookup_table.clear(); }
 
 bool Loadable::test_load() {
    string error_message;
@@ -59,14 +55,17 @@ bool Loadable::test_load() {
 
       } else {
          // It was okay, but is it default
-         bool isdefault = (!((*it).second->is_a_must_load())) &&
-                          (!(*it).second->get_loaded_status()); // NOT required && NOT loaded == must be using a default
+         bool isdefault =
+               (!((*it).second->is_a_must_load())) &&
+               (!(*it).second->get_loaded_status());  // NOT required && NOT loaded == must be using a default
          bool isDeprecated = (*it).second->get_deprecated_info().isDeprecated;
          if (isdefault && !isDeprecated) {
-            string msg = "The optional tag \"" + (*it).first +
-                         "\" was not found. Its default value will be used."; // unfortunately, the default value is unknown here and cannot be included in the message
+            string msg =
+                  "The optional tag \"" + (*it).first +
+                  "\" was not found. Its default value will be used.";  // unfortunately, the default value is unknown
+                                                                        // here and cannot be included in the message
             stream->report_warning(msg + "\n");
-//				LOG4CPLUS_INFO(logger, msg);
+            //				LOG4CPLUS_INFO(logger, msg);
          }
       }
    }
@@ -74,17 +73,16 @@ bool Loadable::test_load() {
    return good;
 }
 
-
 bool Loadable::complete() {
    bool f;
    string token;
    string warning_message;
 
    while (true) {
-      //dump();
-      f = stream->get_datum(token); //read a token
+      // dump();
+      f = stream->get_datum(token);  // read a token
 
-      if (!f) // if there are no more jump out
+      if (!f)  // if there are no more jump out
       {
          break;
       }
@@ -105,10 +103,12 @@ bool Loadable::complete() {
          } else {
             // Create warning statement since the token was not expected.
             warning_message = "\nThe unexpected tag \"" + token +
-                              "\" appeared in the run file. \nThis tag was not registered in the load function; it will be ignored.";
+                              "\" appeared in the run file. \nThis tag was not registered in the load function; it "
+                              "will be ignored.";
             stream->report_warning(warning_message + "\n");
             // LOG4CPLUS_WARN(logger, warning_message);
-            stream->get_next(); // skip over the next token also, assuming it is a value associated with the unknown tag
+            stream->get_next();  // skip over the next token also, assuming it is a value associated with the unknown
+                                 // tag
             continue;
          }
       }
@@ -125,16 +125,19 @@ bool Loadable::complete() {
             } else {
                warning_message +=
                      "It has been superseded by: " + (*it).second->get_deprecated_info().supersededByTagName;
-               warning_message += "\nThe old tag will be used for now, but may be removed in the future. Please update your input files.\n";
+               warning_message +=
+                     "\nThe old tag will be used for now, but may be removed in the future. Please update your input "
+                     "files.\n";
             }
          } else {
-            warning_message += "\nThe old tag will be used for now, but may be removed in the future. Please update your input files.\n";
+            warning_message +=
+                  "\nThe old tag will be used for now, but may be removed in the future. Please update your input "
+                  "files.\n";
          }
 
          stream->report_warning(warning_message);
          // LOG4CPLUS_WARN(logger, warning_message);
       }
-
 
       bool f2 = (*it).second->load(stream);
       if (!f2) {
@@ -153,9 +156,7 @@ bool Loadable::complete() {
 
 //--------------------------------------------------------
 
-bool Loadable::loaded_successfully() {
-   return was_load_successful;
-}
+bool Loadable::loaded_successfully() { return was_load_successful; }
 
 //--------------------------------------------------------
 
@@ -209,7 +210,7 @@ shared_ptr<LoaderLink> Loadable::getLoaderLink(string name) {
    string varnameclean = clean_token(name);
    map<string, shared_ptr<LoaderLink> >::iterator it = lookup_table.find(varnameclean);
    if (it == lookup_table.end()) {
-      return shared_ptr<LoaderLink>((LoaderLink *) 0);
+      return shared_ptr<LoaderLink>((LoaderLink *)0);
    }
    return it->second;
 }

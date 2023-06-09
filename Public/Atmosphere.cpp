@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -26,8 +26,7 @@ using namespace std;
 
 log4cplus::Logger Atmosphere::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Atmosphere"));
 
-Atmosphere::Atmosphere() {
-}
+Atmosphere::Atmosphere() {}
 
 Atmosphere::~Atmosphere() = default;
 
@@ -37,11 +36,9 @@ Atmosphere::~Atmosphere() = default;
 //   air density, rho (kg/m^3)
 //   air pressure, P (N/m^2)
 
-void Atmosphere::AirDensity(const Units::Length h,
-                            Units::Density &rho,
-                            Units::Pressure &P) const {
+void Atmosphere::AirDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const {
 
-   //global h_trop G T0 RHO0 P0 R K_T rho_trop P_trop;
+   // global h_trop G T0 RHO0 P0 R K_T rho_trop P_trop;
 
    // Find air temperature (Kelvin), density (kg/m^3), and pressure (kg/m^2)
    Units::KelvinTemperature T = GetTemperature(h);
@@ -51,19 +48,16 @@ void Atmosphere::AirDensity(const Units::Length h,
    if (h < H_TROP) {
       Units::Density RHO0 = GetSeaLevelDensity();
       rho = RHO0 * pow((T / T0), RHO_T_EXPONENT);  // BADA_37_USER_MANUAL eq. 3.2-6
-      P = P0_ISA * pow((T / T0), P_T_EXPONENT);  // BADA_37_USER_MANUAL eq. 3.2-15
+      P = P0_ISA * pow((T / T0), P_T_EXPONENT);    // BADA_37_USER_MANUAL eq. 3.2-15
    } else {
       const double factor(exp(-Units::ONE_G_ACCELERATION / (R * T) * (h - H_TROP)));
       rho = GetTropopauseDensity() * factor;  // BADA_37_USER_MANUAL eq. 3.2-9
-      P = GetTropopausePressure() * factor;  // BADA_37_USER_MANUAL eq. 3.2-16
+      P = GetTropopausePressure() * factor;   // BADA_37_USER_MANUAL eq. 3.2-16
    }
-
 }
 
-void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in,
-                                                 const WindStack &wind_stack,
-                                                 Units::Speed &wind_speed,
-                                                 Units::Frequency &wind_gradient) const {
+void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in, const WindStack &wind_stack,
+                                                 Units::Speed &wind_speed, Units::Frequency &wind_gradient) const {
    Units::FeetLength altitude = altitude_in;
 
    Units::FeetLength maximum_altitude = wind_stack.GetAltitude(wind_stack.GetMaxRow());
@@ -112,10 +106,8 @@ void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in
       row_index++;
    }
 
-   double A_original[3][3] = {{0, 0, 0},
-                              {0, 0, 0},
-                              {0, 0, 0}};
-   DMatrix A((double **) &A_original, 1, 3, 1, 3);
+   double A_original[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+   DMatrix A((double **)&A_original, 1, 3, 1, 3);
 
    DVector B(1, 3);
    DVector M_(1, 3);
@@ -130,21 +122,21 @@ void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in
    A.Set(1, 2, -1.0 / 6.0 * h3);
    A.Set(1, 3, 0);
    B.Set(1, (wind_velocities_knots[2] - wind_velocities_knots[1]) / h2 -
-            (wind_velocities_knots[3] - wind_velocities_knots[2]) / h3);
+                  (wind_velocities_knots[3] - wind_velocities_knots[2]) / h3);
 
    // 2nd Row of A Matrix
    A.Set(2, 1, -1.0 / 6.0 * h3);
    A.Set(2, 2, -1.0 / 3.0 * h3 - 1.0 / 3.0 * h4);
    A.Set(2, 3, -1.0 / 6.0 * h4);
    B.Set(2, (wind_velocities_knots[3] - wind_velocities_knots[2]) / h3 -
-            (wind_velocities_knots[4] - wind_velocities_knots[3]) / h4);
+                  (wind_velocities_knots[4] - wind_velocities_knots[3]) / h4);
 
    // 3rd Row of A Matrix
    A.Set(3, 1, 0);
    A.Set(3, 2, -1.0 / 6.0 * h4);
    A.Set(3, 3, -1.0 / 3.0 * h4 - 1.0 / 2.0 * h5);
    B.Set(3, (wind_velocities_knots[4] - wind_velocities_knots[3]) / h4 -
-            (wind_velocities_knots[5] - wind_velocities_knots[4]) / h5);
+                  (wind_velocities_knots[5] - wind_velocities_knots[4]) / h5);
 
    DMatrix A_inverse(1, 3, 1, 3);
    inverse(A, 3, A_inverse);
@@ -217,8 +209,7 @@ void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in
                                      c[(*ind.begin())] * (altitude.value() - x[(*ind.begin())]) + d[(*ind.begin())]);
       wind_gradient = Units::KnotsPerFootFrequency(
             3 * a[(*ind.begin())] * pow(altitude.value() - x[(*ind.begin())], 2) +
-            2 * b[(*ind.begin())] * (altitude.value() - x[(*ind.begin())]) +
-            c[(*ind.begin())]);
+            2 * b[(*ind.begin())] * (altitude.value() - x[(*ind.begin())]) + c[(*ind.begin())]);
    }
 
    if (wind_gradient != Units::zero()) {
@@ -226,14 +217,12 @@ void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in
    }
 }
 
-
 // Inputs:
 //   calibrate air speed, vcas
 //   altitude, alt
 // Outputs:
 //   true air speed, Vtas
-Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
-                                 const Units::Length alt) const {
+Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas, const Units::Length alt) const {
    // global RHO0 P0 mu;
 
    // Get the air density
@@ -246,8 +235,7 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
    return vtas;
 }
 
-Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
-         const Units::Pressure p, const Units::Density rho) {
+Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas, const Units::Pressure p, const Units::Density rho) {
 
    // All calculations are from BADA_37_USER_MANUAL eq. 3.2-12
    // expression inside innermost parentheses
@@ -262,13 +250,11 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
    // full equation
    Units::Speed speed = sqrt(2 / MU * p / rho * temp3);
 
-   LOG4CPLUS_TRACE(m_logger, "CAS " << Units::KnotsSpeed(vcas) << " at " <<
-         Units::PascalsPressure(p) << " and " << Units::KilogramsMeterDensity(rho) <<
-         " is TAS " << Units::KnotsSpeed(speed));
+   LOG4CPLUS_TRACE(m_logger, "CAS " << Units::KnotsSpeed(vcas) << " at " << Units::PascalsPressure(p) << " and "
+                                    << Units::KilogramsMeterDensity(rho) << " is TAS " << Units::KnotsSpeed(speed));
 
    return speed;
 }
-
 
 //--------------------------------
 // Inputs:
@@ -276,9 +262,8 @@ Units::Speed Atmosphere::CAS2TAS(const Units::Speed vcas,
 //   altitude, alt.
 // Outputs:
 //   calibrated air speed.
-Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas,
-                                 const Units::Length alt) const {
-   //global RHO0 P0 MU;
+Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas, const Units::Length alt) const {
+   // global RHO0 P0 MU;
 
    // Get the air density
    Units::KilogramsMeterDensity rho;
@@ -290,8 +275,7 @@ Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas,
    return vcas;
 }
 
-Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas,
-      const Units::Pressure p, const Units::Density rho) {
+Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas, const Units::Pressure p, const Units::Density rho) {
 
    // All calculations are from BADA_37_USER_MANUAL eq. 3.2-13
    // expression inside innermost parentheses
@@ -309,13 +293,8 @@ Units::Speed Atmosphere::TAS2CAS(const Units::Speed vtas,
    return speed;
 }
 
-
 // method to calculate the MACH to IAS transition.
-Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias,
-                                               const double &mach) const {
-
-
-
+Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias, const double &mach) const {
 
    // temp values to store the MACH IAS transition calculations
    double temp1, temp2, temp3, temp4;
@@ -337,21 +316,17 @@ Units::Length Atmosphere::GetMachIASTransition(const Units::Speed &ias,
 
    // calculates Mach IAS Transition (Transition Altitude)
 
-   return Units::FeetLength(
-         (Units::FeetLength(Units::MetersLength(1000.0)).value() / 6.5) * GetSeaLevelTemperature().value() * (1 - thetaTrans));
-
+   return Units::FeetLength((Units::FeetLength(Units::MetersLength(1000.0)).value() / 6.5) *
+                            GetSeaLevelTemperature().value() * (1 - thetaTrans));
 }
 
-Units::Speed Atmosphere::MachToIAS(const double mach,
-                                   const Units::Length alt) const {
+Units::Speed Atmosphere::MachToIAS(const double mach, const Units::Length alt) const {
    Units::Speed tas = Units::MetersPerSecondSpeed(mach * sqrt(GAMMA * R * GetTemperature(alt).value()));
 
    return TAS2CAS(tas, alt);
 }
 
-
-double Atmosphere::ESFconstantCAS(const Units::Speed true_airspeed,
-                                  const Units::Length altitude_msl,
+double Atmosphere::ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude_msl,
                                   const Units::KelvinTemperature temperature) {
 
    double esf;

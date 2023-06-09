@@ -1,17 +1,17 @@
 // ****************************************************************************
 // NOTICE
 //
-// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001 
-// and is subject to Federal Aviation Administration Acquisition Management System 
+// This work was produced for the U.S. Government under Contract 693KA8-22-C-00001
+// and is subject to Federal Aviation Administration Acquisition Management System
 // Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV (Oct. 1996).
 //
-// The contents of this document reflect the views of the author and The MITRE 
-// Corporation and do not necessarily reflect the views of the Federal Aviation 
-// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA 
-// nor the DOT makes any warranty or guarantee, expressed or implied, concerning 
+// The contents of this document reflect the views of the author and The MITRE
+// Corporation and do not necessarily reflect the views of the Federal Aviation
+// Administration (FAA) or the Department of Transportation (DOT). Neither the FAA
+// nor the DOT makes any warranty or guarantee, expressed or implied, concerning
 // the content or accuracy of these views.
 //
-// For further information, please contact The MITRE Corporation, Contracts Management 
+// For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
 // 2022 The MITRE Corporation. All Rights Reserved.
@@ -28,24 +28,22 @@ TokenStream::TokenStream(void) {
    indents = 0;
    echo = false;
    last_was_return = false;
-   //echo = false;
+   // echo = false;
    comment_not_end = false;
 }
 
-TokenStream::~TokenStream(void) {
-
-}
+TokenStream::~TokenStream(void) {}
 
 ///////////////////////////////////////////////////////////////////////////////////
-//public functions
+// public functions
 ///////////////////////////////////////////////////////////////////////////////////
 
-//returns the next token, while not the end of file, 
-//get each character and check to see if its a comment,
-//a quote, or a delimiter. Dont return at all if come across
-// a comment. Ensure you get end of quote if character 
-//is a quote. Return string if character is a delimiter
-//otherwise keep getting characters
+// returns the next token, while not the end of file,
+// get each character and check to see if its a comment,
+// a quote, or a delimiter. Dont return at all if come across
+//  a comment. Ensure you get end of quote if character
+// is a quote. Return string if character is a delimiter
+// otherwise keep getting characters
 
 Token TokenStream::get_next() {
    Token out;
@@ -82,31 +80,25 @@ Token TokenStream::get_next() {
          } while (!is_delimiter(c) && !file.eof());
          return out;
       }
-      //must be a delimiter so add to format
+      // must be a delimiter so add to format
       out.add_Format(c);
    }
 
    return out;
 }
 
+void TokenStream::close() { file.close(); }
 
-void TokenStream::close() {
-   file.close();
-}
+void TokenStream::report_error(string message) {}
 
-
-void TokenStream::report_error(string message) {
-}
-
-void TokenStream::report_warning(string message) {
-}
+void TokenStream::report_warning(string message) {}
 
 ///////////////////////////////////////////////////////////////////////////////////
-//protected functions
+// protected functions
 ///////////////////////////////////////////////////////////////////////////////////
 
-//returns the next character and echos to 
-//dump file and command line if echo=true
+// returns the next character and echos to
+// dump file and command line if echo=true
 char TokenStream::get_char() {
    char out(0);
    file.get(out);
@@ -146,9 +138,9 @@ bool TokenStream::is_char(char c) {
    }
 }
 
-//a quote was found so the text inside the quote should
-//be returned. Ensures that there is not a newline
-//before the quote ends
+// a quote was found so the text inside the quote should
+// be returned. Ensures that there is not a newline
+// before the quote ends
 Token TokenStream::get_quote() {
    Token out;
    char c;
@@ -162,27 +154,27 @@ Token TokenStream::get_quote() {
       if (is_quote(c)) {
          return out;
       }
-      //out += c;
+      // out += c;
       out.add_Data(c);
    }
 }
 
-//returns true if a delimiter is found
+// returns true if a delimiter is found
 bool TokenStream::is_delimiter(char ch) {
    switch (ch) {
-      case ' ' : //space
-      case ',' : //comma
-      case 9 : //tab
-      case 10 : //newline
+      case ' ':  // space
+      case ',':  // comma
+      case 9:    // tab
+      case 10:   // newline
       case -52:
          return true;
-      default :
+      default:
          return false;
    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-//private functions
+// private functions
 ///////////////////////////////////////////////////////////////////////////////////
 
 string TokenStream::add_indent(char c) {

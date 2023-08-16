@@ -14,24 +14,22 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
-
-class AircraftIntent;  // avoid dependency loop
 
 #include <string>
 #include <fstream>
 #include <scalar/Speed.h>
 #include <nlohmann/json.hpp>
 #include "public/LoggingLoadable.h"
-#include "utility/Logging.h"
+#include "public/Logging.h"
 #include "public/Waypoint.h"
 #include "public/TangentPlaneSequence.h"
-#include "utility/constants.h"
+#include "utility/UtilityConstants.h"
 
-using namespace aaesim::constants;
+using namespace aaesim::open_source::constants;
 
 class AircraftIntent : public LoggingLoadable {
   public:
@@ -64,7 +62,7 @@ class AircraftIntent : public LoggingLoadable {
 
    AircraftIntent();
 
-   virtual ~AircraftIntent();
+   virtual ~AircraftIntent() = default;
 
    AircraftIntent(const AircraftIntent &in);
 
@@ -125,7 +123,7 @@ class AircraftIntent : public LoggingLoadable {
 
    unsigned int GetNumberOfWaypoints() const;
 
-   bool IsLoaded();
+   bool IsLoaded() const;
 
    void Dump(std::ostream &fileOut) const;
 
@@ -158,12 +156,6 @@ class AircraftIntent : public LoggingLoadable {
                                                        const std::string &waypoint_name);
 
   protected:
-   struct RouteData m_route_data;
-
-   std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
-
-   double m_planned_cruise_mach;
-
    std::list<Waypoint> AddConnectingLeg(const std::list<Waypoint> &first_waypoint_vector,
                                         const std::list<Waypoint> &second_waypoint_vector) const;
 
@@ -179,22 +171,24 @@ class AircraftIntent : public LoggingLoadable {
 
    void DoRouteDataLogging() const;
 
+   struct RouteData m_route_data;
+   std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
+   double m_planned_cruise_mach;
    std::vector<Waypoint> m_all_waypoints;
+   bool m_is_loaded;
 
   private:
    static const int UNINITIALIZED_AIRCRAFT_ID;
    static log4cplus::Logger m_logger;
 
+   void DeleteRouteDataContent();
+   void AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints, enum WaypointPhaseOfFlight add_as_phase);
    friend std::ostream &operator<<(std::ostream &out, const AircraftIntent &intent);
 
    std::vector<Waypoint> m_ascent_waypoints, m_cruise_waypoints, m_descent_waypoints;
    Units::MetersLength m_planned_cruise_altitude;
    int m_id;
-   bool m_is_loaded;
    std::map<std::string, Arinc424LegType> m_arinc424_dictionary;
-
-   void DeleteRouteDataContent();
-   void AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints, enum WaypointPhaseOfFlight add_as_phase);
 };
 
 inline const std::shared_ptr<TangentPlaneSequence> &AircraftIntent::GetTangentPlaneSequence() const {
@@ -211,7 +205,7 @@ inline unsigned int AircraftIntent::GetNumberOfWaypoints() const { return m_rout
 
 inline Units::MetersLength AircraftIntent::GetPlannedCruiseAltitude() const { return m_planned_cruise_altitude; }
 
-inline bool AircraftIntent::IsLoaded() { return m_is_loaded; }
+inline bool AircraftIntent::IsLoaded() const { return m_is_loaded; }
 
 inline std::list<Waypoint> AircraftIntent::GetWaypointList() const {
    std::list<Waypoint> output;

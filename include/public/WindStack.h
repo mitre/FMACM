@@ -14,30 +14,32 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <vector>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
-#include "math/UVector.h"
 
+namespace aaesim {
+namespace open_source {
 class WindStack {
   public:
    WindStack();
 
+   WindStack(const WindStack &in);
+
    WindStack(const int min, const int max);
 
-   virtual ~WindStack();
+   ~WindStack() = default;
+
+   WindStack &operator=(const WindStack &in);
 
    bool operator==(const WindStack &obj) const;
 
    bool operator!=(const WindStack &obj) const;
-
-   UVector<Units::FeetLength> GetAltitudeVector();
-
-   UVector<Units::KnotsSpeed> GetSpeedVector();
 
    Units::FeetLength GetAltitude(const int index) const;
 
@@ -49,21 +51,28 @@ class WindStack {
 
    void SetBounds(const int min, const int max);
 
-   void Set(const int index, const Units::Length altitude, const Units::Speed speed);
+   void Insert(const int index, const Units::Length altitude, const Units::Speed speed);
 
-   void AscendSort();
+   void SortAltitudesAscending();
 
    static WindStack CreateZeroSpeedStack();
 
   private:
-   UVector<Units::FeetLength> m_altitude;
-   UVector<Units::KnotsSpeed> m_speed;
+   static bool AltitudeComparator(std::pair<Units::Length, Units::Speed> item1,
+                                  std::pair<Units::Length, Units::Speed> item2);
+   void Copy(const WindStack &in);
+   std::vector<Units::Length> m_altitude;
+   std::vector<Units::Speed> m_speed;
+   int m_minimum_data_index, m_maximum_data_index;
 };
 
-inline UVector<Units::FeetLength> WindStack::GetAltitudeVector() { return m_altitude; }
+inline int WindStack::GetMinRow() const { return m_minimum_data_index; }
 
-inline UVector<Units::KnotsSpeed> WindStack::GetSpeedVector() { return m_speed; }
+inline int WindStack::GetMaxRow() const { return m_maximum_data_index; }
 
-inline int WindStack::GetMinRow() const { return m_altitude.get_min(); }
-
-inline int WindStack::GetMaxRow() const { return m_altitude.get_max(); }
+inline bool WindStack::AltitudeComparator(std::pair<Units::Length, Units::Speed> item1,
+                                          std::pair<Units::Length, Units::Speed> item2) {
+   return item1.first < item2.first;
+}
+}  // namespace open_source
+}  // namespace aaesim

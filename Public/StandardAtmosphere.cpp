@@ -14,11 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/StandardAtmosphere.h"
-#include "utility/Logging.h"
+#include "public/Logging.h"
 
 log4cplus::Logger StandardAtmosphere::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("StandardAtmosphere"));
 
@@ -52,8 +52,6 @@ StandardAtmosphere *StandardAtmosphere::MakeInstance(const Units::KelvinTemperat
    // sea_level_temperature = temperature + 6.5/1000 * altitude
    Units::KelvinTemperature sea_level_temperature = temperature - TEMPERATURE_GRADIENT_TROPOSPHERE * altitude;
    Units::KelvinTemperature offset(sea_level_temperature - T0_ISA);
-   LOG4CPLUS_TRACE(m_logger, "For StandardAtmosphere with " << temperature << " at " << Units::FeetLength(altitude)
-                                                            << ", offset is " << offset);
    return new StandardAtmosphere(offset);
 }
 
@@ -75,7 +73,6 @@ void StandardAtmosphere::SetTemperatureOffset(const Units::Temperature temperatu
    m_sea_level_density = RHO0_ISA * T0_ISA / m_sea_level_temperature;  // BADA_37_USER_MANUAL eq. 3.2-7
    m_tropopause_density = m_sea_level_density * pow(T_TROP / m_sea_level_temperature, RHO_T_EXPONENT);
    m_tropopause_pressure = P0_ISA * pow(T_TROP / m_sea_level_temperature, P_T_EXPONENT);
-   LOG4CPLUS_TRACE(m_logger, "Temperature offset set to " << Units::KelvinTemperature(temperatureOffset));
 }
 
 StandardAtmosphere::~StandardAtmosphere() {

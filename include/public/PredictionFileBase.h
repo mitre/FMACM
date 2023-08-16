@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -22,7 +22,7 @@
 #include <map>
 #include <vector>
 
-#include "utility/Logging.h"
+#include "public/Logging.h"
 #include "public/AircraftState.h"
 #include "public/OutputHandler.h"
 #include "public/VerticalPath.h"
@@ -33,14 +33,10 @@
 #include <scalar/Angle.h>
 #include <scalar/Temperature.h>
 
-/**
- * Abstract class containing data objects and methods to create
- * forms of PredictedData.csv file.
- */
-
-struct PredictionFileBase : public OutputHandler {
+struct PredictionFileBase {
   public:
-   PredictionFileBase(const std::string &file_suffix);
+   PredictionFileBase() = default;
+   ~PredictionFileBase() = default;
 
    struct PredictionData {
       enum DataSource {
@@ -92,7 +88,31 @@ struct PredictionFileBase : public OutputHandler {
                                                                      const Units::Time simulation_time,
                                                                      const std::string &acid,
                                                                      const VerticalPath &vertical_path,
-                                                                     const PredictionData::DataSource &source);
+                                                                     const PredictionData::DataSource &source) {
 
-   static log4cplus::Logger logger;
+      std::vector<PredictionFileBase::PredictionData> prediction_data;
+
+      for (auto m = 0; m < vertical_path.along_path_distance_m.size(); ++m) {
+         PredictionFileBase::PredictionData pdata;
+
+         pdata.iteration_number = iteration;
+         pdata.source = source;
+         pdata.acid = acid;
+         pdata.simulation_time = simulation_time;
+
+         pdata.altitude = Units::MetersLength(vertical_path.altitude_m[m]);
+         pdata.IAS = Units::MetersPerSecondSpeed(vertical_path.cas_mps[m]);
+         pdata.GS = Units::MetersPerSecondSpeed(vertical_path.gs_mps[m]);
+         pdata.TAS = Units::MetersPerSecondSpeed(vertical_path.true_airspeed[m]);
+         pdata.time_to_go = Units::SecondsTime(vertical_path.time_to_go_sec[m]);
+         pdata.distance_to_go = Units::MetersLength(vertical_path.along_path_distance_m[m]);
+         pdata.VwePred = vertical_path.wind_velocity_east[m];
+         pdata.VwnPred = vertical_path.wind_velocity_north[m];
+         pdata.algorithm = vertical_path.algorithm_type[m];
+         pdata.flap_setting = vertical_path.flap_setting[m];
+
+         prediction_data.push_back(pdata);
+      }
+      return prediction_data;
+   }
 };

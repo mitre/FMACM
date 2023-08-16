@@ -14,13 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <map>
-#include "utility/Logging.h"
+#include "public/Logging.h"
 #include <scalar/Length.h>
 #include <scalar/Time.h>
 #include <scalar/Speed.h>
@@ -51,11 +51,11 @@ class PilotDelay {
 
    void SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere);
 
-   void DumpParameters(std::string str);
+   void DumpParameters(std::string str) const;
 
-   void DumpStatistics();
+   void DumpStatistics() const;
 
-   bool IsPilotDelayOn();
+   bool IsPilotDelayOn() const;
 
    std::pair<Units::Time, Units::Time> GetPilotDelayParameters() const;
 
@@ -88,7 +88,7 @@ inline void PilotDelay::SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere) { 
 
 inline void PilotDelay::SetUsePilotDelay(const bool delay_enabled) { m_pilot_delay_is_on = delay_enabled; }
 
-inline bool PilotDelay::IsPilotDelayOn() { return m_pilot_delay_is_on; }
+inline bool PilotDelay::IsPilotDelayOn() const { return m_pilot_delay_is_on; }
 
 inline std::pair<Units::Time, Units::Time> PilotDelay::GetPilotDelayParameters() const {
    return std::pair<Units::Time, Units::Time>(m_pilot_delay_mean, m_pilot_delay_standard_deviation);

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -28,7 +28,7 @@ class SpeedOnThrustControl : public AircraftControl {
   public:
    SpeedOnThrustControl();
 
-   void Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> bada_calculator,
+   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
                    const Units::Angle &max_bank_angle) override;
 
   private:
@@ -36,6 +36,9 @@ class SpeedOnThrustControl : public AircraftControl {
    static Units::Frequency m_gain_altitude, m_gain_gamma, m_gain_phi;
    static double m_gain_speedbrake;
    Units::Frequency m_gain_velocity;
+   unsigned int m_min_thrust_counter;
+   unsigned int m_speedbrake_counter;
+   bool m_is_speedbrake_on;
 
   protected:
    virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
@@ -43,10 +46,6 @@ class SpeedOnThrustControl : public AircraftControl {
                                   double &speed_brake_command,
                                   aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
                                   const WeatherTruth &weather) override;
-
-   unsigned int m_min_thrust_counter;
-   unsigned int m_speedbrake_counter;
-   bool m_is_speedbrake_on;
 };
 }  // namespace open_source
 }  // namespace aaesim

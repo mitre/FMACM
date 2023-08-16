@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -60,7 +60,7 @@ static std::string GetFlapConfigurationAsString(FlapConfiguration flap_configura
       case GEAR_DOWN:
          return "GEAR_DOWN";
       default:
-         throw std::runtime_error("Invalid flap_configuration encountered: " + flap_configuration);
+         throw std::runtime_error("Invalid flap_configuration encountered: " + std::to_string(flap_configuration));
    }
 }
 

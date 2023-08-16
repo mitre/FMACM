@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VerticalPredictor.h"
@@ -173,11 +173,11 @@ Guidance VerticalPredictor::CalculateGuidanceCommands(const AircraftState &state
       // no selected speed, so set it to Mach or IAS depending on altitude
       if (Units::FeetLength(state.m_z) > m_transition_altitude_msl) {
          // Mach
-         result.SetSelectedSpeed(AircraftSpeed(MACH_SPEED, m_transition_mach));
+         result.SetSelectedSpeed(AircraftSpeed::OfMach(BoundedValue<double, 0, 1>(m_transition_mach)));
       } else {
          // IAS
-         result.SetSelectedSpeed(AircraftSpeed(
-               INDICATED_AIR_SPEED, Units::MetersPerSecondSpeed(m_vertical_path.cas_mps[m_current_trajectory_index])));
+         result.SetSelectedSpeed(AircraftSpeed::OfIndicatedAirspeed(
+               Units::MetersPerSecondSpeed(m_vertical_path.cas_mps[m_current_trajectory_index])));
       }
    }
 

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -35,7 +35,7 @@
 
 namespace testvector {
 
-class HfpReaderPre2020 : public aaesim::open_source::DataReader {
+class HfpReaderPre2020 final : public aaesim::open_source::DataReader {
   public:
    static const size_t EXPECTED_TV_COLUMN_COUNT;
    HfpReaderPre2020(std::string file_name, int header_lines);

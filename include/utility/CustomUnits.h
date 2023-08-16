@@ -14,11 +14,10 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#ifndef CUSTOM_UNITS_H_
-#define CUSTOM_UNITS_H_
+#pragma once
 
 #include <scalar/Acceleration.h>
 #include <scalar/Angle.h>
@@ -29,9 +28,9 @@
 #include <scalar/Speed.h>
 #include <scalar/Time.h>
 #include <scalar/Force.h>
-#include "utility/constants.h"
+#include "utility/UtilityConstants.h"
 
-using namespace aaesim::constants;
+using namespace aaesim::open_source::constants;
 
 /*
  * Definitions for unit types which are not already defined in unitsLib.
@@ -144,4 +143,3 @@ const Units::Angle DUMMY_DEGREES_ANGLE = DegreesAngle(-999.0);
 // end constants-----------------------------------------------------------------------------------------------------
 
 }  // namespace Units
-#endif

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,14 +26,25 @@
 
 class HorizontalPath;  // avoid recursive class defs
 
-class HorizontalTurnPath {
+class HorizontalTurnPath final {
   public:
    enum TURN_TYPE { UNKNOWN, PERFORMANCE, RADIUS_FIXED };
+   static std::string GetTurnTypeAsString(TURN_TYPE tt) {
+      switch (tt) {
+         case PERFORMANCE:
+            return "PERFORMANCE";
+         case RADIUS_FIXED:
+            return "RADIUS_FIXED";
+         case UNKNOWN:
+         default:
+            return "UNKNOWN";
+      }
+   };
    enum TURN_DIRECTION { NO_TURN, LEFT_TURN, RIGHT_TURN };
 
-   HorizontalTurnPath(void);
+   HorizontalTurnPath();
 
-   ~HorizontalTurnPath(void);
+   ~HorizontalTurnPath();
 
    bool operator==(const HorizontalTurnPath &that) const;
 

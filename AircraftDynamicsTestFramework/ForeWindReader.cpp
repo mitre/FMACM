@@ -14,15 +14,8 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
-/*
- * ForeWindReader.cpp
- *
- *  Created on: Mar 23, 2019
- *      Author: klewis
- */
 
 #include "framework/ForeWindReader.h"
 
@@ -35,7 +28,7 @@ ForeWindReader::ForeWindReader(std::shared_ptr<std::istream> input_stream, int h
 
 ForeWindReader::~ForeWindReader() {}
 
-bool ForeWindReader::ReadWind(WeatherPrediction &weather_prediction) {
+bool ForeWindReader::ReadWind(aaesim::open_source::WeatherPrediction &weather_prediction) {
    const int ALTITUDE_COUNT(5);
 
    weather_prediction.east_west.SetBounds(1, ALTITUDE_COUNT);
@@ -46,11 +39,11 @@ bool ForeWindReader::ReadWind(WeatherPrediction &weather_prediction) {
          // end of stream
          return false;
       }
-      Units::MetersLength altitude(GetDouble(0));
-      Units::MetersPerSecondSpeed u(GetDouble(1));
-      Units::MetersPerSecondSpeed v(GetDouble(2));
-      weather_prediction.east_west.Set(i, altitude, u);
-      weather_prediction.north_south.Set(i, altitude, v);
+      Units::FeetLength altitude(GetDouble(0));
+      Units::KnotsSpeed u(GetDouble(1));
+      Units::KnotsSpeed v(GetDouble(2));
+      weather_prediction.east_west.Insert(i, altitude, u);
+      weather_prediction.north_south.Insert(i, altitude, v);
    }
 
    return true;

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -24,7 +24,7 @@
 #include <public/WeatherTruth.h>
 #include <public/Wind.h>
 
-class WeatherTruthByTime : public StandardAtmosphere, public WeatherTruth, public Wind {
+class WeatherTruthByTime : public StandardAtmosphere, public aaesim::open_source::WeatherTruth, public Wind {
   public:
    class Weather {
      public:
@@ -58,7 +58,8 @@ class WeatherTruthByTime : public StandardAtmosphere, public WeatherTruth, publi
                                       Units::Speed &east_west, Units::Speed &north_south);
 
    virtual void InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
-                                      WindStack &east_west, WindStack &north_south);
+                                      aaesim::open_source::WindStack &east_west,
+                                      aaesim::open_source::WindStack &north_south);
 
   private:
    std::shared_ptr<WeatherTruthByTime> m_shared_ptr;

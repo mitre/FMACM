@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -93,18 +93,18 @@ class Wind {
     * and across all lat/longs.
     */
    static void UpdatePredictedWindsAtAltitudeFromSensedWind(const aaesim::open_source::AircraftState &current_state,
-                                                            WeatherPrediction &weather_prediction);
+                                                            aaesim::open_source::WeatherPrediction &weather_prediction);
 
    void PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
                                       const std::vector<Units::Length> &predicted_wind_altitudes_in,
-                                      WeatherPrediction &weather_prediction);
+                                      aaesim::open_source::WeatherPrediction &weather_prediction);
 
    static void ValidatePredictedOptOne(const AircraftIntent &aircraft_intent,
-                                       PredictedWindOption &predicted_wind_option, double &altitude_coefficient,
-                                       Units::Length &distance_constant);
+                                       aaesim::open_source::PredictedWindOption &predicted_wind_option,
+                                       double &altitude_coefficient, Units::Length &distance_constant);
 
    void InterpolateTrueWind(const Units::Angle lat_in, const Units::Angle lon_in, const Units::Length altitude,
-                            WindStack &east_west, WindStack &north_south);
+                            aaesim::open_source::WindStack &east_west, aaesim::open_source::WindStack &north_south);
 
    void InterpolateForecastWind(const std::shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
                                 const Units::Length x_in, const Units::Length y_in, const Units::Length altitude,
@@ -120,7 +120,7 @@ class Wind {
    virtual Units::Pressure InterpolatePressure(const Units::Angle latitude_in, const Units::Angle longitude_in,
                                                const Units::Length altitude) = 0;
 
-   static WeatherPrediction CreateZeroWindPrediction();
+   static aaesim::open_source::WeatherPrediction CreateZeroWindPrediction();
 
    static std::shared_ptr<Wind> GetWindTruthInstance();
 
@@ -135,7 +135,8 @@ class Wind {
                                 Units::Speed &u, Units::Speed &v) = 0;
 
    virtual void InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
-                                      WindStack &east_west, WindStack &north_south) = 0;
+                                      aaesim::open_source::WindStack &east_west,
+                                      aaesim::open_source::WindStack &north_south) = 0;
 
   private:
    static bool m_use_wind;
@@ -144,26 +145,28 @@ class Wind {
                                                const Units::FeetLength altitude_at_end_of_route,
                                                const int maximum_wind_index,
                                                std::set<Units::Length> &forecast_wind_altitudes,
-                                               int current_wind_index_in, WeatherPrediction &weather_prediction);
+                                               int current_wind_index_in,
+                                               aaesim::open_source::WeatherPrediction &weather_prediction);
 
-   void CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_wind_option_in,
+   void CreatePredictionUsingLegacyWindOption(aaesim::open_source::PredictedWindOption predicted_wind_option_in,
                                               const std::set<Units::Length> &wind_altitudes,
                                               const AircraftIntent &aircraft_intent,
                                               const Units::Length altitude_at_beginning_of_route,
                                               const int current_wind_index_in, const int maximum_wind_index,
-                                              WeatherPrediction &weather_prediction);
+                                              aaesim::open_source::WeatherPrediction &weather_prediction);
 
    void AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
                                   const AircraftIntent::RouteData &fms,
                                   const Units::FeetLength altitude_at_beginning_of_route,
                                   std::set<Units::Length> &forecast_wind_altitudes,
-                                  WeatherPrediction &weather_prediction, int &current_wind_index);
+                                  aaesim::open_source::WeatherPrediction &weather_prediction, int &current_wind_index);
 
    void AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence,
                                          const Units::FeetLength x_position, const Units::FeetLength y_position,
                                          const Units::FeetLength altitude_at_end_of_route,
                                          std::set<Units::Length> &forecast_wind_altitudes,
-                                         WeatherPrediction &weather_prediction, int &current_wind_index);
+                                         aaesim::open_source::WeatherPrediction &weather_prediction,
+                                         int &current_wind_index);
 
    Units::FeetLength GetAdjustedEndPointAltitude(Units::FeetLength altitude_at_end_of_route);
 

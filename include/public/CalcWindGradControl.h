@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -27,10 +27,8 @@
 
 #include "public/WeatherPrediction.h"
 
-/*
- * Use to reduce unnecessary calls to Atmosphere class.
- */
-
+namespace aaesim {
+namespace open_source {
 class CalcWindGradControl {
 
   public:
@@ -57,8 +55,8 @@ class CalcWindGradControl {
                              Units::Frequency &wind_gradient_y);
 
   private:
-   WindStack m_wind_x;
-   WindStack m_wind_y;
+   aaesim::open_source::WindStack m_wind_x;
+   aaesim::open_source::WindStack m_wind_y;
 
    Units::Length m_altitude;
    Units::Speed m_wind_speed_x;
@@ -66,3 +64,5 @@ class CalcWindGradControl {
    Units::Frequency m_wind_gradient_x;
    Units::Frequency m_wind_gradient_y;
 };
+}  // namespace open_source
+}  // namespace aaesim

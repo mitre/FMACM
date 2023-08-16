@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -24,9 +24,9 @@
 
 class StereographicProjection {
   public:
-   StereographicProjection(void);
+   StereographicProjection() = default;
 
-   ~StereographicProjection(void);
+   ~StereographicProjection() = default;
 
    static void init(Units::Angle lat, Units::Angle lon, Units::Length earthRadius);
 
@@ -50,4 +50,9 @@ class StereographicProjection {
    /* Convienience parameters used only for the reverse NAS projection */
    static double cos_gamma;
    static double sin_gamma;
+
+   /* The following constants are used for converting from geodetic to */
+   /* conformal latitude.  They are found in NAS-MD-312 Appendix D. */
+   static double GEOD_CONST_A;
+   static double GEOD_CONST_B;
 };

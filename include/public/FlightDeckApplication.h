@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -41,8 +41,8 @@ struct OwnshipFmsPredictionParameters {
    double transition_mach;
    Units::Length transition_altitude;
    Units::Length expected_cruise_altitude;
-   WeatherPrediction weather_prediction;
-   AircraftIntent ownship_aircraft_intent;
+   WeatherPrediction weather_prediction;    // FIXME Stuart this type probably needs to be a shared_ptr
+   AircraftIntent ownship_aircraft_intent;  // FIXME Stuart this is an IM-centric term. fms_intent is better
 };
 
 struct FlightDeckApplicationInitializer {
@@ -54,7 +54,7 @@ struct FlightDeckApplicationInitializer {
 
 struct FlightDeckApplication {
    virtual void Initialize(FlightDeckApplicationInitializer &initializer_visitor) = 0;
-   virtual aaesim::open_source::Guidance Update(const SimulationTime &simtime,
+   virtual aaesim::open_source::Guidance Update(const aaesim::open_source::SimulationTime &simtime,
                                                 const aaesim::open_source::Guidance &current_guidance,
                                                 const aaesim::open_source::DynamicsState &dynamics_state,
                                                 const aaesim::open_source::AircraftState &own_state) = 0;

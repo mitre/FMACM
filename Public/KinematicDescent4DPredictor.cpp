@@ -14,11 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <cmath>
 #include "public/Waypoint.h"
+#include <cmath>
 #include "public/KinematicDescent4DPredictor.h"
 #include "public/SimulationTime.h"
 
@@ -67,7 +67,7 @@ void KinematicDescent4DPredictor::BuildVerticalPrediction(vector<HorizontalPath>
    m_prediction_too_low = false;
    m_prediction_too_high = false;
    HorizontalPath start_pos(horizontal_path.back());
-   LOG4CPLUS_DEBUG(m_logger, "Building vertical prediction from ("
+   LOG4CPLUS_TRACE(m_logger, "Building vertical prediction from ("
                                    << start_pos.GetXPositionMeters() << "," << start_pos.GetYPositionMeters()
                                    << "), alt=" << m_start_altitude_msl
                                    << " dtg: " << Units::MetersLength(aircraft_distance_to_go).value());
@@ -150,22 +150,8 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
       return;
    }
 
-   LOG4CPLUS_TRACE(m_logger, "begin constrainedVerticalPath, start/cruise/transition altitude: "
-                                   << m_start_altitude_msl.value() << "/"
-                                   << Units::MetersLength(m_cruise_altitude_msl).value() << "/"
-                                   << Units::MetersLength(m_transition_altitude_msl).value());
-   // CAS segment
-   // Need to plan to end of segment, at least.  Cannot stop when reaching start altitude.
-   // Start altitude can cause a switch in type of descent part way along a segment.
-   // The test for start altitude is placed after the segment is complete: see AAES-756.
    while (m_vertical_path.altitude_m.back() < alt1) {
-      LOG4CPLUS_TRACE(m_logger, " before constantCASVerticalPath, x,h,cas,gs is: "
-                                      << m_vertical_path.along_path_distance_m.back() << ","
-                                      << m_vertical_path.altitude_m.back() << "," << m_vertical_path.cas_mps.back()
-                                      << "," << m_vertical_path.gs_mps.back());
       if (m_vertical_path.along_path_distance_m.back() > horizontal_path.back().m_path_length_cumulative_meters) {
-         LOG4CPLUS_WARN(m_logger, "KinematicDescent4DPredictor cannot create a trajectory that reaches "
-                                        << alt1 << "m in the distance required.");
          break;
       }
 
@@ -176,12 +162,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
          m_vertical_path = ConstantCasVerticalPath(m_vertical_path, alt1, horizontal_path, precalc_waypoints,
                                                    const_gamma_cas_er, weather_prediction, aircraft_distance_to_go);
       }
-      LOG4CPLUS_TRACE(m_logger,
-                      " after constantCASVerticalPath, x/h/v is: "
-                            << m_vertical_path.along_path_distance_m.back() << "/" << m_vertical_path.altitude_m.back()
-                            << "/" << m_vertical_path.cas_mps.back()
-                            << " active_flag is: " << static_cast<int>(m_precalculated_constraints.active_flag));
-
       if (m_prediction_too_low || m_prediction_too_high) {
          break;
       }
@@ -197,12 +177,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                   m_deceleration_fpa_mps,
                   Units::MetersPerSecondSpeed(m_precalculated_constraints.constraint_speedHi).value(), FPA,
                   horizontal_path, precalc_waypoints, weather_prediction, aircraft_distance_to_go);
-
-            LOG4CPLUS_TRACE(m_logger, "   after constantFPADecelVerticalPath, x/h/v is: "
-                                            << m_vertical_path.along_path_distance_m.back() << "/"
-                                            << m_vertical_path.altitude_m.back() << "/"
-                                            << m_vertical_path.cas_mps.back());
-
             if (m_prediction_too_low || m_prediction_too_high) {
                break;
             }
@@ -210,11 +184,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
             m_vertical_path = ConstantGeometricFpaVerticalPath(
                   m_vertical_path, Units::MetersLength(m_precalculated_constraints.constraint_altLow).value(), FPA,
                   horizontal_path, precalc_waypoints, weather_prediction, aircraft_distance_to_go);
-
-            LOG4CPLUS_TRACE(m_logger, "   after constantGeoFPAVerticalPath, x/h/v is: "
-                                            << m_vertical_path.along_path_distance_m.back() << "/"
-                                            << m_vertical_path.altitude_m.back() << "/"
-                                            << m_vertical_path.cas_mps.back());
 
          } else if (m_precalculated_constraints.active_flag == ActiveFlagType::AT_ALT_ON_SPEED) {
             FPA = atan2(Units::MetersLength(m_precalculated_constraints.constraint_altHi).value() -
@@ -226,11 +195,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                m_vertical_path = ConstantGeometricFpaVerticalPath(
                      last_state, Units::MetersLength(m_precalculated_constraints.constraint_altHi).value(), FPA,
                      horizontal_path, precalc_waypoints, weather_prediction, aircraft_distance_to_go);
-               LOG4CPLUS_TRACE(m_logger, "   after constantGeoFPAVerticalPath, x/h/v is: "
-                                               << m_vertical_path.along_path_distance_m.back() << "/"
-                                               << m_vertical_path.altitude_m.back() << "/"
-                                               << m_vertical_path.cas_mps.back());
-
                if (m_prediction_too_low || m_prediction_too_high) {
                   break;
                }
@@ -240,10 +204,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                   m_vertical_path,
                   Units::MetersLength(m_precalculated_constraints.constraint_along_path_distance).value(),
                   horizontal_path, weather_prediction, aircraft_distance_to_go);
-            LOG4CPLUS_TRACE(m_logger,
-                            "   after levelVerticalPath, x/h/v is: " << m_vertical_path.along_path_distance_m.back()
-                                                                     << "/" << m_vertical_path.altitude_m.back() << "/"
-                                                                     << m_vertical_path.cas_mps.back());
 
          } else if (m_precalculated_constraints.active_flag == ActiveFlagType::BELOW_ALT_SLOW) {
 
@@ -253,10 +213,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                      m_precalculated_constraints.constraint_altHi, deceleration,
                      Units::MetersPerSecondSpeed(m_precalculated_constraints.constraint_speedHi).value(),
                      horizontal_path, weather_prediction, aircraft_distance_to_go);
-               LOG4CPLUS_TRACE(m_logger, "   after constantDecelVerticalPath, x/h/v is: "
-                                               << m_vertical_path.along_path_distance_m.back() << "/"
-                                               << m_vertical_path.altitude_m.back() << "/"
-                                               << m_vertical_path.cas_mps.back());
             }
 
             if (m_prediction_too_low || m_prediction_too_high) {
@@ -283,10 +239,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                         m_deceleration_fpa_mps,
                         Units::MetersPerSecondSpeed(m_precalculated_constraints.constraint_speedHi).value(), FPA,
                         horizontal_path, precalc_waypoints, weather_prediction, aircraft_distance_to_go);
-                  LOG4CPLUS_TRACE(m_logger, "   after constantFPADecelVerticalPath, x/h/v is: "
-                                                  << m_vertical_path.along_path_distance_m.back() << "/"
-                                                  << m_vertical_path.altitude_m.back() << "/"
-                                                  << m_vertical_path.cas_mps.back());
                }
             }
          } else if (m_precalculated_constraints.active_flag == ActiveFlagType::AT_ALT_SLOW) {
@@ -296,17 +248,10 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                      m_deceleration_level_mps,
                      Units::MetersPerSecondSpeed(m_precalculated_constraints.constraint_speedHi).value(),
                      horizontal_path, weather_prediction, aircraft_distance_to_go);
-               LOG4CPLUS_TRACE(m_logger, "   after levelDecelVerticalPath, x/h/v is: "
-                                               << m_vertical_path.along_path_distance_m.back() << "/"
-                                               << m_vertical_path.altitude_m.back() << "/"
-                                               << m_vertical_path.cas_mps.back());
             }
          }
 
          if (m_prediction_too_low || m_prediction_too_high) {
-            LOG4CPLUS_TRACE(m_logger, "Constrained Vertical Path is out of tolerance at aircraft position; alt: "
-                                            << Units::MetersLength(m_start_altitude_msl).value()
-                                            << " prediction alt: " << m_vertical_path.altitude_m.back());
             break;
          }
       }
@@ -316,11 +261,10 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
       if (m_vertical_path.along_path_distance_m.back() >
           Units::MetersLength(m_precalculated_constraints.constraint_along_path_distance).value()) {
          if (last_waypoint_state == m_vertical_path) {
-            LOG4CPLUS_ERROR(m_logger, "Infinite loop detected");
+            LOG4CPLUS_ERROR(m_logger, "Infinite loop detected...trying to progress");
             return;
          }
 
-         LOG4CPLUS_TRACE(m_logger, "last_waypoint_state reset to " << m_precalculated_constraints.index);
          last_waypoint_state = m_vertical_path;
          while (m_vertical_path_waypoint_index.back() >= last_waypoint_state.altitude_m.size()) {
             m_vertical_path_waypoint_index.pop_back();
@@ -408,11 +352,11 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
    }
 
    if (m_prediction_too_low) {
-      LOG4CPLUS_DEBUG(m_logger, "Constrained prediction too low.  Replanning with FPA.");
+      LOG4CPLUS_TRACE(m_logger, "Constrained prediction too low.  Replanning with FPA.");
    }
 
    if (m_prediction_too_high) {
-      LOG4CPLUS_DEBUG(m_logger, "Constrained prediction too high.  Replanning with FPA.");
+      LOG4CPLUS_TRACE(m_logger, "Constrained prediction too high.  Replanning with FPA.");
    }
 
    if (m_prediction_too_low || m_prediction_too_high) {
@@ -464,12 +408,12 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
 
       if (m_vertical_path.altitude_m.back() < Units::MetersLength(m_start_altitude_msl).value()) {
 
-         LOG4CPLUS_DEBUG(m_logger,
+         LOG4CPLUS_TRACE(m_logger,
                          "Did not complete FPA above transition altitude. " << m_vertical_path.altitude_m.back());
       }
 
       if (m_vertical_path.along_path_distance_m.back() < Units::MetersLength(aircraft_distance_to_go).value()) {
-         LOG4CPLUS_DEBUG(m_logger, "Did not complete FPA above transition altitude");
+         LOG4CPLUS_TRACE(m_logger, "Did not complete FPA above transition altitude");
       }
    }
 
@@ -589,7 +533,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(VerticalPath v
 
          if ((h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_high = true;
@@ -597,7 +541,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(VerticalPath v
          }
          if ((h_new + Units::MetersLength(m_vertical_tolerance_distance).value()) <
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_low = true;
@@ -618,7 +562,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(VerticalPath v
    if ((aircraft_distance_to_go < Units::MetersLength(Units::Infinity())) &&
        (h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
                                                                   << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_high = true;
    }
@@ -719,7 +663,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(VerticalPath 
          bracket_found = true;
          if ((h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_high = true;
@@ -727,7 +671,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(VerticalPath 
          }
          if ((h_new + Units::MetersLength(m_vertical_tolerance_distance).value()) <
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_low = true;
@@ -750,7 +694,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(VerticalPath 
    if ((aircraft_distance_to_go < Units::MetersLength(Units::Infinity())) &&
        (h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
                                                                   << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_high = true;
    }
@@ -857,7 +801,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantGeometricFpaVerticalPath(
          bracket_found = true;
          if (h - Units::MetersLength(m_vertical_tolerance_distance).value() >
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_high = true;
@@ -865,7 +809,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantGeometricFpaVerticalPath(
          }
          if ((h_new + Units::MetersLength(m_vertical_tolerance_distance).value()) <
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_low = true;
@@ -882,7 +826,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantGeometricFpaVerticalPath(
    if ((aircraft_distance_to_go < Units::MetersLength(Units::Infinity())) &&
        (h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
                                                                   << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_high = true;
    }
@@ -972,7 +916,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaDecelerationVerticalPath(
          bracket_found = true;
          if ((h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_high = true;
@@ -980,7 +924,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaDecelerationVerticalPath(
          }
          if ((h_new + Units::MetersLength(m_vertical_tolerance_distance).value()) <
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_low = true;
@@ -996,7 +940,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaDecelerationVerticalPath(
    if ((aircraft_distance_to_go < Units::MetersLength(Units::Infinity())) &&
        (h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
                                                                   << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_high = true;
    }
@@ -1081,7 +1025,7 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
    if ((result.along_path_distance_m.back() > Units::MetersLength(aircraft_distance_to_go).value()) &&
        ((h + Units::MetersLength(m_vertical_tolerance_distance).value()) <
         Units::MetersLength(m_start_altitude_msl).value())) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
                                                                  << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_low = true;
    }
@@ -1169,7 +1113,7 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
    if ((result.along_path_distance_m.back() > Units::MetersLength(aircraft_distance_to_go).value()) &&
        ((h + Units::MetersLength(m_vertical_tolerance_distance).value()) <
         Units::MetersLength(m_start_altitude_msl).value())) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
                                                                  << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_low = true;
    }
@@ -1260,7 +1204,7 @@ VerticalPath KinematicDescent4DPredictor::LevelVerticalPath(VerticalPath vertica
    if ((result.along_path_distance_m.back() > Units::MetersLength(aircraft_distance_to_go).value()) &&
        ((h + Units::MetersLength(m_vertical_tolerance_distance).value()) <
         Units::MetersLength(m_start_altitude_msl).value())) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: " << h << " start_alt: "
                                                                  << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_low = true;
    }
@@ -1350,7 +1294,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantDecelerationVerticalPath(
          bracket_found = true;
          if ((h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_high = true;
@@ -1358,7 +1302,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantDecelerationVerticalPath(
          }
          if ((h_new + Units::MetersLength(m_vertical_tolerance_distance).value()) <
              Units::MetersLength(m_start_altitude_msl).value()) {
-            LOG4CPLUS_DEBUG(m_logger, "Prediction alt too low. pred: "
+            LOG4CPLUS_TRACE(m_logger, "Prediction alt too low. pred: "
                                             << h_new
                                             << " start_alt: " << Units::MetersLength(m_start_altitude_msl).value());
             m_prediction_too_low = true;
@@ -1375,7 +1319,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantDecelerationVerticalPath(
    if ((aircraft_distance_to_go < Units::MetersLength(Units::Infinity())) &&
        (h - Units::MetersLength(m_vertical_tolerance_distance).value()) >
              Units::MetersLength(m_start_altitude_msl).value()) {
-      LOG4CPLUS_DEBUG(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
+      LOG4CPLUS_TRACE(m_logger, "Prediction alt too high. pred: " << h << " start_alt: "
                                                                   << Units::MetersLength(m_start_altitude_msl).value());
       m_prediction_too_high = true;
    }
@@ -1423,8 +1367,8 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaToCurrentPositionVerticalPa
       // See Issue AAES-1025.  This should rarely occur.
 
       if (descent_ratio > 0.2) {
-         LOG4CPLUS_DEBUG(m_logger, "Aircraft position too close to waypoint for adequate FPA.  See Issue AAES-1025");
-         LOG4CPLUS_DEBUG(m_logger, "dist_left: " << (distance_left - dist) << ", alt_change: "
+         LOG4CPLUS_TRACE(m_logger, "Aircraft position too close to waypoint for adequate FPA.  See Issue AAES-1025");
+         LOG4CPLUS_TRACE(m_logger, "dist_left: " << (distance_left - dist) << ", alt_change: "
                                                  << (m_start_altitude_msl.value() - h) << ", fpa: " << fpa);
          // result = LevelVerticalPath(result, Units::MetersLength(aircraft_distance_to_go).value(),
          // horizontal_path,

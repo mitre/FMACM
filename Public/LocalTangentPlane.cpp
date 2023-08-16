@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,7 +25,7 @@
  */
 
 #include "public/LocalTangentPlane.h"
-#include "math/CustomMath.h"
+#include "public/CustomMath.h"
 
 using namespace std;
 

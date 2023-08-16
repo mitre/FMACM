@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <iomanip>
+#include <cmath>
 #include "public/AircraftCalculations.h"
-#include "math/CustomMath.h"
+#include "public/CustomMath.h"
 
 using namespace aaesim::open_source;
 
@@ -177,8 +178,8 @@ void AircraftState::CsvHdrDump(std::string str) const {
 AircraftState &AircraftState::Interpolate(const AircraftState &a, const AircraftState &b, const double time) {
 
    if (a.m_id != b.m_id) {
-      LOG4CPLUS_ERROR(logger,
-                      "Interpolating between states that have different ids:  " << a.m_id + " and " << b.m_id << ".");
+      LOG4CPLUS_ERROR(logger, "Interpolating between states that have different ids:  " + std::to_string(a.m_id) +
+                                    " and " + std::to_string(b.m_id) + ".");
    }
 
    const double baTimeDiff = b.m_time - a.m_time;

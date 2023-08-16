@@ -14,11 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/CalcWindGradControl.h"
 #include "public/Environment.h"
+
+using namespace aaesim::open_source;
 
 CalcWindGradControl::CalcWindGradControl()
    : m_wind_x(),
@@ -36,8 +38,10 @@ void CalcWindGradControl::ComputeWindGradients(const Units::Length &msl_altitude
                                                Units::Speed &wind_speed_y, Units::Frequency &wind_gradient_x,
                                                Units::Frequency &wind_gradient_y) {
 
-   bool computex = ((msl_altitude != m_altitude) || (weather_prediction.east_west != m_wind_x));
-   bool computey = ((msl_altitude != m_altitude) || (weather_prediction.north_south != m_wind_y));
+   bool computex = ((msl_altitude != m_altitude) || (weather_prediction.east_west != m_wind_x)) ||
+                   std::isnan(Units::KnotsSpeed(m_wind_speed_x).value());
+   bool computey = ((msl_altitude != m_altitude) || (weather_prediction.north_south != m_wind_y)) ||
+                   std::isnan(Units::KnotsSpeed(m_wind_speed_y).value());
 
    if (computex) {
       weather_prediction.GetForecastAtmosphere()->CalculateWindGradientAtAltitude(

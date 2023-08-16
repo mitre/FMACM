@@ -14,15 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <cstring>
 #include <sstream>
 #include <stdexcept>
-#include <public/Wind.h>
 
-#include "aaesim/Bada.h"
 #include "public/Wind.h"
 #include "public/WindZero.h"
 #include "public/AircraftCalculations.h"
@@ -65,8 +63,8 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 
    // Local predicted wind WindStack to operate on. The returned matrices
    // will be updated just prior to return
-   WindStack local_blended_x = weather_prediction.east_west;
-   WindStack local_blended_y = weather_prediction.north_south;
+   aaesim::open_source::WindStack local_blended_x = weather_prediction.east_west;
+   aaesim::open_source::WindStack local_blended_y = weather_prediction.north_south;
 
    // Define the limits that we need to use for wind blending
 
@@ -117,8 +115,8 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
       const Units::Speed Vwy_predicted = local_blended_y.GetSpeed(iRow);
       const Units::Speed Vwx_update((weightValue * Vwx_sensed) + (unityMinusWeightValue * Vwx_predicted));
       const Units::Speed Vwy_update((weightValue * Vwy_sensed) + (unityMinusWeightValue * Vwy_predicted));
-      local_blended_x.Set(iRow, altFromPrediction, Vwx_update);
-      local_blended_y.Set(iRow, altFromPrediction, Vwy_update);
+      local_blended_x.Insert(iRow, altFromPrediction, Vwx_update);
+      local_blended_y.Insert(iRow, altFromPrediction, Vwy_update);
    }
 
    // Add the current location and sensed wind to the matrices also
@@ -148,28 +146,28 @@ void Wind::UpdatePredictedWindsAtAltitudeFromSensedWind(const AircraftState &cur
 
          // Take winds from blended matrix.
 
-         weather_prediction.east_west.Set(iRow, local_blended_x.GetAltitude(iRow), local_blended_x.GetSpeed(iRow));
-         weather_prediction.north_south.Set(iRow, local_blended_y.GetAltitude(iRow), local_blended_y.GetSpeed(iRow));
+         weather_prediction.east_west.Insert(iRow, local_blended_x.GetAltitude(iRow), local_blended_x.GetSpeed(iRow));
+         weather_prediction.north_south.Insert(iRow, local_blended_y.GetAltitude(iRow), local_blended_y.GetSpeed(iRow));
 
       } else {
 
          // Take winds from current altitude.
 
-         weather_prediction.east_west.Set(iRow, currentAlt, Vwx_sensed);
-         weather_prediction.north_south.Set(iRow, currentAlt, Vwy_sensed);
+         weather_prediction.east_west.Insert(iRow, currentAlt, Vwx_sensed);
+         weather_prediction.north_south.Insert(iRow, currentAlt, Vwy_sensed);
       }
    }
 
    if (currentAltIx == -1) {
       // Add current wind to end
 
-      weather_prediction.east_west.Set(newMaxBound, currentAlt, Vwx_sensed);
-      weather_prediction.north_south.Set(newMaxBound, currentAlt, Vwy_sensed);
+      weather_prediction.east_west.Insert(newMaxBound, currentAlt, Vwx_sensed);
+      weather_prediction.north_south.Insert(newMaxBound, currentAlt, Vwy_sensed);
    }
 
    // Sort before returning
-   weather_prediction.east_west.AscendSort();
-   weather_prediction.north_south.AscendSort();
+   weather_prediction.east_west.SortAltitudesAscending();
+   weather_prediction.north_south.SortAltitudesAscending();
 }
 
 void Wind::PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
@@ -217,8 +215,8 @@ void Wind::PopulatePredictedWindMatrices(const AircraftIntent &intent_in,
                                             current_wind_index, maximum_wind_index, weather_prediction);
    }
 
-   weather_prediction.east_west.AscendSort();
-   weather_prediction.north_south.AscendSort();
+   weather_prediction.east_west.SortAltitudesAscending();
+   weather_prediction.north_south.SortAltitudesAscending();
 }
 
 Units::FeetLength Wind::GetAdjustedStartPointAltitude(Units::FeetLength altitude_at_cruise) {
@@ -315,8 +313,8 @@ void Wind::AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence>
    Units::Length x_position = fms.m_x[0];
    Units::Length y_position = fms.m_y[0];
 
-   WindStack x_true_wind(1, 5);
-   WindStack y_true_wind(1, 5);
+   aaesim::open_source::WindStack x_true_wind(1, 5);
+   aaesim::open_source::WindStack y_true_wind(1, 5);
 
    EarthModel::GeodeticPosition geoPosition;
 
@@ -336,8 +334,8 @@ void Wind::AddSensedWindsToWindStack(const std::shared_ptr<TangentPlaneSequence>
    weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_at_cruise, x_true_wind, Vwx, dVwx_dh);
    weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(altitude_at_cruise, y_true_wind, Vwy, dVwy_dh);
 
-   weather_prediction.east_west.Set(current_wind_index, altitude_at_cruise, Vwx);
-   weather_prediction.north_south.Set(current_wind_index, altitude_at_cruise, Vwy);
+   weather_prediction.east_west.Insert(current_wind_index, altitude_at_cruise, Vwx);
+   weather_prediction.north_south.Insert(current_wind_index, altitude_at_cruise, Vwy);
    ++current_wind_index;
 
    if (!forecast_wind_altitudes.erase(altitude_at_cruise)) {
@@ -391,8 +389,8 @@ void Wind::CreatePredictionUsingCurrentWindOption(const AircraftIntent &aircraft
             Units::KnotsSpeed wind_x, wind_y;
             InterpolateForecastWind(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position, wind_altitude,
                                     wind_x, wind_y);
-            weather_prediction.east_west.Set(current_wind_index, wind_altitude, wind_x);
-            weather_prediction.north_south.Set(current_wind_index, wind_altitude, wind_y);
+            weather_prediction.east_west.Insert(current_wind_index, wind_altitude, wind_x);
+            weather_prediction.north_south.Insert(current_wind_index, wind_altitude, wind_y);
             ++current_wind_index;
          }
       }
@@ -408,8 +406,8 @@ void Wind::AddPredictedWindAtPtpToWindStack(const std::shared_ptr<TangentPlaneSe
 
    InterpolateForecastWind(tangent_plane_sequence, x_position, y_position, altitude_at_end_of_route, wind_x, wind_y);
 
-   weather_prediction.east_west.Set(current_wind_index, altitude_at_end_of_route, wind_x);
-   weather_prediction.north_south.Set(current_wind_index, altitude_at_end_of_route, wind_y);
+   weather_prediction.east_west.Insert(current_wind_index, altitude_at_end_of_route, wind_x);
+   weather_prediction.north_south.Insert(current_wind_index, altitude_at_end_of_route, wind_y);
    ++current_wind_index;
 
    if (!forecast_wind_altitudes.erase(altitude_at_end_of_route)) {
@@ -485,8 +483,8 @@ void Wind::CreatePredictionUsingLegacyWindOption(PredictedWindOption predicted_w
          Wind::InterpolateForecastWind(aircraft_intent.GetTangentPlaneSequence(), x_position, y_position,
                                        current_altitude, wind_speed_x, wind_speed_y);
 
-         weather_prediction.east_west.Set(current_wind_index, current_altitude, wind_speed_x);
-         weather_prediction.north_south.Set(current_wind_index, current_altitude, wind_speed_y);
+         weather_prediction.east_west.Insert(current_wind_index, current_altitude, wind_speed_x);
+         weather_prediction.north_south.Insert(current_wind_index, current_altitude, wind_speed_y);
          ++current_wind_index;
       }
    }
@@ -564,14 +562,14 @@ void Wind::ValidatePredictedOptOne(const AircraftIntent &aircraft_intent, Predic
  * but only if m_use_wind is true.  Also includes temperature.
  */
 void Wind::InterpolateTrueWind(const Units::Angle lat_in, const Units::Angle lon_in, const Units::Length altitude,
-                               WindStack &east_west, WindStack &north_south) {
+                               aaesim::open_source::WindStack &east_west, aaesim::open_source::WindStack &north_south) {
    if (!m_use_wind) {
       for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
-         east_west.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+         east_west.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
       }
 
       for (int i = north_south.GetMinRow(); i <= north_south.GetMaxRow(); i++) {
-         north_south.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+         north_south.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
       }
       return;
    }
@@ -605,12 +603,12 @@ void Wind::InterpolateForecastWind(const shared_ptr<TangentPlaneSequence> &tange
 WeatherPrediction Wind::CreateZeroWindPrediction() {
 
    // Create zero winds data and provide that to the x and y values.
-   WindStack zeroWinds(1, 5);
-   zeroWinds.Set(1, Units::FeetLength(0.), Units::KnotsSpeed(0.));
-   zeroWinds.Set(2, Units::FeetLength(10000.), Units::KnotsSpeed(0.));
-   zeroWinds.Set(3, Units::FeetLength(20000.), Units::KnotsSpeed(0.));
-   zeroWinds.Set(4, Units::FeetLength(30000.), Units::KnotsSpeed(0.));
-   zeroWinds.Set(5, Units::FeetLength(50000.), Units::KnotsSpeed(0.));
+   aaesim::open_source::WindStack zeroWinds(1, 5);
+   zeroWinds.Insert(1, Units::FeetLength(0.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(2, Units::FeetLength(10000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(3, Units::FeetLength(20000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(4, Units::FeetLength(30000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(5, Units::FeetLength(50000.), Units::KnotsSpeed(0.));
    WeatherPrediction zeroWeather;
    zeroWeather.east_west = zeroWinds;
    zeroWeather.north_south = zeroWinds;

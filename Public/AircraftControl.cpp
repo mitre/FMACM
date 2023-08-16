@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <nlohmann/json.hpp>
@@ -29,8 +29,9 @@ log4cplus::Logger AircraftControl::m_logger = log4cplus::Logger::getInstance("Ai
 
 AircraftControl::AircraftControl() : m_speed_brake_gain(0.0), m_bada_calculator(nullptr) {}
 
-void AircraftControl::Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> aircraft_performance,
-                                 const Units::Angle &max_bank_angle) {
+void AircraftControl::Initialize(
+      std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
+      const Units::Angle &max_bank_angle) {
    m_max_bank_angle = max_bank_angle;
    m_bada_calculator = aircraft_performance;
    m_ac_mass = m_bada_calculator->GetAircraftMass();

@@ -14,15 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
-#include <scalar/Time.h>
 #include "MiniCSV/minicsv.h"
-#include "utility/Logging.h"
 
 struct OutputHandler {
 
@@ -33,7 +31,7 @@ struct OutputHandler {
     */
    OutputHandler(const std::string &scenario_name, const std::string &file_suffix);
 
-   virtual ~OutputHandler();
+   virtual ~OutputHandler() = default;
 
    /**
     * Writes the file, closes it, and clears data stores to save memory.
@@ -49,7 +47,7 @@ struct OutputHandler {
     * use a dummy scenario name in the constructor and set it later
     * using this function.
     */
-   void SetScenarioName(const std::string &scenario_name);
+   virtual void SetScenarioName(const std::string &scenario_name);
 
   protected:
    // Everything in the filename after the scenario name, e.g. "-waypoints.csv"
@@ -63,9 +61,6 @@ struct OutputHandler {
 
    // indicates whether Finish() has been called, to complete writing
    bool m_finished;
-
-  private:
-   static log4cplus::Logger m_logger;
 };
 
 inline void OutputHandler::SetScenarioName(const std::string &scenario_name) {

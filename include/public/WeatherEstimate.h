@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -22,10 +22,12 @@
 #include <memory>
 #include "public/Atmosphere.h"
 #include "public/WindStack.h"
-#include "utility/Logging.h"
+#include "public/Logging.h"
 
 class Wind;
 
+namespace aaesim {
+namespace open_source {
 class WeatherEstimate {
    friend class Wind_populate_predicted_wind_matrices_Test;
 
@@ -39,14 +41,15 @@ class WeatherEstimate {
    static log4cplus::Logger m_logger;
 
   public:
-   WindStack east_west;
-   WindStack north_south;
+   aaesim::open_source::WindStack east_west;
+   aaesim::open_source::WindStack north_south;
 
    std::shared_ptr<Wind> getWind() const;
 
    std::shared_ptr<Atmosphere> getAtmosphere() const;
 
-   void LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude, const Units::Length altitude);
+   virtual void LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude,
+                                 const Units::Length altitude);
    Units::Density GetDensity() const;
    Units::Pressure GetPressure() const;
    Units::KelvinTemperature GetTemperature() const;
@@ -96,3 +99,6 @@ inline std::pair<std::pair<Units::Angle, Units::Angle>, Units::Length> WeatherEs
       const {
    return m_location_of_current_conditions;
 }
+
+}  // namespace open_source
+}  // namespace aaesim

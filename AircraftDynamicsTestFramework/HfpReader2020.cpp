@@ -14,12 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/HfpReader2020.h"
+
 #include <stdexcept>
 #include <utility>
+#include <algorithm>
+
 #include <public/HorizontalPath.h>
 
 using namespace testvector;
@@ -100,8 +103,9 @@ Units::Length HfpReader2020::GetY() { return Units::MetersLength(GetDouble(m_y_c
 Units::Length HfpReader2020::GetDTG() { return Units::MetersLength(GetDouble(m_dtg_column)); }
 
 HorizontalPath::SegmentType HfpReader2020::GetSegmentType() {
-   const std::string segment_type = GetString(m_segment_type_column);
-
+   std::string segment_type = GetString(m_segment_type_column);
+   std::transform(segment_type.cbegin(), segment_type.cend(), segment_type.begin(),
+                  [](unsigned char c) { return std::tolower(c); });
    if (segment_type == "straight") {
       return HorizontalPath::STRAIGHT;
    } else if (segment_type == "turn") {
@@ -111,17 +115,19 @@ HorizontalPath::SegmentType HfpReader2020::GetSegmentType() {
    }
 }
 
-Units::Angle HfpReader2020::GetCourse() { return Units::RadiansAngle(GetDouble(m_course_column)); }
+Units::UnsignedAngle HfpReader2020::GetCourse() { return Units::RadiansAngle(GetDouble(m_course_column)); }
 
 Units::Length HfpReader2020::GetTurnCenterX() { return Units::MetersLength(GetDouble(m_turn_center_x_column)); }
 
 Units::Length HfpReader2020::GetTurnCenterY() { return Units::MetersLength(GetDouble(m_turn_center_y_column)); }
 
-Units::Angle HfpReader2020::GetAngleStartOfTurn() {
+Units::UnsignedAngle HfpReader2020::GetAngleStartOfTurn() {
    return Units::RadiansAngle(GetDouble(m_angle_start_of_turn_column));
 }
 
-Units::Angle HfpReader2020::GetAngleEndOfTurn() { return Units::RadiansAngle(GetDouble(m_angle_end_of_turn_column)); }
+Units::UnsignedAngle HfpReader2020::GetAngleEndOfTurn() {
+   return Units::RadiansAngle(GetDouble(m_angle_end_of_turn_column));
+}
 
 Units::Length HfpReader2020::GetTurnRadius() { return Units::MetersLength(GetDouble(m_turn_radius_column)); }
 

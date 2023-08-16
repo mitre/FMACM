@@ -14,12 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "utility/FilePath.h"
+#include "loader/FilePath.h"
 #include <iostream>
 #include <map>
 
@@ -55,7 +55,7 @@ class RunFileArchiveDirector {
 
    bool is_Name_in_Archive(const std::string &name) const {
       std::map<std::string, std::string>::const_iterator it;
-      for (it = mapper.begin(); it != mapper.end(); it++) {
+      for (it = mapper.begin(); it != mapper.end(); ++it) {
          std::string value = (*it).second;
          if (name == value) {
             return true;
@@ -68,7 +68,7 @@ class RunFileArchiveDirector {
    // mainly for debug purposes
    void print_Map() {
       std::map<std::string, std::string>::iterator it;
-      for (it = mapper.begin(); it != mapper.end(); it++) {
+      for (it = mapper.begin(); it != mapper.end(); ++it) {
          std::cout << (*it).first << " => " << (*it).second << std::endl;
       }
    }

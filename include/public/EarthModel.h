@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -26,11 +26,13 @@
 
 #pragma once
 
-#include <scalar/Length.h>
-#include <scalar/SignedAngle.h>
+#include <memory>
+
+#include "scalar/Length.h"
+#include "scalar/SignedAngle.h"
 #include "public/Waypoint.h"
 #include "utility/CustomUnits.h"
-#include <memory>
+#include "public/AircraftState.h"
 
 // can't include LocalTangentPlane.h here because of mutual dependency
 class LocalTangentPlane;
@@ -71,6 +73,7 @@ class EarthModel {
    class LocalPositionEnu {
      public:
       static LocalPositionEnu Of(Units::Length x, Units::Length y, Units::Length z);
+      static LocalPositionEnu Of(const aaesim::open_source::AircraftState &state);
       static LocalPositionEnu OfZeros();
       Units::Length x, y, z;
    };
@@ -115,6 +118,10 @@ inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::Of(Units::Leng
    lpe.y = y;
    lpe.z = z;
    return lpe;
+}
+
+inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::Of(const aaesim::open_source::AircraftState &state) {
+   return Of(state.GetPositionX(), state.GetPositionY(), state.GetPositionZ());
 }
 
 inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::OfZeros() {

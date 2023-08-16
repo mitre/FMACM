@@ -14,11 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <nlohmann/json.hpp>
 #include "public/SpeedOnThrustControl.h"
+
+#include <nlohmann/json.hpp>
+
 #include "public/Environment.h"
 
 using namespace aaesim::open_source;
@@ -32,21 +34,21 @@ log4cplus::Logger SpeedOnThrustControl::m_logger =
       log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SpeedOnThrustControl"));
 
 SpeedOnThrustControl::SpeedOnThrustControl() {
-   // Map this class's gains to the parent class
    m_alt_gain = m_gain_altitude;
    m_gamma_gain = m_gain_gamma;
    m_phi_gain = m_gain_phi;
    m_speed_brake_gain = m_gain_speedbrake;
-   m_thrust_gain = CalculateThrustGain();  // use the parent's provided thrust gain calculation
-   m_gain_velocity = Units::sqr(m_natural_frequency) / m_thrust_gain;  // new velocity gain, roughly .117
+   m_thrust_gain = CalculateThrustGain();
+   m_gain_velocity = Units::sqr(m_natural_frequency) / m_thrust_gain;
 
    m_min_thrust_counter = 0.0;
    m_speedbrake_counter = 0.0;
    m_is_speedbrake_on = false;
 }
 
-void SpeedOnThrustControl::Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> bada_calculator,
-                                      const Units::Angle &max_bank_angle) {
+void SpeedOnThrustControl::Initialize(
+      std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
+      const Units::Angle &max_bank_angle) {
    AircraftControl::Initialize(bada_calculator, max_bank_angle);
    m_min_thrust_counter = 0.0;
    m_speedbrake_counter = 0.0;

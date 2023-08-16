@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -29,7 +29,8 @@ class TrajectoryPredictor_updateWeatherPrediction_Test;
 class TrajectoryPredictor_startAltitudeInDescentAltList_Test;
 class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 }  // namespace test
-}  // namespace aaesim
+
+namespace open_source {
 
 enum PredictedWindOption { SINGLE_DTG = 0, MULTIPLE_DTG_LEGACY = 1, MULTIPLE_DTG_ALONG_ROUTE = 2 };
 
@@ -88,3 +89,5 @@ inline int WeatherPrediction::GetUpdateCount() const { return m_update_count; }
 inline std::shared_ptr<Wind> WeatherPrediction::GetForecastWind() const { return getWind(); }
 
 inline std::shared_ptr<Atmosphere> WeatherPrediction::GetForecastAtmosphere() const { return getAtmosphere(); }
+}  // namespace open_source
+}  // namespace aaesim

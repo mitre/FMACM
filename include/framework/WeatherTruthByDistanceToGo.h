@@ -14,17 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <memory>
-#include <public/StandardAtmosphere.h>
-#include <public/WeatherTruth.h>
-#include <public/Wind.h>
+#include "public/StandardAtmosphere.h"
+#include "public/WeatherTruth.h"
+#include "public/Wind.h"
 
-class WeatherTruthByDistanceToGo : public StandardAtmosphere, public WeatherTruth, public Wind {
+class WeatherTruthByDistanceToGo : public StandardAtmosphere, public aaesim::open_source::WeatherTruth, public Wind {
   public:
    class Weather {
      public:
@@ -39,6 +39,8 @@ class WeatherTruthByDistanceToGo : public StandardAtmosphere, public WeatherTrut
    void SetWeatherFromDtg(Units::Length dtg);
    void LoadEnvFile(const std::string &env_csv_file);
    std::shared_ptr<WeatherTruthByDistanceToGo> GetSharedPtr() const;
+
+   Units::KelvinTemperature CalculateTemperatureOffset(const Units::Length altitude);
 
    Units::KelvinTemperature GetTemperature(Units::Length h) const override;
 
@@ -55,8 +57,9 @@ class WeatherTruthByDistanceToGo : public StandardAtmosphere, public WeatherTrut
    void InterpolateWindScalar(Units::Angle lat_in, Units::Angle lon_in, Units::Length altitude, Units::Speed &east_west,
                               Units::Speed &north_south) override;
 
-   void InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in, WindStack &east_west,
-                              WindStack &north_south) override;
+   void InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
+                              aaesim::open_source::WindStack &east_west,
+                              aaesim::open_source::WindStack &north_south) override;
 
   private:
    std::shared_ptr<WeatherTruthByDistanceToGo> m_shared_ptr;

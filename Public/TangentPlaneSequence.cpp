@@ -14,17 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * TangentPlaneSequence.cpp
- *
- *  Created on: Jul 5, 2015
- *      Author: klewis
- */
-
 #include "public/TangentPlaneSequence.h"
+
 #include "public/Environment.h"
 
 using namespace std;
@@ -32,9 +26,7 @@ log4cplus::Logger TangentPlaneSequence::logger = log4cplus::Logger::getInstance(
 
 TangentPlaneSequence::TangentPlaneSequence() {}
 
-TangentPlaneSequence::TangentPlaneSequence(list<Waypoint> &waypoint_list) { initialize(waypoint_list); }
-
-TangentPlaneSequence::~TangentPlaneSequence() {}
+TangentPlaneSequence::TangentPlaneSequence(list<Waypoint> &waypoint_list) { Initialize(waypoint_list); }
 
 TangentPlaneSequence::TangentPlaneSequence(const TangentPlaneSequence &in) { copy(in); }
 
@@ -44,9 +36,9 @@ void TangentPlaneSequence::copy(const TangentPlaneSequence &in) {
    this->waypointsFromInitialization = in.waypointsFromInitialization;
 }
 
-void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
+void TangentPlaneSequence::Initialize(std::list<Waypoint> &waypoint_list) {
    // Setup the private members that will facilitate future calls to the this class.
-   EarthModel *earthModel = Environment::getInstance()->getEarthModel();
+   EarthModel *earthModel = Environment::GetInstance()->GetEarthModel();
 
    shared_ptr<LocalTangentPlane> plane = shared_ptr<LocalTangentPlane>((LocalTangentPlane *)NULL);
    EarthModel::LocalPositionEnu enu;
@@ -57,7 +49,7 @@ void TangentPlaneSequence::initialize(std::list<Waypoint> &waypoint_list) {
    tangentPlanesFromInitialization.resize(ix + 1);
    localPositionsFromInitialization.resize(ix + 1);
    // use reverse iterator so that last will be processed first
-   for (list<Waypoint>::reverse_iterator it = waypoint_list.rbegin(); it != waypoint_list.rend(); it++) {
+   for (list<Waypoint>::reverse_iterator it = waypoint_list.rbegin(); it != waypoint_list.rend(); ++it) {
       // Waypoint *wp = (*it);
       EarthModel::GeodeticPosition geo;
       geo.altitude = Units::MetersLength(0);
@@ -114,7 +106,7 @@ void TangentPlaneSequence::convertGeodeticToLocal(EarthModel::GeodeticPosition g
                                                   EarthModel::LocalPositionEnu &localPosition) const {
 
    EarthModel::AbsolutePositionEcef ecefPosition;
-   Environment::getInstance()->getEarthModel()->ConvertGeodeticToAbsolute(geoPosition, ecefPosition);
+   Environment::GetInstance()->GetEarthModel()->ConvertGeodeticToAbsolute(geoPosition, ecefPosition);
    int ix = -1;
    // find the closest waypoint
    Units::Area minD2 = Units::KilometersArea(Units::infinity());

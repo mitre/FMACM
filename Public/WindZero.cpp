@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WindZero.h"
+
+using namespace aaesim::open_source;
 
 WindZero::WindZero() : m_standard_atmosphere(Units::CelsiusTemperature(0)) {}
 
@@ -38,14 +40,15 @@ void WindZero::InterpolateWindScalar(Units::Angle lat_in, Units::Angle lon_in, U
 }
 
 void WindZero::InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
-                                     WindStack &east_west, WindStack &north_south) {
+                                     aaesim::open_source::WindStack &east_west,
+                                     aaesim::open_source::WindStack &north_south) {
 
    for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
-      east_west.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+      east_west.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
    }
 
    for (int i = north_south.GetMinRow(); i <= north_south.GetMaxRow(); i++) {
-      north_south.Set(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
+      north_south.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
    }
 }
 

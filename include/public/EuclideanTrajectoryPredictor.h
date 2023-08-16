@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -46,13 +46,16 @@ class EuclideanTrajectoryPredictor {
 
    bool operator!=(const EuclideanTrajectoryPredictor &boj) const;
 
-   virtual void CalculateWaypoints(const AircraftIntent &aircraft_intent, const WeatherPrediction &weather_prediction);
+   virtual void CalculateWaypoints(const AircraftIntent &aircraft_intent,
+                                   const aaesim::open_source::WeatherPrediction &weather_prediction);
 
-   const std::vector<HorizontalPath> EstimateHorizontalTrajectory(WeatherPrediction weather_prediction);
+   const std::vector<HorizontalPath> EstimateHorizontalTrajectory(
+         aaesim::open_source::WeatherPrediction weather_prediction);
 
-   virtual void BuildTrajectoryPrediction(WeatherPrediction &weather, Units::Length start_altitude);
+   virtual void BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                          Units::Length start_altitude);
 
-   virtual void BuildTrajectoryPrediction(WeatherPrediction &weather, Units::Length start_altitude,
+   virtual void BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather, Units::Length start_altitude,
                                           Units::Length aircraft_distance_to_go);
 
    aaesim::open_source::Guidance Update(const aaesim::open_source::AircraftState &state,
@@ -89,7 +92,7 @@ class EuclideanTrajectoryPredictor {
   protected:
    virtual void Copy(const EuclideanTrajectoryPredictor &obj);
 
-   void UpdateWeatherPrediction(WeatherPrediction &weather) const;
+   void UpdateWeatherPrediction(aaesim::open_source::WeatherPrediction &weather) const;
 
    /**
     * Forces altitude constraints to form a monotonic space.
@@ -108,9 +111,8 @@ class EuclideanTrajectoryPredictor {
    PositionCalculator m_position_calculator;
    std::shared_ptr<Atmosphere> m_atmosphere;
 
-   static log4cplus::Logger m_logger;
-
   private:
+   static log4cplus::Logger m_logger;
    enum HorizontalTrajOption { FIRST_PASS, SECOND_PASS };
 
    std::string GetTrajectoryOptionAsString(HorizontalTrajOption option) const {

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/AircraftIntent.h>
@@ -22,10 +22,8 @@
 
 const Units::FeetLength Waypoint::MAX_ALTITUDE_CONSTRAINT(50000);
 const Units::FeetLength Waypoint::MIN_ALTITUDE_CONSTRAINT(0);
-const Units::FeetLength Waypoint::UNDEFINED_ALTITUDE_CONSTRAINT(-10000);
 const Units::KnotsSpeed Waypoint::MAX_SPEED_CONSTRAINT(1000);
 const Units::KnotsSpeed Waypoint::MIN_SPEED_CONSTRAINT(0);
-const Units::KnotsSpeed Waypoint::UNDEFINED_SPEED_CONSTRAINT(-999);
 
 Waypoint::Waypoint() {
    m_name = "";
@@ -55,57 +53,15 @@ Waypoint::Waypoint(const std::string &name, Units::Angle latitude, Units::Angle 
    m_altitude = nominal_altitude;
    m_nominal_ias = nominal_ias;
 
-   if (std::isnan(Units::MetersLength(altitude_constraint_upper).value())) {
-      altitude_constraint_upper = UNDEFINED_ALTITUDE_CONSTRAINT;
-   }
-   if (std::isnan(Units::MetersLength(altitude_constraint_lower).value())) {
-      altitude_constraint_lower = UNDEFINED_ALTITUDE_CONSTRAINT;
-   }
-   if (std::isnan(Units::KnotsSpeed(speed_constraint).value())) {
-      speed_constraint = UNDEFINED_SPEED_CONSTRAINT;
-   }
-
-   ProcessAltitudeConstraints(altitude_constraint_upper, altitude_constraint_lower);
-
-   ProcessSpeedConstraints(speed_constraint);
+   m_altitude_constraint_high = altitude_constraint_upper;
+   m_altitude_constraint_low = altitude_constraint_lower;
+   m_speed_constraint_high = speed_constraint;
+   m_speed_constraint_low = MIN_SPEED_CONSTRAINT;
 
    m_rf_turn_center_latitude = Units::ZERO_ANGLE;
    m_rf_turn_center_longitude = Units::ZERO_ANGLE;
    m_rf_turn_arc_radius = Units::ZERO_LENGTH;
    m_mach = 0;
-}
-
-void Waypoint::ProcessAltitudeConstraints(Units::Length altitude_upper, Units::Length altitude_lower) {
-   if (altitude_upper == UNDEFINED_ALTITUDE_CONSTRAINT && altitude_lower == UNDEFINED_ALTITUDE_CONSTRAINT) {
-      m_altitude_constraint_high = MAX_ALTITUDE_CONSTRAINT;
-      m_altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
-   } else if (altitude_upper == UNDEFINED_ALTITUDE_CONSTRAINT || altitude_lower == UNDEFINED_ALTITUDE_CONSTRAINT) {
-      if (altitude_upper > altitude_lower) {
-         m_altitude_constraint_high = altitude_upper;
-      } else {
-         m_altitude_constraint_high = altitude_lower;
-      }
-      m_altitude_constraint_low = MIN_ALTITUDE_CONSTRAINT;
-   } else {
-      if (altitude_upper > altitude_lower) {
-         m_altitude_constraint_high = altitude_upper;
-         m_altitude_constraint_low = altitude_lower;
-
-      } else {
-         m_altitude_constraint_high = altitude_lower;
-         m_altitude_constraint_low = altitude_upper;
-      }
-   }
-}
-
-void Waypoint::ProcessSpeedConstraints(Units::Speed speed) {
-   if (speed == UNDEFINED_SPEED_CONSTRAINT) {
-      m_speed_constraint_high = MAX_SPEED_CONSTRAINT;
-      m_speed_constraint_low = MIN_SPEED_CONSTRAINT;
-   } else {
-      m_speed_constraint_high = speed;
-      m_speed_constraint_low = MIN_SPEED_CONSTRAINT;
-   }
 }
 
 bool Waypoint::load(DecodedStream *input) {

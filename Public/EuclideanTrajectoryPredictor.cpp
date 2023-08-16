@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <stdexcept>
@@ -26,7 +26,7 @@
 #include <scalar/AngularSpeed.h>
 
 using namespace std;
-using namespace aaesim::constants;
+using namespace aaesim::open_source::constants;
 using namespace aaesim::open_source;
 
 log4cplus::Logger EuclideanTrajectoryPredictor::m_logger =
@@ -99,8 +99,8 @@ EuclideanTrajectoryPredictor::EuclideanTrajectoryPredictor(void) {
    m_aircraft_distance_to_go = Units::infinity();
 }
 
-void EuclideanTrajectoryPredictor::CalculateWaypoints(const AircraftIntent &aircraft_intent,
-                                                      const WeatherPrediction &weather_prediction) {
+void EuclideanTrajectoryPredictor::CalculateWaypoints(
+      const AircraftIntent &aircraft_intent, const aaesim::open_source::WeatherPrediction &weather_prediction) {
    // Sets waypoints, achieve by point, and altitude at FAF (final) waypoint
    // based on intent.
 
@@ -594,10 +594,6 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
 }
 
 void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const HorizontalTrajOption option) {
-   // Calculates horizontal trajectory in meters and stores in h_traj;
-   //
-   // option:option depending which pass being processed.
-
    vector<HorizontalPath> results;
    HorizontalPath temp;
    double radius;
@@ -1001,78 +997,21 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
 
    // Set the class member as the result of the horizontal planning operation
    m_horizontal_path = results;
-
-#ifdef TRAJ_DEBUG
-   // Write horizontal trajectory file
-   FILE *fpd = fopen("HorizontalTrajectoryLatLon.csv", "w");
-   shared_ptr<TangentPlaneSequence> tangentPlaneSequence = getAircraftIntent().getTangentPlaneSequence();
-   EarthModel::GeodeticPosition geoPosition;
-   EarthModel::GeodeticPosition turnPosition;
-   EarthModel::LocalPositionEnu xyPosition;
-
-   fprintf(fpd,
-           "id,GetXPositionMeters(),GetYPositionMeters(),length,segment_type,m_path_course,turn_x,turn_y,q_start,q_end,"
-           "radius\n");
-   // vector<PrecalcRfWaypoint>::iterator wpit;
-   int index = 0;
-   vector<HorizontalPath>::iterator wpit;
-   for (wpit = results.begin(); wpit != results.end(); wpit++) {
-      xyPosition.z = Units::ZERO_LENGTH;
-      xyPosition.GetXPositionMeters() = Units::MetersLength((*wpit).GetXPositionMeters());
-      xyPosition.GetYPositionMeters() = Units::MetersLength((*wpit).GetYPositionMeters());
-      tangentPlaneSequence->convertLocalToGeodetic(xyPosition, geoPosition);
-      if ((*wpit).segment_type.compare("turn") == 0) {
-         xyPosition.GetXPositionMeters() = Units::MetersLength((*wpit).m_turn_info.x_position_meters);
-         xyPosition.GetYPositionMeters() = Units::MetersLength((*wpit).m_turn_info.y_position_meters);
-         xyPosition.z = Units::ZERO_LENGTH;
-         tangentPlaneSequence->convertLocalToGeodetic(xyPosition, turnPosition);
-
-      } else {
-         turnPosition.altitude = Units::ZERO_LENGTH;
-         turnPosition.latitude = Units::ZERO_ANGLE;
-         turnPosition.longitude = Units::ZERO_ANGLE;
-      }
-
-      fprintf(fpd, "%d,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f\n", index, Units::DegreesAngle(geoPosition.longitude).value(),
-              Units::DegreesAngle(geoPosition.latitude).value(), (*wpit).m_path_length_cumulative_meters,
-              (*wpit).segment_type.c_str(), (*wpit).m_path_course, Units::DegreesAngle(turnPosition.longitude).value(),
-              Units::DegreesAngle(turnPosition.latitude).value(), (*wpit).m_turn_info.q_start,
-              (*wpit).m_turn_info.q_end, (*wpit).m_turn_info.radius);
-      index++;
-   }
-
-   fclose(fpd);
-   // Write horizontal trajectory file
-   FILE *fp = fopen("HorizontalTrajectory.csv", "w");
-
-   fprintf(fp,
-           "id,GetXPositionMeters(),GetYPositionMeters(),length,segment_type,m_path_course,turn_x,turn_y,q_start,q_end,"
-           "radius\n");
-   // vector<PrecalcRfWaypoint>::iterator wit;
-   index = 0;
-   vector<HorizontalPath>::iterator wit;
-   for (wit = results.begin(); wit != results.end(); wit++) {
-      fprintf(fp, "%d,%f,%f,%f,%s,%f,%f,%f,%f,%f,%f\n", index, (*wit).GetXPositionMeters(), (*wit).GetYPositionMeters(),
-              (*wit).m_path_length_cumulative_meters, (*wit).segment_type.c_str(), (*wit).m_path_course,
-              (*wit).m_turn_info.x_position_meters, (*wit).m_turn_info.y_position_meters, (*wit).m_turn_info.q_start,
-              (*wit).m_turn_info.q_end, (*wit).m_turn_info.radius);
-      index++;
-   }
-
-   fclose(fp);
-#endif
+   DoHorizontalPathLogging(m_logger, option);
 }
 
 // See issue AAES-961  Need aircraft distance to go to calculate vertical prediction
 // All of the vertical predictors, except kinematic (Constrained) do not need nor use distance to go.
 // aircraft_distance_to_go defaults to infinity
 // Cannot use default parameter values in a virtual method.
-void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &weather, Units::Length start_altitude) {
+void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                                             Units::Length start_altitude) {
    BuildTrajectoryPrediction(weather, start_altitude, Units::infinity());
 }
 
 // main method to precalculate the 4D trajectory
-void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &weather, Units::Length start_altitude,
+void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                                             Units::Length start_altitude,
                                                              Units::Length aircraft_distance_to_go) {
    m_aircraft_distance_to_go = aircraft_distance_to_go;
    SetAtmosphere(weather.getAtmosphere());
@@ -1080,10 +1019,8 @@ void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &
    // calculation the positions of the Precalculation Waypoints
    DefineRoute();
 
-   // calculate the Horizontal Trajectory first pass
    if (m_vertical_predictor != NULL) {
       CalculateHorizontalTrajectory(FIRST_PASS);
-      DoHorizontalPathLogging(m_logger, FIRST_PASS);
    } else {
       string msg = string("NULL vertical predictor encountered calling Calculate_Horizontal_Traj(FIRST_PASS)\n") +
                    string("Check trajectory class constructor");
@@ -1091,7 +1028,6 @@ void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &
       throw logic_error(msg);
    }
 
-   // calculate Descent Trajectory first pass
    if (m_vertical_predictor != NULL) {
       m_vertical_predictor->BuildVerticalPrediction(m_horizontal_path, m_waypoint_vector, weather, start_altitude,
                                                     aircraft_distance_to_go);
@@ -1105,12 +1041,8 @@ void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &
 
    UpdateWeatherPrediction(weather);
 
-   // NOTE: There should be no change to horizontal trajectory for RF Legs
-
-   // calculate Horizontal Trajectory second pass
    if (m_vertical_predictor != NULL) {
       CalculateHorizontalTrajectory(SECOND_PASS);
-      DoHorizontalPathLogging(m_logger, SECOND_PASS);
    } else {
       string msg = string("NULL vertical predictor encountered calling Calculate_Horizontal_Traj(SECOND_PASS)\n") +
                    string("Check trajectory class constructor");
@@ -1118,13 +1050,7 @@ void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(WeatherPrediction &
       throw logic_error(msg);
    }
 
-   // calculate Descent Trajectory second pass
    if (m_vertical_predictor != NULL) {
-      LOG4CPLUS_TRACE(
-            m_logger,
-            "before second build vertical prediction waypoint_vector[0].constraints.constraint_along_path_distance"
-                  << Units::MetersLength(m_waypoint_vector[0].m_precalc_constraints.constraint_along_path_distance)
-                           .value());
       m_vertical_predictor->BuildVerticalPrediction(m_horizontal_path, m_waypoint_vector, weather, start_altitude,
                                                     aircraft_distance_to_go);
       DoVerticalPathLogging(m_logger, SECOND_PASS);
@@ -1381,7 +1307,7 @@ const AircraftIntent &EuclideanTrajectoryPredictor::GetAircraftIntent() const { 
 
 const vector<HorizontalPath> &EuclideanTrajectoryPredictor::GetHorizontalPath() const { return m_horizontal_path; }
 
-void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(WeatherPrediction &weather) const {
+void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(aaesim::open_source::WeatherPrediction &weather) const {
 
    // Get wind for option 2
    if (weather.GetPredictedWindOption() == MULTIPLE_DTG_ALONG_ROUTE) {
@@ -1461,11 +1387,11 @@ void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(WeatherPrediction &we
          Units::KnotsSpeed wind_x, wind_y;
          weather.GetForecastWind()->InterpolateForecastWind(m_aircraft_intent.GetTangentPlaneSequence(), x[i], y[i],
                                                             h[i], wind_x, wind_y);
-         weather.east_west.Set(i + 1, h[i], wind_x);
-         weather.north_south.Set(i + 1, h[i], wind_y);
+         weather.east_west.Insert(i + 1, h[i], wind_x);
+         weather.north_south.Insert(i + 1, h[i], wind_y);
       }
-      weather.east_west.Set(h.size() + 1, alt0, windX0);
-      weather.north_south.Set(h.size() + 1, alt0, windY0);
+      weather.east_west.Insert(h.size() + 1, alt0, windX0);
+      weather.north_south.Insert(h.size() + 1, alt0, windY0);
 
       weather.IncrementUpdateCount();
       // weather.dump();
@@ -1478,7 +1404,7 @@ void EuclideanTrajectoryPredictor::SetAtmosphere(std::shared_ptr<Atmosphere> atm
 }
 
 const std::vector<HorizontalPath> EuclideanTrajectoryPredictor::EstimateHorizontalTrajectory(
-      WeatherPrediction weather_prediction) {
+      aaesim::open_source::WeatherPrediction weather_prediction) {
    SetAtmosphere(weather_prediction.getAtmosphere());
    CalculateHorizontalTrajectory(FIRST_PASS);
    return GetHorizontalPath();

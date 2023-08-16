@@ -14,26 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "public/TangentPlaneSequence.h"
 
-class SingleTangentPlaneSequence : public TangentPlaneSequence {
+class SingleTangentPlaneSequence final : public TangentPlaneSequence {
 
   public:
-   static void clearStaticMembers();
-
+   static void ClearStaticMembers();
    SingleTangentPlaneSequence(const std::list<Waypoint> &waypoint_list);
-
-   void dump(std::ofstream &file_out) const;
-
-  protected:
-   virtual void initialize(const std::list<Waypoint> &waypoint_list);
 
   private:
    static std::list<Waypoint> m_master_waypoint_sequence;
-   static log4cplus::Logger logger;
+   static log4cplus::Logger m_logger;
+   void Initialize(const std::list<Waypoint> &waypoint_list);
 };

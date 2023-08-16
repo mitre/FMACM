@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <nlohmann/json.hpp>
@@ -31,12 +31,11 @@ double SpeedOnPitchControl::m_gain_speedbrake = 0.10;
 log4cplus::Logger SpeedOnPitchControl::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SpeedOnPitchControl"));
 
 SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold, const Units::Length altitude_threshold) {
-   // Map this class's gains to the parent class
    m_alt_gain = m_gain_alt;
    m_gamma_gain = m_gain_gamma;
    m_phi_gain = m_gain_phi;
    m_speed_brake_gain = m_gain_speedbrake;
-   m_thrust_gain = CalculateThrustGain();  // use the parent's provided thrust gain calculation
+   m_thrust_gain = CalculateThrustGain();
    m_gain_velocity = Units::sqr(m_natural_frequency) / m_thrust_gain;
 
    m_speed_threshold = speed_threshold;
@@ -47,7 +46,7 @@ SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold, con
    m_is_speed_brake_on = false;
 }
 
-void SpeedOnPitchControl::Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> bada_calculator,
+void SpeedOnPitchControl::Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
                                      const Units::Angle &max_bank_angle) {
    AircraftControl::Initialize(bada_calculator, max_bank_angle);
    m_is_level_flight = true;

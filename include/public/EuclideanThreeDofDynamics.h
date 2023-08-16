@@ -14,8 +14,10 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
+#pragma once
 
 #include "public/ThreeDOFDynamics.h"
 
@@ -27,13 +29,11 @@ class EuclideanThreeDofDynamics : public ThreeDOFDynamics {
 
    ~EuclideanThreeDofDynamics() = default;
 
-   AircraftState Update(const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control) override;
-
-   void Initialize(std::shared_ptr<const BadaPerformanceCalculator> aircraft_performance,
+   void Initialize(std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
                    const Waypoint &initial_position, std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence,
                    Units::Length initial_altitude_msl, Units::Speed initial_true_airspeed,
                    Units::Angle initial_ground_course_enu, double initial_mass_fraction,
-                   const WeatherTruth &true_weather) override;
+                   std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather);
 
   protected:
    void CalculateEnvironmentalWind(WindStack &wind_east, WindStack &wind_north, Units::Frequency &dVwx_dh,

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Environment.h"
@@ -24,21 +24,13 @@ Environment *Environment::mInstance = NULL;
 
 Environment::Environment() : earthModel(new EllipsoidalEarthModel()) {}
 
-Environment::~Environment() {
-   // delete wind;
-   delete earthModel;
-   // delete atmosphere;
-}
+Environment::~Environment() { delete earthModel; }
 
-Environment *Environment::getInstance() {
+Environment *Environment::GetInstance() {
    if (mInstance == NULL) {
       mInstance = new Environment();
    }
    return mInstance;
 }
 
-EarthModel *Environment::getEarthModel() const { return earthModel; }
-
-Environment *ENVIRONMENT() { return Environment::getInstance(); }
-
-EarthModel *EARTH_MODEL() { return Environment::getInstance()->getEarthModel(); }
+EarthModel *Environment::GetEarthModel() const { return earthModel; }

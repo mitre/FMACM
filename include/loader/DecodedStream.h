@@ -14,19 +14,20 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <string>
 #include "loader/TokenStream.h"
 #include "loader/SinglePushBackStream.h"
 #include "loader/IncludeStream.h"
 #include "loader/CommentStream.h"
 #include "loader/EchoStream.h"
-#include <string>
 #include "loader/FormatDifferentiatorStreamEcho.h"
 #include "loader/ArchiveStreamEcho.h"
+#include "utility/CustomUnits.h"
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 #include <scalar/Time.h>
@@ -34,7 +35,6 @@
 #include <scalar/Mass.h>
 #include <scalar/Area.h>
 #include <scalar/MassFlowRate.h>
-#include "utility/CustomUnits.h"
 
 class DecodedStream : public SinglePushBackStream<FormatDifferentiatorStreamEcho<
                             EchoStream<IncludeStream<ArchiveStreamEcho<CommentStream<TokenStream> > > > > > {

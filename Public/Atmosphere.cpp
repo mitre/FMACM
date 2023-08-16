@@ -14,11 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Atmosphere.h"
-#include "math/CustomMath.h"
+#include "public/CustomMath.h"
 #include <list>
 #include <log4cplus/loggingmacros.h>
 
@@ -56,7 +56,8 @@ void Atmosphere::AirDensity(const Units::Length h, Units::Density &rho, Units::P
    }
 }
 
-void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in, const WindStack &wind_stack,
+void Atmosphere::CalculateWindGradientAtAltitude(const Units::Length altitude_in,
+                                                 const aaesim::open_source::WindStack &wind_stack,
                                                  Units::Speed &wind_speed, Units::Frequency &wind_gradient) const {
    Units::FeetLength altitude = altitude_in;
 

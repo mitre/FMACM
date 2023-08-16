@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -41,9 +41,8 @@ class TvReader : public aaesim::open_source::DataReader {
    static const size_t EXPECTED_TV_COLUMN_COUNT;
    TvReader(std::string file_name, int header_lines);
    TvReader(std::shared_ptr<std::istream> input_stream, int header_lines);
-   TvReader();
-   virtual ~TvReader();
-   virtual bool Advance();
+   TvReader() = default;
+   bool Advance();
    const Units::SecondsTime GetTimeOfReceipt() const;
    const int GetAcid() const;
    const Units::SecondsTime GetToap() const;

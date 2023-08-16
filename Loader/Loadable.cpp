@@ -14,12 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/Loadable.h"
 #include "loader/LoadError.h"
-#include "utility/Logging.h"
 
 using namespace std;
 
@@ -46,7 +45,7 @@ bool Loadable::test_load() {
    string error_message;
    bool good = true;
 
-   for (map<string, shared_ptr<LoaderLink> >::iterator it = lookup_table.begin(); it != lookup_table.end(); it++) {
+   for (map<string, shared_ptr<LoaderLink> >::iterator it = lookup_table.begin(); it != lookup_table.end(); ++it) {
       if (!(*it).second->ok()) {
          error_message = "\nERROR: Did not load required tag '" + (*it).first + "'";
          stream->report_error(error_message + "\n");

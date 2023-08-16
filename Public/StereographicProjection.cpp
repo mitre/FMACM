@@ -14,13 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/StereographicProjection.h"
-#include "utility/constants.h"
-
-using namespace aaesim::constants;
+#include "utility/UtilityConstants.h"
 
 Units::RadiansAngle StereographicProjection::latTPT(0); /* North latitude of tangency point (radians) */
 Units::RadiansAngle StereographicProjection::lonTPT(0); /* **WEST** longitude of tangency point (radians) */
@@ -35,9 +33,8 @@ double StereographicProjection::cos_clatTPT = 0; /* cos of conformal latitude of
 double StereographicProjection::cos_gamma = 0;
 double StereographicProjection::sin_gamma = 0;
 
-StereographicProjection::StereographicProjection(void) {}
-
-StereographicProjection::~StereographicProjection(void) {}
+double StereographicProjection::GEOD_CONST_A = 0.9932773;
+double StereographicProjection::GEOD_CONST_B = 0.0066625;
 
 void StereographicProjection::init(Units::Angle lat, Units::Angle lon, Units::Length earthRadius) {
    latTPT = lat;
@@ -69,7 +66,7 @@ void StereographicProjection::init(Units::Angle lat, Units::Angle lon, Units::Le
       cos_clatTPT = -cos_clatTPT;
    }
 
-   gamma = PI / 2.0 - asin(sin_clatTPT);
+   gamma = aaesim::open_source::constants::PI / 2.0 - asin(sin_clatTPT);
    sin_gamma = sin(gamma);
    cos_gamma = cos(gamma);
 }
@@ -156,7 +153,7 @@ void StereographicProjection::xy_to_ll(const Units::Length x, const Units::Lengt
    delta = Units::RadiansAngle(acos(cos_delta));
    sin_delta = sin(delta);
 
-   dlatc = PI / 2. - delta.value(); /* The conformal latitude of the X,Y point*/
+   dlatc = aaesim::open_source::constants::PI / 2. - delta.value(); /* The conformal latitude of the X,Y point*/
 
    /* Find Epsilon, The longitude component measured from the
       point of tangency.*/

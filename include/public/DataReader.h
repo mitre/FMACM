@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -32,7 +32,7 @@
 #include <memory>
 #include <istream>
 #include "utility/CsvParser.h"
-#include "utility/Logging.h"
+#include "public/Logging.h"
 #include <scalar/Time.h>
 
 namespace aaesim {
@@ -42,7 +42,7 @@ class DataReader {
   public:
    static const Units::SecondsTime UNDEFINED_TIME;
    static log4cplus::Logger m_logger;
-
+   DataReader() = default;
    DataReader(std::string file_name, int header_lines, size_t expected_columns);
    DataReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns);
    virtual ~DataReader();

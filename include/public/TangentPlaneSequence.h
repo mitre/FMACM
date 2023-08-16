@@ -14,23 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * TangentPlaneSequence.h
- *
- *  Created on: Jul 5, 2015
- *      Author: klewis
- */
-
 #pragma once
-
-class TangentPlaneSequence;  // avoid dependency loop
 
 #include <list>
 #include <vector>
 #include <memory>
+
 #include "public/Waypoint.h"
 #include "public/LocalTangentPlane.h"
 
@@ -53,7 +45,7 @@ class TangentPlaneSequence {
     */
    TangentPlaneSequence(std::list<Waypoint> &waypoint_list);
 
-   ~TangentPlaneSequence();
+   virtual ~TangentPlaneSequence() = default;
 
    TangentPlaneSequence(const TangentPlaneSequence &in);  // copy constructor
 
@@ -107,7 +99,7 @@ class TangentPlaneSequence {
    void copy(const TangentPlaneSequence &in);  // helper method for copy constructor and assignment operator
 
   protected:
-   virtual void initialize(std::list<Waypoint> &waypoint_list);
+   virtual void Initialize(std::list<Waypoint> &waypoint_list);
 
    std::vector<Waypoint> waypointsFromInitialization;
    std::vector<std::shared_ptr<LocalTangentPlane> > tangentPlanesFromInitialization;

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/DecodedStream.h"
@@ -315,8 +315,8 @@ bool DecodedStream::get_datum(long &s) {
 
 bool DecodedStream::get_datum(float &s) {
    string temp = get_next().get_Data();
-   static const long big = numeric_limits<float>::max();
-   static const long small = numeric_limits<float>::min();
+   static const float big = numeric_limits<float>::max();
+   static const float small = numeric_limits<float>::min();
 
    if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
    {

@@ -14,12 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WeatherEstimate.h"
 #include "public/StandardAtmosphere.h"
 #include "public/Wind.h"
+
+using namespace aaesim::open_source;
 
 log4cplus::Logger WeatherEstimate::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherEstimate"));
 

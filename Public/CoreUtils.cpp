@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <stdexcept>
@@ -22,7 +22,6 @@
 #include <iomanip>
 
 #include "public/CoreUtils.h"
-#include "public/Scenario.h"
 #include "public/AircraftCalculations.h"
 #include "public/SimulationTime.h"
 #include "public/GeolibUtils.h"
@@ -110,7 +109,6 @@ std::list<Waypoint> CoreUtils::ShortenLongLegs(const std::list<Waypoint> &ordere
             const LineOnEllipsoid line_on_ellipsoid = LineOnEllipsoid::CreateFromPoints(point1, point2);
 
             if (line_on_ellipsoid.GetShapeLength() > maximum_allowable_length) {
-               // calculate intermediate waypoints
                auto intermediate_waypoints =
                      GetIntermediateWaypointsForLongLeg(line_on_ellipsoid, maximum_allowable_length);
                replacement_waypoints.insert(replacement_waypoints.end(), intermediate_waypoints.begin(),

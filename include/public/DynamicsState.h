@@ -14,17 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "BadaUtils.h"
-#include <utility/CustomUnits.h>
-#include <scalar/Speed.h>
-#include <scalar/Length.h>
-#include <scalar/SignedAngle.h>
-#include <scalar/Force.h>
+#include "utility/CustomUnits.h"
+#include "scalar/Speed.h"
+#include "scalar/Length.h"
+#include "scalar/SignedAngle.h"
+#include "scalar/Force.h"
+#include "scalar/Temperature.h"
 
 namespace aaesim {
 namespace open_source {
@@ -49,6 +50,7 @@ typedef struct {
    double speed_brake;                                                     // speed brake (% of deployment)
    aaesim::open_source::bada_utils::FlapConfiguration flap_configuration;  // for flaps speed
    Units::Mass current_mass;
+   Units::AbsCelsiusTemperature true_temperature;
 } DynamicsState;
 }  // namespace open_source
 }  // namespace aaesim

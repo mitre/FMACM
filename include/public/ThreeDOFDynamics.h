@@ -14,14 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
 #include <map>
-#include "aaesim/BadaPerformanceCalculator.h"
+#include "public/FixedMassAircraftPerformance.h"
 #include "public/EquationsOfMotionStateDeriv.h"
 #include "public/DynamicsState.h"
 #include "public/AircraftControl.h"
@@ -29,7 +29,7 @@
 #include "public/ControlCommands.h"
 #include "public/Guidance.h"
 #include "public/EquationsOfMotionState.h"
-#include "public/LoggingLoadable.h"
+#include "public/SimulationTime.h"
 #include <scalar/Angle.h>
 #include <scalar/Force.h>
 #include <scalar/Frequency.h>
@@ -41,6 +41,7 @@ namespace open_source {
 class ThreeDOFDynamics {
   public:
    ThreeDOFDynamics();
+   virtual ~ThreeDOFDynamics() = default;
 
    /**
     * Aircraft update method that calculates the new aircraft state from the given command state
@@ -50,27 +51,27 @@ class ThreeDOFDynamics {
     * @param aircraft_control
     * @return
     */
-   virtual AircraftState Update(const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control);
+   virtual AircraftState Update(const aaesim::open_source::SimulationTime &simtime, const Guidance &guidance,
+                                const std::shared_ptr<AircraftControl> &aircraft_control);
 
-   virtual void Initialize(std::shared_ptr<const BadaPerformanceCalculator> aircraft_performance,
-                           const Waypoint &initial_position,
-                           std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence,
-                           Units::Length initial_altitude_msl, Units::Speed initial_true_airspeed,
-                           Units::Angle initial_ground_course_enu, double initial_mass_fraction,
-                           const WeatherTruth &true_weather);
+   virtual void Initialize(
+         std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
+         const EarthModel::LocalPositionEnu &initial_position_enu, Units::Length initial_altitude_msl,
+         Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu, double initial_mass_fraction,
+         std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather);
 
    /**
     * @return the pair <east-component, north-component>
     */
    const std::pair<Units::Speed, Units::Speed> GetWindComponents() const;
 
-   const WeatherTruth GetTruthWeather() const;
-
    const DynamicsState GetDynamicsState() const;
 
    const EquationsOfMotionState GetEquationsOfMotionState() const;
 
    const EquationsOfMotionStateDeriv GetEquationsOfMotionStateDerivative() const;
+
+   virtual std::map<Units::Time, DynamicsState> GetDynamicsStateHistory() const;
 
   private:
    static log4cplus::Logger m_logger;
@@ -91,10 +92,14 @@ class ThreeDOFDynamics {
    virtual void CalculateKineticForces(Units::Force &lift, Units::Force &drag);
 
    virtual void CalculateEnvironmentalWind(WindStack &wind_east, WindStack &wind_north, Units::Frequency &dVwx_dh,
-                                           Units::Frequency &dVwy_dh) = 0;
+                                           Units::Frequency &dVwy_dh);
 
-   std::shared_ptr<const aaesim::BadaPerformanceCalculator> m_bada_calculator;
+   DynamicsState ComputeDynamicsState(const EquationsOfMotionState &equations_of_motion_state,
+                                      const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative);
+
+   std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
    DynamicsState m_dynamics_state;
+   std::map<Units::Time, DynamicsState> m_dynamics_history;
    EquationsOfMotionState m_equations_of_motion_state;
    EquationsOfMotionStateDeriv m_equations_of_motion_state_derivative;
 
@@ -104,14 +109,12 @@ class ThreeDOFDynamics {
 
    double m_max_thrust_percent;
    double m_min_thrust_percent;
-   WeatherTruth m_true_weather;
+   std::shared_ptr<aaesim::open_source::WeatherTruth> m_true_weather;
 };
 
 inline const std::pair<Units::Speed, Units::Speed> ThreeDOFDynamics::GetWindComponents() const {
    return std::make_pair(m_wind_velocity_east, m_wind_velocity_north);
 }
-
-inline const WeatherTruth ThreeDOFDynamics::GetTruthWeather() const { return m_true_weather; }
 
 inline const DynamicsState ThreeDOFDynamics::GetDynamicsState() const { return m_dynamics_state; }
 
@@ -121,6 +124,10 @@ inline const EquationsOfMotionState ThreeDOFDynamics::GetEquationsOfMotionState(
 
 inline const EquationsOfMotionStateDeriv ThreeDOFDynamics::GetEquationsOfMotionStateDerivative() const {
    return m_equations_of_motion_state_derivative;
+}
+
+inline std::map<Units::Time, DynamicsState> ThreeDOFDynamics::GetDynamicsStateHistory() const {
+   return m_dynamics_history;
 }
 
 }  // namespace open_source

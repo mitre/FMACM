@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -25,25 +25,18 @@ class Waypoint : public LoggingLoadable {
   public:
    static const Units::FeetLength MAX_ALTITUDE_CONSTRAINT;
    static const Units::FeetLength MIN_ALTITUDE_CONSTRAINT;
-   static const Units::FeetLength UNDEFINED_ALTITUDE_CONSTRAINT;
    static const Units::KnotsSpeed MAX_SPEED_CONSTRAINT;
    static const Units::KnotsSpeed MIN_SPEED_CONSTRAINT;
-   static const Units::KnotsSpeed UNDEFINED_SPEED_CONSTRAINT;
 
    Waypoint();
 
    Waypoint(const std::string &name, Units::Angle latitude, Units::Angle longitude,
-            Units::Length altitude_constraint_upper = UNDEFINED_ALTITUDE_CONSTRAINT,
-            Units::Length altitude_constraint_lower = UNDEFINED_ALTITUDE_CONSTRAINT,
-            Units::Speed speed_constraint = UNDEFINED_SPEED_CONSTRAINT,
-            Units::Length nominal_altitude = Units::ZERO_LENGTH, Units::Speed nominal_ias = Units::ZERO_SPEED,
-            std::string arinc424_leg_type = "");
+            Units::Length altitude_constraint_upper = MAX_ALTITUDE_CONSTRAINT,
+            Units::Length altitude_constraint_lower = MIN_ALTITUDE_CONSTRAINT,
+            Units::Speed speed_constraint = MAX_SPEED_CONSTRAINT, Units::Length nominal_altitude = Units::ZERO_LENGTH,
+            Units::Speed nominal_ias = Units::ZERO_SPEED, std::string arinc424_leg_type = "");
 
    bool load(DecodedStream *input);
-
-   void ProcessAltitudeConstraints(Units::Length altitude_upper, Units::Length altitude_lower);
-
-   void ProcessSpeedConstraints(Units::Speed speed);
 
    const std::string &GetName() const;
 

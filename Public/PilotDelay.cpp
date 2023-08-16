@@ -14,13 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <iomanip>
 #include "public/PilotDelay.h"
-#include "public/Scenario.h"
-#include "math/CustomMath.h"
+#include "public/ScenarioUtils.h"
+#include "public/CustomMath.h"
 
 const double PilotDelay::STANDARD_DEVIATION_LIMIT(3);
 log4cplus::Logger PilotDelay::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("PilotDelay"));
@@ -37,7 +37,7 @@ PilotDelay::PilotDelay()
 }
 
 PilotDelay::~PilotDelay() {
-   if (m_delay_count > 0 && m_logger.getLogLevel() <= log4cplus::TRACE_LOG_LEVEL) {
+   if (m_delay_count > 0) {
       DumpStatistics();
    }
 }
@@ -155,11 +155,11 @@ Units::Time PilotDelay::ComputeTimeToSpeedChange(Units::Length current_altitude,
    Units::SecondsTime tval;
 
    if ((current_altitude - altitude_at_end_of_route) > Units::FeetLength(9000.0)) {
-      tval = Scenario::m_rand.TruncatedGaussianSample(m_pilot_delay_mean, m_pilot_delay_standard_deviation,
-                                                      STANDARD_DEVIATION_LIMIT);
+      tval = aaesim::open_source::ScenarioUtils::RANDOM_NUMBER_GENERATOR.TruncatedGaussianSample(
+            m_pilot_delay_mean, m_pilot_delay_standard_deviation, STANDARD_DEVIATION_LIMIT);
    } else {
-      tval = Scenario::m_rand.TruncatedGaussianSample(m_pilot_delay_mean / 2, m_pilot_delay_standard_deviation / 2,
-                                                      STANDARD_DEVIATION_LIMIT);
+      tval = aaesim::open_source::ScenarioUtils::RANDOM_NUMBER_GENERATOR.TruncatedGaussianSample(
+            m_pilot_delay_mean / 2, m_pilot_delay_standard_deviation / 2, STANDARD_DEVIATION_LIMIT);
    }
 
    tval = abs(quantize(tval, Units::SecondsTime(1)));
@@ -193,7 +193,7 @@ void PilotDelay::SetPilotDelayParameters(const Units::Time mean, const Units::Ti
  *
  * @param str Header string for output.
  */
-void PilotDelay::DumpParameters(std::string str) {
+void PilotDelay::DumpParameters(std::string str) const {
    LOG4CPLUS_DEBUG(PilotDelay::m_logger, std::endl
                                                << "Pilot delay parms for " << str.c_str() << std::endl
                                                << std::endl);
@@ -221,23 +221,24 @@ void PilotDelay::SetInitialIAS(Units::Length current_altitude, Units::Speed fall
    }
 }
 
-void PilotDelay::DumpStatistics() {
-   LOG4CPLUS_DEBUG(m_logger, "****** PilotDelay statistics ******");
-   // This is the longest bar we want
-   const std::string BAR("************************************************************");
-
-   // horizontal histogram
-   double max_delay = m_delay_frequency.rbegin()->first;
-   for (double delay = 0; delay <= max_delay; delay++) {
-      int count = m_delay_frequency[delay];
-      LOG4CPLUS_DEBUG(m_logger, std::setprecision(3) << delay << ": " << BAR.substr(0, count) << " (" << count << ")");
+void PilotDelay::DumpStatistics() const {
+   if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
+      LOG4CPLUS_TRACE(m_logger, "****** PilotDelay statistics ******");
+      const std::string BAR("************************************************************");
+      double max_delay = m_delay_frequency.rbegin()->first;
+      for (double delay = 0; delay <= max_delay; delay++) {
+         int count = m_delay_frequency.at(delay);
+         LOG4CPLUS_TRACE(m_logger, std::setprecision(3)
+                                         << delay << ": " << BAR.substr(0, count) << " (" << count << ")");
+      }
+      double mean = m_delay_sum / m_delay_count;
+      double standard_deviation = sqrt((m_delay_square_sum - m_delay_count * mean * mean) / m_delay_count);
+      LOG4CPLUS_TRACE(m_logger, "Number of delays (all iterations):  " << m_delay_count);
+      LOG4CPLUS_TRACE(m_logger, "Average delay (all iterations):  " << mean << " seconds"
+                                                                    << " (parameter value " << m_pilot_delay_mean
+                                                                    << ")");
+      LOG4CPLUS_TRACE(m_logger, "Standard deviation (all iterations):  " << standard_deviation << " seconds"
+                                                                         << " (parameter value "
+                                                                         << m_pilot_delay_standard_deviation << ")");
    }
-   double mean = m_delay_sum / m_delay_count;
-   double standard_deviation = sqrt((m_delay_square_sum - m_delay_count * mean * mean) / m_delay_count);
-   LOG4CPLUS_DEBUG(m_logger, "Number of delays (all iterations):  " << m_delay_count);
-   LOG4CPLUS_DEBUG(m_logger, "Average delay (all iterations):  " << mean << " seconds"
-                                                                 << " (parameter value " << m_pilot_delay_mean << ")");
-   LOG4CPLUS_DEBUG(m_logger, "Standard deviation (all iterations):  " << standard_deviation << " seconds"
-                                                                      << " (parameter value "
-                                                                      << m_pilot_delay_standard_deviation << ")");
 }

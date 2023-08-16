@@ -14,62 +14,49 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "public/Scenario.h"
-#include "framework/TestFrameworkAircraft.h"
-#include "public/SimulationTime.h"
-#include "loader/Loadable.h"
-#include <list>
+#include "public/LoggingLoadable.h"
+
 #include <string>
-#include <fstream>
-#include <iostream>
 #include <vector>
 #include <scalar/Angle.h>
 #include <scalar/Time.h>
 
-class TestFrameworkScenario : public Scenario {
+#include "framework/TestFrameworkAircraft.h"
+#include "framework/FrameworkAircraftLoader.h"
+#include "public/SimulationTime.h"
+
+#ifdef SAMPLE_ALGORITHM_LIBRARY
+#include "imalgs/FIMAlgorithmDataWriter.h"
+#include "imalgs/PredictionFileKinematic.h"
+#endif
+
+class TestFrameworkScenario final : public aaesim::open_source::Scenario, public LoggingLoadable {
   public:
    TestFrameworkScenario();
 
-   virtual ~TestFrameworkScenario();
+   ~TestFrameworkScenario() = default;
 
-   void ProcessOneScenario();
+   void SimulateAllIterations() override;
 
-   void InitializeIterationState(int number_of_aircraft_in);
-
-   void InitializeIterationMetrics(int number_of_aircraft_in);
-
-   void ProcessOneIteration();
-
-   bool ProcessOneCycle(SimulationTime &time);
-
-   bool ProcessAllAircraft(SimulationTime &time);
-
-   void LoadOneScenarioFromScenarioClassIntoActorLists();
-
-   bool load(DecodedStream *input);
+   bool load(DecodedStream *input) override;
 
   private:
-   void PostLoadAircraft(Units::Time simulation_time_step, int predicted_wind_opt, bool blend_wind);
+   static const Units::SecondsTime SIMULATION_TIME_STEP;
+   static log4cplus::Logger m_logger;
 
-   void PostLoad(const std::string &bada_data_path, int predicted_wind_opt, bool blend_wind,
-                 Units::Time simulation_time_step);
+   bool AdvanceAllAircraft(aaesim::open_source::SimulationTime &time);
+   void PostLoad(const std::string &bada_data_path, std::vector<fmacm::FrameworkAircraftLoader> &aircraft_loaders);
 
-   void RecordState(const aaesim::open_source::AircraftState &aircraft_state,
-                    const aaesim::open_source::DynamicsState &dynamics_state) const;
+   std::vector<std::shared_ptr<TestFrameworkAircraft>> m_aircraft_in_scenario;
 
-   static const Units::SecondsTime mDefaultSimulationTimeStep;
-   static const int number_of_iterations;
-   static const int number_of_aircraft;
-
-   std::vector<TestFrameworkAircraft> m_aircraft_list;
-   std::vector<TestFrameworkAircraft> m_master_aircraft_list;  // this list is loaded and then copied for each iteration
-
-   double m_mean_inter_delivery_time;
-   double m_stdev_inter_delivery_time;
-   FILE *m_acstates;
+#ifdef SAMPLE_ALGORITHM_LIBRARY
+   std::unique_ptr<interval_management::open_source::FIMAlgorithmDataWriter> m_sample_algorithm_writer;
+   std::unique_ptr<interval_management::open_source::PredictionFileKinematic> m_sample_algorithm_kinematic_writer;
+#endif
 };

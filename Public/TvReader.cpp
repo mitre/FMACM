@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -42,8 +42,6 @@ TvReader::TvReader(std::string file_name, int header_lines) : DataReader(file_na
 TvReader::TvReader(std::shared_ptr<std::istream> input_stream, int header_lines) : DataReader(input_stream, 0, 0) {
    SetColumnIndexesFromHeader(header_lines);
 }
-
-TvReader::~TvReader() {}
 
 bool TvReader::Advance() {
    bool result = DataReader::Advance();

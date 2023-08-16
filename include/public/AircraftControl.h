@@ -14,12 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "aaesim/BadaPerformanceCalculator.h"
+#include "public/FixedMassAircraftPerformance.h"
 #include "public/Guidance.h"
 #include "public/ControlCommands.h"
 #include "public/EquationsOfMotionState.h"
@@ -31,8 +31,8 @@ namespace open_source {
 class AircraftControl {
   public:
    AircraftControl();
-
-   virtual void Initialize(std::shared_ptr<aaesim::BadaPerformanceCalculator> aircraft_performance,
+   virtual ~AircraftControl() = default;
+   virtual void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
                            const Units::Angle &max_bank_angle);
 
    ControlCommands CalculateControlCommands(const Guidance &guidance,
@@ -83,7 +83,7 @@ class AircraftControl {
    double m_speed_brake_gain;
    Units::Angle m_max_bank_angle;  // Maximum bank angle for dynamics and speed_on_pitch_control_dynamics calculations
                                    // (parameter max_bank_angle)
-   std::shared_ptr<aaesim::BadaPerformanceCalculator> m_bada_calculator;
+   std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
    bool m_is_level_flight;
 
   private:

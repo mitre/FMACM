@@ -14,65 +14,65 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <sstream>
 #include "public/SimulationTime.h"
 
-Units::SecondsTime SimulationTime::simulation_time_step(1.0);
-log4cplus::Logger SimulationTime::logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SimulationTime"));
+using namespace aaesim::open_source;
 
-SimulationTime::SimulationTime() : cycle(0), current_time(Units::SecondsTime(0.0)) {}
+Units::SecondsTime SimulationTime::m_simulation_time_step(1.0);
+log4cplus::Logger SimulationTime::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SimulationTime"));
 
-SimulationTime::~SimulationTime() = default;
+SimulationTime::SimulationTime() : m_cycle(0), m_current_time(Units::SecondsTime(0.0)) {}
 
-void SimulationTime::increment() {
-   ++cycle;
-   current_time += simulation_time_step;
+void SimulationTime::Increment() {
+   ++m_cycle;
+   m_current_time += m_simulation_time_step;
 }
 
-Units::SecondsTime SimulationTime::get_current_simulation_time() const { return current_time; }
+Units::SecondsTime SimulationTime::GetCurrentSimulationTime() const { return m_current_time; }
 
-int SimulationTime::get_sim_cycle() const { return cycle; }
+int SimulationTime::GetCycle() const { return m_cycle; }
 
-void SimulationTime::set_cycle(int cycle_in) {
-   cycle = cycle_in;
-   current_time = simulation_time_step * cycle;
+void SimulationTime::SetCycle(int cycle_in) {
+   m_cycle = cycle_in;
+   m_current_time = m_simulation_time_step * m_cycle;
 }
 
-SimulationTime::SimulationTime(const SimulationTime &in) { copy(in); }
+SimulationTime::SimulationTime(const SimulationTime &in) { Copy(in); }
 
 SimulationTime &SimulationTime::operator=(const SimulationTime &in) {
    if (this != &in) {
-      copy(in);
+      Copy(in);
    }
    return *this;
 }
 
-const SimulationTime SimulationTime::make(const Units::SecondsTime time) {
-   int cyc = static_cast<int>(Units::SecondsTime(time / simulation_time_step).value());
+const SimulationTime SimulationTime::Of(const Units::SecondsTime time) {
+   int cyc = static_cast<int>(Units::SecondsTime(time / m_simulation_time_step).value());
 
    SimulationTime simtime;
-   simtime.set_cycle(cyc);
+   simtime.SetCycle(cyc);
 
-   if (time != simtime.get_current_simulation_time()) {
-      LOG4CPLUS_WARN(SimulationTime::logger, "Inconsistent SimulationTime::make result computing cycle from time "
-                                                   << time.value() << " for step "
-                                                   << SimulationTime::get_simulation_time_step().value() << std::endl);
+   if (time != simtime.GetCurrentSimulationTime()) {
+      LOG4CPLUS_ERROR(SimulationTime::m_logger, "Inconsistent SimulationTime::Of result computing cycle from time "
+                                                      << time.value() << " for step "
+                                                      << SimulationTime::GetSimulationTimeStep().value());
    }
 
    return simtime;
 }
 
-void SimulationTime::copy(SimulationTime const &in) {
-   this->current_time = in.current_time;
-   this->cycle = in.cycle;
-   this->simulation_time_step = in.simulation_time_step;
+void SimulationTime::Copy(SimulationTime const &in) {
+   this->m_current_time = in.m_current_time;
+   this->m_cycle = in.m_cycle;
+   this->m_simulation_time_step = in.m_simulation_time_step;
 }
 
-std::string SimulationTime::getCurrentSimulationTimeAsString() const {
+std::string SimulationTime::GetCurrentSimulationTimeAsString() const {
    std::ostringstream strs;
-   strs << this->current_time.value();
+   strs << this->m_current_time.value();
    return strs.str();
 }

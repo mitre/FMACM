@@ -14,15 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/AircraftState.h>
-#include <public/Guidance.h>
-#include <public/EuclideanThreeDofDynamics.h>
+#include "public/EuclideanThreeDofDynamics.h"
+
+#include "public/AircraftState.h"
+#include "public/Guidance.h"
 #include "public/Wind.h"
 
-using namespace std;
 using namespace aaesim::open_source;
 
 log4cplus::Logger EuclideanThreeDofDynamics::m_logger = log4cplus::Logger::getInstance("EuclideanThreeDofDynamics");
@@ -35,52 +35,24 @@ void EuclideanThreeDofDynamics::CalculateEnvironmentalWind(WindStack &wind_east,
    localPosition.y = m_equations_of_motion_state.enu_y;
    localPosition.z = m_equations_of_motion_state.altitude_msl;
    m_tangent_plane_sequence->convertLocalToGeodetic(localPosition, m_equations_of_motion_state.geodetic_position);
-   m_true_weather.LoadConditionsAt(m_equations_of_motion_state.geodetic_position.latitude,
-                                   m_equations_of_motion_state.geodetic_position.longitude,
-                                   m_equations_of_motion_state.altitude_msl);
+   m_true_weather->LoadConditionsAt(m_equations_of_motion_state.geodetic_position.latitude,
+                                    m_equations_of_motion_state.geodetic_position.longitude,
+                                    m_equations_of_motion_state.altitude_msl);
 
-   if (Wind::UseWind()) {
-      wind_east = m_true_weather.east_west;
-      wind_north = m_true_weather.north_south;
-
-      // Get Winds and Wind Gradients at altitude
-      m_true_weather.getAtmosphere()->CalculateWindGradientAtAltitude(m_equations_of_motion_state.altitude_msl,
-                                                                      wind_east, m_wind_velocity_east, dVwx_dh);
-      m_true_weather.getAtmosphere()->CalculateWindGradientAtAltitude(m_equations_of_motion_state.altitude_msl,
-                                                                      wind_north, m_wind_velocity_north, dVwy_dh);
-   } else {
-      // return zeros
-      static const WindStack zero_stack = WindStack::CreateZeroSpeedStack();
-      wind_east = zero_stack;
-      wind_north = zero_stack;
-      dVwx_dh = Units::zero();
-      dVwy_dh = Units::zero();
-   }
+   ThreeDOFDynamics::CalculateEnvironmentalWind(wind_east, wind_north, dVwx_dh, dVwy_dh);
 }
-void EuclideanThreeDofDynamics::Initialize(std::shared_ptr<const BadaPerformanceCalculator> aircraft_performance,
-                                           const Waypoint &initial_position,
-                                           std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence,
-                                           Units::Length initial_altitude_msl, Units::Speed initial_true_airspeed,
-                                           Units::Angle initial_ground_course_enu, double initial_mass_fraction,
-                                           const WeatherTruth &true_weather) {
-   // Handle Euclidean initializations
+
+void EuclideanThreeDofDynamics::Initialize(
+      std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
+      const Waypoint &initial_position, std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence,
+      Units::Length initial_altitude_msl, Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu,
+      double initial_mass_fraction, std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather) {
    this->m_tangent_plane_sequence = std::move(tangent_plane_sequence);
    EarthModel::LocalPositionEnu initial_enu_position;
    m_tangent_plane_sequence->convertGeodeticToLocal(EarthModel::GeodeticPosition::CreateFromWaypoint(initial_position),
                                                     initial_enu_position);
-   m_dynamics_state.x = initial_enu_position.x;
-   m_dynamics_state.y = initial_enu_position.y;
-   m_equations_of_motion_state.enu_x = Units::MetersLength(m_dynamics_state.x);
-   m_equations_of_motion_state.enu_y = Units::MetersLength(m_dynamics_state.y);
    m_equations_of_motion_state.geodetic_position = EarthModel::GeodeticPosition::CreateFromWaypoint(initial_position);
 
-   // Finish with base class
-   ThreeDOFDynamics::Initialize(aircraft_performance, initial_position, tangent_plane_sequence, initial_altitude_msl,
-                                initial_true_airspeed, initial_ground_course_enu, initial_mass_fraction, true_weather);
-}
-
-AircraftState EuclideanThreeDofDynamics::Update(const Guidance &guidance,
-                                                const shared_ptr<AircraftControl> &aircraft_control) {
-   LOG4CPLUS_TRACE(m_logger, "starting...");
-   return ThreeDOFDynamics::Update(guidance, aircraft_control);
+   ThreeDOFDynamics::Initialize(aircraft_performance, initial_enu_position, initial_altitude_msl, initial_true_airspeed,
+                                initial_ground_course_enu, initial_mass_fraction, true_weather);
 }

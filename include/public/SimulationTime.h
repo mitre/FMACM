@@ -14,46 +14,51 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
 #include <scalar/Time.h>
-#include "utility/Logging.h"
+#include "public/Logging.h"
 
-class SimulationTime {
+namespace aaesim {
+namespace open_source {
+class SimulationTime final {
   public:
+   static const Units::SecondsTime GetSimulationTimeStep() { return m_simulation_time_step; }
+
+   static const SimulationTime Of(const Units::SecondsTime time);
+
+   // visible for testing
+   static void SetSimulationTimeStep(Units::Time in) { m_simulation_time_step = in; }
+
    SimulationTime();
 
-   ~SimulationTime();
+   ~SimulationTime() = default;
 
    SimulationTime(const SimulationTime &in);
 
    SimulationTime &operator=(const SimulationTime &in);
 
-   static const SimulationTime make(const Units::SecondsTime time);
+   void Increment();
 
-   void increment();
+   Units::SecondsTime GetCurrentSimulationTime() const;
 
-   Units::SecondsTime get_current_simulation_time() const;
+   std::string GetCurrentSimulationTimeAsString() const;
 
-   std::string getCurrentSimulationTimeAsString() const;
+   int GetCycle() const;
 
-   static const Units::SecondsTime get_simulation_time_step() { return simulation_time_step; }
-
-   static void set_simulation_time_step(Units::Time in) { simulation_time_step = in; }
-
-   int get_sim_cycle() const;
-
-   void set_cycle(int cycle_in);
+   void SetCycle(int cycle_in);
 
   private:
-   void copy(SimulationTime const &in);
+   void Copy(SimulationTime const &in);
 
-   int cycle;
-   Units::SecondsTime current_time;
-   static Units::SecondsTime simulation_time_step;
-   static log4cplus::Logger logger;
+   int m_cycle;
+   Units::SecondsTime m_current_time;
+   static Units::SecondsTime m_simulation_time_step;
+   static log4cplus::Logger m_logger;
 };
+}  // namespace open_source
+}  // namespace aaesim

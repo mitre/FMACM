@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VectorDifferenceWindEvaluator.h"
@@ -41,11 +41,10 @@ VectorDifferenceWindEvaluator::VectorDifferenceWindEvaluator(const Units::Speed 
 
 VectorDifferenceWindEvaluator::~VectorDifferenceWindEvaluator() {}
 
-bool VectorDifferenceWindEvaluator::ArePredictedWindsAccurate(const aaesim::open_source::AircraftState &state,
-                                                              const WeatherPrediction &weather_prediction,
-                                                              const Units::Speed reference_cas,
-                                                              const Units::Length reference_altitude,
-                                                              const Atmosphere *sensed_atmosphere) const {
+bool VectorDifferenceWindEvaluator::ArePredictedWindsAccurate(
+      const aaesim::open_source::AircraftState &state, const aaesim::open_source::WeatherPrediction &weather_prediction,
+      const Units::Speed reference_cas, const Units::Length reference_altitude,
+      const Atmosphere *sensed_atmosphere) const {
 
    Units::MetersPerSecondSpeed windeastcomp, windnorthcomp;  // units of mps as returned from AircraftCalculations
    Units::Frequency dtmp;

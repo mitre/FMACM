@@ -14,15 +14,8 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
-
-/*
- * Environment.h
- *
- *  Created on: Jun 25, 2015
- *      Author: klewis
- */
 
 #pragma once
 
@@ -32,9 +25,9 @@ class Wind;
 
 class Environment {
   public:
-   static Environment *getInstance();
+   static Environment *GetInstance();
 
-   EarthModel *getEarthModel() const;
+   EarthModel *GetEarthModel() const;
 
   private:
    static Environment *mInstance;
@@ -44,8 +37,3 @@ class Environment {
 
    virtual ~Environment();
 };
-
-// external C functions with short names
-Environment *ENVIRONMENT();
-
-EarthModel *EARTH_MODEL();

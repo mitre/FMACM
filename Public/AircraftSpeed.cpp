@@ -14,18 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <stdexcept>
 #include "public/AircraftSpeed.h"
 
-AircraftSpeed::AircraftSpeed() { SetSpeed(UNSPECIFIED_SPEED, 0); }
+using namespace aaesim::open_source;
 
-AircraftSpeed::AircraftSpeed(const speed_type type, const double value) { SetSpeed(type, value); }
+AircraftSpeed::AircraftSpeed() { SetSpeed(UNSPECIFIED_SPEED, INT16_MIN); }
 
-/** Convenience constructor for using Units::Speed IAS, stores speed as knots */
-AircraftSpeed::AircraftSpeed(const speed_type type, const Units::Speed speed) {
+AircraftSpeed::AircraftSpeed(const SpeedValueType type, const double value) { SetSpeed(type, value); }
+
+AircraftSpeed::AircraftSpeed(const SpeedValueType type, const Units::Speed speed) {
    if (type == MACH_SPEED) {
       throw std::logic_error("Cannot construct MACH_SPEED AircraftSpeed using traditional speed units.");
    }
@@ -34,10 +35,9 @@ AircraftSpeed::AircraftSpeed(const speed_type type, const Units::Speed speed) {
 
 AircraftSpeed::~AircraftSpeed() {}
 
-speed_type AircraftSpeed::GetSpeedType() const { return m_speed_type; }
+SpeedValueType AircraftSpeed::GetSpeedType() const { return m_speed_type; }
 
-void AircraftSpeed::SetSpeed(const speed_type type, const double value) {
-   // TODO range sanity checks -- perhaps allow MACH 0.1 to 10.0, IAS 20 to 2000
+void AircraftSpeed::SetSpeed(const SpeedValueType type, const double value) {
    m_speed_type = type;
    m_value = value;
 }

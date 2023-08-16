@@ -14,34 +14,46 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include <scalar/Speed.h>
+#include "scalar/Speed.h"
+#include "utility/BoundedValue.h"
 
-enum speed_type {
+enum SpeedValueType {
    UNSPECIFIED_SPEED,
    INDICATED_AIR_SPEED,
    MACH_SPEED,
 };
 
-/*
- * This class holds a speed type and value.
- * For types other than MACH, the unit is assumed to be knots.
- */
+namespace aaesim {
+namespace open_source {
 class AircraftSpeed {
   public:
+   static AircraftSpeed OfMach(const BoundedValue<double, 0, 1> mach_value);
+   static AircraftSpeed OfIndicatedAirspeed(const Units::Speed ias);
+
    AircraftSpeed();
-   AircraftSpeed(const speed_type type, const double value);
-   AircraftSpeed(const speed_type type, const Units::Speed value);
    virtual ~AircraftSpeed();
-   void SetSpeed(const speed_type type, const double value);
-   speed_type GetSpeedType() const;
+   SpeedValueType GetSpeedType() const;
    double GetValue() const;
 
   private:
-   speed_type m_speed_type;
+   AircraftSpeed(const SpeedValueType type, const double value);
+   AircraftSpeed(const SpeedValueType type, const Units::Speed value);
+   void SetSpeed(const SpeedValueType type, const double value);
+   SpeedValueType m_speed_type;
    double m_value;
 };
+
+inline AircraftSpeed AircraftSpeed::OfMach(const BoundedValue<double, 0, 1> mach_value) {
+   return AircraftSpeed(MACH_SPEED, mach_value);
+}
+
+inline AircraftSpeed AircraftSpeed::OfIndicatedAirspeed(const Units::Speed ias) {
+   return AircraftSpeed(INDICATED_AIR_SPEED, ias);
+}
+}  // namespace open_source
+}  // namespace aaesim

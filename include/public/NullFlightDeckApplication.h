@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -24,13 +24,18 @@
 namespace aaesim {
 namespace open_source {
 class NullFlightDeckApplication : public aaesim::open_source::FlightDeckApplication {
+  public:
+   NullFlightDeckApplication() = default;
+   virtual ~NullFlightDeckApplication() = default;
    void Initialize(FlightDeckApplicationInitializer &initializer_visitor) override { /**/
    }
-   aaesim::open_source::Guidance Update(const SimulationTime &simtime,
+   aaesim::open_source::Guidance Update(const aaesim::open_source::SimulationTime &simtime,
                                         const aaesim::open_source::Guidance &current_guidance,
                                         const aaesim::open_source::DynamicsState &dynamics_state,
                                         const aaesim::open_source::AircraftState &own_state) override {
-      return current_guidance;
+      aaesim::open_source::Guidance invalid_guidance{current_guidance};
+      invalid_guidance.SetValid(false);
+      return invalid_guidance;
    }
    bool IsActive() const override { return false; }
 };

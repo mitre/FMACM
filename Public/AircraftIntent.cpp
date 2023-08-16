@@ -14,14 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftIntent.h"
 
 #include <stdexcept>
-#include <public/CoreUtils.h>
-#include "math/InvalidIndexException.h"
+#include "public/CoreUtils.h"
+#include "public/InvalidIndexException.h"
 #include "public/AircraftCalculations.h"
 #include "public/SingleTangentPlaneSequence.h"
 
@@ -34,23 +34,32 @@ AircraftIntent::AircraftIntent()
      m_tangent_plane_sequence(nullptr),
      m_planned_cruise_mach(0),
      m_all_waypoints(),
+     m_is_loaded(false),
+     m_ascent_waypoints(),
+     m_cruise_waypoints(),
+     m_descent_waypoints(),
+     m_planned_cruise_altitude(),
      m_id(UNINITIALIZED_AIRCRAFT_ID),
-     m_is_loaded(false) {
+     m_arinc424_dictionary() {
    Initialize();
 }
 
 AircraftIntent::AircraftIntent(const AircraftIntent &in)
    : m_route_data(),
      m_tangent_plane_sequence(nullptr),
+     m_planned_cruise_mach(0),
      m_all_waypoints(),
+     m_is_loaded(false),
+     m_ascent_waypoints(),
+     m_cruise_waypoints(),
+     m_descent_waypoints(),
+     m_planned_cruise_altitude(),
      m_id(UNINITIALIZED_AIRCRAFT_ID),
-     m_is_loaded(false) {
+     m_arinc424_dictionary() {
    Initialize();
 
    Copy(in);
 }
-
-AircraftIntent::~AircraftIntent() = default;
 
 void AircraftIntent::Initialize() {
    m_all_waypoints.clear();
@@ -346,14 +355,8 @@ bool AircraftIntent::load(DecodedStream *input) {
    unsigned int waypoint_count_loaded;
 
    // register all the variables used by the Aircraft Intent
-   const LoaderDeprecatedMetaInfo deprecated_waypoints_count_input =
-         (LoaderDeprecatedMetaInfo){true, "This input variable is no longer needed"};
-   register_var("number_of_waypoints", &waypoint_count_loaded, deprecated_waypoints_count_input);
    register_var("planned_cruise_mach", &cruise_mach_loaded, true);
    register_var("planned_cruise_altitude", &cruise_alt_loaded, true);
-   const LoaderDeprecatedMetaInfo deprecated_waypoints_input =
-         (LoaderDeprecatedMetaInfo){true, "Use a 'descent_waypoints' input block instead of 'waypoints'"};
-   register_named_list("waypoints", &waypoints, deprecated_waypoints_input);
    register_named_list("descent_waypoints", &descent_waypoints, false);
    register_named_list("cruise_waypoints", &cruise_waypoints, false);
    register_named_list("ascent_waypoints", &ascent_waypoints, false);

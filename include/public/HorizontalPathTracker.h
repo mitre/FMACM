@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -82,6 +82,8 @@ class HorizontalPathTracker {
     */
    void InitializeStartingIndex();
 
+   const HorizontalPath GetActivePathSegment() const;
+
   protected:
    static const Units::Length EXTENSION_LENGTH;
    std::vector<HorizontalPath>::size_type m_current_index;
@@ -136,4 +138,8 @@ inline TrajectoryIndexProgressionDirection HorizontalPathTracker::GetExpectedPro
 
 inline void HorizontalPathTracker::UpdateCurrentIndex(std::vector<HorizontalPath>::size_type new_index) {
    m_current_index = new_index;
+}
+
+inline const HorizontalPath HorizontalPathTracker::GetActivePathSegment() const {
+   return m_extended_horizontal_trajectory[m_current_index];
 }

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2022 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -34,6 +34,7 @@
 #include "scalar/Time.h"
 #include "public/CalcWindGradControl.h"
 #include "public/DirectionOfFlightCourseCalculator.h"
+#include "public/FixedMassAircraftPerformance.h"
 
 class VerticalPredictor {
   public:
@@ -49,7 +50,8 @@ class VerticalPredictor {
 
    virtual void BuildVerticalPrediction(std::vector<HorizontalPath> &horizontal_path,
                                         std::vector<PrecalcWaypoint> &precalc_waypoints,
-                                        const WeatherPrediction &weather, const Units::Length &start_altitude,
+                                        const aaesim::open_source::WeatherPrediction &weather,
+                                        const Units::Length &start_altitude,
                                         const Units::Length &aircraft_distance_to_go) = 0;
 
    void SetMembers(const VerticalPredictor &vertical_predictor);
@@ -154,12 +156,13 @@ class VerticalPredictor {
    double m_cruise_mach;
    double m_transition_mach;
    PrecalcConstraint m_precalculated_constraints;
-   CalcWindGradControl m_wind_calculator;
+   aaesim::open_source::CalcWindGradControl m_wind_calculator;
    Units::MetersLength m_start_altitude_msl;
    VerticalPath m_vertical_path;
    DirectionOfFlightCourseCalculator m_course_calculator;
    Units::Speed m_ias_at_end_of_route;
    std::shared_ptr<Atmosphere> m_atmosphere;
+   std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
 };
 
 inline const VerticalPath &VerticalPredictor::GetVerticalPath() const { return m_vertical_path; }

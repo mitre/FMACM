@@ -1,0 +1,19 @@
+;aircraft_intent
+;{
+	planned_cruise_mach 0.72
+	planned_cruise_altitude 34000
+
+    ascent_waypoints
+    {
+    }
+
+    cruise_waypoints
+    {
+        DAAYE   38.0112305555556   -105.778941666667   50000     0   0   50000       0   320   0   0   0   0   TF
+        GUP     35.476             -108.8726111            0    0   0  50000       0   1000     0   0   0   0   IF
+    }
+
+	descent_waypoints
+	{
+	}
+}

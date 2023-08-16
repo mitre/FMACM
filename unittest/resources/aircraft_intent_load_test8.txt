@@ -1,0 +1,17 @@
+;aircraft_intent
+;{
+	planned_cruise_mach 0.72
+	planned_cruise_altitude 34000
+
+    ascent_waypoints
+    {
+    }
+
+    cruise_waypoints
+    {
+    }
+
+	descent_waypoints
+	{
+	}
+}

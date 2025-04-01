@@ -53,9 +53,10 @@ class LatitudeLongitudePoint {
 
    static LatitudeLongitudePoint CreateFromGeolibPrimitive(geolib_idealab::LLPoint ll_point);
 
-   static LatitudeLongitudePoint CreateFromWaypoint(Waypoint wgs84_waypoint);
+   static LatitudeLongitudePoint CreateFromWaypoint(const Waypoint &wgs84_waypoint);
 
-   static LatitudeLongitudePoint CreateFromGeodeticPosition(EllipsoidalEarthModel::GeodeticPosition geodetic_position);
+   static LatitudeLongitudePoint CreateFromGeodeticPosition(
+         const EllipsoidalEarthModel::GeodeticPosition &geodetic_position);
 
    /**
     *

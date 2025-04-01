@@ -31,7 +31,8 @@ namespace open_source {
 
 const Units::SecondsTime DataReader::UNDEFINED_TIME(-9999);
 
-log4cplus::Logger DataReader::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("DataReader"));
+log4cplus::Logger DataReader::m_logger =
+      log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("aaesim::open_source::DataReader"));
 
 DataReader::DataReader(std::string file_name, int header_lines, size_t expected_columns)
    : m_expected_column_count(expected_columns) {

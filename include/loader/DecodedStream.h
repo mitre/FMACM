@@ -24,8 +24,6 @@
 #include "loader/SinglePushBackStream.h"
 #include "loader/IncludeStream.h"
 #include "loader/CommentStream.h"
-#include "loader/EchoStream.h"
-#include "loader/FormatDifferentiatorStreamEcho.h"
 #include "loader/ArchiveStreamEcho.h"
 #include "utility/CustomUnits.h"
 #include <scalar/Length.h>
@@ -36,14 +34,11 @@
 #include <scalar/Area.h>
 #include <scalar/MassFlowRate.h>
 
-class DecodedStream : public SinglePushBackStream<FormatDifferentiatorStreamEcho<
-                            EchoStream<IncludeStream<ArchiveStreamEcho<CommentStream<TokenStream> > > > > > {
+class DecodedStream : public SinglePushBackStream<IncludeStream<ArchiveStreamEcho<CommentStream<TokenStream> > > > {
   public:
    DecodedStream(void);
 
    ~DecodedStream(void);
-
-   bool set_html_output_file(const std::string &dump_file_name) { return set_output_file(dump_file_name, 0); }
 
    /*
     * Primitive Declarations

@@ -85,7 +85,7 @@ class IncludeStream : public PARENT {
       archive_director = new_ad;
    }
 
-   void set_Local_Path(FilePath fp) { local_path = fp; }
+   void set_Local_Path(const FilePath &fp) { local_path = fp; }
 
    //=====================================================================================
    // overloading indent management functions

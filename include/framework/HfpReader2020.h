@@ -47,7 +47,7 @@ class HfpReader2020 final : public aaesim::open_source::DataReader {
 
    Units::Length GetDTG();
 
-   HorizontalPath::SegmentType GetSegmentType();
+   aaesim::open_source::HorizontalPath::SegmentType GetSegmentType();
 
    Units::UnsignedAngle GetCourse();
 

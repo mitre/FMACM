@@ -9,6 +9,10 @@ set(PUBLIC_LIBRARY_TEST_SOURCE
         ${UNITTEST_DIR}/src/Public/windstack_tests.cpp
         ${UNITTEST_DIR}/src/Public/utility_tests.cpp
         ${UNITTEST_DIR}/src/Public/public_tests.cpp
+        ${UNITTEST_DIR}/src/Public/public_atmosphere_tests.cpp
+        ${UNITTEST_DIR}/src/Public/tangent_plane_tests.cpp
+        ${UNITTEST_DIR}/src/Public/wind_blending_tests.cpp
+        ${UNITTEST_DIR}/src/Public/earth_model_tests.cpp
 )
 
 add_executable(public_test 

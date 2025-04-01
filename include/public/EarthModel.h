@@ -55,6 +55,13 @@ class EarthModel {
          return_this.longitude = waypoint.GetLongitude();
          return return_this;
       }
+      static EarthModel::GeodeticPosition Of(Units::SignedAngle latitude, Units::SignedAngle longitude) {
+         EarthModel::GeodeticPosition return_this;
+         return_this.altitude = Units::zero();
+         return_this.latitude = latitude;
+         return_this.longitude = longitude;
+         return return_this;
+      }
    };
 
    class AbsolutePositionEcef {
@@ -75,7 +82,7 @@ class EarthModel {
       static LocalPositionEnu Of(Units::Length x, Units::Length y, Units::Length z);
       static LocalPositionEnu Of(const aaesim::open_source::AircraftState &state);
       static LocalPositionEnu OfZeros();
-      Units::Length x, y, z;
+      Units::Length x{}, y{}, z{};
    };
 
    virtual ~EarthModel();
@@ -121,7 +128,7 @@ inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::Of(Units::Leng
 }
 
 inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::Of(const aaesim::open_source::AircraftState &state) {
-   return Of(state.GetPositionX(), state.GetPositionY(), state.GetPositionZ());
+   return Of(state.GetPositionEnuX(), state.GetPositionEnuY(), state.GetAltitudeMsl());
 }
 
 inline EarthModel::LocalPositionEnu EarthModel::LocalPositionEnu::OfZeros() {

@@ -21,6 +21,7 @@
 
 #include "public/LoggingLoadable.h"
 #include "public/FlightDeckApplication.h"
+#include "public/StatisticalPilotDelay.h"
 
 namespace aaesim {
 namespace open_source {
@@ -28,7 +29,8 @@ struct FlightDeckApplicationLoader : public LoggingLoadable {
    virtual std::string GetTopLevelTag() const = 0;
    virtual void RegisterLoadableVariables() = 0;
    virtual bool VariablesAreLoaded() const = 0;
-   virtual std::shared_ptr<aaesim::open_source::FlightDeckApplication> ConstructLoadedAlgorithm() = 0;
+   virtual std::shared_ptr<aaesim::open_source::FlightDeckApplication> ConstructLoadedAlgorithm(
+         aaesim::open_source::StatisticalPilotDelay &pilot_delay) = 0;
 };
 }  // namespace open_source
 }  // namespace aaesim

@@ -21,19 +21,22 @@
 
 class Wind;
 
+#include <memory>
+
 #include "public/EarthModel.h"
 
-class Environment {
+class Environment final {
   public:
    static Environment *GetInstance();
 
    EarthModel *GetEarthModel() const;
 
+   virtual ~Environment() = default;
+
   private:
-   static Environment *mInstance;
-   EarthModel *earthModel;
+   static std::unique_ptr<Environment> m_instance;
+
+   std::unique_ptr<EarthModel> m_earth_model;
 
    Environment();
-
-   virtual ~Environment();
 };

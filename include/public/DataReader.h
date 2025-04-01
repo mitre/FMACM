@@ -41,7 +41,6 @@ namespace open_source {
 class DataReader {
   public:
    static const Units::SecondsTime UNDEFINED_TIME;
-   static log4cplus::Logger m_logger;
    DataReader() = default;
    DataReader(std::string file_name, int header_lines, size_t expected_columns);
    DataReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns);
@@ -60,6 +59,7 @@ class DataReader {
    void SkipLines(int header_lines);
 
   private:
+   static log4cplus::Logger m_logger;
    std::shared_ptr<std::istream> m_input_stream;
    size_t m_expected_column_count;
    CsvParser::CsvRow m_csv_row;

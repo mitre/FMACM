@@ -35,8 +35,7 @@ TestFrameworkAircraft::TestFrameworkAircraft()
      m_aircraft_control(),
      m_bada_calculator(),
      m_speed_application(),
-     m_states(),
-     m_tangent_plane_sequence() {}
+     m_states() {}
 
 bool TestFrameworkAircraft::Update(const SimulationTime &time) {
 
@@ -46,7 +45,8 @@ bool TestFrameworkAircraft::Update(const SimulationTime &time) {
 
    aaesim::open_source::AircraftState previous_state = m_states.back();
 
-   m_weather_truth->Update(time, m_guidance_calculator->GetEstimatedDistanceAlongPath(), previous_state.GetPositionZ());
+   m_weather_truth->Update(time, m_guidance_calculator->GetEstimatedDistanceAlongPath(),
+                           previous_state.GetAltitudeMsl());
 
    Guidance current_guidance = m_guidance_calculator->Update(previous_state);
    m_adsb_receiver->Receive(time, aaesim::open_source::AircraftState());
@@ -55,25 +55,14 @@ bool TestFrameworkAircraft::Update(const SimulationTime &time) {
    if (speed_guidance_from_application.IsValid() && speed_guidance_from_application.m_ias_command > Units::ZERO_SPEED) {
       current_guidance.m_ias_command = speed_guidance_from_application.m_ias_command;
    }
-   AircraftState state_result = m_dynamics->Update(time, current_guidance, m_aircraft_control);
-   FinalizeAndSaveState(state_result, time);
+   AircraftState state_result =
+         m_dynamics->Update(m_states.back().GetUniqueId(), time, current_guidance, m_aircraft_control);
+   SaveState(state_result, time);
 
    return IsFinished();
 }
 
-void TestFrameworkAircraft::FinalizeAndSaveState(AircraftState &state, const SimulationTime &time) {
-   state.m_id = m_states.back().m_id;
-   state.m_time = time.GetCycle();
-   AddLatitudeLongitude(state);
-   m_states.push_back(state);
-}
-
-void TestFrameworkAircraft::AddLatitudeLongitude(AircraftState &state) const {
-   EarthModel::LocalPositionEnu current_enu_position = EarthModel::LocalPositionEnu::Of(state);
-   EarthModel::GeodeticPosition geodetic_position;
-   m_tangent_plane_sequence->convertLocalToGeodetic(current_enu_position, geodetic_position);
-   state.SetPosition(geodetic_position.latitude, geodetic_position.longitude);
-}
+void TestFrameworkAircraft::SaveState(AircraftState &state, const SimulationTime &time) { m_states.push_back(state); }
 
 std::shared_ptr<TestFrameworkAircraft> TestFrameworkAircraft::Builder::Build() const {
    return std::make_shared<TestFrameworkAircraft>(*this);
@@ -87,9 +76,7 @@ TestFrameworkAircraft::TestFrameworkAircraft(const Builder &builder) {
    m_aircraft_control = builder.GetAircraftControl();
    m_bada_calculator = builder.GetAircraftPerformance();
    m_speed_application = builder.GetFligthDeckApplication();
-   m_tangent_plane_sequence = builder.GetTangentPlaneSequence();
    auto initial_state = builder.GetInitialState();
-   AddLatitudeLongitude(initial_state);
    m_states.push_back(initial_state);
 }
 
@@ -132,12 +119,6 @@ TestFrameworkAircraft::Builder *TestFrameworkAircraft::Builder::WithGuidanceCalc
 TestFrameworkAircraft::Builder *TestFrameworkAircraft::Builder::WithFlightDeckApplication(
       std::shared_ptr<aaesim::open_source::FlightDeckApplication> &speed_application) {
    speed_application_ = speed_application;
-   return this;
-}
-
-TestFrameworkAircraft::Builder *TestFrameworkAircraft::Builder::WithTangentPlaneSequence(
-      std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence) {
-   tangent_plane_sequence_ = tangent_plane_sequence;
    return this;
 }
 

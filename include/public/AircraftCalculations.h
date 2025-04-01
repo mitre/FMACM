@@ -29,6 +29,8 @@
 #include <scalar/Speed.h>
 #include <scalar/Area.h>
 
+namespace aaesim::open_source {
+
 class AircraftCalculations {
 
   public:
@@ -106,29 +108,10 @@ class AircraftCalculations {
          Units::Angle &course, std::vector<HorizontalPath>::size_type &resolved_trajectory_index);
 
    /**
-    * Utility to translate the incoming angle to be on [0, 2pi]. See also Units::UnsignedAngle.
-    */
-   static Units::UnsignedRadiansAngle Convert0to2Pi(Units::Angle course_in);
-
-   /**
-    * Utility to translate the incoming angle to be on [-pi, pi]. See also Units::SignedAngle.
-    */
-   static Units::SignedRadiansAngle ConvertPitoPi(Units::Angle course_in);
-
-   /**
     * @deprecated
     * @see CoreUtils::CalculateEuclideanDistance()
     */
    static Units::NauticalMilesLength PtToPtDist(Units::Length x0, Units::Length y0, Units::Length x1, Units::Length y1);
-
-   /**
-    * Compute ground speed from an aircraft state.
-    *
-    * Do not write new code that uses this.
-    *
-    * @deprecated
-    */
-   static Units::Speed GsAtACS(aaesim::open_source::AircraftState acs);
 
    /**
     * Use the dot product rule to calculate the angle between vectors. The angle will be on the
@@ -158,6 +141,8 @@ class AircraftCalculations {
                                                          const std::vector<HorizontalPath>::size_type &starting_index,
                                                          const std::vector<HorizontalPath> &hTraj);
 
-   static void CrossTrackError(const Units::Length x, const Units::Length y, int trajIx,
-                               const std::vector<HorizontalPath> hTraj, int &nextTrajIx, Units::Length &cte);
+   static void CrossTrackError(const Units::Length position_enu_x, const Units::Length position_enu_y,
+                               int current_trajectory_index, const std::vector<HorizontalPath> &horizontal_trajectory,
+                               int &next_trajectory_index, Units::Length &cross_track_error);
 };
+}  // namespace aaesim::open_source

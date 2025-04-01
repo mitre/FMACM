@@ -23,12 +23,18 @@
 #include "public/SpeedOnPitchControl.h"
 #include "public/SpeedOnThrustControl.h"
 #include "public/NullADSBReceiver.h"
+#include "public/NullAtmosphere.h"
 #include "public/WeatherPrediction.h"
 #include "public/PassThroughAssap.h"
 #include "public/NullFlightDeckApplication.h"
+#include "public/EllipsoidalPositionEstimator.h"
+#include "public/LegacyPositionEstimator.h"
 #include "framework/PreloadedAdsbReceiver.h"
 #include "framework/ForeWindReader.h"
 #include "framework/NullAircraftPerformance.h"
+#include "public/FullWindTrueWeatherOperator.h"
+#include "public/USStandardAtmosphere1976.h"
+#include "scalar/Length.h"
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
 #include "imalgs/FIMAlgorithmInitializer.h"
@@ -36,9 +42,11 @@
 
 #ifdef MITRE_BADA3_LIBRARY
 #include "bada/Bada3Factory.h"
+#include "bada/BadaAtmosphere37.h"
 #endif
 
 using namespace fmacm;
+using namespace aaesim::open_source;
 
 double FrameworkAircraftLoader::m_mass_fraction_default = 0.5;
 double FrameworkAircraftLoader::m_start_time_default = 0;
@@ -67,7 +75,7 @@ bool FrameworkAircraftLoader::load(DecodedStream *input) {
    register_var("ttv_csv_file", &m_ttv_csv_file, false);
    register_var("forewind_csv_file", &m_forewind_csv_file, false);
    register_loadable_with_brackets("fms_guidance_data_files", &m_guidance_loader, true);
-   register_loadable_with_brackets("airborne_app", &m_flightdeck_application_loader, true);
+   register_loadable_with_brackets("flight_deck_application", &m_flightdeck_application_loader, true);
    return complete();
 }
 
@@ -77,15 +85,17 @@ std::shared_ptr<TestFrameworkAircraft> FrameworkAircraftLoader::BuildAircraft() 
    auto true_weather =
          BuildTrueWeather(m_env_csv_file, m_env_csv_data_index,
                           Units::MetersLength(guidance_calculator->GetVerticalData().m_altitude_meters.back()));
-   auto dynamics = BuildAircraftDynamics(bada_calculator, true_weather, guidance_calculator);
+   m_initial_local_position = ComputeInitialPositionOnPath(guidance_calculator);
+   EarthModel::GeodeticPosition wgs84;
+   m_guidance_loader.GetTangentPlaneSequence()->ConvertLocalToGeodetic(m_initial_local_position, wgs84);
+   auto dynamics = BuildAircraftDynamics(bada_calculator, true_weather, guidance_calculator, wgs84);
    auto control = BuildAircraftControl(m_speed_management_type, bada_calculator);
    auto receiver = BuildAdsbReceiver(m_ttv_csv_file);
    auto initial_state =
          BuildInitialState(dynamics, Units::SecondsTime(m_start_time),
-                           Units::MetersLength(guidance_calculator->GetVerticalData().m_altitude_meters.back()));
+                           Units::MetersLength(guidance_calculator->GetVerticalData().m_altitude_meters.back()), wgs84);
    auto flightdeck_application = BuildFlightdeckApplication(bada_calculator, receiver, initial_state,
                                                             m_guidance_loader.GetPlannedDescentParameters());
-   auto tangent_plane_sequence = m_guidance_loader.GetTangentPlaneSequence();
 
    TestFrameworkAircraft::Builder builder;
    return builder.WithInitialState(initial_state)
@@ -96,7 +106,6 @@ std::shared_ptr<TestFrameworkAircraft> FrameworkAircraftLoader::BuildAircraft() 
          ->WithAdsbReceiver(receiver)
          ->WithGuidanceCalculator(guidance_calculator)
          ->WithFlightDeckApplication(flightdeck_application)
-         ->WithTangentPlaneSequence(tangent_plane_sequence)
          ->Build();
 }
 
@@ -107,7 +116,7 @@ std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> FrameworkAirc
    initial_conditions.faf_altitude_msl = Units::FeetLength(1500);
    initial_conditions.initial_flap_configuration = aaesim::open_source::bada_utils::FlapConfiguration::CRUISE;
    initial_conditions.mass_percentile = m_mass_fraction;
-   return aaesim::bada::Bada3Factory::CreateBada3Performance(bada_aircraft_code, initial_conditions);
+   return aaesim::bada::Bada3Factory::CreateBada3ForwardProgression(bada_aircraft_code, initial_conditions);
 #else
    return std::make_shared<fmacm::NullAircraftPerformance>();
 #endif
@@ -116,7 +125,7 @@ std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> FrameworkAirc
 std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> FrameworkAircraftLoader::BuildAircraftDynamics(
       std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &performance,
       std::shared_ptr<fmacm::WeatherTruthFromStaticData> &true_weather,
-      std::shared_ptr<GuidanceFromStaticData> &guidance) {
+      std::shared_ptr<GuidanceFromStaticData> &guidance, const EarthModel::GeodeticPosition &initial_wgs84_position) {
    auto initial_altitude = Units::MetersLength(guidance->GetVerticalData().m_altitude_meters.back());
    Units::KnotsSpeed initial_ias = Units::MetersPerSecondSpeed(guidance->GetVerticalData().m_ias_mps.back());
    DirectionOfFlightCourseCalculator course_calculator = DirectionOfFlightCourseCalculator(
@@ -125,11 +134,14 @@ std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> FrameworkAircraftLoader::
    true_weather->Update(aaesim::open_source::SimulationTime::Of(Units::SecondsTime(m_start_time)), Units::infinity(),
                         initial_altitude);
    Units::KnotsSpeed initial_tas = true_weather->getAtmosphere()->CAS2TAS(initial_ias, initial_altitude);
-   EarthModel::LocalPositionEnu local_position = ComputeInitialPositionOnPath(guidance);
-
+   std::shared_ptr<aaesim::open_source::EllipsoidalPositionEstimator> position_estimator =
+         std::make_shared<aaesim::open_source::LegacyPositionEstimator>(m_guidance_loader.GetTangentPlaneSequence(),
+                                                                        initial_wgs84_position);
+   std::shared_ptr<aaesim::open_source::TrueWeatherOperator> true_weather_operator =
+         std::make_shared<aaesim::open_source::FullWindTrueWeatherOperator>(true_weather);
    auto dynamics = std::make_shared<aaesim::open_source::ThreeDOFDynamics>();
-   dynamics->Initialize(performance, local_position, initial_altitude, initial_tas, initial_heading, m_mass_fraction,
-                        true_weather);
+   dynamics->Initialize(performance, initial_wgs84_position, m_initial_local_position, initial_altitude, initial_tas,
+                        initial_heading, m_mass_fraction, position_estimator, true_weather_operator);
    return dynamics;
 }
 
@@ -205,15 +217,16 @@ std::shared_ptr<aaesim::open_source::AircraftControl> FrameworkAircraftLoader::B
       std::string control_method, std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &bada_calculator) {
    std::shared_ptr<aaesim::open_source::AircraftControl> aircraft_control;
 
+   const Units::Angle max_bank_angle = Units::DegreesAngle(30);
    if (control_method == "thrust") {
-      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnThrustControl>();
+      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnThrustControl>(max_bank_angle);
    } else if (control_method == "pitch") {
-      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnPitchControl>(Units::KnotsSpeed(20.0),
-                                                                                    Units::FeetLength(500.0));
+      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnPitchControl>(
+            Units::KnotsSpeed(20.0), Units::FeetLength(500.0), max_bank_angle);
    } else {
       throw std::runtime_error("Supported speed_management_type values are 'thrust' and 'pitch'");
    }
-   aircraft_control->Initialize(bada_calculator, Units::DegreesAngle(30));
+   aircraft_control->Initialize(bada_calculator);
    return aircraft_control;
 }
 
@@ -231,37 +244,42 @@ std::shared_ptr<aaesim::open_source::ADSBReceiver> FrameworkAircraftLoader::Buil
 
 aaesim::open_source::AircraftState FrameworkAircraftLoader::BuildInitialState(
       std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> &dynamics, Units::Time start_time,
-      Units::Length initial_altitude) {
-   aaesim::open_source::AircraftState initial_state;
-   initial_state.m_id = 1;
-   initial_state.m_x = Units::FeetLength(dynamics->GetDynamicsState().x).value();
-   initial_state.m_y = Units::FeetLength(dynamics->GetDynamicsState().y).value();
-   initial_state.m_z = Units::FeetLength(initial_altitude).value();
-   initial_state.m_xd = Units::FeetPerSecondSpeed(dynamics->GetDynamicsState().xd).value();
-   initial_state.m_yd = Units::FeetPerSecondSpeed(dynamics->GetDynamicsState().yd).value();
-   initial_state.m_zd = 0.;
+      Units::Length initial_altitude, const EarthModel::GeodeticPosition &wgs84_position) {
    std::pair<Units::Speed, Units::Speed> wind_components = dynamics->GetWindComponents();
-   initial_state.m_Vwx = Units::MetersPerSecondSpeed(wind_components.first).value();
-   initial_state.m_Vwy = Units::MetersPerSecondSpeed(wind_components.second).value();
-   initial_state.m_time = Units::SecondsTime(start_time).value();
-   initial_state.m_dynamics_state = dynamics->GetDynamicsState();
-   return initial_state;
+   return aaesim::open_source::AircraftState::Builder(1, start_time)
+         .Position(m_initial_local_position.x, m_initial_local_position.y)
+         ->Latitude(wgs84_position.latitude)
+         ->Longitude(wgs84_position.longitude)
+         ->AltitudeMsl(initial_altitude)
+         ->GroundSpeed(dynamics->GetDynamicsState().xd, dynamics->GetDynamicsState().yd)
+         ->SensedWindComponents(wind_components.first, wind_components.second)
+         ->DynamicsState(dynamics->GetDynamicsState())
+         ->Build();
 }
 
 std::shared_ptr<aaesim::open_source::FlightDeckApplication> FrameworkAircraftLoader::BuildFlightdeckApplication(
       std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &performance,
       std::shared_ptr<aaesim::open_source::ADSBReceiver> &receiver, const aaesim::open_source::AircraftState &state,
       const GuidanceFromStaticData::PlannedDescentParameters &guidance_descent_parameters) {
-#ifdef SAMPLE_ALGORITHM_LIBRARY
-   aaesim::open_source::WeatherPrediction weather_prediction;
-   if (m_forewind_csv_file.empty()) {
-      weather_prediction = Wind::CreateZeroWindPrediction();
-   } else {
+#ifndef SAMPLE_ALGORITHM_LIBRARY
+   return std::make_shared<aaesim::open_source::NullFlightDeckApplication>();
+#else
+
+#ifdef MITRE_BADA3_LIBRARY
+   auto bada37_atmosphere = aaesim::bada::Bada3Factory::MakeAtmosphereFromTemperatureOffset(
+         Atmosphere::AtmosphereType::BADA37, Units::CelsiusTemperature{0});
+   aaesim::open_source::WeatherPrediction weather_prediction =
+         aaesim::open_source::WeatherPrediction::CreateZeroWindPrediction(bada37_atmosphere);
+#else
+   aaesim::open_source::WeatherPrediction weather_prediction =
+         aaesim::open_source::WeatherPrediction::CreateZeroWindPrediction(std::make_unique<USStandardAtmosphere1976>());
+#endif
+   if (!m_forewind_csv_file.empty()) {
       testvector::ForeWindReader forecast_wind_reader{m_forewind_csv_file, 1};
       forecast_wind_reader.ReadWind(weather_prediction);
    }
    aaesim::open_source::OwnshipFmsPredictionParameters fms_parameters;
-   fms_parameters.expected_cruise_altitude = state.GetPositionZ();
+   fms_parameters.expected_cruise_altitude = state.GetAltitudeMsl();
    fms_parameters.maximum_allowable_bank_angle = Units::DegreesAngle(30);
    fms_parameters.transition_altitude = guidance_descent_parameters.planned_transition_altitude;
    fms_parameters.transition_ias = guidance_descent_parameters.planned_transition_ias;
@@ -280,10 +298,8 @@ std::shared_ptr<aaesim::open_source::FlightDeckApplication> FrameworkAircraftLoa
                ->AddOwnshipPerformanceParameters(performance_parameters)
                ->AddSurveillanceProcessor(surveillance_processor)
                ->Build();
-   auto flightdeck_application = m_flightdeck_application_loader.CreateApplication();
+   auto flightdeck_application = m_flightdeck_application_loader.CreateApplication(weather_prediction);
    flightdeck_application->Initialize(sample_algorithm_initializer);
    return flightdeck_application;
-#else
-   return std::make_shared<aaesim::open_source::NullFlightDeckApplication>();
 #endif
 }

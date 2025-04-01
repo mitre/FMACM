@@ -40,7 +40,7 @@ class Waypoint : public LoggingLoadable {
 
    const std::string &GetName() const;
 
-   void SetName(const std::string name);
+   void SetName(const std::string &name);
 
    Units::Angle GetLatitude() const;
 
@@ -59,10 +59,6 @@ class Waypoint : public LoggingLoadable {
    void SetNominalIas(const Units::Speed &nominal_ias);
 
    Units::Speed GetNominalIas() const;
-
-   void SetMach(double mach);
-
-   double GetMach() const;
 
    void SetAltitudeConstraintHigh(const Units::Length &altitude_high);
 
@@ -100,7 +96,6 @@ class Waypoint : public LoggingLoadable {
    Units::Angle m_longitude;
    Units::Length m_altitude;
    Units::Speed m_nominal_ias;
-   double m_mach;
    Units::Length m_altitude_constraint_high;
    Units::Length m_altitude_constraint_low;
    Units::Speed m_speed_constraint_high;
@@ -113,7 +108,7 @@ class Waypoint : public LoggingLoadable {
 
 inline const std::string &Waypoint::GetName() const { return m_name; }
 
-inline void Waypoint::SetName(const std::string name) { m_name.assign(name); }
+inline void Waypoint::SetName(const std::string &name) { m_name.assign(name); }
 
 inline Units::Angle Waypoint::GetLatitude() const { return m_latitude; }
 
@@ -135,10 +130,6 @@ inline void Waypoint::SetAltitude(const Units::Length &nominal_altitude) { m_alt
 inline Units::Speed Waypoint::GetNominalIas() const { return m_nominal_ias; }
 
 inline void Waypoint::SetNominalIas(const Units::Speed &nominal_ias) { m_nominal_ias = nominal_ias; }
-
-inline double Waypoint::GetMach() const { return m_mach; }
-
-inline void Waypoint::SetMach(double mach) { m_mach = mach; }
 
 inline void Waypoint::SetAltitudeConstraintHigh(const Units::Length &altitude_high) {
    m_altitude_constraint_high = altitude_high;

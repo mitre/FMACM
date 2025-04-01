@@ -17,6 +17,8 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <gtest/gtest.h>
+
 #include "public/CustomMath.h"
 #include "public/AircraftCalculations.h"
 #include "public/AircraftIntent.h"
@@ -30,8 +32,6 @@
 #include "public/PositionCalculator.h"
 #include "public/ScenarioUtils.h"
 #include "public/SimulationTime.h"
-#include "public/SingleTangentPlaneSequence.h"
-#include "public/StandardAtmosphere.h"
 #include "public/WindZero.h"
 #include "public/Wgs84PrecalcWaypoint.h"
 #include "public/EuclideanWaypointMonitor.h"
@@ -39,7 +39,6 @@
 #include "utility/CustomUnits.h"
 #include "utils/public/OldCustomMathUtils.h"
 #include "utils/public/PublicUtils.h"
-#include <gtest/gtest.h>
 
 using namespace std;
 using namespace aaesim::test::utils;
@@ -173,68 +172,6 @@ TEST(CoreUtils, calculateEuclideanDistance) {
    const std::pair<Units::Length, Units::Length> pair2(Units::ZERO_LENGTH, l4);
    const Units::FeetLength actual = CoreUtils::CalculateEuclideanDistance(pair1, pair2);
    EXPECT_EQ(expected, actual);
-}
-
-TEST(Atmosphere, temperature) {
-   const Units::Temperature offset_temperature = Units::CelsiusTemperature(5);
-   Atmosphere *atm = new StandardAtmosphere(offset_temperature);
-   // check for discontinuity at tropopause
-   Units::MetersLength half_eps(1e-6);
-   Units::KelvinTemperature delta(1e-3);
-   Units::KelvinTemperature temp_pre_tropo = atm->GetTemperature(atm->GetTropopauseHeight() - half_eps);
-   Units::KelvinTemperature temp_post_tropo = atm->GetTemperature(atm->GetTropopauseHeight() + half_eps);
-   EXPECT_NEAR(temp_pre_tropo.value(), temp_post_tropo.value(), delta.value());
-
-   // check for temperature below absolute zero
-   Units::KelvinTemperature temp_very_high_alt = atm->GetTemperature(Units::MetersLength(1e8));
-   EXPECT_GE(temp_very_high_alt.value(), 0);
-   EXPECT_EQ(offset_temperature, static_cast<StandardAtmosphere *>(atm)->GetTemperatureOffset());
-   delete atm;
-}
-
-TEST(Atmosphere, density_low_altitude) {
-   Atmosphere *atm = new StandardAtmosphere(Units::CelsiusTemperature(0));
-
-   // below H_TROP
-   const Units::MetersLength alt(3000.0);
-   const Units::KilogramsMeterDensity expectedRho(9.0926e-1);  // from tabular standard atmosphere
-   const Units::PascalsPressure expectedPressure(7.0121e4);    // from tabular standard atmosphere
-   Units::KilogramsMeterDensity rho;
-   Units::PascalsPressure pressure;
-   atm->AirDensity(alt, rho, pressure);
-   EXPECT_NEAR(rho.value(), expectedRho.value(), 1e-3);
-   EXPECT_NEAR(pressure.value(), expectedPressure.value(), 1e2);  // tolerance can be large; Pascals are big numbers!
-
-   delete atm;
-}
-
-TEST(Atmosphere, density_above_htrop) {
-   Atmosphere *atm = new StandardAtmosphere(Units::CelsiusTemperature(0));
-
-   // above H_TROP
-   const Units::MetersLength alt(3000.0);
-   const Units::MetersLength higher_alt = alt + atm->GetTropopauseHeight();
-   const Units::KilogramsMeterDensity expectedRho(2.268e-1);  // from tabular standard atmosphere
-   const Units::PascalsPressure expectedPressure(1.4101e4);   // from tabular standard atmosphere
-   Units::KilogramsMeterDensity rho;
-   Units::PascalsPressure pressure;
-   atm->AirDensity(higher_alt, rho, pressure);
-   EXPECT_NEAR(rho.value(), expectedRho.value(), 1e-3);
-   EXPECT_NEAR(pressure.value(), expectedPressure.value(), 1e2);  // tolerance can be large; Pascals are big numbers!
-
-   delete atm;
-}
-TEST(Atmosphere, speed) {
-   // warm day, 4.5 F (2.5 C) above nominal
-   Atmosphere *atm = new StandardAtmosphere(Units::CelsiusTemperature(2.5));
-
-   const Units::Length alt = Units::MetersLength(3000.0);
-   Units::Speed cas = Units::MetersPerSecondSpeed(400.0);
-   Units::Speed tas = atm->CAS2TAS(cas, alt);
-   EXPECT_NEAR(Units::MetersPerSecondSpeed(tas).value(), 443.67, .02);
-   Units::Speed cas2 = atm->TAS2CAS(tas, alt);
-   EXPECT_DOUBLE_EQ(Units::MetersPerSecondSpeed(cas).value(), Units::MetersPerSecondSpeed(cas2).value());
-   delete atm;
 }
 
 TEST(AircraftCalculations, anglebetweenvectors) {
@@ -736,29 +673,27 @@ TEST(DMatrix, multiply) {
    EXPECT_EQ(ba[0][0], 39);
    EXPECT_EQ(ba.GetMaxRow(), 1);
    EXPECT_EQ(ba.GetMaxColumn(), 2);
+   delete &ba;
 }
 
 TEST(AircraftState, extrapolate) {
-   AircraftState state_in;
-   state_in.m_time = 0;
-   state_in.m_xd = 100.0;
-   state_in.m_yd = -100.0;
-   state_in.SetZd(100.0);
+   const auto state_in = AircraftState::Builder(0, 0)
+                               .GroundSpeed(Units::FeetPerSecondSpeed(100), Units::FeetPerSecondSpeed(-100))
+                               ->AltitudeRate(Units::FeetPerSecondSpeed(100))
+                               ->Build();
 
    AircraftState state_out;
    double extrapolate_time = 10.0;
-
-   state_out.Extrapolate(state_in, extrapolate_time);
-
-   if (state_out.m_time == -1) {
+   state_out.Extrapolate(state_in, Units::SecondsTime(extrapolate_time));
+   if (state_out.GetTime().value() == -1) {
       printf("Nothing was extrapolated!");
       FAIL();
    }
 
-   EXPECT_DOUBLE_EQ(state_out.m_time, extrapolate_time);
-   EXPECT_DOUBLE_EQ(state_out.m_x, 1000.0);
-   EXPECT_DOUBLE_EQ(state_out.m_y, -1000.0);
-   EXPECT_DOUBLE_EQ(state_out.m_z, 1000.0);
+   EXPECT_DOUBLE_EQ(state_out.GetTime().value(), extrapolate_time);
+   EXPECT_DOUBLE_EQ(Units::FeetLength(state_out.GetPositionEnuX()).value(), 1000.0);
+   EXPECT_DOUBLE_EQ(Units::FeetLength(state_out.GetPositionEnuY()).value(), -1000.0);
+   EXPECT_DOUBLE_EQ(Units::FeetLength(state_out.GetAltitudeMsl()).value(), 1000.0);
 }
 
 TEST(Units, CustomUnits) {
@@ -987,9 +922,13 @@ TEST(AlongPathDistanceCalculator, consistency_check_two_public_methods) {
                tol_crs.value());
 }
 
+/* Broken because we cannot access bada classes from here
 TEST(WindZero, test_for_zero_behavior) {
+   std::shared_ptr<Atmosphere>
+atm(aaesim::bada::Bada3Factory::MakeAtmosphereFromTemperatureOffset(Atmosphere::AtmosphereType::BADA37,
+                                                                                     Units::CelsiusTemperature(0)));
    Units::MetersPerSecondSpeed u, v;
-   WindZero zero_wind;
+   WindZero zero_wind(atm);
    zero_wind.InterpolateWind(Units::zero(), Units::zero(), Units::zero(), u, v);
    EXPECT_EQ(0., u.value());
    EXPECT_EQ(0., v.value());
@@ -997,7 +936,7 @@ TEST(WindZero, test_for_zero_behavior) {
    Units::CelsiusTemperature temperature =
          zero_wind.InterpolateTemperature(Units::zero(), Units::zero(), Units::zero());
    EXPECT_NEAR(288.15, temperature.value(), 1e-1);
-}
+} */
 
 TEST(TestHorizontalPathTracker, check_is_on_node_position) {
    const std::vector<HorizontalPath> horizontal_trajectory =
@@ -1091,47 +1030,25 @@ TEST(TestHorizontalPathTracker, check_is_on_node_distance) {
    }
 }
 
-TEST(StandardAtmosphere, mach_ias_transition_isa) {
-   // Test mach/ias conversion at altitude using mach of unity.
-   const std::vector<double> test_machs = {.6, .65, .713, .868};
-   const std::vector<Units::Length> test_altitudes = {Units::FeetLength(27800.0), Units::FeetLength(30000.0),
-                                                      Units::FeetLength(35000.0)};
-   const Units::FeetLength tolerance(50.0);
-
-   for (double test_mach : test_machs) {
-      for (Units::FeetLength test_altitude : test_altitudes) {
-         // zero temp offset
-         const StandardAtmosphere atmosphere_0(Units::CelsiusTemperature(0.));
-         Units::Speed ias_at_test_mach = atmosphere_0.MachToIAS(test_mach, test_altitude);
-         Units::FeetLength actual_alt_trans_sea_level_old =
-               atmosphere_0.GetMachIASTransition(ias_at_test_mach, test_mach);
-         Units::FeetLength actual_alt_trans_sea_level = atmosphere_0.GetMachIASTransition(ias_at_test_mach, test_mach);
-         EXPECT_NEAR(test_altitude.value(), actual_alt_trans_sea_level_old.value(), tolerance.value());
-         EXPECT_NEAR(test_altitude.value(), actual_alt_trans_sea_level.value(), tolerance.value());
-      }
-   }
-}
-
 TEST(AircraftState, GetHeadingCcwFromEastRadians) {
-
+   const Units::SecondsTime delta_time{1};
    for (int q = Quadrant::FIRST; q <= Quadrant::FOURTH; ++q) {
-
       vector<HorizontalPath> known_course_path = PublicUtils::CreateStraightHorizontalPath(static_cast<Quadrant>(q));
-      AircraftState state1, state2, test_state;
-      state1.m_x = known_course_path[0].GetXPositionMeters();
-      state1.m_y = known_course_path[0].GetYPositionMeters();
-      state1.m_z = 0;
-      state1.m_time = 0;
-      state2.m_x = known_course_path[1].GetXPositionMeters();
-      state2.m_y = known_course_path[1].GetYPositionMeters();
-      state2.m_z = 0;
-      state2.m_time = 1;
 
-      state1.m_xd = state2.m_x / (state2.m_time - state1.m_time);
-      state1.m_yd = state2.m_y / (state2.m_time - state1.m_time);
-      state2.m_xd = state1.m_xd;
-      state2.m_yd = state1.m_yd;
+      const auto state1 =
+            AircraftState::Builder(0, 0)
+                  .Position(Units::MetersLength(known_course_path[0].GetXPositionMeters()),
+                            Units::MetersLength(known_course_path[0].GetYPositionMeters()))
+                  ->GroundSpeed(Units::MetersLength(known_course_path[1].GetXPositionMeters()) / delta_time,
+                                Units::MetersLength(known_course_path[1].GetYPositionMeters()) / delta_time)
+                  ->Build();
+      const auto state2 = AircraftState::Builder(0, delta_time)
+                                .Position(Units::MetersLength(known_course_path[1].GetXPositionMeters()),
+                                          Units::MetersLength(known_course_path[1].GetYPositionMeters()))
+                                ->GroundSpeed(state1.GetSpeedEnuX(), state1.GetSpeedEnuY())
+                                ->Build();
 
+      AircraftState test_state;
       test_state.Interpolate(state1, state2, 0.5);
       const Units::SignedRadiansAngle reported_heading = test_state.GetHeadingCcwFromEastRadians();
       EXPECT_NEAR(known_course_path[0].m_path_course, reported_heading.value(), 1e-3);
@@ -1150,27 +1067,24 @@ TEST(Guidance, GetIasCommandIntegerKnots) {
    EXPECT_EQ(209, guidance.GetIasCommandIntegerKnots());
 }
 
-TEST(StandardAtmosphere, MakeInstanceFromTemperatureOffset) {
-   auto zero_offset_sa = StandardAtmosphere::MakeInstanceFromTemperatureOffset(Units::CelsiusTemperature(0));
-
-   ASSERT_EQ(0, Units::CelsiusTemperature(zero_offset_sa->GetTemperatureOffset()).value());
-}
-
+/* Broken because we cannot access bada classes from here
 class PredictedWindEvaluatorTest : public ::testing::Test {
   protected:
    PredictedWindEvaluatorTest()
       : aircraft_state(),
-        weather_prediction(Wind::CreateZeroWindPrediction()),
         reference_cas(Units::ZERO_SPEED),
         reference_altitude(Units::ZERO_LENGTH),
-        sensed_atmosphere(StandardAtmosphere::MakeInstanceFromTemperatureOffset(Units::CelsiusTemperature(0))) {}
+        sensed_atmosphere(aaesim::bada::Bada3Factory::MakeAtmosphereFromTemperatureOffset(Atmosphere::AtmosphereType::BADA37,
+                                                                            Units::CelsiusTemperature(0))),
+        weather_prediction(Wind::CreateZeroWindPrediction(sensed_atmosphere)) {}
 
    aaesim::open_source::AircraftState aircraft_state;
-   WeatherPrediction weather_prediction;
    Units::Speed reference_cas;
    Units::Length reference_altitude;
    std::shared_ptr<Atmosphere> sensed_atmosphere;
+   WeatherPrediction weather_prediction;
 };
+
 
 TEST_F(PredictedWindEvaluatorTest, VectorDifferenceWindEvaluator) {
    const std::shared_ptr<PredictedWindEvaluator> vector_difference_wind_evaluator =
@@ -1182,6 +1096,7 @@ TEST_F(PredictedWindEvaluatorTest, VectorDifferenceWindEvaluator) {
    ASSERT_FALSE(vector_difference_wind_evaluator->ArePredictedWindsAccurate(
          aircraft_state, weather_prediction, reference_cas, reference_altitude, sensed_atmosphere.get()));
 }
+*/
 
 TEST(EuclideanWaypointMonitor, passed_waypoint_first_update) {
    const Waypoint test_waypoint("monitor_me", Units::DegreesAngle(38), Units::DegreesAngle(-77));
@@ -1299,6 +1214,75 @@ TEST(FlightEnvelopeSpeedLimiter, limit_mach_command) {
                                                                  BoundedValue<double, 0, 2>(0), Units::ZERO_MASS,
                                                                  Units::ZERO_LENGTH, WeatherPrediction());
    ASSERT_EQ(limited_mach, current_mach);
+}
+
+TEST(Units, TemperatureAdd) {
+   Units::Temperature celsius1(Units::CelsiusTemperature(1));
+   Units::Temperature celsius2(Units::CelsiusTemperature(2));
+   Units::Temperature celsius3;
+   celsius3 = celsius1 + celsius2;
+   EXPECT_NEAR(3, Units::CelsiusTemperature(celsius3).value(), 1e-6);
+
+   Units::Temperature kelvin1(Units::KelvinTemperature(1));
+   Units::Temperature kelvin2(Units::KelvinTemperature(2));
+   Units::Temperature kelvin3;
+   kelvin3 = kelvin1 + kelvin2;
+   EXPECT_NEAR(3, Units::KelvinTemperature(kelvin3).value(), 1e-6);
+}
+
+TEST(AircraftState, GetTrueAirspeed) {
+   const Units::MetersPerSecondSpeed five_mps(5);
+   const auto aircraft_state_x_only = AircraftState::Builder(0, 0).GroundSpeed(five_mps, Units::ZERO_SPEED)->Build();
+   const Units::MetersPerSecondSpeed tas_calculated_x_only = aircraft_state_x_only.GetTrueAirspeed();
+   ASSERT_NEAR(five_mps.value(), tas_calculated_x_only.value(), 1e-10);
+
+   const auto aircraft_state_y_only = AircraftState::Builder(0, 0).GroundSpeed(Units::ZERO_SPEED, five_mps)->Build();
+   const Units::MetersPerSecondSpeed tas_calculated_y_only = aircraft_state_y_only.GetTrueAirspeed();
+   ASSERT_NEAR(five_mps.value(), tas_calculated_y_only.value(), 1e-10);
+}
+
+TEST(CustomUnits, ToUnsigned) {
+   const Units::SignedDegreesAngle quadrant_1{45};
+   const Units::DegreesAngle quad1_unsigned_angle = Units::ToUnsigned(quadrant_1);
+   ASSERT_DOUBLE_EQ(45, quad1_unsigned_angle.value());
+
+   const Units::SignedDegreesAngle quadrant_2{125};
+   const Units::DegreesAngle quad2_unsigned_angle = Units::ToUnsigned(quadrant_2);
+   ASSERT_DOUBLE_EQ(125, quad2_unsigned_angle.value());
+
+   const Units::SignedDegreesAngle quadrant_3{-135};
+   const Units::DegreesAngle quad3_unsigned_angle = Units::ToUnsigned(quadrant_3);
+   ASSERT_DOUBLE_EQ(225, quad3_unsigned_angle.value());
+
+   const Units::SignedDegreesAngle quadrant_3k{-495};
+   const Units::UnsignedDegreesAngle quad3k_unsigned_angle = Units::UnsignedDegreesAngle(quadrant_3k);
+   ASSERT_DOUBLE_EQ(225, quad3k_unsigned_angle.value());
+
+   const Units::SignedDegreesAngle quadrant_4{-45};
+   const Units::DegreesAngle quad4_unsigned_angle = Units::ToUnsigned(quadrant_4);
+   ASSERT_DOUBLE_EQ(315, quad4_unsigned_angle.value());
+}
+
+TEST(CustomUnits, ToSigned) {
+   const Units::UnsignedDegreesAngle quadrant_1{45};
+   const Units::SignedDegreesAngle quad1_signed_angle = Units::ToSigned(quadrant_1);
+   ASSERT_DOUBLE_EQ(45, quad1_signed_angle.value());
+
+   const Units::UnsignedDegreesAngle quadrant_2{135};
+   const Units::SignedDegreesAngle quad2_signed_angle = Units::ToSigned(quadrant_2);
+   ASSERT_DOUBLE_EQ(135, quad2_signed_angle.value());
+
+   const Units::UnsignedDegreesAngle quadrant_3{225};
+   const Units::SignedDegreesAngle quad3_signed_angle = Units::ToSigned(quadrant_3);
+   ASSERT_DOUBLE_EQ(-135, quad3_signed_angle.value());
+
+   const Units::UnsignedDegreesAngle quadrant_3k{585};
+   const Units::SignedDegreesAngle quad3k_signed_angle = Units::SignedDegreesAngle(quadrant_3k);
+   ASSERT_DOUBLE_EQ(-135, quad3k_signed_angle.value());
+
+   const Units::UnsignedDegreesAngle quadrant_4{315};
+   const Units::SignedDegreesAngle quad4_signed_angle = Units::ToSigned(quadrant_4);
+   ASSERT_DOUBLE_EQ(-45, quad4_signed_angle.value());
 }
 
 }  // namespace open_source

@@ -1,0 +1,67 @@
+# You can control the aaesim branch/tag in this container from the command line, like this:
+# >> docker build -t aaesim:3.5.2 --build-arg ARG_AAESIM_GIT_TAG=v3.5.2 -f Dockerfile.deploy_v3 .
+FROM artifacts.mitre.org:8200/docker/idealab/centos7/idealab-basic:1.0.2 AS build
+ENV container docker
+
+# Install Run Dependencies
+# BADA data (needed by AAESim/FMACM in order to run a scenario)
+RUN mkdir /data \
+    && mkdir /data/aaesim \
+    && mkdir /data/aaesim/regressionScens \
+    && git clone -b master --depth 1 https://mustache.mitre.org/scm/aaes/bada-data.git /data/aaesim/regressionScens/bada
+
+# Older releases of aaesim contained some hardcoded NFS path dependencies in the cmake definition. 
+# Install these dependencies so that this container can build older code revisions.
+USER root
+ARG DEVEL_WINDAPI="/devel/caasdwind/release/v2.5.1"
+ENV WINDAPI_PATH=${DEVEL_WINDAPI}
+COPY --from=artifacts.mitre.org:8200/docker/sbowman/windapi:v2.5.1 ${DEVEL_WINDAPI} ${DEVEL_WINDAPI}
+
+ARG DEVEL_GEOLIB="/devel/aaesim/bamboo/geolib-idealab/v3.2.7-SNAPSHOT"
+ENV GEOLIB_PATH=${DEVEL_WINDAPI}
+COPY --from=geolib-idealab:v3.2.7-SNAPSHOT ${DEVEL_GEOLIB} ${DEVEL_GEOLIB}
+
+# System must have a "cmake3" for aaesim builds
+USER root
+RUN ln -s /usr/local/bin/cmake /usr/local/bin/cmake3
+
+# Install AAESim code
+ARG ARG_AAESIM_GIT_TAG='v3.5.3'
+ENV AAESIM_VERSION=$ARG_AAESIM_GIT_TAG
+USER demo
+RUN cd /home/demo \
+    && git clone --branch ${AAESIM_VERSION} --depth 1 https://mustache.mitre.org/scm/aaes/aaesim.git aaesim
+
+# Build aaesim
+USER demo
+RUN cd /home/demo/aaesim \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make
+
+# Install Test Dependencies
+# NOTE: this container is ~7GB! You only need it if you intend to run aaesim unit/regression tests inside the container
+COPY --from=artifacts.mitre.org:8200/docker/sbowman/aaesim_regression_data:latest /data/aaesim/regression_input_data /data/aaesim/regression_input_data
+
+# Unit Test
+USER demo
+RUN cd /home/demo/aaesim/build \
+    && make run
+
+# Regression Test
+# NOTE: regression testing can run for a long time. Only use the "mini" test target to expedite this step
+RUN cd /home/demo/aaesim/regression \
+    && make mini
+
+# ---
+# Buildinfo Example: docker run --rm -it aaesim:<tag>
+# Run Local Config Example: docker run --rm -it -v `pwd`:`pwd` -w `pwd` aaesim:<tag> <config-file>
+FROM artifacts.mitre.org:8200/docker/aaesim/aaesim-minimal:1.0.0
+ENV container docker
+USER demo
+COPY --from=build /data/aaesim/regressionScens/bada /data/aaesim/regressionScens/bada
+COPY --from=build /home/demo/aaesim/bin/aaesim /home/demo/aaesim/bin/aaesim
+COPY --from=build /devel/caasdwind/release/v2.5.1/local /devel/caasdwind/release/v2.5.1/local
+ENTRYPOINT ["/home/demo/aaesim/bin/aaesim"]
+CMD ["--buildinfo"]

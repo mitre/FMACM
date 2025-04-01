@@ -43,4 +43,4 @@ bool inverse(DMatrix &in, int n, DMatrix &inverse);
 
 void matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector &vector_out);
 
-DMatrix &createRotationMatrix(double l, double m, double n, const Units::Angle theta);
+DMatrix &CreateRotationMatrix(double l, double m, double n, const Units::Angle theta);

@@ -451,7 +451,7 @@ TEST(GeolibUtils, test_CalculateLineLineIntersectionPoint) {
 
 TEST(GeolibUtils, test_NoPossibleLineLineIntersectionPoint) {
 
-   // Define two lines that are guaranteed to pass through the intersection point
+   // Define two lines that are guaranteed not to intersect
    const LatitudeLongitudePoint start_point1(Units::DegreesAngle(38.0), Units::DegreesAngle(-77.3));
    const LatitudeLongitudePoint end_point1 =
          GeolibUtils::CalculateNewPoint(start_point1, Units::NauticalMilesLength(.1), Units::DegreesAngle(0));
@@ -1588,6 +1588,73 @@ TEST(EarthModel, VectorCrossProduct) {
    EXPECT_NEAR(expect_zero_zero_negative_one.y.value(), Units::MetersLength(actual_cp_result_test2.y).value(), 1e-10);
    EXPECT_NEAR(expect_zero_zero_negative_one.z.value(), Units::MetersLength(actual_cp_result_test2.z).value(), 1e-10);
 }
+
+TEST(GeolibUtils, IsSuccess_ReturnsFalse) {
+   // Define two lines that are guaranteed -not- to intersect
+   const LatitudeLongitudePoint start_point1(Units::DegreesAngle(38.0), Units::DegreesAngle(-77.3));
+   const LatitudeLongitudePoint end_point1 =
+         GeolibUtils::CalculateNewPoint(start_point1, Units::NauticalMilesLength(.1), Units::DegreesAngle(0));
+   const LineOnEllipsoid line1 = LineOnEllipsoid::CreateFromPoints(start_point1, end_point1);
+   const LatitudeLongitudePoint start_point2(Units::DegreesAngle(40.1), Units::DegreesAngle(-112.8));
+   const LatitudeLongitudePoint end_point2 =
+         GeolibUtils::CalculateNewPoint(start_point2, Units::NauticalMilesLength(.5), Units::DegreesAngle(10));
+   const LineOnEllipsoid line2 = LineOnEllipsoid::CreateFromPoints(start_point2, end_point2);
+
+   double crs31, distance_line1_start_to_intx_point, crs32, distance_line2_start_to_intx_point;
+   geolib_idealab::LLPoint intersection_point;
+   ErrorSet error_set =
+         geoIntx(line1.GetStartPoint().GetGeolibPrimitiveLLPoint(), line1.GetEndPoint().GetGeolibPrimitiveLLPoint(),
+                 line1.GetLineType(), &crs31, &distance_line1_start_to_intx_point,
+                 line2.GetStartPoint().GetGeolibPrimitiveLLPoint(), line2.GetEndPoint().GetGeolibPrimitiveLLPoint(),
+                 line2.GetLineType(), &crs32, &distance_line2_start_to_intx_point, &intersection_point,
+                 GEOLIB_TOLERANCE, GEOLIB_EPSILON);
+
+   EXPECT_FALSE(GeolibUtils::IsSuccess(error_set));
+   EXPECT_TRUE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR));
+}
+
+TEST(GeolibUtils, IsSuccess_ReturnsTrue) {
+   // Define two lines that are guaranteed to intersect
+   const LatitudeLongitudePoint start_point1(Units::DegreesAngle(38.0), Units::DegreesAngle(-77.3));
+   const LatitudeLongitudePoint end_point1 =
+         GeolibUtils::CalculateNewPoint(start_point1, Units::NauticalMilesLength(1), Units::DegreesAngle(0));
+   const LineOnEllipsoid line1 = LineOnEllipsoid::CreateFromPoints(start_point1, end_point1);
+   const LatitudeLongitudePoint start_point2 =
+         line1.CalculatePointAtDistanceFromStartPoint(Units::NauticalMilesLength(.1));
+   const LatitudeLongitudePoint end_point2 =
+         GeolibUtils::CalculateNewPoint(start_point2, Units::NauticalMilesLength(.5), Units::DegreesAngle(10));
+   const LineOnEllipsoid line2 = LineOnEllipsoid::CreateFromPoints(start_point2, end_point2);
+
+   double crs31, distance_line1_start_to_intx_point, crs32, distance_line2_start_to_intx_point;
+   geolib_idealab::LLPoint intersection_point;
+   ErrorSet error_set =
+         geoIntx(line1.GetStartPoint().GetGeolibPrimitiveLLPoint(), line1.GetEndPoint().GetGeolibPrimitiveLLPoint(),
+                 line1.GetLineType(), &crs31, &distance_line1_start_to_intx_point,
+                 line2.GetStartPoint().GetGeolibPrimitiveLLPoint(), line2.GetEndPoint().GetGeolibPrimitiveLLPoint(),
+                 line2.GetLineType(), &crs32, &distance_line2_start_to_intx_point, &intersection_point,
+                 GEOLIB_TOLERANCE, GEOLIB_EPSILON);
+
+   EXPECT_TRUE(GeolibUtils::IsSuccess(error_set));
+   EXPECT_FALSE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR));
+}
+
+TEST(GeolibUtils, HasErrorBitSet_SUCCESS) {
+   const ErrorSet error_set{geolib_idealab::ErrorCodes::SUCCESS};
+   EXPECT_TRUE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::SUCCESS));
+}
+
+TEST(GeolibUtils, HasErrorBitSet) {
+   const ErrorSet error_set{geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR};
+   EXPECT_TRUE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR));
+}
+
+TEST(GeolibUtils, HasErrorBitSet_Combo) {
+   ErrorSet error_set{geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR};
+   error_set |= geolib_idealab::ErrorCodes::ERROR_MAX_REACHED_ERR;
+   EXPECT_TRUE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::NO_INTERSECTION_ERR));
+   EXPECT_TRUE(GeolibUtils::HasErrorBitSet(error_set, geolib_idealab::ErrorCodes::ERROR_MAX_REACHED_ERR));
+}
+
 }  // namespace open_source
 }  // namespace test
 }  // namespace aaesim

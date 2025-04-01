@@ -23,6 +23,14 @@
 
 #include "MiniCSV/minicsv.h"
 
+#ifdef MITRE_BADA3_LIBRARY
+#include "bada/BadaAtmosphere37.h"
+#define ATMOSPHERE_IMPL aaesim::bada::BadaAtmosphere37
+#else
+#include "public/USStandardAtmosphere1976.h"
+#define ATMOSPHERE_IMPL USStandardAtmosphere1976
+#endif
+
 using namespace fmacm;
 
 WeatherTruthFromStaticData::WeatherTruthFromStaticData()
@@ -33,7 +41,7 @@ WeatherTruthFromStaticData::WeatherTruthFromStaticData()
    m_wind_interpolator = std::make_shared<fmacm::WindInterpolator>();
    m_wind_interpolator->SetUseWind(true);
    m_wind = std::static_pointer_cast<Wind>(m_wind_interpolator);
-   m_atmosphere = std::make_shared<StandardAtmosphere>(Units::zero());
+   SetAtmosphere(std::make_shared<ATMOSPHERE_IMPL>(Units::zero()));
 }
 
 void WeatherTruthFromStaticData::Update(const aaesim::open_source::SimulationTime &simulation_time,
@@ -72,10 +80,10 @@ Units::KelvinTemperature WeatherTruthFromStaticData::Initialize(const std::strin
    LoadEnvFile(env_csv_file);
    Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::Infinity(), altitude);
 
-   const StandardAtmosphere basic_atm(Units::zero());
-   Units::Temperature offset_difference = GetTemperature(altitude) - basic_atm.GetTemperature(altitude);
+   const ATMOSPHERE_IMPL basic_atm(Units::zero());
+   Units::Temperature offset_difference = GetTemperature() - basic_atm.GetTemperature(altitude);
    Units::Temperature offset = basic_atm.GetTemperatureOffset() + offset_difference;
-   std::shared_ptr<Atmosphere> atmosphere_with_offset = std::make_shared<StandardAtmosphere>(offset);
+   std::shared_ptr<Atmosphere> atmosphere_with_offset = std::make_shared<ATMOSPHERE_IMPL>(offset);
    SetAtmosphere(atmosphere_with_offset);
 
    Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::Infinity(), altitude);
@@ -115,12 +123,24 @@ void WeatherTruthFromStaticData::LoadEnvFile(const std::string &env_csv_file) {
    Wind::SetUseWind(true);
 }
 
-Units::KelvinTemperature WeatherTruthFromStaticData::GetTemperature(const Units::Length h) const {
-   /** Ignore parameters, return temp from set weather */
-   return Units::KelvinTemperature(m_weather_data_point.temperature.value());
-}
-
 void WeatherTruthFromStaticData::LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude,
                                                   const Units::Length altitude) {
-   WeatherEstimate::LoadConditionsAt(Units::ZERO_ANGLE, Units::ZERO_ANGLE, altitude);
+   getAtmosphere()->AirDensity(altitude, m_density, m_pressure);
+
+   // Load matrices from m_weather_data_point
+   const double ONE_THOUSAND_FEET(Units::MetersLength(Units::FeetLength(1000)).value());
+
+   // set the WindStack bounds based on altitude
+   int middle_thousand = round(altitude / Units::FeetLength(1000));
+   middle_thousand = std::max(middle_thousand, 2);
+
+   east_west().SetBounds(middle_thousand - 1, middle_thousand + 3);
+   north_south().SetBounds(middle_thousand - 1, middle_thousand + 3);
+
+   for (int i = east_west().GetMinRow(); i <= east_west().GetMaxRow(); i++) {
+      double alt_meters = (i - 1) * ONE_THOUSAND_FEET;
+      // Using the same wind vector for every altitude
+      east_west().Insert(i, Units::MetersLength(alt_meters), m_weather_data_point.Vwx);
+      north_south().Insert(i, Units::MetersLength(alt_meters), m_weather_data_point.Vwy);
+   }
 }

@@ -25,11 +25,14 @@
 #include <stdlib.h>
 #include <string>
 #include <unistd.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 log4cplus::Logger aaesim::open_source::ConfigurationFileReader::m_logger =
       log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConfigurationFileReader"));
 
-const std::vector<std::string> aaesim::open_source::ConfigurationFileReader::LoadConfigurationFile(
+const std::vector<std::filesystem::path> aaesim::open_source::ConfigurationFileReader::LoadConfigurationFile(
       std::string suggested_filename) {
    std::string configuration_filename("");
    if (suggested_filename.find('/') != std::string::npos) {
@@ -39,22 +42,28 @@ const std::vector<std::string> aaesim::open_source::ConfigurationFileReader::Loa
       configuration_filename += suggested_filename.c_str();
    }
 
-   FILE *fp;
-   fp = fopen(configuration_filename.c_str(), "r");
-   std::vector<std::string> scenario_filenames;
-   if (fp == NULL) {
+   std::ifstream file(configuration_filename);
+   std::vector<fs::path> scenario_filenames;
+   if (!file.is_open()) {
       std::string error_msg = "Configuration file " + configuration_filename + " not found.";
       LOG4CPLUS_FATAL(m_logger, error_msg);
       throw std::runtime_error(error_msg);
    } else {
-      int scenario_count;
-      char scenario_filename[300];
-      fscanf(fp, "%d", &scenario_count);
-      for (int i = 0; i < scenario_count; ++i) {
-         fscanf(fp, "%299s", scenario_filename);
-         scenario_filenames.push_back(scenario_filename);
+      std::string ignored_first_line;
+      std::string scenario_filename;
+      getline(file, ignored_first_line);
+      while (getline(file, scenario_filename)) {
+         if (scenario_filename.empty()) continue;
+         fs::path fp = fs::absolute(scenario_filename);
+         if (fs::exists(fp)) {
+            scenario_filenames.push_back(fp);
+         } else {
+            std::string error_msg = "Scenario file " + std::string(scenario_filename) + " not found.";
+            LOG4CPLUS_FATAL(m_logger, error_msg);
+            throw std::runtime_error(error_msg);
+         }
       }
-      fclose(fp);
+      file.close();
    }
    return scenario_filenames;
 }

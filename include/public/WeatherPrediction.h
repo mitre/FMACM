@@ -32,9 +32,9 @@ class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 
 namespace open_source {
 
-enum PredictedWindOption { SINGLE_DTG = 0, MULTIPLE_DTG_LEGACY = 1, MULTIPLE_DTG_ALONG_ROUTE = 2 };
+enum PredictedWindOption { SINGLE_DTG = 0, MULTIPLE_DTG_ALONG_ROUTE = 1 };
 
-class WeatherPrediction : public WeatherEstimate {
+class WeatherPrediction final : public WeatherEstimate {
    friend class aaesim::test::Wind_populate_predicted_wind_matrices_Test;
 
    friend class aaesim::test::TrajectoryPredictor_updateWeatherPrediction_Test;
@@ -44,38 +44,27 @@ class WeatherPrediction : public WeatherEstimate {
    friend class aaesim::test::TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 
   public:
-   static const PredictedWindOption PWOValues[];
+   inline static const PredictedWindOption PWOValues[2] = {SINGLE_DTG, MULTIPLE_DTG_ALONG_ROUTE};
+   static aaesim::open_source::WeatherPrediction CreateZeroWindPrediction(std::shared_ptr<Atmosphere> atmosphere);
 
-   WeatherPrediction();
-
+   WeatherPrediction() = default;
    WeatherPrediction(PredictedWindOption option, std::shared_ptr<Wind> wind, std::shared_ptr<Atmosphere> atmosphere);
-
-   virtual ~WeatherPrediction();
+   virtual ~WeatherPrediction() = default;
 
    PredictedWindOption GetPredictedWindOption() const;
 
-   void SetPredictedWindOption(PredictedWindOption predicted_wind_option);
-
-   // for backward compatibility
    std::shared_ptr<Wind> GetForecastWind() const;
 
    std::shared_ptr<Atmosphere> GetForecastAtmosphere() const;
-
-   const void Dump() const;
 
    int IncrementUpdateCount();
 
    int GetUpdateCount() const;
 
   private:
-   PredictedWindOption m_predicted_wind_option;
-
-   int m_update_count;
+   PredictedWindOption m_predicted_wind_option{SINGLE_DTG};
+   int m_update_count{0};
 };
-
-inline void WeatherPrediction::SetPredictedWindOption(PredictedWindOption predicted_wind_option) {
-   m_predicted_wind_option = predicted_wind_option;
-}
 
 inline PredictedWindOption WeatherPrediction::GetPredictedWindOption() const { return m_predicted_wind_option; }
 

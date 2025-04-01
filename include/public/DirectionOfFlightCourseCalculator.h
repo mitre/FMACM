@@ -21,6 +21,8 @@
 
 #include <public/HorizontalPathTracker.h>
 
+namespace aaesim::open_source {
+
 /**
  * @brief Calculates the forward course along a horizontal path. "Forward" is defined as the direction of flight.
  */
@@ -65,3 +67,5 @@ class DirectionOfFlightCourseCalculator : public HorizontalPathTracker {
 inline Units::UnsignedAngle DirectionOfFlightCourseCalculator::GetCourseAtPathEnd() const { return m_end_course; }
 
 inline Units::UnsignedAngle DirectionOfFlightCourseCalculator::GetCourseAtPathStart() const { return m_start_course; }
+
+}  // namespace aaesim::open_source

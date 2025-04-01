@@ -46,10 +46,6 @@ class KinematicTrajectoryPredictor : public aaesim::open_source::EuclideanTrajec
 
    KinematicTrajectoryPredictor &operator=(const KinematicTrajectoryPredictor &obj);
 
-   bool operator==(const KinematicTrajectoryPredictor &obj) const;
-
-   bool operator!=(const KinematicTrajectoryPredictor &boj) const;
-
    const std::vector<double> &GetVerticalPathDistances() const;
 
    const double GetVerticalPathDistanceByIndex(int index) const;

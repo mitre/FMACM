@@ -19,9 +19,10 @@
 
 #include <stdexcept>
 #include <iomanip>
+
 #include "public/EuclideanTrajectoryPredictor.h"
 #include "public/Wind.h"
-#include "public/AircraftCalculations.h"
+#include "public/LawOfSinesResolver.h"
 #include <public/AlongPathDistanceCalculator.h>
 #include <scalar/AngularSpeed.h>
 
@@ -84,25 +85,20 @@ double EuclideanTrajectoryPredictor::FindCenterPoint(double fromX, double fromY,
 
 // Returns half of hte arc-distance of a turn in meters
 double EuclideanTrajectoryPredictor::HalfTurn(HorizontalTurnPath turn) {
-   Units::SignedRadiansAngle course_change =
-         AircraftCalculations::ConvertPitoPi(Units::RadiansAngle(turn.q_end - turn.q_start));
+   Units::SignedRadiansAngle course_change = Units::ToSigned(Units::RadiansAngle(turn.q_end - turn.q_start));
    return (Units::MetersLength(turn.radius).value() * fabs(course_change.value()) / 2.0);
 }
 
-EuclideanTrajectoryPredictor::EuclideanTrajectoryPredictor(void) {
+EuclideanTrajectoryPredictor::EuclideanTrajectoryPredictor() {
    m_waypoint_vector.clear();
    m_horizontal_path.clear();
-   m_bank_angle = Units::DUMMY_DEGREES_ANGLE;
-   m_altitude_at_final_waypoint = Units::FeetLength(-50.0);
    m_distance_calculator = AlongPathDistanceCalculator();
    m_position_calculator = PositionCalculator();
-   m_aircraft_distance_to_go = Units::infinity();
+   m_tight_turn_resolver = std::make_shared<aaesim::open_source::LawOfSinesResolver>();
 }
 
 void EuclideanTrajectoryPredictor::CalculateWaypoints(
       const AircraftIntent &aircraft_intent, const aaesim::open_source::WeatherPrediction &weather_prediction) {
-   // Sets waypoints, achieve by point, and altitude at FAF (final) waypoint
-   // based on intent.
 
    m_aircraft_intent = aircraft_intent;
 
@@ -282,129 +278,21 @@ void EuclideanTrajectoryPredictor::CalculateWaypoints(
    AdjustConstraints(start_speed);
 }
 
-// Calculates the trajectory for a turn when the leg length is less than the required turn distance.
-// courseChange1 is first turn (change in m_path_course at the first waypoint).
-// courseChange2 is second turn (change in m_path_course at the second waypoint).
-// legLength is the distance between the first waypoint and the second waypoint.
-// Calculates the inscribed turn that is tangent to the m_path_course into the first waypoint,
-// tangent to the line between waypoint 1 and 2, and tangent to the m_path_course out of the
-// second waypoint.
-// output parameters:
-//   radius - the radius of the inscribed circle
-//   turnDist - the turn anticipation distance for the first turn
-void EuclideanTrajectoryPredictor::CalculateTrajUsingLawOfSines(const double courseChange1, const double courseChange2,
-                                                                const double legLength, double &radius,
-                                                                double &turnDist) {
-   Units::Angle A, B, AOB, AOC;
-   double AO;  // side distances
-   double AC;  // turn anticipation distances
-
-   A = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(180) - Units::RadiansAngle(fabs(courseChange1)));
-   B = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(180) - Units::RadiansAngle(fabs(courseChange2)));
-   AOB = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(180) - A / 2 - B / 2);
-   AO = legLength * sin(B / 2) / sin(AOB);
-   AOC = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(90) - A / 2);
-   radius = AO * sin(A / 2);
-   AC = AO * sin(AOC);
-   turnDist = AC;
-}
-
-void EuclideanTrajectoryPredictor::CalculateTrajUsingKite(const double courseChange1, const double courseChange2,
-                                                          const double legLength, double &radius, double &turnDist) {
-   // Calculates the trajectory for a turn when the leg length is less than the required turn distance.
-   // courseChange1 is first turn (change in m_path_course at the firat waypoint) in degrees.
-   // courseChange2 is second turn (change in m_path_course at the second waypoint)in degrees.
-   // legLength is the distance between the first waypoint and the second waypoint.
-   // Calculates the inscribed turn that is tangent to the m_path_course into the firat waypoint,
-   // tangent to the line between waypoint 1 and 2, and tangent to the m_path_course out of the
-   // second waypoint.
-
-   // varaibles for Kite algorithm
-   double c, d;  // tangent segments for Kite algorithm
-
-   /*
-   //           A
-   //          / \
-   //         /   \
-   //        B  O  C
-   //         \ E /
-   //          \ /F
-   //           D
-   // E is center of inscribed circle
-   // F is tangent point of inscribed circle and segment_type CD
-    */
-
-   Units::Angle A, C, D;               // Kite angles
-   double AC, OC, CD;                  // Kite side distances
-   Units::Angle ECD, ACE, ACO, OCE;    // Angles for inscribed circle points
-   double BC, OE, OA, AE, AD, ED, EF;  // distances for inscribed circle calculations
-   // radius;  // equal to EF
-
-   A = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(180) - Units::RadiansAngle(fabs(courseChange1)));
-   C = AircraftCalculations::Convert0to2Pi(Units::DegreesAngle(180) - Units::RadiansAngle(fabs(courseChange2)));
-   // B = C;  // unused
-   D = Units::DegreesAngle(360) - (A + C + C);
-   // test for D positive
-   if (Units::DegreesAngle(D).value() < 0.0)  // turns do not form a kite
-   {
-      LOG4CPLUS_INFO(m_logger, "Kite called for tight turn that cannot form a kite, Using half leg-length instead.");
-      radius = -1;
-      turnDist = 0;
-      return;
-   }
-
-   // find kite side distances in meters
-   AC = legLength;
-   // AB = AC; // unused
-   OC = AC * sin(A / 2);
-   CD = OC / sin(D / 2);
-   // BD = CD;  // unused
-
-   // find radius of inscribed circle
-   ECD = C / 2;
-   ACE = ECD;
-   ACO = Units::DegreesAngle(90) - A / 2;
-   OCE = ACE - ACO;
-   BC = OC * 2;
-   OE = BC * tan(OCE) / 2;
-   OA = AC * cos(A / 2);
-   AE = OA + OE;
-   AD = AC * cos(A / 2) + CD * cos(D / 2);
-   ED = AD - AE;
-   EF = ED * sin(D / 2);
-   radius = EF;
-
-   // find tangent segments
-   // segment_type a is the turn anticipation at angle A.
-   // segment_type b = c is the turn anticipation at angle C
-   // segment_type d is the turn anticipation at Angle D, which does not exist as a way point
-   d = ED * cos(D / 2);
-   c = CD - d;
-   // b= c;
-   // a = AC - c;
-   turnDist = AC - c;
-}
-
 vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::CalculateTurnAnticipation(
       const HorizontalTrajOption option) {
-   double turn_radius;
-   aaesim::open_source::TurnAnticipation thisTurnAnticipation;
-   vector<aaesim::open_source::TurnAnticipation> turnAnticipation;
-   // waypoints are indexed backwards: first waypoint is route destination
-   // modified for RF legs
-
-   aaesim::open_source::TurnAnticipation straightTurnAnticipation = aaesim::open_source::TurnAnticipation();
+   vector<aaesim::open_source::TurnAnticipation> turnAnticipation{};
+   aaesim::open_source::TurnAnticipation straightTurnAnticipation{};
    // first point has zero turn anticipation
    turnAnticipation.push_back(straightTurnAnticipation);
    // loop through all but last waypoint (starting point for route)
-   for (unsigned int loop = 1; loop < m_waypoint_vector.size() - 1; loop++) {
+   for (unsigned int loop = 1; loop < m_waypoint_vector.size() - 1; ++loop) {
       // if this is an RF leg, then no turn anticipation
       double alt_at_turn = 0;
-      double gspeed_at_turn = 0;  // should be meters per second
+      double gspeed_at_turn_mps = 0;
 
       // loop to sum leg lengths used for both altitude approximations
       double leg_sum = 0;
-      for (unsigned int curr_leg = 0; curr_leg < loop; curr_leg++) {
+      for (unsigned int curr_leg = 0; curr_leg < loop; ++curr_leg) {
          leg_sum += Units::MetersLength(m_waypoint_vector[curr_leg].m_leg_length).value();
       }
 
@@ -418,7 +306,7 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
             bool found = false;  // index of distance found flag
             for (unsigned int next_index = 0;
                  next_index < m_vertical_predictor->GetVerticalPath().along_path_distance_m.size() && !found;
-                 next_index++) {
+                 ++next_index) {
                if (fabs(m_vertical_predictor->GetVerticalPath().along_path_distance_m[next_index]) > leg_sum) {
                   found = true;
                }
@@ -428,16 +316,16 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
 
             if (curr_index != 0 && found) {
                alt_at_turn = m_vertical_predictor->GetVerticalPath().altitude_m[curr_index];
-               gspeed_at_turn = m_vertical_predictor->GetVerticalPath().gs_mps[curr_index];
+               gspeed_at_turn_mps = m_vertical_predictor->GetVerticalPath().gs_mps[curr_index];
             } else {
                const string msg = "Unable to find position in vertical prediction";
                LOG4CPLUS_FATAL(m_logger, msg);
                throw runtime_error(msg);
             }
 
-            m_waypoint_vector[loop].m_ground_speed = Units::MetersPerSecondSpeed(gspeed_at_turn);
+            m_waypoint_vector[loop].m_ground_speed = Units::MetersPerSecondSpeed(gspeed_at_turn_mps);
             m_waypoint_vector[loop].m_bank_angle = Units::UnsignedRadiansAngle(
-                  atan(gspeed_at_turn * gspeed_at_turn /
+                  atan(gspeed_at_turn_mps * gspeed_at_turn_mps /
                        (GRAVITY_METERS_PER_SECOND * m_waypoint_vector[loop].m_radius_rf_leg.value())));
          }
          continue;
@@ -448,9 +336,9 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
          continue;
       }
       // calculate change in waypoint m_path_course
-      double course_change = AircraftCalculations::ConvertPitoPi(m_waypoint_vector[loop].m_course_angle -
-                                                                 m_waypoint_vector[loop - 1].m_course_angle)
-                                   .value();
+      double course_change =
+            Units::ToSigned(m_waypoint_vector[loop].m_course_angle - m_waypoint_vector[loop - 1].m_course_angle)
+                  .value();
       if (course_change == 0.0)  // straight segment
       {
          turnAnticipation.push_back(straightTurnAnticipation);
@@ -460,8 +348,6 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
       // check options
       // if option 1 calculate approximate altitude at turn using 3-deg fpa
       if (option == FIRST_PASS) {
-         double tas_at_turn;
-
          alt_at_turn = leg_sum * tan(3 * PI / 180) +
                        Units::MetersLength(m_vertical_predictor->GetAltitudeAtEndOfRoute()).value();
 
@@ -471,21 +357,15 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
 
          // check if altitude is more or less than the Transition Altitude to calculate groundspeed at turn
          if (alt_at_turn < Units::MetersLength(m_vertical_predictor->GetTransitionAltitude()).value()) {
-            // LAW: use constraint speed, if available
-
-            tas_at_turn = Units::MetersPerSecondSpeed(m_atmosphere->CAS2TAS(m_vertical_predictor->GetTransitionIas(),
-                                                                            Units::MetersLength(alt_at_turn)))
-                                .value();
-
-            gspeed_at_turn = tas_at_turn;
-            // LAW: use Predicted Wind Vector to estimate ground speed in turn
+            gspeed_at_turn_mps =
+                  Units::MetersPerSecondSpeed(m_atmosphere->CAS2TAS(m_vertical_predictor->GetTransitionIas(),
+                                                                    Units::MetersLength(alt_at_turn)))
+                        .value();  // ignore wind for this estimate
          } else {
             Units::KelvinTemperature t =
                   m_atmosphere->GetTemperature(Units::MetersLength(alt_at_turn));  // gets temperature
-            tas_at_turn = m_vertical_predictor->GetTransitionMach() *
-                          sqrt(GAMMA * R.value() * t.value());  // calculate true airspeed
-            gspeed_at_turn = tas_at_turn;
-            // LAW: use Predicted Wind Vector to estimate ground speed in turn
+            gspeed_at_turn_mps = m_vertical_predictor->GetTransitionMach() *
+                                 sqrt(GAMMA * R.value() * t.value());  // ignore wind for this estimate
          }
       }  // END if FIRST_PASS
          // else if option 2 calculate approximate altitude at turn from 1st pass Vertical Trajectory
@@ -495,7 +375,7 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
          bool found = false;  // index of distance found flag
          for (unsigned int next_index = 0;
               next_index < m_vertical_predictor->GetVerticalPath().along_path_distance_m.size() && !found;
-              next_index++) {
+              ++next_index) {
             if (fabs(m_vertical_predictor->GetVerticalPath().along_path_distance_m[next_index]) > leg_sum) {
                found = true;
             }
@@ -504,7 +384,7 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
 
          if (curr_index != 0 && found) {
             alt_at_turn = m_vertical_predictor->GetVerticalPath().altitude_m[curr_index];
-            gspeed_at_turn = m_vertical_predictor->GetVerticalPath().gs_mps[curr_index];
+            gspeed_at_turn_mps = m_vertical_predictor->GetVerticalPath().gs_mps[curr_index];
          } else {
             VerticalPath newTrajectory = m_vertical_predictor->GetVerticalPath();
             ofstream gout("newVerticalTrajectory.csv");
@@ -512,7 +392,7 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
                     "Change(fpm),Velocity_Change(mps2),Theta(deg),TAS_GroundSpeed(knots),Mass"
                  << endl;
             gout << fixed;
-            for (int i = 0; i < newTrajectory.along_path_distance_m.size(); i++) {
+            for (int i = 0; i < newTrajectory.along_path_distance_m.size(); ++i) {
                gout << "0,0," << setprecision(2) << newTrajectory.time_to_go_sec[i] << "," << setprecision(6)
                     << Units::MetersLength(newTrajectory.along_path_distance_m[i]).value() << ","
                     << Units::FeetLength(Units::MetersLength(newTrajectory.altitude_m[i])).value() << ","
@@ -533,9 +413,10 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
          }
       }  // END of SECOND_PASS
 
+      aaesim::open_source::TurnAnticipation thisTurnAnticipation{};
       // Calculate Turn Radius
       double bankangle = 0.5 * fabs(course_change);
-      thisTurnAnticipation.groundspeed = gspeed_at_turn;
+      thisTurnAnticipation.groundspeed = gspeed_at_turn_mps;
 
       if (alt_at_turn < 19500.0 * FEET_TO_METERS) {
          thisTurnAnticipation.maxAngle = Units::RadiansAngle(m_bank_angle).value();
@@ -555,29 +436,20 @@ vector<aaesim::open_source::TurnAnticipation> EuclideanTrajectoryPredictor::Calc
       thisTurnAnticipation.bankAngle = bankangle;
 
       m_waypoint_vector[loop].m_bank_angle = Units::UnsignedRadiansAngle(bankangle);
-      m_waypoint_vector[loop].m_ground_speed = Units::MetersPerSecondSpeed(gspeed_at_turn);
+      m_waypoint_vector[loop].m_ground_speed = Units::MetersPerSecondSpeed(gspeed_at_turn_mps);
 
-      turn_radius = (pow(gspeed_at_turn, 2)) / (GRAVITY_METERS_PER_SECOND * tan(bankangle));
+      const auto turn_radius = (pow(gspeed_at_turn_mps, 2)) / (GRAVITY_METERS_PER_SECOND * tan(bankangle));
       thisTurnAnticipation.radius = turn_radius;
 
-      double halfCourseChange = fabs(course_change) / 2.0;
+      const auto half_course_change = fabs(course_change) / 2.0;
 
-      thisTurnAnticipation.distance = turn_radius * tan(halfCourseChange);
+      thisTurnAnticipation.distance = turn_radius * tan(half_course_change);
 
       if (thisTurnAnticipation.distance <= (0.2 * NAUTICAL_MILES_TO_METERS))  // 1200 feet
       {
          turnAnticipation.push_back(straightTurnAnticipation);  // handle as straight
          continue;
       }
-
-      /*
-      // allow for now.  calculate_Horizontal_Trajectory will check leg lengths
-      // turn anticipation can never be more than the leg length
-      if (thisTurnAnticipation > waypoint_vector[loop-1].leg_length)
-          thisTurnAnticipation = waypoint_vector[loop-1].leg_length;
-      if (thisTurnAnticipation > waypoint_vector[loop].leg_length)
-          thisTurnAnticipation = waypoint_vector[loop].leg_length;
-      */
 
       turnAnticipation.push_back(thisTurnAnticipation);
 
@@ -598,7 +470,7 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
    HorizontalPath temp;
    double radius;
    double turnDist;
-   const Units::DegreesAngle epsilonAngle(5.0);
+   const Units::DegreesAngle epsilon(5.0);
 
    if (m_waypoint_vector.size() == 0) {
       m_horizontal_path = results;
@@ -641,12 +513,9 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
 
    double course_change;
    double turn_radius;
-   for (unsigned int loop = 1; loop < m_waypoint_vector.size(); loop++) {
+   for (unsigned int loop = 1; loop < m_waypoint_vector.size(); ++loop) {
       if (turnAnticipation[loop].distance == 0)  // straight segment_type, or this is RF leg, or previous was RF leg
       {
-         // results[counter].x = waypoint_vector[loop-1].x_pos + waypoint_vector[loop-1].leg_length *
-         // cos(waypoint_vector[loop-1].course_angle); results[counter].y = waypoint_vector[loop-1].y_pos +
-         // waypoint_vector[loop-1].leg_length * sin(waypoint_vector[loop-1].course_angle);
          results[counter].SetXYPositionMeters(m_waypoint_vector[loop].m_x_pos_meters.value(),
                                               m_waypoint_vector[loop].m_y_pos_meters.value());
          if (m_waypoint_vector[loop - 1].m_radius_rf_leg.value() < 0.000001) {
@@ -675,9 +544,9 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
 
          results[counter - 1].m_path_course = m_waypoint_vector[loop - 1].m_course_angle.value();
       } else {  // turn segment
-         course_change = AircraftCalculations::ConvertPitoPi(m_waypoint_vector[loop].m_course_angle -
-                                                             m_waypoint_vector[loop - 1].m_course_angle)
-                               .value();
+         course_change =
+               Units::ToSigned(m_waypoint_vector[loop].m_course_angle - m_waypoint_vector[loop - 1].m_course_angle)
+                     .value();
 
          if (makeconstturn == 2)  // continue previous turn (KITE or LawOfSines algorithm)
                                   // radius and turnDist are set in previous loop
@@ -693,16 +562,13 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
                   makeconstturn = 1;
                } else {
                   // law of sines
-                  double next_course_change =
-                        AircraftCalculations::ConvertPitoPi(m_waypoint_vector[loop + 1].m_course_angle -
-                                                            m_waypoint_vector[loop].m_course_angle)
-                              .value();
+                  double next_course_change = Units::ToSigned(m_waypoint_vector[loop + 1].m_course_angle -
+                                                              m_waypoint_vector[loop].m_course_angle)
+                                                    .value();
 
-                  // CalculateTrajUsingKite(course_change, next_course_change, waypoint_vector[loop].leg_length, radius,
-                  // turnDist);
-                  CalculateTrajUsingLawOfSines(course_change, next_course_change,
-                                               Units::MetersLength(m_waypoint_vector[loop].m_leg_length).value(),
-                                               radius, turnDist);
+                  m_tight_turn_resolver->ResolveTightTurnGeometry(
+                        course_change, next_course_change,
+                        Units::MetersLength(m_waypoint_vector[loop].m_leg_length).value(), radius, turnDist);
 
                   if (radius < 0)  // should not happen with Law-of-Sines
                   {
@@ -749,16 +615,13 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
                      atan(pow(turnAnticipation[loop].groundspeed, 2) / (GRAVITY_METERS_PER_SECOND * turn_radius));
                // To Do, reset bank angle
             } else {
-               double next_course_change =
-                     AircraftCalculations::ConvertPitoPi(m_waypoint_vector[loop + 1].m_course_angle -
-                                                         m_waypoint_vector[loop].m_course_angle)
-                           .value();
+               double next_course_change = Units::ToSigned(m_waypoint_vector[loop + 1].m_course_angle -
+                                                           m_waypoint_vector[loop].m_course_angle)
+                                                 .value();
 
-               // CalculateTrajUsingKite(course_change, next_course_change, waypoint_vector[loop].leg_length, radius,
-               // turnDist);
-               CalculateTrajUsingLawOfSines(course_change, next_course_change,
-                                            Units::MetersLength(m_waypoint_vector[loop].m_leg_length).value(), radius,
-                                            turnDist);
+               m_tight_turn_resolver->ResolveTightTurnGeometry(
+                     course_change, next_course_change,
+                     Units::MetersLength(m_waypoint_vector[loop].m_leg_length).value(), radius, turnDist);
 
                if (radius < 0)  // should not happen with Law-of-Sines
                {
@@ -810,13 +673,6 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
          double stopTurny = m_waypoint_vector[loop].m_y_pos_meters.value() +
                             turnAnticipation[loop].distance * sin(m_waypoint_vector[loop].m_course_angle);
 
-         // std::ostringstream strs;
-         // strs << "calculateHorizontalTrajectory turn segment_type:\n  start_turn GetXPositionMeters(): " <<
-         // startTurnx << "  GetYPositionMeters(): " << startTurny
-         //         << "\n  stop_turn  GetXPositionMeters(): " << stopTurnx << "  GetYPositionMeters(): " << stopTurny;
-         // std::string str = strs.str();
-         // LOG4CPLUS_DEBUG(logger, str);
-         // strs.str(std::string());
          // Check if last trajectory point is within 5 meters of start of this turn
          if (pow(results[counter - 1].GetXPositionMeters() - startTurnx, 2) +
                    pow(results[counter - 1].GetYPositionMeters() - startTurny, 2) <
@@ -828,8 +684,6 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
             results[counter].SetXYPositionMeters(startTurnx, startTurny);
             results[counter - 1].m_path_course = m_waypoint_vector[loop - 1].m_course_angle.value();
             results.push_back(temp);
-            // printf("results[%d].GetXPositionMeters(): %f  .GetYPositionMeters(): %f  straight\n", counter,
-            // results[counter].GetXPositionMeters(), results[counter].GetYPositionMeters());
          }
 
          // process end of turn
@@ -847,7 +701,7 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
 
          // Check for bank angle in excess of max bank angle (option 2 only)
          if (option == SECOND_PASS) {
-            if (results[counter - 1].m_turn_info.bankAngle > m_bank_angle + epsilonAngle / 2) {
+            if (results[counter - 1].m_turn_info.bankAngle > m_bank_angle + epsilon / 2) {
                // Getting close to maximum epsilon. Start warning user.
                ostringstream msg_strm;
                msg_strm << "Turn at waypoint " << loop << " uses bank angle "
@@ -855,13 +709,13 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
                         << " which exceeds maximum allowable bank: " << Units::DegreesAngle(m_bank_angle);
                string msg = msg_strm.str();
                LOG4CPLUS_WARN(m_logger, msg);
-            } else if (results[counter - 1].m_turn_info.bankAngle > (m_bank_angle + epsilonAngle)) {
+            } else if (results[counter - 1].m_turn_info.bankAngle > (m_bank_angle + epsilon)) {
                // beyond epsilon. Throw.
                ostringstream msg_strm;
                msg_strm << "Turn at waypoint " << loop << " uses bank angle "
                         << Units::DegreesAngle(results[counter - 1].m_turn_info.bankAngle)
                         << " which exceeds our internal tolerance of allowable bank error: "
-                        << Units::DegreesAngle(m_bank_angle + epsilonAngle)
+                        << Units::DegreesAngle(m_bank_angle + epsilon)
                         << ". This looks like an unflyable waypoint sequence.";
                string msg = msg_strm.str();
                LOG4CPLUS_FATAL(m_logger, msg);
@@ -870,10 +724,10 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
          }
          if (course_change < 0)  // left turn
          {
-            results[counter - 1].m_turn_info.q_start = AircraftCalculations::Convert0to2Pi(
-                  m_waypoint_vector[loop - 1].m_course_angle + Units::PI_RADIANS_ANGLE / 2.0);
-            results[counter - 1].m_turn_info.q_end = AircraftCalculations::Convert0to2Pi(
-                  m_waypoint_vector[loop].m_course_angle + Units::PI_RADIANS_ANGLE / 2.0);
+            results[counter - 1].m_turn_info.q_start =
+                  Units::ToUnsigned(m_waypoint_vector[loop - 1].m_course_angle + Units::PI_RADIANS_ANGLE / 2.0);
+            results[counter - 1].m_turn_info.q_end =
+                  Units::ToUnsigned(m_waypoint_vector[loop].m_course_angle + Units::PI_RADIANS_ANGLE / 2.0);
             results[counter - 1].m_turn_info.x_position_meters =
                   results[counter - 1].GetXPositionMeters() +
                   turn_radius * cos(m_waypoint_vector[loop - 1].m_course_angle - (Units::PI_RADIANS_ANGLE / 2.0));
@@ -887,10 +741,10 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
                         turn_radius * sin(m_waypoint_vector[loop].m_course_angle + (Units::PI_RADIANS_ANGLE / 2.0)));
          } else  // right turn
          {
-            results[counter - 1].m_turn_info.q_start = AircraftCalculations::Convert0to2Pi(
-                  m_waypoint_vector[loop - 1].m_course_angle - Units::PI_RADIANS_ANGLE / 2.0);
-            results[counter - 1].m_turn_info.q_end = AircraftCalculations::Convert0to2Pi(
-                  m_waypoint_vector[loop].m_course_angle - Units::PI_RADIANS_ANGLE / 2.0);
+            results[counter - 1].m_turn_info.q_start =
+                  Units::ToUnsigned(m_waypoint_vector[loop - 1].m_course_angle - Units::PI_RADIANS_ANGLE / 2.0);
+            results[counter - 1].m_turn_info.q_end =
+                  Units::ToUnsigned(m_waypoint_vector[loop].m_course_angle - Units::PI_RADIANS_ANGLE / 2.0);
             results[counter - 1].m_turn_info.x_position_meters =
                   results[counter - 1].GetXPositionMeters() +
                   turn_radius * cos(m_waypoint_vector[loop - 1].m_course_angle + (Units::PI_RADIANS_ANGLE / 2.0));
@@ -925,13 +779,13 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
    // calculate path length
    double seg_length = 0.0;
    results[0].m_path_length_cumulative_meters = 0.0;
-   for (unsigned int loop = 0; loop < results.size() - 1; loop++) {
+   for (unsigned int loop = 0; loop < results.size() - 1; ++loop) {
       if (results[loop].m_segment_type == HorizontalPath::SegmentType::STRAIGHT) {
          seg_length = sqrt(pow(results[loop + 1].GetXPositionMeters() - results[loop].GetXPositionMeters(), 2) +
                            pow(results[loop + 1].GetYPositionMeters() - results[loop].GetYPositionMeters(), 2));
          results[loop + 1].m_path_length_cumulative_meters = results[loop].m_path_length_cumulative_meters + seg_length;
       } else if (results[loop].m_segment_type == HorizontalPath::SegmentType::TURN) {
-         Units::SignedRadiansAngle course_change = AircraftCalculations::ConvertPitoPi(
+         Units::SignedRadiansAngle course_change = Units::ToSigned(
                Units::RadiansAngle(results[loop].m_turn_info.q_end - results[loop].m_turn_info.q_start));
          seg_length = Units::MetersLength(results[loop].m_turn_info.radius).value() * fabs(course_change.value());
          results[loop + 1].m_path_length_cumulative_meters = results[loop].m_path_length_cumulative_meters + seg_length;
@@ -939,10 +793,8 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
    }
 
    // set waypoint constraint distances
-   // constraint distance is the distance from the next waypoint back to the FAF (waypoint_vector[0])
-   // see Powerpoint "Constrained Distance Example.pptx" in JIRA Issue AAES-592 for description of this loop
    unsigned int iTraj = 0;
-   for (unsigned int loop = 0; loop < m_waypoint_vector.size() - 1; loop++) {
+   for (unsigned int loop = 0; loop < m_waypoint_vector.size() - 1; ++loop) {
       if (SamePoint(m_waypoint_vector[loop], results[iTraj])) {
          iTraj++;
          if (SamePoint(m_waypoint_vector[loop + 1], results[iTraj])) {
@@ -1000,19 +852,15 @@ void EuclideanTrajectoryPredictor::CalculateHorizontalTrajectory(const Horizonta
    DoHorizontalPathLogging(m_logger, option);
 }
 
-// See issue AAES-961  Need aircraft distance to go to calculate vertical prediction
-// All of the vertical predictors, except kinematic (Constrained) do not need nor use distance to go.
-// aircraft_distance_to_go defaults to infinity
-// Cannot use default parameter values in a virtual method.
-void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
-                                                             Units::Length start_altitude) {
-   BuildTrajectoryPrediction(weather, start_altitude, Units::infinity());
+void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(
+      aaesim::open_source::WeatherPrediction &weather, const std::shared_ptr<TangentPlaneSequence> &position_converter,
+      Units::Length start_altitude) {
+   BuildTrajectoryPrediction(weather, position_converter, start_altitude, Units::infinity());
 }
 
-// main method to precalculate the 4D trajectory
-void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
-                                                             Units::Length start_altitude,
-                                                             Units::Length aircraft_distance_to_go) {
+void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(
+      aaesim::open_source::WeatherPrediction &weather, const std::shared_ptr<TangentPlaneSequence> &position_converter,
+      Units::Length start_altitude, Units::Length aircraft_distance_to_go) {
    m_aircraft_distance_to_go = aircraft_distance_to_go;
    SetAtmosphere(weather.getAtmosphere());
 
@@ -1039,7 +887,7 @@ void EuclideanTrajectoryPredictor::BuildTrajectoryPrediction(aaesim::open_source
       throw logic_error(msg);
    }
 
-   UpdateWeatherPrediction(weather);
+   UpdateWeatherPrediction(weather, position_converter);
 
    if (m_vertical_predictor != NULL) {
       CalculateHorizontalTrajectory(SECOND_PASS);
@@ -1077,8 +925,8 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
    // get the distance based on aircraft position
    Units::MetersLength distance_to_go;
    Units::UnsignedRadiansAngle course_at_dtg;
-   m_distance_calculator.CalculateAlongPathDistanceFromPosition(
-         Units::FeetLength(state.m_x), Units::FeetLength(state.m_y), distance_to_go, course_at_dtg);
+   m_distance_calculator.CalculateAlongPathDistanceFromPosition(state.GetPositionEnuX(), state.GetPositionEnuY(),
+                                                                distance_to_go, course_at_dtg);
    if (!m_distance_calculator.IsPassedEndOfRoute()) {
 
       result = m_vertical_predictor->Update(
@@ -1096,10 +944,9 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
       }
 
       // error  check
-      Units::SignedRadiansAngle check_cross_track =
-            AircraftCalculations::ConvertPitoPi(course_at_position - course_at_dtg);
+      Units::SignedRadiansAngle check_cross_track = Units::ToSigned(course_at_position - course_at_dtg);
       if (fabs(check_cross_track.value()) > 0.001) {
-         LOG4CPLUS_WARN(m_logger, "AC" << state.m_id << " Course angles from getPosFromPathLength("
+         LOG4CPLUS_WARN(m_logger, "AC" << state.GetUniqueId() << " Course angles from getPosFromPathLength("
                                        << course_at_position << ") and getPathLengthFromPos (" << course_at_dtg
                                        << ") do not agree.  DTG: " << distance_to_go);
       }
@@ -1112,12 +959,15 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
 
       // calculate cross track as difference between actual and precalculated position
       Units::MetersLength cross_track =
-            sqrt(Units::sqr(Units::FeetLength(state.m_x) - x_pos) + Units::sqr(Units::FeetLength(state.m_y) - y_pos));
+            sqrt(Units::sqr(state.GetPositionEnuX() - x_pos) + Units::sqr(state.GetPositionEnuY() - y_pos));
 
       // generate cross-track sign based on distance from turn center and change in m_path_course
-      double center_dist =
-            sqrt(pow(state.m_x * FEET_TO_METERS - m_horizontal_path[traj_index].m_turn_info.x_position_meters, 2) +
-                 pow(state.m_y * FEET_TO_METERS - m_horizontal_path[traj_index].m_turn_info.y_position_meters, 2));
+      double center_dist = sqrt(pow(Units::MetersLength(state.GetPositionEnuX()).value() -
+                                          m_horizontal_path[traj_index].m_turn_info.x_position_meters,
+                                    2) +
+                                pow(Units::MetersLength(state.GetPositionEnuY()).value() -
+                                          m_horizontal_path[traj_index].m_turn_info.y_position_meters,
+                                    2));
 
       // calculate the cross track error based on distance from center point and m_path_course change if turning
       if (m_horizontal_path[traj_index].m_segment_type == HorizontalPath::SegmentType::TURN) {
@@ -1133,7 +983,7 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
          }
          Units::UnsignedRadiansAngle acCourse = Units::UnsignedRadiansAngle(
                Units::RadiansAngle(m_horizontal_path[traj_index].m_path_course) + Units::PI_RADIANS_ANGLE);
-         Units::SignedRadiansAngle courseChange = AircraftCalculations::Convert0to2Pi(course_at_dtg - acCourse);
+         Units::SignedRadiansAngle courseChange = Units::ToUnsigned(course_at_dtg - acCourse);
          // courseChange - positive is left turn, neg is right turn
          // if left turn, distance < radius is left of m_path_course, distance > radius is right of m_path_course
          // if right turn, distance < radius is right of m_path_course, distance > radius is left of m_path_course
@@ -1180,7 +1030,7 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
             {
                Units::UnsignedRadiansAngle turnAmount = (m_horizontal_path[traj_index - 1].m_turn_info.q_start -
                                                          m_horizontal_path[traj_index - 1].m_turn_info.q_end);
-               Units::SignedRadiansAngle courseChange = AircraftCalculations::Convert0to2Pi(turnAmount);
+               Units::SignedRadiansAngle courseChange = Units::ToUnsigned(turnAmount);
                // right turn is positive, left turn is negative
                double rollFactor = (timeToTrajPoint / timeToBank);
                if (courseChange > Units::ZERO_ANGLE) {  // right turn
@@ -1193,19 +1043,20 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
             }
          }
 
-         result.m_cross_track_error = Units::MetersLength(
-               -(state.m_y * FEET_TO_METERS - m_horizontal_path[traj_index + 1].GetYPositionMeters()) *
-                     cos(course_at_dtg) +
-               (state.m_x * FEET_TO_METERS - m_horizontal_path[traj_index + 1].GetXPositionMeters()) *
-                     sin(course_at_dtg));
+         result.m_cross_track_error = Units::MetersLength(-(Units::MetersLength(state.GetPositionEnuY()).value() -
+                                                            m_horizontal_path[traj_index + 1].GetYPositionMeters()) *
+                                                                cos(course_at_dtg) +
+                                                          (Units::MetersLength(state.GetPositionEnuX()).value() -
+                                                           m_horizontal_path[traj_index + 1].GetXPositionMeters()) *
+                                                                sin(course_at_dtg));
       }
       result.m_use_cross_track = true;
    }  // not passed end of route
    else {
       // off the guidance path so no guidance can be calculated. Set the references to reasonable values from current
       // state.
-      result.m_reference_altitude = Units::FeetLength(state.m_z);
-      result.m_ground_speed = Units::FeetPerSecondSpeed(sqrt(pow(state.m_xd, 2) + pow(state.m_yd, 2)));
+      result.m_reference_altitude = Units::FeetLength(state.GetAltitudeMsl());
+      result.m_ground_speed = Units::FeetPerSecondSpeed(state.GetGroundSpeed());
       result.m_ias_command = m_vertical_predictor->GetIasAtEndOfRoute();
       result.SetValid(true);
    }
@@ -1216,8 +1067,7 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
 void EuclideanTrajectoryPredictor::DefineRoute() {
    // loop to process all of the waypoint positions
    for (unsigned int loop = 0; loop < m_waypoint_vector.size(); ++loop) {
-      m_waypoint_vector[loop].m_course_angle =
-            AircraftCalculations::Convert0to2Pi(m_waypoint_vector[loop].m_course_angle);
+      m_waypoint_vector[loop].m_course_angle = Units::ToUnsigned(m_waypoint_vector[loop].m_course_angle);
    }
 }
 
@@ -1248,84 +1098,26 @@ void EuclideanTrajectoryPredictor::AdjustConstraints(Units::Speed start_speed) {
    }
 }
 
-EuclideanTrajectoryPredictor &EuclideanTrajectoryPredictor::operator=(const EuclideanTrajectoryPredictor &obj) {
-   if (this != &obj) {
-      Copy(obj);
-   }
-
-   return *this;
-}
-
-void EuclideanTrajectoryPredictor::Copy(const EuclideanTrajectoryPredictor &obj) {
-
-   if (this != &obj) {
-      m_waypoint_vector = obj.m_waypoint_vector;
-      m_horizontal_path = obj.m_horizontal_path;
-      m_vertical_predictor = obj.m_vertical_predictor;
-
-      m_bank_angle = obj.m_bank_angle;
-      m_altitude_at_final_waypoint = obj.m_altitude_at_final_waypoint;
-
-      m_aircraft_intent = obj.m_aircraft_intent;
-      m_atmosphere = obj.m_atmosphere;
-
-      m_distance_calculator = obj.m_distance_calculator;
-      m_position_calculator = obj.m_position_calculator;
-
-      // probably not necessary as this attributte is only set and used by BuildInitialTrajectoryPredictions
-      // m_aircraft_distance_to_go = obj.m_aircraft_distance_to_go;
-   }
-}
-
-bool EuclideanTrajectoryPredictor::operator==(const EuclideanTrajectoryPredictor &obj) const {
-
-   bool match = (m_waypoint_vector == obj.m_waypoint_vector);
-
-   match = match && (m_horizontal_path == obj.m_horizontal_path);
-
-   match = match && (m_bank_angle == obj.m_bank_angle);
-   match = match && (m_altitude_at_final_waypoint == obj.m_altitude_at_final_waypoint);
-
-   match = match && (m_aircraft_intent == obj.m_aircraft_intent);
-   //  m_aircraft_distance_to_go is used temporarily during BuildInitialTrajectoryPredictions, do not test for equality
-
-   return match;
-}
-
-bool EuclideanTrajectoryPredictor::operator!=(const EuclideanTrajectoryPredictor &obj) const {
-
-   // Generic not equals operator.
-   //
-   // obj:comparison object.
-   // returns true if obj doesn't match.
-   //         false if obj matches.
-
-   return !operator==(obj);
-}
-
 const AircraftIntent &EuclideanTrajectoryPredictor::GetAircraftIntent() const { return m_aircraft_intent; }
 
 const vector<HorizontalPath> &EuclideanTrajectoryPredictor::GetHorizontalPath() const { return m_horizontal_path; }
 
-void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(aaesim::open_source::WeatherPrediction &weather) const {
-
-   // Get wind for option 2
+void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(
+      aaesim::open_source::WeatherPrediction &weather,
+      const std::shared_ptr<TangentPlaneSequence> &position_converter) const {
    if (weather.GetPredictedWindOption() == MULTIPLE_DTG_ALONG_ROUTE) {
-      // weather.dump();
-
-      // skip if this is not the first time
       if (weather.GetUpdateCount() > 0) {
          LOG4CPLUS_TRACE(m_logger, "Skipping weather update for AC " << m_aircraft_intent.GetId()
-                                                                     << " ptr=" << &(weather.east_west));
+                                                                     << " ptr=" << &(weather.east_west()));
          return;
       }
       LOG4CPLUS_TRACE(m_logger,
-                      "Doing weather update for AC " << m_aircraft_intent.GetId() << " ptr=" << &(weather.east_west));
+                      "Doing weather update for AC " << m_aircraft_intent.GetId() << " ptr=" << &(weather.east_west()));
 
       // save initial point
-      Units::MetersLength alt0 = weather.east_west.GetAltitude(weather.east_west.GetMaxRow());
-      Units::Speed windX0 = weather.east_west.GetSpeed(weather.east_west.GetMaxRow());
-      Units::Speed windY0 = weather.north_south.GetSpeed(weather.north_south.GetMaxRow());
+      Units::MetersLength alt0 = weather.east_west().GetAltitude(weather.east_west().GetMaxRow());
+      Units::Speed windX0 = weather.east_west().GetSpeed(weather.east_west().GetMaxRow());
+      Units::Speed windY0 = weather.north_south().GetSpeed(weather.north_south().GetMaxRow());
 
       const VerticalPath verticalPath(m_vertical_predictor->GetVerticalPath());
       int iVert(0);
@@ -1336,7 +1128,7 @@ void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(aaesim::open_source::
       vector<Units::MetersLength> x, y, h;
 
       // go through waypoints
-      for (auto iWaypoint = m_waypoint_vector.begin(); iWaypoint != m_waypoint_vector.end(); iWaypoint++) {
+      for (auto iWaypoint = m_waypoint_vector.begin(); iWaypoint != m_waypoint_vector.end(); ++iWaypoint) {
 
          double dx = prevHoriz->GetXPositionMeters() - iWaypoint->m_x_pos_meters.value();
          double dy = prevHoriz->GetYPositionMeters() - iWaypoint->m_y_pos_meters.value();
@@ -1379,22 +1171,20 @@ void EuclideanTrajectoryPredictor::UpdateWeatherPrediction(aaesim::open_source::
       }
 
       // set bounds of weather
-      weather.east_west.SetBounds(1, h.size() + 1);
-      weather.north_south.SetBounds(1, h.size() + 1);
+      weather.east_west().SetBounds(1, h.size() + 1);
+      weather.north_south().SetBounds(1, h.size() + 1);
 
       // look up the wind for each point
       for (int i = 0; i < h.size(); i++) {
          Units::KnotsSpeed wind_x, wind_y;
-         weather.GetForecastWind()->InterpolateForecastWind(m_aircraft_intent.GetTangentPlaneSequence(), x[i], y[i],
-                                                            h[i], wind_x, wind_y);
-         weather.east_west.Insert(i + 1, h[i], wind_x);
-         weather.north_south.Insert(i + 1, h[i], wind_y);
+         weather.GetForecastWind()->InterpolateForecastWind(position_converter, x[i], y[i], h[i], wind_x, wind_y);
+         weather.east_west().Insert(i + 1, h[i], wind_x);
+         weather.north_south().Insert(i + 1, h[i], wind_y);
       }
-      weather.east_west.Insert(h.size() + 1, alt0, windX0);
-      weather.north_south.Insert(h.size() + 1, alt0, windY0);
+      weather.east_west().Insert(h.size() + 1, alt0, windX0);
+      weather.north_south().Insert(h.size() + 1, alt0, windY0);
 
       weather.IncrementUpdateCount();
-      // weather.dump();
    }
 }
 
@@ -1404,7 +1194,7 @@ void EuclideanTrajectoryPredictor::SetAtmosphere(std::shared_ptr<Atmosphere> atm
 }
 
 const std::vector<HorizontalPath> EuclideanTrajectoryPredictor::EstimateHorizontalTrajectory(
-      aaesim::open_source::WeatherPrediction weather_prediction) {
+      const aaesim::open_source::WeatherPrediction &weather_prediction) {
    SetAtmosphere(weather_prediction.getAtmosphere());
    CalculateHorizontalTrajectory(FIRST_PASS);
    return GetHorizontalPath();

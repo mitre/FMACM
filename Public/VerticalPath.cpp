@@ -31,6 +31,7 @@ void VerticalPath::Append(const VerticalPath &in) {
       along_path_distance_m.push_back(in.along_path_distance_m[index]);
       altitude_m.push_back(in.altitude_m[index]);
       cas_mps.push_back(in.cas_mps[index]);
+      mach.push_back(in.mach[index]);
       altitude_rate_mps.push_back(in.altitude_rate_mps[index]);
       true_airspeed.push_back(in.true_airspeed[index]);
       tas_rate_mps.push_back(in.tas_rate_mps[index]);
@@ -51,6 +52,7 @@ bool VerticalPath::operator==(const VerticalPath &obj) const {
    bool match = (along_path_distance_m.size() == obj.along_path_distance_m.size());
    match = match && (altitude_m.size() == obj.altitude_m.size());
    match = match && (cas_mps.size() == obj.cas_mps.size());
+   match = match && (mach.size() == obj.mach.size());
    match = match && (altitude_rate_mps.size() == obj.altitude_rate_mps.size());
    match = match && (true_airspeed.size() == obj.true_airspeed.size());
    match = match && (tas_rate_mps.size() == obj.tas_rate_mps.size());
@@ -72,6 +74,10 @@ bool VerticalPath::operator==(const VerticalPath &obj) const {
 
    for (auto ix = 0; match && (ix < cas_mps.size()); ix++) {
       match = match && (cas_mps[ix] == obj.cas_mps[ix]);
+   }
+
+   for (auto ix = 0; match && (ix < mach.size()); ix++) {
+      match = match && (mach[ix] == obj.mach[ix]);
    }
 
    for (auto ix = 0; match && (ix < altitude_rate_mps.size()); ix++) {
@@ -115,22 +121,4 @@ bool VerticalPath::operator==(const VerticalPath &obj) const {
    }
 
    return match;
-}
-
-const std::vector<double> VerticalPath::GetWindVelocityEast() const {
-   std::vector<double> vwe_mps_vector;
-   for (auto i = wind_velocity_east.begin(); i != wind_velocity_east.end(); ++i) {
-      vwe_mps_vector.push_back(Units::MetersPerSecondSpeed(*i).value());
-   }
-
-   return vwe_mps_vector;
-}
-
-const std::vector<double> VerticalPath::GetWindVelocityNorth() const {
-   std::vector<double> vwn_mps_vector;
-   for (auto i = wind_velocity_north.begin(); i != wind_velocity_north.end(); ++i) {
-      vwn_mps_vector.push_back(Units::MetersPerSecondSpeed(*i).value());
-   }
-
-   return vwn_mps_vector;
 }

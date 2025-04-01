@@ -25,6 +25,8 @@
 #include "HorizontalPathTracker.h"
 #include "DirectionOfFlightCourseCalculator.h"
 
+namespace aaesim::open_source {
+
 /**
  * Calculates position (euclidean x,y) for a given horizontal path (previously defined in x/y) and a
  * distance along that path.
@@ -51,3 +53,4 @@ class PositionCalculator : public DirectionOfFlightCourseCalculator {
                           Units::Length &x_position, Units::Length &y_position, Units::UnsignedAngle &course,
                           std::vector<HorizontalPath>::size_type &resolved_trajectory_index);
 };
+}  // namespace aaesim::open_source

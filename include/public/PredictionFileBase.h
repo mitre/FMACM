@@ -47,41 +47,26 @@ struct PredictionFileBase {
          FMS_ASCENT,
       };
 
-      PredictionData()
-         : iteration_number(-1),
-           simulation_time(Units::SecondsTime(-1.0)),
-           acid(),
-           source(PredictionData::INVALID_SOURCE),
-           altitude(Units::MetersLength(-1.0)),
-           IAS(Units::MetersPerSecondSpeed(-1.0)),
-           GS(Units::MetersPerSecondSpeed(-1.0)),
-           TAS(Units::MetersPerSecondSpeed(-1.0)),
-           time_to_go(Units::SecondsTime(-1.0)),
-           distance_to_go(Units::MetersLength(-1.0)),
-           VwePred(Units::MetersPerSecondSpeed(-1.0)),
-           VwnPred(Units::MetersPerSecondSpeed(-1.0)),
-           algorithm(VerticalPath::PredictionAlgorithmType::UNDETERMINED),
-           flap_setting(aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED){};
+      PredictionData() = default;
 
-      int iteration_number;
-      Units::Time simulation_time;
-      std::string acid;
-
-      DataSource source;
-      Units::Length altitude;
-      Units::Speed IAS;
-      Units::Speed GS;
-      Units::Speed TAS;
-      Units::Time time_to_go;
-      Units::Length distance_to_go;
-
-      // Predicted wind components
-      Units::MetersPerSecondSpeed VwePred;
-      Units::MetersPerSecondSpeed VwnPred;
-
-      VerticalPath::PredictionAlgorithmType algorithm;
-
-      aaesim::open_source::bada_utils::FlapConfiguration flap_setting;
+      int iteration_number{-1};
+      Units::Time simulation_time{Units::SecondsTime(-1.0)};
+      std::string acid{};
+      DataSource source{PredictionData::INVALID_SOURCE};
+      Units::Length altitude{Units::MetersLength(-1.0)};
+      Units::Speed IAS{Units::MetersPerSecondSpeed(-1.0)};
+      double mach{-1};
+      Units::Speed GS{Units::MetersPerSecondSpeed(-1.0)};
+      Units::Speed TAS{Units::MetersPerSecondSpeed(-1.0)};
+      Units::Time time_to_go{Units::SecondsTime(-1.0)};
+      Units::Length distance_to_go{Units::MetersLength(-1.0)};
+      Units::MetersPerSecondSpeed VwePred{Units::MetersPerSecondSpeed(-1.0)};
+      Units::MetersPerSecondSpeed VwnPred{Units::MetersPerSecondSpeed(-1.0)};
+      VerticalPath::PredictionAlgorithmType algorithm{VerticalPath::PredictionAlgorithmType::UNDETERMINED};
+      aaesim::open_source::bada_utils::FlapConfiguration flap_setting{
+            aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
+      Units::MetersPerSecondSpeed vertical_rate{Units::MetersPerSecondSpeed(-1.0)};
+      Units::DegreesAngle flight_path_angle{Units::DegreesAngle(-1)};
    };
 
    std::vector<PredictionData> ExtractPredictionDataFromVerticalPath(const unsigned int &iteration,
@@ -102,6 +87,7 @@ struct PredictionFileBase {
 
          pdata.altitude = Units::MetersLength(vertical_path.altitude_m[m]);
          pdata.IAS = Units::MetersPerSecondSpeed(vertical_path.cas_mps[m]);
+         pdata.mach = vertical_path.mach[m];
          pdata.GS = Units::MetersPerSecondSpeed(vertical_path.gs_mps[m]);
          pdata.TAS = Units::MetersPerSecondSpeed(vertical_path.true_airspeed[m]);
          pdata.time_to_go = Units::SecondsTime(vertical_path.time_to_go_sec[m]);
@@ -110,6 +96,8 @@ struct PredictionFileBase {
          pdata.VwnPred = vertical_path.wind_velocity_north[m];
          pdata.algorithm = vertical_path.algorithm_type[m];
          pdata.flap_setting = vertical_path.flap_setting[m];
+         pdata.vertical_rate = Units::MetersPerSecondSpeed(vertical_path.altitude_rate_mps[m]);
+         pdata.flight_path_angle = Units::DegreesAngle(Units::RadiansAngle(vertical_path.theta_radians[m]));
 
          prediction_data.push_back(pdata);
       }

@@ -5,10 +5,10 @@ repos:
     hooks:
       - id: clang-format
         args: [--style=file, -i] # -i does inline formatting and will rewrite the files
-      # - id: cpplint
-      #   args:
-      #     [
-      #       --verbose=3,
-      #       "--filter=-legal/copyright, -build/namespaces, -build/storage_class, -build/c++11, -build/include_what_you_use, -build/include, -build/include_subdir, -runtime/string, -runtime/int, -build/header_guard, -whitespace/ending_newline, -whitespace/operators, -whitespace/comma, -whitespace/indent, -whitespace/semicolon, -whitespace/newline, -whitespace/blank_line, -whitespace/braces, -whitespace/comments, -whitespace/parens, -runtime/explicit, -build/include_order, -readability/casting, -readability/inheritance, -readability/braces, -readability/utf8, -readability/multiline_comment, -runtime/printf",
-      #     ]
-      #   files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$
+      - id: cpplint
+        args:
+          [
+            --verbose=3,
+            "--filter=-legal/copyright, -build/namespaces, -build/storage_class, -build/c++11, -build/include_what_you_use, -build/include, -build/include_subdir, -runtime/string, -runtime/int, -build/header_guard, -whitespace/ending_newline, -whitespace/operators, -whitespace/comma, -whitespace/indent, -whitespace/semicolon, -whitespace/newline, -whitespace/blank_line, -whitespace/braces, -whitespace/comments, -whitespace/parens, -runtime/explicit, -build/include_order, -readability/casting, -readability/inheritance, -readability/braces, -readability/utf8, -readability/multiline_comment, -runtime/printf",
+          ]
+        files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$

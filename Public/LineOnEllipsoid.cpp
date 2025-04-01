@@ -172,12 +172,12 @@ std::pair<Units::SignedAngle, LatitudeLongitudePoint> LineOnEllipsoid::Calculate
       const Units::Length &distance_along_shape_from_start_point) const {
 
    double temp_course_1, temp_course_2, dist_to_point;
-   ErrorSet error_set = ErrorCodes::SUCCESS;
+   ErrorSet error_set{ErrorCodes::SUCCESS};
    LatitudeLongitudePoint point_on_geodesic =
          CalculatePointAtDistanceFromStartPoint(distance_along_shape_from_start_point);
    double course_ned_at_point = geoCrs(m_geolib_geodesic, point_on_geodesic.GetGeolibPrimitiveLLPoint(), &temp_course_1,
                                        &temp_course_2, &dist_to_point, &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   if (!GeolibUtils::IsSuccess(error_set)) {
       LOG4CPLUS_ERROR(m_logger, GeolibUtils::m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(GeolibUtils::m_basic_error_message);
    }

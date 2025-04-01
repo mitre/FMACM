@@ -28,24 +28,25 @@ class PreloadedAdsbReceiver final : public aaesim::open_source::ADSBReceiver {
    PreloadedAdsbReceiver() = default;
    PreloadedAdsbReceiver(std::string ttv_csv_file, std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence);
 
-   Sensor::ADSB::ADSBSVReport GetCurrentADSBReport(int id) const override;
-   Sensor::ADSB::ADSBSVReport GetADSBReportBefore(int id, double time) const override;
-   const std::vector<Sensor::ADSB::ADSBSVReport> &GetReportsReceivedByTime(
+   aaesim::open_source::ADSBSVReport GetCurrentADSBReport(int id) const override;
+   aaesim::open_source::ADSBSVReport GetADSBReportBefore(int id, Units::Time time) const override;
+   const std::vector<aaesim::open_source::ADSBSVReport> &GetReportsReceivedByTime(
          const aaesim::open_source::SimulationTime &time) const override;
-   const std::map<int, std::vector<Sensor::ADSB::ADSBSVReport> > &GetAllReportsReceived() const override;
-   std::map<int, Sensor::ADSB::ADSBSVReport> const GetCurrentADSBReport() const override;
+   const std::map<int, std::vector<aaesim::open_source::ADSBSVReport> > &GetAllReportsReceived() const override;
+   std::map<int, aaesim::open_source::ADSBSVReport> const GetCurrentADSBReport() const override;
    void Initialize(Units::Length adsb_reception_range_threshold) override;
-   std::map<int, Sensor::ADSB::ADSBSVReport> Receive(const aaesim::open_source::SimulationTime &time,
-                                                     const aaesim::open_source::AircraftState &state) override;
+   std::map<int, aaesim::open_source::ADSBSVReport> Receive(const aaesim::open_source::SimulationTime &time,
+                                                            const aaesim::open_source::AircraftState &state) override;
 
   private:
    std::string m_ttv_filename;
    std::shared_ptr<TangentPlaneSequence> m_tanget_plane_sequence;
-   std::map<int, Sensor::ADSB::ADSBSVReport> m_most_recent_adsb_reports;                // ADSB data stored as
-                                                                                        // [numericFlightID][Report]
-   std::map<int, std::vector<Sensor::ADSB::ADSBSVReport> > m_all_reports_received;      // ADSB data stored as
-                                                                                        // [numericFlightID][Report]
-   std::map<int, std::vector<Sensor::ADSB::ADSBSVReport> > m_reports_received_by_time;  // ADSB reports received stored
-                                                                                        // as [time][report_vector]
+   std::map<int, aaesim::open_source::ADSBSVReport> m_most_recent_adsb_reports;            // ADSB data stored as
+                                                                                           // [numericFlightID][Report]
+   std::map<int, std::vector<aaesim::open_source::ADSBSVReport> > m_all_reports_received;  // ADSB data stored as
+                                                                                           // [numericFlightID][Report]
+   std::map<int, std::vector<aaesim::open_source::ADSBSVReport> > m_reports_received_by_time;  // ADSB reports received
+                                                                                               // stored as
+                                                                                               // [time][report_vector]
 };
 }  // namespace fmacm

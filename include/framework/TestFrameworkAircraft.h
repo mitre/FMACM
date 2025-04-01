@@ -43,25 +43,20 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
 
    std::vector<aaesim::open_source::AircraftState> GetAircraftStates() const { return m_states; }
 
-   const int GetStartTime() const override { return m_states[0].m_time; };
+   const int GetStartTime() const override { return m_states[0].GetTime().value(); };
 
    bool IsFinished() const override {
       return m_guidance_calculator->GetEstimatedDistanceAlongPath() < Units::ZERO_LENGTH;
    }
 
-   std::shared_ptr<aaesim::open_source::FlightDeckApplication> GetAirborneApplication() const {
+   std::shared_ptr<aaesim::open_source::FlightDeckApplication> GetFlightDeckApplication() const {
       return m_speed_application;
    }
 
    class Builder final {
      public:
       Builder()
-         : performance_(),
-           aircraft_dynamics_model_(),
-           aircraft_control_(),
-           guidance_calculator_(),
-           tangent_plane_sequence_(),
-           initial_state_() {
+         : performance_(), aircraft_dynamics_model_(), aircraft_control_(), guidance_calculator_(), initial_state_() {
          receiver_ = std::make_shared<aaesim::open_source::NullADSBReceiver>();
          speed_application_ = std::make_shared<aaesim::open_source::NullFlightDeckApplication>();
          true_weather_ = std::make_shared<fmacm::WeatherTruthFromStaticData>(
@@ -77,7 +72,6 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
       Builder *WithGuidanceCalculator(std::shared_ptr<fmacm::GuidanceFromStaticData> &guidance_calculator);
       Builder *WithFlightDeckApplication(
             std::shared_ptr<aaesim::open_source::FlightDeckApplication> &speed_application);
-      Builder *WithTangentPlaneSequence(std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence);
       Builder *WithInitialState(const aaesim::open_source::AircraftState &initial_state);
 
       std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> GetAircraftPerformance() const {
@@ -93,7 +87,6 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
       std::shared_ptr<aaesim::open_source::FlightDeckApplication> GetFligthDeckApplication() const {
          return speed_application_;
       }
-      std::shared_ptr<TangentPlaneSequence> GetTangentPlaneSequence() const { return tangent_plane_sequence_; }
       aaesim::open_source::AircraftState GetInitialState() const { return initial_state_; }
 
      private:
@@ -104,7 +97,6 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
       std::shared_ptr<aaesim::open_source::ADSBReceiver> receiver_;
       std::shared_ptr<fmacm::GuidanceFromStaticData> guidance_calculator_;
       std::shared_ptr<aaesim::open_source::FlightDeckApplication> speed_application_;
-      std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence_;
       aaesim::open_source::AircraftState initial_state_;
    };
 
@@ -115,8 +107,7 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
 
    TestFrameworkAircraft();
 
-   void FinalizeAndSaveState(aaesim::open_source::AircraftState &state,
-                             const aaesim::open_source::SimulationTime &time);
+   void SaveState(aaesim::open_source::AircraftState &state, const aaesim::open_source::SimulationTime &time);
    void AddLatitudeLongitude(aaesim::open_source::AircraftState &state) const;
 
    std::shared_ptr<fmacm::WeatherTruthFromStaticData> m_weather_truth;
@@ -127,5 +118,4 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
    std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
    std::shared_ptr<aaesim::open_source::FlightDeckApplication> m_speed_application;
    std::vector<aaesim::open_source::AircraftState> m_states;
-   std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
 };

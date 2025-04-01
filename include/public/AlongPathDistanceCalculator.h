@@ -26,6 +26,8 @@
 
 #include "HorizontalPath.h"
 
+namespace aaesim::open_source {
+
 /**
  * Calculates distance along a horizontal path and ensures that the progression of
  */
@@ -75,3 +77,4 @@ class AlongPathDistanceCalculator : public HorizontalPathTracker {
                                TrajectoryIndexProgressionDirection expected_index_progression,
                                Units::Length specified_cross_track_tolerance);
 };
+}  // namespace aaesim::open_source

@@ -19,8 +19,9 @@
 
 #include "public/DirectionOfFlightCourseCalculator.h"
 
-#include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
+
+using namespace aaesim::open_source;
 
 log4cplus::Logger DirectionOfFlightCourseCalculator::m_logger =
       log4cplus::Logger::getInstance("DirectionOfFlightCourseCalculator");
@@ -145,7 +146,7 @@ bool DirectionOfFlightCourseCalculator::CalculateForwardCourse(
                horizontal_trajectory[index].m_path_course);  // get the forward_course for the given index
 
          // calculate output values
-         forward_course = AircraftCalculations::Convert0to2Pi(crs + Units::PI_RADIANS_ANGLE);
+         forward_course = Units::ToUnsigned(crs + Units::PI_RADIANS_ANGLE);
       } else if (horizontal_trajectory[index].m_segment_type == HorizontalPath::SegmentType::TURN) {
          if ((distance_along_path - Units::MetersLength(horizontal_trajectory[index].m_path_length_cumulative_meters)) <
              Units::MetersLength(3)) {
@@ -157,7 +158,7 @@ bool DirectionOfFlightCourseCalculator::CalculateForwardCourse(
             Units::UnsignedAngle end = Units::UnsignedRadiansAngle(horizontal_trajectory[index].m_turn_info.q_end);
 
             // calculate forward_course change between the start and end of turn
-            Units::SignedRadiansAngle course_change = AircraftCalculations::ConvertPitoPi(end - start);
+            Units::SignedRadiansAngle course_change = Units::ToSigned(end - start);
 
             // calculate difference in distance
             Units::Angle delta = Units::RadiansAngle(
@@ -167,8 +168,8 @@ bool DirectionOfFlightCourseCalculator::CalculateForwardCourse(
 
             // calculate the theta of the turn
             turn_theta = start + delta * CoreUtils::SignOfValue(course_change.value());
-            forward_course = AircraftCalculations::Convert0to2Pi(
-                  turn_theta - Units::PI_RADIANS_ANGLE / 2.0 * CoreUtils::SignOfValue(course_change.value()));
+            forward_course = Units::ToUnsigned(turn_theta - Units::PI_RADIANS_ANGLE / 2.0 *
+                                                                  CoreUtils::SignOfValue(course_change.value()));
          }
       }
       resolved_trajectory_index = index;

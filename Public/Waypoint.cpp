@@ -32,7 +32,6 @@ Waypoint::Waypoint() {
    m_longitude = Units::ZERO_ANGLE;
    m_altitude = Units::ZERO_LENGTH;
    m_nominal_ias = Units::ZERO_SPEED;
-   m_mach = 0;
    m_altitude_constraint_high = Units::ZERO_LENGTH;
    m_altitude_constraint_low = Units::ZERO_LENGTH;
    m_speed_constraint_high = Units::ZERO_SPEED;
@@ -61,15 +60,14 @@ Waypoint::Waypoint(const std::string &name, Units::Angle latitude, Units::Angle 
    m_rf_turn_center_latitude = Units::ZERO_ANGLE;
    m_rf_turn_center_longitude = Units::ZERO_ANGLE;
    m_rf_turn_arc_radius = Units::ZERO_LENGTH;
-   m_mach = 0;
 }
 
 bool Waypoint::load(DecodedStream *input) {
    set_stream(input);
 
-   const unsigned int column_count_v4_schema = 14;
-   const unsigned int column_count_no_rf_legs_pre_v4_schema = 12;
-   const unsigned int column_count_complete_pre_v4_schema = 15;
+   const unsigned int column_count_v4_schema = 13;
+   const unsigned int column_count_no_rf_legs_pre_v4_schema = 11;
+   const unsigned int column_count_complete_pre_v4_schema = 14;
 
    bool f = load_datum(m_name);
    if (!f) {
@@ -99,11 +97,10 @@ bool Waypoint::load(DecodedStream *input) {
          if (i == column_count_no_rf_legs_pre_v4_schema) {
             // use column_count_no_rf_legs_pre_v4_schema
             m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[5]);
-            m_mach = uninterpreted_loaded_values[6];
-            m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[8]);
-            m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[9]);
-            m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
-            m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[11]);
+            m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[7]);
+            m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[8]);
+            m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[9]);
+            m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
             m_rf_turn_arc_radius = Units::zero();
             m_rf_turn_center_latitude = Units::zero();
             m_rf_turn_center_longitude = Units::zero();
@@ -126,32 +123,30 @@ bool Waypoint::load(DecodedStream *input) {
       if (loaded_character_length == leg_type_identifier_size) {
          // use column_count_v4_schema
          m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[4]);
-         m_mach = uninterpreted_loaded_values[5];
-         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[6]);
-         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[7]);
-         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[8]);
-         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[9]);
-         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[10]);
-         m_rf_turn_center_latitude = Units::DegreesAngle(uninterpreted_loaded_values[11]);
-         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[12]);
+         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[5]);
+         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[6]);
+         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[7]);
+         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[8]);
+         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[9]);
+         m_rf_turn_center_latitude = Units::DegreesAngle(uninterpreted_loaded_values[10]);
+         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[11]);
          m_arinc424_leg_type = uninterpreted_next_value;
          return true;
       } else {
          // use column_count_complete_pre_v4_schema
          m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[5]);
-         m_mach = uninterpreted_loaded_values[6];
-         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[8]);
-         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[9]);
-         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
-         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[11]);
-         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[12]);
+         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[7]);
+         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[8]);
+         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[9]);
+         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
+         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[11]);
          m_rf_turn_center_latitude = Units::DegreesAngle(std::strtod(uninterpreted_next_value.c_str(), NULL));
-         f = load_datum(uninterpreted_loaded_values[14]);
+         f = load_datum(uninterpreted_loaded_values[13]);
          if (!f) {
             LoggingLoadable::report_error("could not load a waypoint parameter");
             return false;
          }
-         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[14]);
+         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[13]);
          m_arinc424_leg_type = "UNSET";
          return true;
       }
@@ -164,7 +159,6 @@ std::ostream &operator<<(std::ostream &out, const Waypoint &waypoint) {
    out << Units::DegreesAngle(waypoint.GetLongitude()).value() << " ";
    out << Units::FeetLength(waypoint.GetAltitude()).value() << " ";
    out << Units::KnotsSpeed(waypoint.GetNominalIas()).value() << " ";
-   out << waypoint.GetMach() << " ";
    out << Units::FeetLength(waypoint.GetAltitudeConstraintHigh()).value() << " ";
    out << Units::FeetLength(waypoint.GetAltitudeConstraintLow()).value() << " ";
    out << Units::KnotsSpeed(waypoint.GetSpeedConstraintHigh()).value() << " ";

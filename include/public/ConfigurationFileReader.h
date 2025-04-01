@@ -21,11 +21,13 @@
 
 #include "public/Logging.h"
 
+#include <filesystem>
+
 namespace aaesim::open_source {
 class ConfigurationFileReader {
   public:
    ~ConfigurationFileReader() = default;
-   static const std::vector<std::string> LoadConfigurationFile(std::string suggested_filename);
+   static const std::vector<std::filesystem::path> LoadConfigurationFile(std::string suggested_filename);
 
   private:
    ConfigurationFileReader() = default;

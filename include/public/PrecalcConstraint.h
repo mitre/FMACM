@@ -30,7 +30,8 @@ enum class ActiveFlagType {
    SEG_END_LOW_ALT,
    SEG_END_MID_ALT,
    AT_ALT_SLOW,
-   SEG_END_AT_ALT
+   SEG_END_AT_ALT,
+   AT_250_BELOW_10K
 };
 
 bool operator<=(ActiveFlagType l, ActiveFlagType r);

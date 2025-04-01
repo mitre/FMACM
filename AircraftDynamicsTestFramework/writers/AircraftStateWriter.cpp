@@ -40,7 +40,6 @@ void fmacm::AircraftStateWriter::Finish() {
    auto column_inserter = [&os](std::string &column_name) { os << column_name; };
    std::for_each(COLUMN_NAMES.begin(), COLUMN_NAMES.end(), column_inserter);
    os << NEWLINE;
-   os.flush();
 
    os.set_precision(6);
    auto data_inserter = [&os](const DataToWrite &data_row) {
@@ -55,7 +54,6 @@ void fmacm::AircraftStateWriter::Finish() {
       os << data_row.latitude.value();
       os << data_row.longitude.value();
       os << NEWLINE;
-      os.flush();
    };
    std::for_each(m_data_to_write.cbegin(), m_data_to_write.cend(), data_inserter);
 
@@ -66,13 +64,13 @@ void fmacm::AircraftStateWriter::Finish() {
 void fmacm::AircraftStateWriter::Gather(std::vector<aaesim::open_source::AircraftState> aircraft_states) {
    auto data_gatherer = [this](const aaesim::open_source::AircraftState &state) {
       DataToWrite data;
-      data.altitude_msl = state.GetPositionZ();
-      data.dynamics_altitude_rate = state.GetSpeedZd();
+      data.altitude_msl = state.GetAltitudeMsl();
+      data.dynamics_altitude_rate = state.GetVerticalSpeed();
       data.dynamics_ground_speed = state.GetGroundSpeed();
       data.dynamics_ias = state.GetDynamicsState().v_indicated_airspeed;
       data.dynamics_tas = state.GetDynamicsState().v_true_airspeed;
-      data.euclidean_x = state.GetPositionX();
-      data.euclidean_y = state.GetPositionY();
+      data.euclidean_x = state.GetPositionEnuX();
+      data.euclidean_y = state.GetPositionEnuY();
       data.simulation_time = state.GetTime();
       data.latitude = state.GetLatitude();
       data.longitude = state.GetLongitude();

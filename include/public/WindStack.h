@@ -22,6 +22,7 @@
 #include <vector>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
+#include <scalar/Frequency.h>
 
 namespace aaesim {
 namespace open_source {
@@ -54,6 +55,9 @@ class WindStack {
    void Insert(const int index, const Units::Length altitude, const Units::Speed speed);
 
    void SortAltitudesAscending();
+
+   void CalculateWindGradientAtAltitude(const Units::Length altitude_in, Units::Speed &wind_speed,
+                                        Units::Frequency &wind_gradient) const;
 
    static WindStack CreateZeroSpeedStack();
 

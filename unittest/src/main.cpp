@@ -19,9 +19,11 @@
 
 #include "gtest/gtest.h"
 #include "public/Logging.h"
+#include <log4cplus/initializer.h>
 
 GTEST_API_ int main(int argc, char **argv) {
-   InitializeLogging();
+   log4cplus::Initializer initializer;
+   LoadLoggerProperties();
    log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
    LOG4CPLUS_INFO(logger, "Running main()");
    testing::InitGoogleTest(&argc, argv);

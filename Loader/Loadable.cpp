@@ -22,7 +22,7 @@
 
 using namespace std;
 
-Loadable::Loadable(void) {
+Loadable::Loadable() {
    stream = NULL;
    was_load_successful = false;
 }
@@ -205,7 +205,7 @@ bool Loadable::loadAccelerationKnotsPerSecond(Units::Acceleration &acceleration)
    return result;
 }
 
-shared_ptr<LoaderLink> Loadable::getLoaderLink(string name) {
+shared_ptr<LoaderLink> Loadable::getLoaderLink(const string &name) {
    string varnameclean = clean_token(name);
    map<string, shared_ptr<LoaderLink> >::iterator it = lookup_table.find(varnameclean);
    if (it == lookup_table.end()) {

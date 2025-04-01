@@ -28,7 +28,7 @@
 
 using namespace fmacm;
 
-ApplicationLoader::ApplicationLoader() : m_loaded(false), m_pilot_delay_configuration(), m_im_speed_command_file() {
+ApplicationLoader::ApplicationLoader() {
 #ifdef SAMPLE_ALGORITHM_LIBRARY
    m_sample_algorithm_time_goal = interval_management::open_source::IMTimeBasedAchieve();
    m_sample_algorithm_distance_goal = interval_management::open_source::IMDistBasedAchieve();
@@ -47,7 +47,8 @@ bool ApplicationLoader::load(DecodedStream *input) {
    return m_loaded;
 }
 
-std::shared_ptr<aaesim::open_source::FlightDeckApplication> ApplicationLoader::CreateApplication() {
+std::shared_ptr<aaesim::open_source::FlightDeckApplication> ApplicationLoader::CreateApplication(
+      aaesim::open_source::WeatherPrediction &avionic_weather_predictor) {
    if (m_im_speed_command_file.IsLoaded()) {
       Units::Time delay_duration =
             m_pilot_delay_configuration.IsEnabled() ? m_pilot_delay_configuration.DelayDuration() : Units::ZERO_TIME;
@@ -55,12 +56,17 @@ std::shared_ptr<aaesim::open_source::FlightDeckApplication> ApplicationLoader::C
       return std::make_shared<SpeedCommandsFromStaticData>(speed_commands);
    }
 
+   auto statistical_pilot_delay = aaesim::open_source::StatisticalPilotDelay::NoDelay();
+   if (m_pilot_delay_configuration.IsEnabled()) {
+      statistical_pilot_delay = aaesim::open_source::StatisticalPilotDelay::WithDelay(
+            m_pilot_delay_configuration.DelayDuration(), Units::zero(), avionic_weather_predictor.getAtmosphere());
+   }
+
 #ifdef SAMPLE_ALGORITHM_LIBRARY
    if (m_sample_algorithm_time_goal.IsLoaded()) {
       std::shared_ptr<interval_management::open_source::IMAlgorithm> time_based_achieve_algorithm =
             std::make_shared<interval_management::open_source::IMTimeBasedAchieve>(m_sample_algorithm_time_goal);
-      time_based_achieve_algorithm->SetPilotDelay(m_pilot_delay_configuration.IsEnabled(),
-                                                  m_pilot_delay_configuration.DelayDuration(), Units::zero());
+      time_based_achieve_algorithm->SetPilotDelay(statistical_pilot_delay);
       auto adapted_algorithm = std::make_shared<interval_management::open_source::FIMAlgorithmAdapter>(
             time_based_achieve_algorithm, IMUtils::IMAlgorithmTypes::TIMEBASEDACHIEVE);
       return std::static_pointer_cast<aaesim::open_source::FlightDeckApplication>(adapted_algorithm);
@@ -68,8 +74,7 @@ std::shared_ptr<aaesim::open_source::FlightDeckApplication> ApplicationLoader::C
    if (m_sample_algorithm_distance_goal.IsLoaded()) {
       std::shared_ptr<interval_management::open_source::IMAlgorithm> distance_based_achieve_algorithm =
             std::make_shared<interval_management::open_source::IMDistBasedAchieve>(m_sample_algorithm_distance_goal);
-      distance_based_achieve_algorithm->SetPilotDelay(m_pilot_delay_configuration.IsEnabled(),
-                                                      m_pilot_delay_configuration.DelayDuration(), Units::zero());
+      distance_based_achieve_algorithm->SetPilotDelay(statistical_pilot_delay);
       auto adapted_algorithm = std::make_shared<interval_management::open_source::FIMAlgorithmAdapter>(
             distance_based_achieve_algorithm, IMUtils::IMAlgorithmTypes::DISTANCEBASEDACHIEVE);
       return std::static_pointer_cast<aaesim::open_source::FlightDeckApplication>(adapted_algorithm);

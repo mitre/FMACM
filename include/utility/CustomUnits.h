@@ -21,6 +21,8 @@
 
 #include <scalar/Acceleration.h>
 #include <scalar/Angle.h>
+#include <scalar/UnsignedAngle.h>
+#include <scalar/SignedAngle.h>
 #include <scalar/Frequency.h>
 #include <scalar/Mass.h>
 #include <scalar/MassFlowRate.h>
@@ -29,8 +31,6 @@
 #include <scalar/Time.h>
 #include <scalar/Force.h>
 #include "utility/UtilityConstants.h"
-
-using namespace aaesim::open_source::constants;
 
 /*
  * Definitions for unit types which are not already defined in unitsLib.
@@ -134,12 +134,29 @@ const Units::AbsCelsiusTemperature ZERO_CELSIUS = Units::AbsCelsiusTemperature(0
 const InvertedLengthGain ZERO_INVERTED_LENGTH_GAIN = Units::SecondsSquaredPerMeterInvertedLengthGain(0.0);
 const InvertedSpeed ZERO_INVERTED_SPEED = Units::SecondsPerMeterInvertedSpeed(0.0);
 
-const Units::Acceleration ONE_G_ACCELERATION = MetersSecondAcceleration(GRAVITY_METERS_PER_SECOND);
+const Units::Acceleration ONE_G_ACCELERATION =
+      MetersSecondAcceleration(aaesim::open_source::constants::GRAVITY_METERS_PER_SECOND);
 
 // angle constants
 const Units::Angle PI_RADIANS_ANGLE = DegreesAngle(180.0);
 const Units::Angle ONE_RADIAN_ANGLE = RadiansAngle(1.0);
 const Units::Angle DUMMY_DEGREES_ANGLE = DegreesAngle(-999.0);
 // end constants-----------------------------------------------------------------------------------------------------
+
+/*
+Convenience Methods
+*/
+
+inline static Units::UnsignedRadiansAngle ToUnsigned(const Units::SignedAngle &signed_angle) {
+   Units::UnsignedRadiansAngle result{signed_angle};
+   result.normalize();
+   return result;
+}
+
+inline static Units::SignedRadiansAngle ToSigned(Units::UnsignedAngle unsigned_angle) {
+   Units::SignedRadiansAngle result{unsigned_angle};
+   result.normalize();
+   return result;
+}
 
 }  // namespace Units

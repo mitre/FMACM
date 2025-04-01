@@ -50,12 +50,12 @@ LatitudeLongitudePoint LatitudeLongitudePoint::ProjectDistanceAlongCourse(Units:
    return GeolibUtils::CalculateNewPoint(*this, projection_distance, course_enu);
 }
 
-LatitudeLongitudePoint LatitudeLongitudePoint::CreateFromWaypoint(Waypoint wgs84_waypoint) {
+LatitudeLongitudePoint LatitudeLongitudePoint::CreateFromWaypoint(const Waypoint &wgs84_waypoint) {
    return LatitudeLongitudePoint(wgs84_waypoint.GetLatitude(), wgs84_waypoint.GetLongitude());
 }
 
 LatitudeLongitudePoint LatitudeLongitudePoint::CreateFromGeodeticPosition(
-      EllipsoidalEarthModel::GeodeticPosition geodetic_position) {
+      const EllipsoidalEarthModel::GeodeticPosition &geodetic_position) {
    return LatitudeLongitudePoint(geodetic_position.latitude, geodetic_position.longitude);
 }
 

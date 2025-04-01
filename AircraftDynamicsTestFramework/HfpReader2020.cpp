@@ -26,6 +26,7 @@
 #include <public/HorizontalPath.h>
 
 using namespace testvector;
+using namespace aaesim::open_source;
 
 HfpReader2020::HfpReader2020(std::string file_name, int header_lines)
    : DataReader(std::move(file_name), 0, 0),

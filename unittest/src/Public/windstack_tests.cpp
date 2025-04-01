@@ -182,6 +182,31 @@ TEST(WindStack, sort_shifted_min_max) {
    EXPECT_EQ(sorted_stack.GetSpeed(4), Units::KnotsSpeed(20));
 }
 
+TEST(WindStack, AscendSort) {
+   std::vector<std::pair<Units::Length, Units::Speed> > test_values;
+   test_values.push_back(std::make_pair(Units::MetersLength(100), Units::KnotsSpeed(5)));
+   test_values.push_back(std::make_pair(Units::MetersLength(0), Units::KnotsSpeed(5)));
+   test_values.push_back(std::make_pair(Units::MetersLength(10), Units::KnotsSpeed(5)));
+   test_values.push_back(std::make_pair(Units::MetersLength(200), Units::KnotsSpeed(5)));
+   test_values.push_back(std::make_pair(Units::MetersLength(20), Units::KnotsSpeed(5)));
+
+   WindStack test_stack(0, test_values.size() - 1);
+   auto index = 0;
+   for (auto test_value : test_values) {
+      test_stack.Insert(index, test_value.first, test_value.second);
+      ++index;
+   }
+
+   // This is the tested method
+   test_stack.SortAltitudesAscending();
+
+   EXPECT_EQ(Units::MetersLength(test_stack.GetAltitude(0)).value(), Units::MetersLength(0).value());
+   EXPECT_EQ(Units::MetersLength(test_stack.GetAltitude(1)).value(), Units::MetersLength(10).value());
+   EXPECT_EQ(Units::MetersLength(test_stack.GetAltitude(2)).value(), Units::MetersLength(20).value());
+   EXPECT_EQ(Units::MetersLength(test_stack.GetAltitude(3)).value(), Units::MetersLength(100).value());
+   EXPECT_EQ(Units::MetersLength(test_stack.GetAltitude(4)).value(), Units::MetersLength(200).value());
+}
+
 }  // namespace open_source
 }  // namespace test
 }  // namespace aaesim

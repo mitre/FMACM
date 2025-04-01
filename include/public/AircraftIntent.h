@@ -29,8 +29,6 @@
 #include "public/TangentPlaneSequence.h"
 #include "utility/UtilityConstants.h"
 
-using namespace aaesim::open_source::constants;
-
 class AircraftIntent : public LoggingLoadable {
   public:
    enum WaypointPhaseOfFlight { ASCENT, CRUISE, DESCENT };
@@ -51,7 +49,6 @@ class AircraftIntent : public LoggingLoadable {
       std::vector<Units::MetersLength> m_low_altitude_constraint;
       std::vector<Units::MetersPerSecondSpeed> m_high_speed_constraint;
       std::vector<Units::MetersPerSecondSpeed> m_low_speed_constraint;
-      std::vector<double> m_mach;
       std::vector<Arinc424LegType> m_leg_type;
       std::vector<Units::MetersLength> m_x_rf_center;
       std::vector<Units::MetersLength> m_y_rf_center;
@@ -115,8 +112,6 @@ class AircraftIntent : public LoggingLoadable {
 
    virtual void ClearWaypoints();
 
-   const std::shared_ptr<TangentPlaneSequence> &GetTangentPlaneSequence() const;
-
    void SetId(int id_in);
 
    int GetId() const;
@@ -176,6 +171,9 @@ class AircraftIntent : public LoggingLoadable {
    double m_planned_cruise_mach;
    std::vector<Waypoint> m_all_waypoints;
    bool m_is_loaded;
+   std::vector<Waypoint> m_ascent_waypoints, m_cruise_waypoints, m_descent_waypoints;
+   Units::MetersLength m_planned_cruise_altitude;
+   std::map<std::string, Arinc424LegType> m_arinc424_dictionary;
 
   private:
    static const int UNINITIALIZED_AIRCRAFT_ID;
@@ -184,16 +182,8 @@ class AircraftIntent : public LoggingLoadable {
    void DeleteRouteDataContent();
    void AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints, enum WaypointPhaseOfFlight add_as_phase);
    friend std::ostream &operator<<(std::ostream &out, const AircraftIntent &intent);
-
-   std::vector<Waypoint> m_ascent_waypoints, m_cruise_waypoints, m_descent_waypoints;
-   Units::MetersLength m_planned_cruise_altitude;
    int m_id;
-   std::map<std::string, Arinc424LegType> m_arinc424_dictionary;
 };
-
-inline const std::shared_ptr<TangentPlaneSequence> &AircraftIntent::GetTangentPlaneSequence() const {
-   return m_tangent_plane_sequence;
-}
 
 inline const AircraftIntent::RouteData &AircraftIntent::GetRouteData() const { return m_route_data; }
 
@@ -236,7 +226,6 @@ inline void AircraftIntent::AddWaypointsToRouteDataVectors(const std::vector<Way
       m_route_data.m_latitude.emplace_back(waypoint_itr->GetLatitude());
       m_route_data.m_longitude.emplace_back(waypoint_itr->GetLongitude());
       m_route_data.m_nominal_ias.emplace_back(waypoint_itr->GetNominalIas());
-      m_route_data.m_mach.push_back(m_planned_cruise_mach);
       m_route_data.m_leg_type.push_back(m_arinc424_dictionary[waypoint_itr->GetArinc424LegType()]);
       m_route_data.m_high_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintHigh());
       m_route_data.m_low_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintLow());
@@ -300,7 +289,6 @@ inline void AircraftIntent::DoRouteDataLogging() const {
          j["alt_low_ft"] = Units::FeetLength(m_route_data.m_low_altitude_constraint[idx]).value();
          j["speed_high_knots"] = Units::KnotsSpeed(m_route_data.m_high_speed_constraint[idx]).value();
          j["speed_low_knots"] = Units::KnotsSpeed(m_route_data.m_low_speed_constraint[idx]).value();
-         j["mach"] = m_route_data.m_mach[idx];
          j["leg_type_int"] = m_route_data.m_leg_type[idx];
          j["rf_turn_x_position_m"] = Units::MetersLength(m_route_data.m_x_rf_center[idx]).value();
          j["rf_turn_y_position_m"] = Units::MetersLength(m_route_data.m_y_rf_center[idx]).value();
@@ -313,7 +301,7 @@ inline void AircraftIntent::DoRouteDataLogging() const {
 }
 
 inline bool AircraftIntent::ContainsWaypointName(std::string waypoint_name) const {
-   auto name_comparator = [waypoint_name](Waypoint waypoint_to_test) {
+   auto name_comparator = [waypoint_name](const Waypoint &waypoint_to_test) {
       return waypoint_to_test.GetName().compare(waypoint_name) == 0;
    };
    return std::any_of(m_all_waypoints.rbegin(), m_all_waypoints.rend(), name_comparator);

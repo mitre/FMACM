@@ -20,17 +20,15 @@
 #include "public/Environment.h"
 #include "public/EllipsoidalEarthModel.h"
 
-Environment *Environment::mInstance = NULL;
+std::unique_ptr<Environment> Environment::m_instance = nullptr;
 
-Environment::Environment() : earthModel(new EllipsoidalEarthModel()) {}
-
-Environment::~Environment() { delete earthModel; }
+Environment::Environment() : m_earth_model(new EllipsoidalEarthModel()) {}
 
 Environment *Environment::GetInstance() {
-   if (mInstance == NULL) {
-      mInstance = new Environment();
+   if (m_instance == NULL) {
+      m_instance = std::unique_ptr<Environment>(new Environment());
    }
-   return mInstance;
+   return m_instance.get();
 }
 
-EarthModel *Environment::GetEarthModel() const { return earthModel; }
+EarthModel *Environment::GetEarthModel() const { return m_earth_model.get(); }

@@ -24,6 +24,8 @@
 #include <scalar/SignedAngle.h>
 #include <scalar/Length.h>
 
+namespace aaesim::open_source {
+
 class HorizontalPath;  // avoid recursive class defs
 
 class HorizontalTurnPath final {
@@ -42,20 +44,19 @@ class HorizontalTurnPath final {
    };
    enum TURN_DIRECTION { NO_TURN, LEFT_TURN, RIGHT_TURN };
 
-   HorizontalTurnPath();
+   HorizontalTurnPath() = default;
 
-   ~HorizontalTurnPath();
-
-   bool operator==(const HorizontalTurnPath &that) const;
+   ~HorizontalTurnPath() = default;
 
    TURN_DIRECTION GetTurnDirection(const HorizontalPath &p0, const HorizontalPath &p1) const;
 
-   double x_position_meters;
-   double y_position_meters;
-   Units::UnsignedRadiansAngle q_start;
-   Units::UnsignedRadiansAngle q_end;
-   Units::MetersLength radius;
-   Units::UnsignedRadiansAngle bankAngle;
-   Units::MetersPerSecondSpeed groundspeed;
-   TURN_TYPE turn_type;
+   double x_position_meters{0};
+   double y_position_meters{0};
+   Units::UnsignedRadiansAngle q_start{0};
+   Units::UnsignedRadiansAngle q_end{0};
+   Units::MetersLength radius{0};
+   Units::UnsignedRadiansAngle bankAngle{0};
+   Units::MetersPerSecondSpeed groundspeed{0};
+   TURN_TYPE turn_type{UNKNOWN};
 };
+}  // namespace aaesim::open_source

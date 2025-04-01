@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <bitset>
+
 #include "public/LatitudeLongitudePoint.h"
 #include "public/LineOnEllipsoid.h"
 #include "public/ArcOnEllipsoid.h"
@@ -38,7 +40,18 @@ static const Units::Length GEOLIB_TOLERANCE_UNITZED = Units::NauticalMilesLength
 class GeolibUtils {
 
   public:
-   static std::string m_basic_error_message;  // allow other classes to use this error message
+   inline static std::string m_basic_error_message{
+         "Arg! Something very bad occurred inside a geolib library operation!"};
+
+   inline static bool IsSuccess(const geolib_idealab::ErrorSet &error_set) { return std::bitset<32>(error_set).none(); }
+
+   inline static bool HasErrorBitSet(const geolib_idealab::ErrorSet &error_set, geolib_idealab::ErrorCodes code) {
+      if (IsSuccess(error_set)) {
+         if (!IsSuccess(code)) return false;
+         return true;
+      }
+      return error_set & code;
+   }
 
    /**
     * Create a line of zero length that has directionality correctly defined.
@@ -263,8 +276,29 @@ class GeolibUtils {
    static std::vector<std::pair<bool, LatitudeLongitudePoint> > CalculateLineArcIntersectionPoints(
          const LineOnEllipsoid &line, const ArcOnEllipsoid &arc);
 
+   /**
+    * Build a reverse line.
+    */
+   static const LineOnEllipsoid ReverseLine(const LineOnEllipsoid &line) {
+      return GeolibUtils::CreateLineOnEllipsoid(line.GetEndPoint(), line.GetStartPoint());
+   }
+
+   /**
+    * Build a reverse arc.
+    */
+   static const ArcOnEllipsoid ReverseArc(const ArcOnEllipsoid &arc) {
+      geolib_idealab::ArcDirection reversed_direction;
+      if (arc.GetArcDirection() == geolib_idealab::ArcDirection::CLOCKWISE) {
+         reversed_direction = geolib_idealab::ArcDirection::COUNTERCLOCKWISE;
+      } else {
+         reversed_direction = geolib_idealab::ArcDirection::CLOCKWISE;
+      }
+      return GeolibUtils::CreateArcOnEllipsoid(arc.GetEndPoint(), arc.GetStartPoint(), arc.GetCenterPoint(),
+                                               reversed_direction);
+   }
+
   private:
-   static log4cplus::Logger m_logger;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("GeolibUtils"))};
 };
 
 }  // namespace aaesim

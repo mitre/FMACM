@@ -21,6 +21,7 @@
 #include "public/AircraftIntent.h"
 #include "public/CoreUtils.h"
 #include "public/SingleTangentPlaneSequence.h"
+#include "public/TangentPlaneSequence.h"
 #include "utils/public/PublicUtils.h"
 
 using namespace aaesim::test::utils;
@@ -243,12 +244,6 @@ TEST(AircraftIntent, wgs84_to_xy) {
 }
 
 TEST(AircraftIntent, xyz_to_wgs84) {
-   // This test will load waypoints from a file as lat,lon locations and convert them to local tangent plane [x,y,z].
-   // It will assume that conversion was correct (see separate test for that conversion). Then, it
-   // converts from [x,y,z] back to WGS84 lat,lon. The assert will be placed on
-   // how well the whole process ends up back at the waypoint locations originally loaded.
-
-   // open the test data file and get a stream
    std::string testData = "./resources/EAGUL5_GALLUP.txt";
    FILE *fp;
    fp = fopen(testData.c_str(), "r");
@@ -267,7 +262,7 @@ TEST(AircraftIntent, xyz_to_wgs84) {
 
    SingleTangentPlaneSequence::ClearStaticMembers();
    AircraftIntent aiTest;
-   aiTest.load(&stream);  // read the test data
+   aiTest.load(&stream);
    aiTest.UpdateXYZFromLatLonWgs84();
 
    // Convert back to lat/lon
@@ -278,23 +273,21 @@ TEST(AircraftIntent, xyz_to_wgs84) {
                               Units::MetersLength(aiTest.GetRouteData().m_z[i]), latRad[i], lonRad[i]);
    }
 
-   const std::vector<Waypoint> waypoints = aiTest.GetTangentPlaneSequence()->getWaypointsFromInitialization();
+   auto wp_list = aiTest.GetWaypointList();
+   const auto tangent_plane_sequence = std::make_shared<TangentPlaneSequence>(wp_list);
+   const auto waypoints = tangent_plane_sequence->GetWaypointsFromInitialization();
 
-   // Asserts on lat
    for (int var = 0; var < aiTest.GetNumberOfWaypoints(); ++var) {
       EXPECT_NEAR(Units::RadiansAngle(waypoints[var].GetLatitude()).value(), Units::RadiansAngle(latRad[var]).value(),
                   TOLERANCE_RADIANS);
    }
 
-   // Asserts on lon
    for (int var = 0; var < aiTest.GetNumberOfWaypoints(); ++var) {
       EXPECT_NEAR(Units::RadiansAngle(waypoints[var].GetLongitude()).value(), Units::RadiansAngle(lonRad[var]).value(),
                   TOLERANCE_RADIANS);
    }
 
    // go back the other way
-
-   std::shared_ptr<TangentPlaneSequence> tps = aiTest.GetTangentPlaneSequence();
    for (int i = 0; i < aiTest.GetNumberOfWaypoints(); ++i) {
       EarthModel::GeodeticPosition geo;
       geo.latitude = Units::RadiansAngle(latRad[i]);
@@ -302,7 +295,7 @@ TEST(AircraftIntent, xyz_to_wgs84) {
       geo.altitude = Units::MetersLength(0);
 
       EarthModel::LocalPositionEnu enu;
-      tps->convertGeodeticToLocal(geo, enu);
+      tangent_plane_sequence->ConvertGeodeticToLocal(geo, enu);
 
       EXPECT_NEAR(aiTest.GetRouteData().m_x[i].value(), Units::MetersLength(enu.x).value(), TOLERANCE_METERS);
       EXPECT_NEAR(aiTest.GetRouteData().m_y[i].value(), Units::MetersLength(enu.y).value(), TOLERANCE_METERS);
@@ -394,13 +387,13 @@ TEST(AircraftIntent, test_consistency_long_route) {
 
    AircraftIntent aircraft_intent;
    aircraft_intent.load(&stream);
-
+   auto wplist = aircraft_intent.GetWaypointList();
+   auto position_converter = std::make_shared<TangentPlaneSequence>(wplist);
    for (Waypoint wp : aircraft_intent.GetWaypointList()) {
       EarthModel::LocalPositionEnu enu_position;
       EarthModel::GeodeticPosition geodetic_position;
-      aircraft_intent.GetTangentPlaneSequence()->convertGeodeticToLocal(
-            EarthModel::GeodeticPosition::CreateFromWaypoint(wp), enu_position);
-      aircraft_intent.GetTangentPlaneSequence()->convertLocalToGeodetic(enu_position, geodetic_position);
+      position_converter->ConvertGeodeticToLocal(EarthModel::GeodeticPosition::CreateFromWaypoint(wp), enu_position);
+      position_converter->ConvertLocalToGeodetic(enu_position, geodetic_position);
       EXPECT_NEAR(Units::RadiansAngle(geodetic_position.latitude).value(),
                   Units::RadiansAngle(wp.GetLatitude()).value(), 1e-5);
       EXPECT_NEAR(Units::RadiansAngle(geodetic_position.longitude).value(),

@@ -18,11 +18,11 @@
 // ****************************************************************************
 
 #include "public/VerticalPredictor.h"
-#include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
 
 using namespace std;
 using namespace aaesim::open_source;
+using namespace aaesim::open_source::constants;
 
 VerticalPredictor::VerticalPredictor()
    : m_low_groundspeed_warning(50),
@@ -34,16 +34,12 @@ VerticalPredictor::VerticalPredictor()
    m_cruise_altitude_msl = Units::FeetLength(37000);
    m_transition_ias = Units::KnotsSpeed(310);
    m_cruise_mach = m_transition_mach = 0.8;
-   m_ias_in_tracon = Units::KnotsSpeed(250.0);
-   m_altitude_msl_in_tracon = Units::FeetLength(10000.0);
    m_current_trajectory_index = 0;
    m_descent_start_time = Units::SecondsTime(0.0);
 }
 
 void VerticalPredictor::SetMembers(const VerticalPredictor &vertical_predictor) {
    m_descent_start_time = vertical_predictor.m_descent_start_time;
-   m_ias_in_tracon = vertical_predictor.m_ias_in_tracon;
-   m_altitude_msl_in_tracon = vertical_predictor.m_altitude_msl_in_tracon;
    m_transition_ias = vertical_predictor.m_transition_ias;
    m_transition_mach = vertical_predictor.m_transition_mach;
    m_cruise_altitude_msl = vertical_predictor.m_cruise_altitude_msl;
@@ -63,11 +59,6 @@ PrecalcConstraint VerticalPredictor::CheckActiveConstraint(double along_path_dis
                                                            double altitude_msl_meter, double calibrated_airspeed_mps,
                                                            const PrecalcConstraint &constraints,
                                                            double transition_altitude_meter) {
-
-   //   const double SPEED_DIFFERENCE_THRESHOLD = -0.1;
-   //   const double HI_SPEED_CONSTRAINT_THRESHOLD = (1000.0 * KNOTS_TO_METERS_PER_SECOND);
-   //   const double ALT_DIFFERENCE_THRESHOLD = (100.0 * FEET_TO_METERS);
-
    PrecalcConstraint result = constraints;
 
    // if distance is greater than the constraint distance process the constraint values
@@ -171,7 +162,7 @@ Guidance VerticalPredictor::CalculateGuidanceCommands(const AircraftState &state
 
    if (result.GetSelectedSpeed().GetSpeedType() == UNSPECIFIED_SPEED) {
       // no selected speed, so set it to Mach or IAS depending on altitude
-      if (Units::FeetLength(state.m_z) > m_transition_altitude_msl) {
+      if (Units::FeetLength(state.GetAltitudeMsl()) > m_transition_altitude_msl) {
          // Mach
          result.SetSelectedSpeed(AircraftSpeed::OfMach(BoundedValue<double, 0, 1>(m_transition_mach)));
       } else {
@@ -324,8 +315,6 @@ VerticalPredictor &VerticalPredictor::operator=(const VerticalPredictor &obj) {
       this->m_transition_ias = obj.m_transition_ias;
       this->m_transition_mach = obj.m_transition_mach;
       this->m_cruise_mach = obj.m_cruise_mach;
-      this->m_ias_in_tracon = obj.m_ias_in_tracon;
-      this->m_altitude_msl_in_tracon = obj.m_altitude_msl_in_tracon;
       this->m_descent_start_time = obj.m_descent_start_time;
       this->m_precalculated_constraints = obj.m_precalculated_constraints;
       this->m_vertical_path = obj.m_vertical_path;
@@ -348,8 +337,6 @@ bool VerticalPredictor::operator==(const VerticalPredictor &obj) const {
    match = match && (this->m_transition_ias == obj.m_transition_ias);
    match = match && (this->m_transition_mach == obj.m_transition_mach);
    match = match && (this->m_cruise_mach == obj.m_cruise_mach);
-   match = match && (this->m_ias_in_tracon == obj.m_ias_in_tracon);
-   match = match && (this->m_altitude_msl_in_tracon == obj.m_altitude_msl_in_tracon);
    match = match && (this->m_descent_start_time == obj.m_descent_start_time);
    match = match && (this->m_precalculated_constraints == obj.m_precalculated_constraints);
    match = match && (this->m_vertical_path == obj.m_vertical_path);
@@ -360,7 +347,3 @@ bool VerticalPredictor::operator==(const VerticalPredictor &obj) const {
 }
 
 bool VerticalPredictor::operator!=(const VerticalPredictor &obj) const { return !this->operator==(obj); }
-
-const Units::MetersPerSecondSpeed VerticalPredictor::SPEED_DIFFERENCE_THRESHOLD(-0.1);
-const Units::KnotsSpeed VerticalPredictor::HIGH_SPEED_CONSTRAINT_THRESHOLD(1000);
-const Units::FeetLength VerticalPredictor::ALT_DIFFERENCE_THRESHOLD(100);

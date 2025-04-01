@@ -1,0 +1,25 @@
+{
+   // "image": "aaesim-devel-rocky:latest",
+   "build": { "dockerfile": "Dockerfile" },
+   "customizations": {
+      "vscode": {
+         "extensions": [
+            "dbaeumer.vscode-eslint",
+            "ms-vscode.cpptools-themes",
+            "ms-vscode.cpptools",
+            "ms-vscode.cpptools-extension-pack",
+            "matepek.vscode-catch2-test-adapter"
+         ]
+      }
+   },
+   "containerEnv": {"CPM_SOURCE_CACHE":"/tmp/cpm_cache/"},
+   "workspaceMount": "source=${localWorkspaceFolder},target=/home/demo/gitrepos/aaesim,type=bind,consistency=cached", 
+   "workspaceFolder": "/home/demo/gitrepos/aaesim",
+   // "mounts": [
+   //    "source=/Users/sbowman/gitrepos/fmacm-airs-scenarios,target=/home/demo/gitrepos/aaesim/fmacm-validation-scenarios,type=bind,consistency=cached",
+   //    "source=/Users/sbowman/gitrepos/aaesim-to-fmacm,target=/home/demo/gitrepos/aaesim/aaesim-to-fmacm,type=bind,consistency=cached"
+   //  ]
+   "mounts": [
+      "source=/Users/sbowman/gitrepos/fmacm-airs-scenarios,target=/home/demo/gitrepos/aaesim/fmacm-validation-scenarios,type=bind,consistency=cached"
+    ]
+ }

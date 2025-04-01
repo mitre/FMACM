@@ -33,7 +33,7 @@ double SpeedOnThrustControl::m_gain_speedbrake = 0.20;
 log4cplus::Logger SpeedOnThrustControl::m_logger =
       log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SpeedOnThrustControl"));
 
-SpeedOnThrustControl::SpeedOnThrustControl() {
+SpeedOnThrustControl::SpeedOnThrustControl(const Units::Angle max_bank_angle) : AircraftControl(max_bank_angle) {
    m_alt_gain = m_gain_altitude;
    m_gamma_gain = m_gain_gamma;
    m_phi_gain = m_gain_phi;
@@ -47,20 +47,17 @@ SpeedOnThrustControl::SpeedOnThrustControl() {
 }
 
 void SpeedOnThrustControl::Initialize(
-      std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
-      const Units::Angle &max_bank_angle) {
-   AircraftControl::Initialize(bada_calculator, max_bank_angle);
+      std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator) {
+   AircraftControl::Initialize(bada_calculator);
    m_min_thrust_counter = 0.0;
    m_speedbrake_counter = 0.0;
    m_is_speedbrake_on = false;
 }
 
-void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
-                                             const EquationsOfMotionState &equations_of_motion_state,
-                                             Units::Force &thrust_command, Units::Angle &gamma_command,
-                                             Units::Speed &tas_command, double &speed_brake_command,
-                                             aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
-                                             const WeatherTruth &weather) {
+void SpeedOnThrustControl::DoVerticalControl(
+      const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state, Units::Force &thrust_command,
+      Units::Angle &gamma_command, Units::Speed &tas_command, double &speed_brake_command,
+      aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration) {
    const Units::Speed hdot_ref = guidance.m_vertical_speed;
    const Units::Length alt_ref = guidance.m_reference_altitude;
    const Units::Length error_alt = alt_ref - equations_of_motion_state.altitude_msl;
@@ -76,7 +73,8 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
    gamma_command = Units::RadiansAngle(asin(temp_gamma));
 
    // Speed Control
-   tas_command = weather.CAS2TAS(guidance.m_ias_command, equations_of_motion_state.altitude_msl);
+   tas_command =
+         m_sensed_weather->GetTrueWeather()->CAS2TAS(guidance.m_ias_command, equations_of_motion_state.altitude_msl);
 
    // Speed Error
    const Units::Speed error_tas = tas_command - equations_of_motion_state.true_airspeed;
@@ -84,7 +82,7 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
 
    // Estimate kinetic forces for this state
    Units::Force lift, drag;
-   ConfigureFlapsAndEstimateKineticForces(equations_of_motion_state, lift, drag, new_flap_configuration, weather);
+   ConfigureFlapsAndEstimateKineticForces(equations_of_motion_state, lift, drag, new_flap_configuration);
 
    // Thrust to maintain speed
    // Nominal Thrust (no acceleration) at desired speed
@@ -109,8 +107,8 @@ void SpeedOnThrustControl::DoVerticalControl(const Guidance &guidance,
 
       thrust_command = min_thrust;
 
-      const Units::Speed calibrated_airspeed = weather.getAtmosphere()->TAS2CAS(equations_of_motion_state.true_airspeed,
-                                                                                equations_of_motion_state.altitude_msl);
+      const Units::Speed calibrated_airspeed = m_sensed_weather->GetTrueWeather()->TAS2CAS(
+            equations_of_motion_state.true_airspeed, equations_of_motion_state.altitude_msl);
 
       aaesim::open_source::bada_utils::FlapConfiguration updated_flap_configuration =
             aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED;

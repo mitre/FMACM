@@ -40,36 +40,36 @@ LocalTangentPlane::LocalTangentPlane(const EarthModel *earthModel,
    : earthModel(earthModel),
      pointOfTangencyEcef(ecefPointOfTangency),
      pointOfTangencyEnu(enuPointOfTangency),
-     ecefToEnu(DMatrix((double **)&identity3x3, 0, 2, 0, 2)),
-     enuToEcef(DMatrix((double **)&identity3x3, 0, 2, 0, 2)) {}
+     m_ecef_to_enu(DMatrix((double **)&identity3x3, 0, 2, 0, 2)),
+     m_enu_to_ecef(DMatrix((double **)&identity3x3, 0, 2, 0, 2)) {}
 
 LocalTangentPlane::~LocalTangentPlane() {}
 
-void LocalTangentPlane::initializeRotationForGeodeticOrigin() {
-   ecefToEnu = DMatrix((double **)zxy, 0, 2, 0, 2);
-   enuToEcef = DMatrix((double **)yzx, 0, 2, 0, 2);
+void LocalTangentPlane::InitializeRotationForGeodeticOrigin() {
+   m_ecef_to_enu = DMatrix((double **)zxy, 0, 2, 0, 2);
+   m_enu_to_ecef = DMatrix((double **)yzx, 0, 2, 0, 2);
 }
 
-void LocalTangentPlane::rotateEnuFrame(const double x, const double y, const double z, const Units::Angle theta) {
-   DMatrix &r = createRotationMatrix(x, y, z, theta);
-   DMatrix &ecefToEnu1 = ecefToEnu * r;
-   ecefToEnu = ecefToEnu1;
+void LocalTangentPlane::RotateEnuFrame(const double x, const double y, const double z, const Units::Angle theta) {
+   DMatrix &r = CreateRotationMatrix(x, y, z, theta);
+   DMatrix &ecefToEnu1 = m_ecef_to_enu * r;
+   m_ecef_to_enu = ecefToEnu1;
    delete &r;
    delete &ecefToEnu1;
 
-   DMatrix &rInv = createRotationMatrix(x, y, z, -theta);
-   DMatrix &enuToEcef1 = rInv * enuToEcef;
-   enuToEcef = enuToEcef1;
+   DMatrix &rInv = CreateRotationMatrix(x, y, z, -theta);
+   DMatrix &enuToEcef1 = rInv * m_enu_to_ecef;
+   m_enu_to_ecef = enuToEcef1;
    delete &rInv;
    delete &enuToEcef1;
 }
 
-void LocalTangentPlane::convertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
+void LocalTangentPlane::ConvertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
                                                   EarthModel::AbsolutePositionEcef &ecef) const {
    earthModel->ConvertGeodeticToAbsolute(geo, ecef);
 }
 
-void LocalTangentPlane::convertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
+void LocalTangentPlane::ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
                                                   EarthModel::GeodeticPosition &geo) const {
    earthModel->ConvertAbsoluteToGeodetic(ecef, geo);
 }
@@ -82,16 +82,16 @@ void LocalTangentPlane::printCoordinates(string title, Units::Length x, Units::L
 /**
  * Converts local coordinates to absolute.
  */
-void LocalTangentPlane::convertLocalToAbsolute(const EarthModel::LocalPositionEnu &enu,
+void LocalTangentPlane::ConvertLocalToAbsolute(const EarthModel::LocalPositionEnu &enu,
                                                EarthModel::AbsolutePositionEcef &ecef) const {
    Units::Length x1 = enu.x - pointOfTangencyEnu.x;
    Units::Length y1 = enu.y - pointOfTangencyEnu.y;
    Units::Length z1 = enu.z - pointOfTangencyEnu.z;
    printCoordinates("Local relative: ", x1, y1, z1);
 
-   ecef.x = enuToEcef[0][0] * x1 + enuToEcef[0][1] * y1 + enuToEcef[0][2] * z1;
-   ecef.y = enuToEcef[1][0] * x1 + enuToEcef[1][1] * y1 + enuToEcef[1][2] * z1;
-   ecef.z = enuToEcef[2][0] * x1 + enuToEcef[2][1] * y1 + enuToEcef[2][2] * z1;
+   ecef.x = m_enu_to_ecef[0][0] * x1 + m_enu_to_ecef[0][1] * y1 + m_enu_to_ecef[0][2] * z1;
+   ecef.y = m_enu_to_ecef[1][0] * x1 + m_enu_to_ecef[1][1] * y1 + m_enu_to_ecef[1][2] * z1;
+   ecef.z = m_enu_to_ecef[2][0] * x1 + m_enu_to_ecef[2][1] * y1 + m_enu_to_ecef[2][2] * z1;
 
    printCoordinates("Rotated relative: ", ecef.x, ecef.y, ecef.z);
 
@@ -105,32 +105,32 @@ void LocalTangentPlane::convertLocalToAbsolute(const EarthModel::LocalPositionEn
 /**
  * Converts absolute coordinates to local.
  */
-void LocalTangentPlane::convertAbsoluteToLocal(const EarthModel::AbsolutePositionEcef &ecef,
+void LocalTangentPlane::ConvertAbsoluteToLocal(const EarthModel::AbsolutePositionEcef &ecef,
                                                EarthModel::LocalPositionEnu &enu) const {
    Units::Length x1 = ecef.x - pointOfTangencyEcef.x;
    Units::Length y1 = ecef.y - pointOfTangencyEcef.y;
    Units::Length z1 = ecef.z - pointOfTangencyEcef.z;
 
-   enu.x = ecefToEnu[0][0] * x1 + ecefToEnu[0][1] * y1 + ecefToEnu[0][2] * z1;
-   enu.y = ecefToEnu[1][0] * x1 + ecefToEnu[1][1] * y1 + ecefToEnu[1][2] * z1;
-   enu.z = ecefToEnu[2][0] * x1 + ecefToEnu[2][1] * y1 + ecefToEnu[2][2] * z1;
+   enu.x = m_ecef_to_enu[0][0] * x1 + m_ecef_to_enu[0][1] * y1 + m_ecef_to_enu[0][2] * z1;
+   enu.y = m_ecef_to_enu[1][0] * x1 + m_ecef_to_enu[1][1] * y1 + m_ecef_to_enu[1][2] * z1;
+   enu.z = m_ecef_to_enu[2][0] * x1 + m_ecef_to_enu[2][1] * y1 + m_ecef_to_enu[2][2] * z1;
 
    enu.x += pointOfTangencyEnu.x;
    enu.y += pointOfTangencyEnu.y;
    enu.z += pointOfTangencyEnu.z;
 }
 
-void LocalTangentPlane::convertGeodeticToLocal(const EarthModel::GeodeticPosition &geo,
+void LocalTangentPlane::ConvertGeodeticToLocal(const EarthModel::GeodeticPosition &geo,
                                                EarthModel::LocalPositionEnu &enu) const {
    EarthModel::AbsolutePositionEcef temp;
    earthModel->ConvertGeodeticToAbsolute(geo, temp);
-   convertAbsoluteToLocal(temp, enu);
+   ConvertAbsoluteToLocal(temp, enu);
 }
 
-void LocalTangentPlane::convertLocalToGeodetic(const EarthModel::LocalPositionEnu &enu,
+void LocalTangentPlane::ConvertLocalToGeodetic(const EarthModel::LocalPositionEnu &enu,
                                                EarthModel::GeodeticPosition &geo) const {
    EarthModel::AbsolutePositionEcef temp;
-   convertLocalToAbsolute(enu, temp);
+   ConvertLocalToAbsolute(enu, temp);
    earthModel->ConvertAbsoluteToGeodetic(temp, geo);
 }
 

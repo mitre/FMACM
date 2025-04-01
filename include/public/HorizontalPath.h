@@ -22,23 +22,22 @@
 #include <string>
 #include "public/HorizontalTurnPath.h"
 
-class HorizontalPath {
+namespace aaesim::open_source {
+class HorizontalPath final {
   public:
    enum SegmentType { STRAIGHT, TURN, UNSET };
 
-   HorizontalPath();
-
-   virtual ~HorizontalPath();
-
-   bool operator==(const HorizontalPath &that) const;
+   HorizontalPath() = default;
+   virtual ~HorizontalPath() = default;
    double GetXPositionMeters() const;
    double GetYPositionMeters() const;
    void SetXYPositionMeters(double x_position_meters, double y_position_meters);
+   bool operator==(const HorizontalPath &that) const;
 
-   SegmentType m_segment_type;
-   double m_path_length_cumulative_meters;
-   double m_path_course;
-   HorizontalTurnPath m_turn_info;
+   SegmentType m_segment_type{HorizontalPath::SegmentType::UNSET};
+   double m_path_length_cumulative_meters{0};
+   double m_path_course{0};
+   HorizontalTurnPath m_turn_info{};
 
    std::string GetSegmentTypeAsString() const {
       std::string return_this = "UNSET";
@@ -58,6 +57,7 @@ class HorizontalPath {
    }
 
   private:
-   double m_x_position_meters;
-   double m_y_position_meters;
+   double m_x_position_meters{0};
+   double m_y_position_meters{0};
 };
+}  // namespace aaesim::open_source

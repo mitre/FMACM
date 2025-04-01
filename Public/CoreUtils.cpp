@@ -22,7 +22,6 @@
 #include <iomanip>
 
 #include "public/CoreUtils.h"
-#include "public/AircraftCalculations.h"
 #include "public/SimulationTime.h"
 #include "public/GeolibUtils.h"
 #include "public/LatitudeLongitudePoint.h"
@@ -52,23 +51,22 @@ double CoreUtils::LinearlyInterpolate(int upper_index, double x_interpolation_va
 
    if (upper_index < 1 || upper_index >= x_values.size()) {
       char msg[200];
-      sprintf(msg, "upperIx (%d) is not between 1 and %d", upper_index, static_cast<int>(x_values.size() - 1));
+      sprintf(msg, "upper_index (%d) is not between 1 and %d", upper_index, static_cast<int>(x_values.size() - 1));
       LOG4CPLUS_FATAL(m_logger, msg);
       throw out_of_range(msg);
    }
 
-   double v2 = x_values[upper_index];
-   double v1 = x_values[upper_index - 1];
-   double o2 = y_values[upper_index];
-   double o1 = y_values[upper_index - 1];
+   const double v2 = x_values[upper_index];
+   const double v1 = x_values[upper_index - 1];
+   const double o2 = y_values[upper_index];
+   const double o1 = y_values[upper_index - 1];
 
    if ((x_interpolation_value - v1) * (x_interpolation_value - v2) > 0) {
       char msg[200];
-      sprintf(msg, "v (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
+      sprintf(msg, "ratio (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
 
-      double ratio = (x_interpolation_value - v1) / (x_interpolation_value - v2);  // must be positive
+      double ratio = (x_interpolation_value - v1) / (x_interpolation_value - v2);
       if (upper_index + 1 == x_values.size() && (ratio < .1 || ratio > 10)) {
-         // within 10%, let him off with a warning
          LOG4CPLUS_WARN(m_logger, msg);
       } else {
          LOG4CPLUS_FATAL(m_logger, msg);
@@ -77,6 +75,18 @@ double CoreUtils::LinearlyInterpolate(int upper_index, double x_interpolation_va
    }
 
    return ((o2 - o1) / (v2 - v1)) * (x_interpolation_value - v1) + o1;
+}
+
+Units::Speed CoreUtils::LinearlyInterpolate(int upper_index, Units::Length x_interpolation_value,
+                                            const std::vector<double> &x_values,
+                                            const std::vector<Units::Speed> &y_values) {
+   std::vector<double> y_values_as_double{};
+   auto insert_speed_as_double = [&y_values_as_double](Units::Speed speed_value) {
+      y_values_as_double.push_back(Units::MetersPerSecondSpeed(speed_value).value());
+   };
+   std::for_each(y_values.begin(), y_values.end(), insert_speed_as_double);
+   return Units::MetersPerSecondSpeed(LinearlyInterpolate(
+         upper_index, Units::MetersLength(x_interpolation_value).value(), x_values, y_values_as_double));
 }
 
 const Units::Length CoreUtils::CalculateEuclideanDistance(const std::pair<Units::Length, Units::Length> &xyLoc1,

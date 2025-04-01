@@ -69,7 +69,7 @@ class LoaderLink {
       }
    }
 
-   void set_deprecated_info(LoaderDeprecatedMetaInfo info) { deprecatedInfo = info; }
+   void set_deprecated_info(const LoaderDeprecatedMetaInfo &info) { deprecatedInfo = info; }
 
    LoaderDeprecatedMetaInfo get_deprecated_info() { return deprecatedInfo; }
 
@@ -79,7 +79,4 @@ class LoaderLink {
    bool must_load_only_once;  // if true you can only load it once or 0 times
    bool is_a_list;            // if set high the two above do not apply
    LoaderDeprecatedMetaInfo deprecatedInfo;
-
-  private:
-   /* static log4cplus::Logger logger; */
 };

@@ -29,15 +29,14 @@
 namespace aaesim {
 namespace open_source {
 struct ADSBReceiver {
-   virtual Sensor::ADSB::ADSBSVReport GetCurrentADSBReport(int id) const = 0;
-   virtual Sensor::ADSB::ADSBSVReport GetADSBReportBefore(int id, double time) const = 0;
-   virtual const std::vector<Sensor::ADSB::ADSBSVReport> &GetReportsReceivedByTime(
-         const SimulationTime &time) const = 0;
-   virtual const std::map<int, std::vector<Sensor::ADSB::ADSBSVReport> > &GetAllReportsReceived() const = 0;
-   virtual std::map<int, Sensor::ADSB::ADSBSVReport> const GetCurrentADSBReport() const = 0;
+   virtual ADSBSVReport GetCurrentADSBReport(int id) const = 0;
+   virtual ADSBSVReport GetADSBReportBefore(int id, Units::Time time) const = 0;
+   virtual const std::vector<ADSBSVReport> &GetReportsReceivedByTime(const SimulationTime &time) const = 0;
+   virtual const std::map<int, std::vector<ADSBSVReport> > &GetAllReportsReceived() const = 0;
+   virtual std::map<int, ADSBSVReport> const GetCurrentADSBReport() const = 0;
    virtual void Initialize(Units::Length adsb_reception_range_threshold) = 0;
-   virtual std::map<int, Sensor::ADSB::ADSBSVReport> Receive(const aaesim::open_source::SimulationTime &time,
-                                                             const aaesim::open_source::AircraftState &state) = 0;
+   virtual std::map<int, ADSBSVReport> Receive(const aaesim::open_source::SimulationTime &time,
+                                               const aaesim::open_source::AircraftState &state) = 0;
 };
 }  // namespace open_source
 }  // namespace aaesim

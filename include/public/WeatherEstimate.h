@@ -37,12 +37,23 @@ class WeatherEstimate {
 
    friend class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 
+   struct shared_members {
+      shared_members() : east_west(), north_south(), m_atmosphere(nullptr) {}
+      shared_members(std::shared_ptr<Atmosphere> atmosphere) : east_west(), north_south(), m_atmosphere(atmosphere) {}
+      aaesim::open_source::WindStack east_west;
+      aaesim::open_source::WindStack north_south;
+      std::shared_ptr<Atmosphere> m_atmosphere;
+   };
+
+  protected:
+   std::shared_ptr<shared_members> m_shared_members;
+
   private:
    static log4cplus::Logger m_logger;
 
   public:
-   aaesim::open_source::WindStack east_west;
-   aaesim::open_source::WindStack north_south;
+   aaesim::open_source::WindStack &east_west() const { return m_shared_members->east_west; }
+   aaesim::open_source::WindStack &north_south() const { return m_shared_members->north_south; }
 
    std::shared_ptr<Wind> getWind() const;
 
@@ -79,7 +90,6 @@ class WeatherEstimate {
    void SetLocation(const Units::Angle latitude, const Units::Angle longitude, const Units::Length altitude);
 
    std::shared_ptr<Wind> m_wind;
-   std::shared_ptr<Atmosphere> m_atmosphere;
    Units::KelvinTemperature m_temperature;
    Units::Pressure m_pressure;
    Units::Density m_density;
@@ -87,7 +97,9 @@ class WeatherEstimate {
    std::pair<std::pair<Units::Angle, Units::Angle>, Units::Length> m_location_of_current_conditions;
 };
 
-inline void WeatherEstimate::SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere) { m_atmosphere = atmosphere; }
+inline void WeatherEstimate::SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere) {
+   m_shared_members->m_atmosphere = atmosphere;
+}
 
 inline void WeatherEstimate::SetLocation(const Units::Angle latitude, const Units::Angle longitude,
                                          const Units::Length altitude) {

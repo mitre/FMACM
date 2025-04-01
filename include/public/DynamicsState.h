@@ -35,20 +35,20 @@ typedef struct {
    // represent the state outside the EOM function. Within the EOM function, the state is
    // represented with EquationsOfMotionState.
    int id;
-   Units::MetersLength x;                        // aircraft position east coordinate
-   Units::MetersLength y;                        // aircraft position north coordinate
-   Units::MetersLength h;                        // aircraft altitude
-   Units::MetersPerSecondSpeed v_true_airspeed;  // True airspeed
-   Units::KnotsSpeed v_indicated_airspeed;       // calibrated/indicated airspeed
-   Units::SignedAngle psi;                       // aircraft heading angle measured from east counter-clockwise
-   Units::RadiansAngle phi;                      // aircraft roll angle
+   Units::MetersLength h;
+   Units::MetersPerSecondSpeed v_true_airspeed;
+   Units::KnotsSpeed v_indicated_airspeed;
+   double mach;
+   Units::SignedAngle psi;
+   Units::RadiansAngle phi;
    Units::RadiansAngle gamma;  // aircraft flight-path angle (rad) NOTE: for gamma, heading down is positive; heading
    // up is negative
    Units::NewtonsForce thrust;
-   Units::MetersPerSecondSpeed xd;                                         // ground speed x component
-   Units::MetersPerSecondSpeed yd;                                         // ground speed y component
-   double speed_brake;                                                     // speed brake (% of deployment)
-   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration;  // for flaps speed
+   Units::MetersPerSecondSpeed xd;
+   Units::MetersPerSecondSpeed yd;
+   double speed_brake;  // % of deployment
+   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration{
+         aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
    Units::Mass current_mass;
    Units::AbsCelsiusTemperature true_temperature;
 } DynamicsState;

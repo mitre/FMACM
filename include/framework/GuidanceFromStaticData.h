@@ -64,7 +64,8 @@ class GuidanceFromStaticData final : aaesim::open_source::GuidanceCalculator {
 
    GuidanceFromStaticData();
 
-   GuidanceFromStaticData(const std::vector<HorizontalPath> &horizontal_path, const VerticalData &vertical_path,
+   GuidanceFromStaticData(const std::vector<aaesim::open_source::HorizontalPath> &horizontal_path,
+                          const VerticalData &vertical_path,
                           const PlannedDescentParameters &planned_descent_parameters);
 
    aaesim::open_source::Guidance Update(const aaesim::open_source::AircraftState &state) override;
@@ -73,7 +74,7 @@ class GuidanceFromStaticData final : aaesim::open_source::GuidanceCalculator {
 
    const Units::MetersLength GetEstimatedDistanceAlongPath() const;
 
-   const std::vector<HorizontalPath> &GetHorizontalTrajectory() const;
+   const std::vector<aaesim::open_source::HorizontalPath> &GetHorizontalTrajectory() const;
 
   private:
    static log4cplus::Logger m_logger;
@@ -88,9 +89,9 @@ class GuidanceFromStaticData final : aaesim::open_source::GuidanceCalculator {
                                                              const Units::UnsignedAngle &estimated_course);
 
    VerticalData m_vertical_data;
-   std::vector<HorizontalPath> m_horizontal_trajectory;
-   AlongPathDistanceCalculator m_decrementing_distance_calculator;
-   PositionCalculator m_decrementing_position_calculator;
+   std::vector<aaesim::open_source::HorizontalPath> m_horizontal_trajectory;
+   aaesim::open_source::AlongPathDistanceCalculator m_decrementing_distance_calculator;
+   aaesim::open_source::PositionCalculator m_decrementing_position_calculator;
    Units::Length m_estimated_distance_to_go;
    aaesim::open_source::Guidance m_previous_guidance;
    PlannedDescentParameters m_planned_descent_parameters;
@@ -100,7 +101,7 @@ inline const Units::MetersLength GuidanceFromStaticData::GetEstimatedDistanceAlo
    return m_estimated_distance_to_go;
 }
 
-inline const std::vector<HorizontalPath> &GuidanceFromStaticData::GetHorizontalTrajectory() const {
+inline const std::vector<aaesim::open_source::HorizontalPath> &GuidanceFromStaticData::GetHorizontalTrajectory() const {
    return m_horizontal_trajectory;
 }
 

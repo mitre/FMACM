@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include "public/CoreUtils.h"
 #include "public/InvalidIndexException.h"
-#include "public/AircraftCalculations.h"
 #include "public/SingleTangentPlaneSequence.h"
 
 log4cplus::Logger AircraftIntent::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftIntent"));
@@ -31,7 +30,6 @@ const int AircraftIntent::UNINITIALIZED_AIRCRAFT_ID = -1;
 
 AircraftIntent::AircraftIntent()
    : m_route_data(),
-     m_tangent_plane_sequence(nullptr),
      m_planned_cruise_mach(0),
      m_all_waypoints(),
      m_is_loaded(false),
@@ -46,7 +44,6 @@ AircraftIntent::AircraftIntent()
 
 AircraftIntent::AircraftIntent(const AircraftIntent &in)
    : m_route_data(),
-     m_tangent_plane_sequence(nullptr),
      m_planned_cruise_mach(0),
      m_all_waypoints(),
      m_is_loaded(false),
@@ -63,14 +60,12 @@ AircraftIntent::AircraftIntent(const AircraftIntent &in)
 
 void AircraftIntent::Initialize() {
    m_all_waypoints.clear();
-   m_tangent_plane_sequence.reset();
 
    m_route_data.m_name.clear();
    m_route_data.m_nominal_altitude.clear();
    m_route_data.m_latitude.clear();
    m_route_data.m_longitude.clear();
    m_route_data.m_nominal_ias.clear();
-   m_route_data.m_mach.clear();
 
    // the new constraint values
    m_route_data.m_high_altitude_constraint.clear();
@@ -120,7 +115,6 @@ void AircraftIntent::DeleteRouteDataContent() {
    m_route_data.m_latitude.clear();
    m_route_data.m_longitude.clear();
    m_route_data.m_nominal_ias.clear();
-   m_route_data.m_mach.clear();
    m_route_data.m_waypoint_phase_of_flight.clear();
    m_route_data.m_leg_type.clear();
    m_route_data.m_high_altitude_constraint.clear();
@@ -149,7 +143,6 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
    AddWaypointsToRouteDataVectors(m_ascent_waypoints, ASCENT);
    AddWaypointsToRouteDataVectors(m_cruise_waypoints, CRUISE);
 
-   auto number_of_waypoints_before_descent = m_all_waypoints.size();
    auto vector_current_index = m_all_waypoints.size();
    auto waypoint_itr = m_descent_waypoints.begin();
    while (waypoint_itr != m_descent_waypoints.end()) {
@@ -160,7 +153,6 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
       m_route_data.m_latitude.emplace_back(waypoint_itr->GetLatitude());
       m_route_data.m_longitude.emplace_back(waypoint_itr->GetLongitude());
       m_route_data.m_nominal_ias.emplace_back(waypoint_itr->GetNominalIas());
-      m_route_data.m_mach.push_back(m_planned_cruise_mach);
       m_route_data.m_leg_type.push_back(m_arinc424_dictionary[waypoint_itr->GetArinc424LegType()]);
       m_route_data.m_high_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintHigh());
       m_route_data.m_low_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintLow());
@@ -171,31 +163,26 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
       m_route_data.m_rf_radius.emplace_back(waypoint_itr->GetRfTurnArcRadius());
 
       const Units::Speed nominal_ias = waypoint_itr->GetNominalIas();
-      if (vector_current_index == number_of_waypoints_before_descent) {
+
+      if (vector_current_index == m_all_waypoints.size()) {
          if (m_planned_cruise_mach != 0) {
             // cruise mach specified; use it
             m_route_data.m_nominal_ias[vector_current_index] = nominal_ias;
-            m_route_data.m_mach[vector_current_index] = m_planned_cruise_mach;
          } else {
             m_route_data.m_nominal_ias[vector_current_index] = nominal_ias;
-            m_route_data.m_mach[vector_current_index] = 0;
          }
       } else {
-         if (m_route_data.m_mach[vector_current_index - 1] != 0 && nominal_ias == Units::zero()) {
+         if (nominal_ias == Units::zero()) {
             // use previous mach because ias is unspecified
             m_route_data.m_nominal_ias[vector_current_index] = Units::ZERO_SPEED;
-            m_route_data.m_mach[vector_current_index] = m_route_data.m_mach[vector_current_index - 1];
          } else if (nominal_ias != Units::zero()) {
             // use ias because it is specified
             m_route_data.m_nominal_ias[vector_current_index] = nominal_ias;
-            m_route_data.m_mach[vector_current_index] = 0;
          } else if (m_route_data.m_nominal_ias[vector_current_index - 1].value() != 0 && nominal_ias == Units::zero()) {
             // use previous ias
             m_route_data.m_nominal_ias[vector_current_index] = m_route_data.m_nominal_ias[vector_current_index - 1];
-            m_route_data.m_mach[vector_current_index] = 0;
          } else {
             m_route_data.m_nominal_ias[vector_current_index] = nominal_ias;
-            m_route_data.m_mach[vector_current_index] = m_planned_cruise_mach;
          }
       }
 
@@ -273,7 +260,7 @@ void AircraftIntent::UpdateXYZFromLatLonWgs84() {
       geoPosition.altitude = Units::ZERO_LENGTH;
       geoPosition.latitude = Units::RadiansAngle(m_route_data.m_latitude[var]);
       geoPosition.longitude = Units::RadiansAngle(m_route_data.m_longitude[var]);
-      m_tangent_plane_sequence->convertGeodeticToLocal(geoPosition, xyPosition);
+      m_tangent_plane_sequence->ConvertGeodeticToLocal(geoPosition, xyPosition);
       m_route_data.m_x.emplace_back(xyPosition.x);
       m_route_data.m_y.emplace_back(xyPosition.y);
       m_route_data.m_z.emplace_back(xyPosition.z);
@@ -285,7 +272,7 @@ void AircraftIntent::UpdateXYZFromLatLonWgs84() {
          geoPosition.altitude = Units::FeetLength(0);
          geoPosition.latitude = Units::RadiansAngle(m_route_data.m_rf_latitude[var]);
          geoPosition.longitude = Units::RadiansAngle(m_route_data.m_rf_longitude[var]);
-         m_tangent_plane_sequence->convertGeodeticToLocal(geoPosition, xyPosition);
+         m_tangent_plane_sequence->ConvertGeodeticToLocal(geoPosition, xyPosition);
          m_route_data.m_x_rf_center.emplace_back(xyPosition.x);
          m_route_data.m_y_rf_center.emplace_back(xyPosition.y);
       }
@@ -293,8 +280,6 @@ void AircraftIntent::UpdateXYZFromLatLonWgs84() {
 }
 
 int AircraftIntent::GetWaypointIndexByName(const std::string &waypoint_name) const {
-   // returns index into AircraftIntent waypoint list for
-   //         input waypoint.  If waypoint not found, -1 returned.
    int ix = -1;
    bool found_waypoint = false;
    for (Waypoint wp : m_all_waypoints) {
@@ -320,7 +305,6 @@ void AircraftIntent::Dump(std::ostream &fileOut) const {
       fileOut << "Waypoint  " << i << ":" << std::endl;
       fileOut << "waypoint_name[i] " << GetWaypointName(i) << std::endl;
       fileOut << "nominal_IAS_at_waypoint[i] " << Units::FeetPerSecondSpeed(wp.GetNominalIas()).value() << std::endl;
-      fileOut << "MACH_at_waypoint[i] " << wp.GetMach() << std::endl;
       fileOut << "waypoint_Alt[i] " << Units::FeetLength(wp.GetAltitude()).value() << std::endl;
       fileOut << "waypoint_x[i] " << m_route_data.m_x[i].value() << std::endl;
       fileOut << "waypoint_y[i] " << m_route_data.m_y[i].value() << std::endl;
@@ -352,7 +336,6 @@ bool AircraftIntent::load(DecodedStream *input) {
    std::list<Waypoint> ascent_waypoints, cruise_waypoints;
    double cruise_mach_loaded;
    Units::FeetLength cruise_alt_loaded(0);
-   unsigned int waypoint_count_loaded;
 
    // register all the variables used by the Aircraft Intent
    register_var("planned_cruise_mach", &cruise_mach_loaded, true);
@@ -396,7 +379,7 @@ void AircraftIntent::GetLatLonFromXYZ(const Units::Length &xMeters, const Units:
    localPos.z = zMeters;
 
    EarthModel::GeodeticPosition geo;
-   m_tangent_plane_sequence->convertLocalToGeodetic(localPos, geo);
+   m_tangent_plane_sequence->ConvertLocalToGeodetic(localPos, geo);
    lat = geo.latitude;
    lon = geo.longitude;
 }
@@ -528,7 +511,7 @@ bool AircraftIntent::operator==(const AircraftIntent &obj) const {
        m_route_data.m_latitude == obj.m_route_data.m_latitude &&
        m_route_data.m_longitude == obj.m_route_data.m_longitude &&
        m_route_data.m_nominal_altitude == obj.m_route_data.m_nominal_altitude &&
-       m_route_data.m_nominal_ias == obj.m_route_data.m_nominal_ias && m_route_data.m_mach == obj.m_route_data.m_mach &&
+       m_route_data.m_nominal_ias == obj.m_route_data.m_nominal_ias &&
        m_route_data.m_high_altitude_constraint == obj.m_route_data.m_high_altitude_constraint &&
        m_route_data.m_low_altitude_constraint == obj.m_route_data.m_low_altitude_constraint &&
        m_route_data.m_high_speed_constraint == obj.m_route_data.m_high_speed_constraint &&

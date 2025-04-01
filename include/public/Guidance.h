@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <cmath>
+
 #include "public/PrecalcWaypoint.h"
 #include "public/AircraftSpeed.h"
 
@@ -41,9 +43,9 @@ static std::string GuidanceFlightPhaseAsString(GuidanceFlightPhase guidance_flig
 
 class Guidance {
   public:
-   Guidance();
+   Guidance() = default;
 
-   virtual ~Guidance();
+   virtual ~Guidance() = default;
 
    void SetValid(bool value);
 
@@ -61,21 +63,21 @@ class Guidance {
 
    PrecalcConstraint m_active_precalc_constraints;
 
-   Units::Speed m_ias_command;
-   Units::Speed m_ground_speed;
-   Units::Speed m_vertical_speed;
-   Units::Length m_reference_altitude;
-   Units::Length m_cross_track_error;
-   Units::Angle m_reference_bank_angle;
-   Units::SignedAngle m_enu_track_angle;
+   Units::Speed m_ias_command{Units::ZERO_SPEED};
+   double m_mach_command{0};
+   Units::Speed m_ground_speed{Units::ZERO_SPEED};
+   Units::Speed m_vertical_speed{Units::ZERO_SPEED};
+   Units::Length m_reference_altitude{Units::ZERO_LENGTH};
+   Units::Length m_cross_track_error{Units::ZERO_LENGTH};
+   Units::Angle m_reference_bank_angle{Units::ZERO_ANGLE};
+   Units::SignedAngle m_enu_track_angle{Units::ZERO_ANGLE};
    GuidanceFlightPhase m_active_guidance_phase;
 
-   bool m_use_cross_track;
+   bool m_use_cross_track{false};
 
   private:
-   bool m_valid;
-   AircraftSpeed m_selected_speed;
-   double m_mach_command;
+   bool m_valid{false};
+   AircraftSpeed m_selected_speed{};
 };
 
 inline void Guidance::SetValid(bool value) { m_valid = value; }
@@ -89,5 +91,11 @@ inline void Guidance::SetSelectedSpeed(const AircraftSpeed &selected_speed) { m_
 inline double Guidance::GetMachCommand() const { return m_mach_command; }
 
 inline void Guidance::SetMachCommand(double mach_value) { m_mach_command = mach_value; }
+
+inline int Guidance::GetIasCommandIntegerKnots() const {
+   double result = round(Units::KnotsSpeed(m_ias_command).value());
+   return (int)result;
+}
+
 }  // namespace open_source
 }  // namespace aaesim

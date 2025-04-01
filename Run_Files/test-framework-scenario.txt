@@ -1,9 +1,6 @@
 ; A an example scenario to show how the CSV files produced 
 ; for RTCA can be loaded and run with this code.
 
-#echo_file
-"input_echo_fmacm.html"
-
 ; Bada data file input
 bada_data_path "/data/aaesim/regressionScens/bada"
 
@@ -39,7 +36,7 @@ aircraft
         vfp_csv_file "./FimAcTv-P~W_JET_VFP.csv"
     }
 
-    airborne_app
+    flight_deck_application
     {
         IM_speed_commands_from_file
         {
@@ -47,6 +44,6 @@ aircraft
             use_pilot_delay false
             pilot_delay_seconds 0
         }
-    } ; airborne_app
+    } ; flight_deck_application
 
 } ; aircraft

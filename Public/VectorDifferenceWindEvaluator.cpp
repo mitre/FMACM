@@ -29,7 +29,7 @@ const std::shared_ptr<PredictedWindEvaluator> VectorDifferenceWindEvaluator::Get
    std::weak_ptr<PredictedWindEvaluator> cached = m_instances[maxSpeedDiff];
    std::shared_ptr<PredictedWindEvaluator> result = cached.lock();
    if (!result) {
-      result = std::shared_ptr<PredictedWindEvaluator>(new VectorDifferenceWindEvaluator(maxSpeedDiff));
+      result = std::unique_ptr<PredictedWindEvaluator>(new VectorDifferenceWindEvaluator(maxSpeedDiff));
       cached = result;
       m_instances[maxSpeedDiff] = cached;
    }
@@ -44,17 +44,17 @@ VectorDifferenceWindEvaluator::~VectorDifferenceWindEvaluator() {}
 bool VectorDifferenceWindEvaluator::ArePredictedWindsAccurate(
       const aaesim::open_source::AircraftState &state, const aaesim::open_source::WeatherPrediction &weather_prediction,
       const Units::Speed reference_cas, const Units::Length reference_altitude,
-      const Atmosphere *sensed_atmosphere) const {
+      const std::shared_ptr<Atmosphere> &sensed_atmosphere) const {
 
    Units::MetersPerSecondSpeed windeastcomp, windnorthcomp;  // units of mps as returned from AircraftCalculations
    Units::Frequency dtmp;
-   weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(
-         Units::FeetLength(state.m_z), weather_prediction.east_west, windeastcomp, dtmp);
-   weather_prediction.getAtmosphere()->CalculateWindGradientAtAltitude(
-         Units::FeetLength(state.m_z), weather_prediction.north_south, windnorthcomp, dtmp);
+   weather_prediction.east_west().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()),
+                                                                  windeastcomp, dtmp);
+   weather_prediction.north_south().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()),
+                                                                    windnorthcomp, dtmp);
 
-   Units::Speed xDiff = Units::MetersPerSecondSpeed(state.m_Vwx) - windeastcomp;
-   Units::Speed yDiff = Units::MetersPerSecondSpeed(state.m_Vwy) - windnorthcomp;
+   Units::Speed xDiff = state.GetSensedWindEast() - windeastcomp;
+   Units::Speed yDiff = state.GetSensedWindNorth() - windnorthcomp;
 
    return Units::sqr(xDiff) + Units::sqr(yDiff) <= Units::sqr(m_max_allowed_difference);
 }

@@ -25,7 +25,7 @@ std::shared_ptr<PredictedWindEvaluator> NullWindEvaluator::m_instance;
 
 const std::shared_ptr<PredictedWindEvaluator> NullWindEvaluator::GetInstance() {
    if (!m_instance) {
-      m_instance = std::shared_ptr<PredictedWindEvaluator>(new NullWindEvaluator());
+      m_instance = std::unique_ptr<PredictedWindEvaluator>(new NullWindEvaluator());
    }
    return m_instance;
 }
@@ -38,7 +38,7 @@ bool NullWindEvaluator::ArePredictedWindsAccurate(const aaesim::open_source::Air
                                                   const WeatherPrediction &weather_prediction,
                                                   const Units::Speed reference_cas,
                                                   const Units::Length reference_altitude,
-                                                  const Atmosphere *sensed_atmosphere) const {
+                                                  const std::shared_ptr<Atmosphere> &sensed_atmosphere) const {
 
    return true;
 }

@@ -26,10 +26,9 @@ namespace open_source {
 class SpeedOnThrustControl : public AircraftControl {
 
   public:
-   SpeedOnThrustControl();
+   SpeedOnThrustControl(const Units::Angle max_bank_angle);
 
-   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
-                   const Units::Angle &max_bank_angle) override;
+   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator) override;
 
   private:
    static log4cplus::Logger m_logger;
@@ -44,8 +43,7 @@ class SpeedOnThrustControl : public AircraftControl {
    virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
                                   Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
                                   double &speed_brake_command,
-                                  aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
-                                  const WeatherTruth &weather) override;
+                                  aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration) override;
 };
 }  // namespace open_source
 }  // namespace aaesim

@@ -20,6 +20,7 @@
 #pragma once
 
 #include "public/OutputHandler.h"
+#include <stdexcept>
 
 namespace aaesim::open_source {
 struct ScenarioEventNotifier {
@@ -27,5 +28,6 @@ struct ScenarioEventNotifier {
    virtual void IterationEnd(const int &iteration_number) = 0;
    virtual void ScenarioBegin(const std::string &scenario_name) = 0;
    virtual void ScenarioEnd(const std::string &scenario_name) = 0;
+   virtual void ErrorOccurred(const int &iteration_number, const std::exception &exception_object) = 0;
 };
 }  // namespace aaesim::open_source

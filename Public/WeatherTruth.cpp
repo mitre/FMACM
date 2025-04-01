@@ -17,8 +17,8 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include "public/Atmosphere.h"
 #include "public/WeatherTruth.h"
-#include "public/StandardAtmosphere.h"
 
 using namespace aaesim::open_source;
 

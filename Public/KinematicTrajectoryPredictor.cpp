@@ -17,7 +17,6 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/AircraftCalculations.h"
 #include "public/KinematicTrajectoryPredictor.h"
 
 using namespace std;
@@ -47,21 +46,10 @@ void KinematicTrajectoryPredictor::CalculateWaypoints(const AircraftIntent &airc
                                                       const WeatherPrediction &weather_prediction) {
    Units::Length altitude_at_faf = Units::MetersLength(
          aircraft_intent.GetRouteData().m_nominal_altitude[aircraft_intent.GetNumberOfWaypoints() - 1]);
-   Units::Speed ias_at_faf;
    Units::Speed nominal_ias_at_faf = Units::FeetPerSecondSpeed(
          aircraft_intent.GetRouteData().m_nominal_ias[aircraft_intent.GetNumberOfWaypoints() - 1]);
-   double mach_at_faf = aircraft_intent.GetRouteData().m_mach[aircraft_intent.GetNumberOfWaypoints() - 1];
-   if (mach_at_faf == 0)
-      ias_at_faf = nominal_ias_at_faf;
-   else {  // else calculate ias from mach and set ias_at_faf to the calculated ias.
-      ias_at_faf = weather_prediction.MachToCAS(mach_at_faf, altitude_at_faf);
-      if (ias_at_faf > nominal_ias_at_faf) {
-         LOG4CPLUS_WARN(m_logger,
-                        "Aircraft Intent may be malformed.  Last waypoint has non-zero mach and faf altitude is below "
-                        "transition altitude");
-      }
-   }
-   GetKinematicDescent4dPredictor()->SetConditionsAtEndOfRoute(altitude_at_faf, ias_at_faf);
+
+   GetKinematicDescent4dPredictor()->SetConditionsAtEndOfRoute(altitude_at_faf, nominal_ias_at_faf);
    EuclideanTrajectoryPredictor::CalculateWaypoints(aircraft_intent, WeatherPrediction());
 }
 
@@ -79,18 +67,6 @@ KinematicTrajectoryPredictor &KinematicTrajectoryPredictor::operator=(const Kine
    }
 
    return *this;
-}
-
-bool KinematicTrajectoryPredictor::operator==(const KinematicTrajectoryPredictor &obj) const {
-   bool match = EuclideanTrajectoryPredictor::operator==(obj);
-
-   match = match && (*GetKinematicDescent4dPredictor() == *obj.GetKinematicDescent4dPredictor());
-
-   return match;
-}
-
-bool KinematicTrajectoryPredictor::operator!=(const KinematicTrajectoryPredictor &obj) const {
-   return !operator==(obj);
 }
 
 std::shared_ptr<KinematicDescent4DPredictor> KinematicTrajectoryPredictor::GetKinematicDescent4dPredictor() const {

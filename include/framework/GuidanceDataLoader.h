@@ -77,16 +77,19 @@ class GuidanceDataLoader final : public Loadable {
       NUM_HORIZONTAL_TRAJ_FIELDS
    };
 
-   static void DoDebugLogging(const std::vector<HorizontalPath> &horizontal_path);
+   static void DoDebugLogging(const std::vector<aaesim::open_source::HorizontalPath> &horizontal_path);
    GuidanceFromStaticData::VerticalData BuildVerticalGuidanceData() const;
-   std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>> ProcessHfpData() const;
-   std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>> ProcessWaypointSequenceData() const;
-   std::vector<HorizontalPath> BuildHorizontalPathUsingAllColumns(testvector::HfpReader2020 &hfp_reader) const;
-   std::vector<HorizontalPath> BuildHorizontalPathComputeEuclideanComponents(
+   std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<aaesim::open_source::HorizontalPath>> ProcessHfpData()
+         const;
+   std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<aaesim::open_source::HorizontalPath>>
+         ProcessWaypointSequenceData() const;
+   std::vector<aaesim::open_source::HorizontalPath> BuildHorizontalPathUsingAllColumns(
+         testvector::HfpReader2020 &hfp_reader) const;
+   std::vector<aaesim::open_source::HorizontalPath> BuildHorizontalPathComputeEuclideanComponents(
          testvector::HfpReader2020 &hfp_reader, std::shared_ptr<TangentPlaneSequence> &tangent_plane_sequence) const;
    std::shared_ptr<TangentPlaneSequence> BuildTangentPlaneFromFileData() const;
    std::shared_ptr<TangentPlaneSequence> BuildTangentPlane(const std::list<Waypoint> &ordered_waypoints) const;
-   void ComputeCourseColumnsInPlace(std::vector<HorizontalPath> &horizontal_path) const;
+   void ComputeCourseColumnsInPlace(std::vector<aaesim::open_source::HorizontalPath> &horizontal_path) const;
 
    bool m_loaded;
    std::string m_hfp_filename, m_vfp_filename, m_waypoint_sequence_file;
@@ -105,7 +108,8 @@ inline GuidanceFromStaticData::PlannedDescentParameters GuidanceDataLoader::GetP
    return m_planned_descent_parameters;
 }
 
-inline void GuidanceDataLoader::DoDebugLogging(const std::vector<HorizontalPath> &horizontal_path_sequence) {
+inline void GuidanceDataLoader::DoDebugLogging(
+      const std::vector<aaesim::open_source::HorizontalPath> &horizontal_path_sequence) {
    if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
       mini::csv::ofstream os("debug_hfp_data.csv");
       if (!os.is_open()) {
@@ -133,9 +137,9 @@ inline void GuidanceDataLoader::DoDebugLogging(const std::vector<HorizontalPath>
                                                "Turn_Center_Lon[deg]"};
       std::for_each(COLUMN_NAMES.begin(), COLUMN_NAMES.end(), column_inserter);
       os << NEWLINE;
-      os.flush();
+
       int index = 0;
-      auto hfp_writer = [&index, &os](const HorizontalPath &path_segment) {
+      auto hfp_writer = [&index, &os](const aaesim::open_source::HorizontalPath &path_segment) {
          os << index;
          os << path_segment.GetXPositionMeters();
          os << path_segment.GetYPositionMeters();
@@ -154,7 +158,7 @@ inline void GuidanceDataLoader::DoDebugLogging(const std::vector<HorizontalPath>
          os << "0";
          os << "0";
          os << NEWLINE;
-         os.flush();
+
          ++index;
       };
       std::for_each(horizontal_path_sequence.cbegin(), horizontal_path_sequence.cend(), hfp_writer);

@@ -24,11 +24,11 @@
 
 namespace aaesim {
 namespace open_source {
-class PassThroughAssap : public aaesim::open_source::ASSAP {
+class PassThroughAssap final : public aaesim::open_source::ASSAP {
   public:
    PassThroughAssap();
    aaesim::open_source::AircraftState Update(const aaesim::open_source::AircraftState &state_to_sync_with,
-                                             const Sensor::ADSB::ADSBSVReport &most_recent_ads_b) const override;
+                                             const aaesim::open_source::ADSBSVReport &most_recent_ads_b) const override;
 
    void Initialize(std::shared_ptr<const aaesim::open_source::ADSBReceiver> adsb_receiver) override;
 

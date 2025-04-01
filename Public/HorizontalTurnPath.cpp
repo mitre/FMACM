@@ -20,24 +20,6 @@
 #include "public/HorizontalTurnPath.h"
 #include "public/HorizontalPath.h"
 
-HorizontalTurnPath::HorizontalTurnPath(void) {
-   x_position_meters = 0;
-   y_position_meters = 0;
-   q_start = Units::UnsignedRadiansAngle(0);
-   q_end = Units::UnsignedRadiansAngle(0);
-   radius = Units::MetersLength(0);
-   bankAngle = Units::UnsignedRadiansAngle(0);
-   groundspeed = Units::MetersPerSecondSpeed(0);
-   turn_type = UNKNOWN;
-}
-
-HorizontalTurnPath::~HorizontalTurnPath(void) {}
-
-bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
-   return ((this->x_position_meters == that.x_position_meters) && (this->y_position_meters == that.y_position_meters) &&
-           (this->q_start == that.q_start) && (this->q_end == that.q_end) && (this->radius == that.radius));
-}
-
 /**
  * Determine whether this is a right or left turn by using the
  * two previous points in the trajectory to establish a line
@@ -45,10 +27,8 @@ bool HorizontalTurnPath::operator==(const HorizontalTurnPath &that) const {
  * The HorizontalPath object which owns this HorizontalTurnPath
  * would be p2.
  */
-HorizontalTurnPath::TURN_DIRECTION HorizontalTurnPath::GetTurnDirection(const HorizontalPath &p0,
-                                                                        const HorizontalPath &p1) const {
-
-   // TODO replace this with a field and accessor, see AAES-1044
+aaesim::open_source::HorizontalTurnPath::TURN_DIRECTION aaesim::open_source::HorizontalTurnPath::GetTurnDirection(
+      const HorizontalPath &p0, const HorizontalPath &p1) const {
 
    if (turn_type == UNKNOWN) return NO_TURN;
 

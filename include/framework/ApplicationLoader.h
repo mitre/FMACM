@@ -25,6 +25,7 @@
 
 #include "public/LoggingLoadable.h"
 #include "public/FlightDeckApplication.h"
+#include "public/WeatherPrediction.h"
 #include "framework/SpeedCommandsLoader.h"
 #include "scalar/Time.h"
 
@@ -41,7 +42,8 @@ class ApplicationLoader final : public Loadable {
 
    bool load(DecodedStream *input) override;
 
-   std::shared_ptr<aaesim::open_source::FlightDeckApplication> CreateApplication();
+   std::shared_ptr<aaesim::open_source::FlightDeckApplication> CreateApplication(
+         aaesim::open_source::WeatherPrediction &avionic_weather_predictor);
 
    bool IsLoaded() const { return m_loaded; }
 
@@ -57,9 +59,9 @@ class ApplicationLoader final : public Loadable {
       bool m_is_enabled;
       Units::SecondsTime m_delay_duration;
    };
-   bool m_loaded;
-   fmacm::loader::SpeedCommandsLoader m_im_speed_command_file;
-   PilotConfiguration m_pilot_delay_configuration;
+   bool m_loaded{false};
+   fmacm::loader::SpeedCommandsLoader m_im_speed_command_file{};
+   PilotConfiguration m_pilot_delay_configuration{};
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
    interval_management::open_source::IMTimeBasedAchieve m_sample_algorithm_time_goal;

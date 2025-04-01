@@ -100,9 +100,9 @@ bool TestFrameworkScenario::AdvanceAllAircraft(aaesim::open_source::SimulationTi
       bool aircraft_finished = aircraft->Update(time);
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
-      m_sample_algorithm_writer->Gather(0, time, "IMACID", aircraft->GetAirborneApplication());
+      m_sample_algorithm_writer->Gather(0, time, "IMACID", aircraft->GetFlightDeckApplication());
       m_sample_algorithm_kinematic_writer->Gather(0, time.GetCurrentSimulationTime(), "IMACID",
-                                                  aircraft->GetAirborneApplication());
+                                                  aircraft->GetFlightDeckApplication());
 #endif
 
       all_aircraft_complete = all_aircraft_complete && aircraft_finished;

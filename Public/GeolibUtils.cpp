@@ -24,9 +24,6 @@
 using namespace aaesim;
 using namespace geolib_idealab;
 
-log4cplus::Logger GeolibUtils::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("GeolibUtils"));
-std::string GeolibUtils::m_basic_error_message("Arg! Something very bad occurred inside a geolib library operation!");
-
 LatitudeLongitudePoint GeolibUtils::CalculateNewPoint(const LatitudeLongitudePoint &start_point,
                                                       const Units::Length &distance,
                                                       const Units::SignedAngle &course_enu) {
@@ -36,7 +33,8 @@ LatitudeLongitudePoint GeolibUtils::CalculateNewPoint(const LatitudeLongitudePoi
    LLPoint destination_calculated;
    ErrorSet error_set = direct(start_point.GetGeolibPrimitiveLLPoint(), angle_from_true_north.value(),
                                Units::NauticalMilesLength(distance).value(), &destination_calculated, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -70,7 +68,8 @@ const LineOnEllipsoid GeolibUtils::CreateLineOnEllipsoid(const LatitudeLongitude
    Geodesic geolib_geodesic;
    ErrorSet error_set = createGeo(&geolib_geodesic, start_point.GetGeolibPrimitiveLLPoint(),
                                   end_point.GetGeolibPrimitiveLLPoint(), LineType::SEGMENT, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -78,6 +77,7 @@ const LineOnEllipsoid GeolibUtils::CreateLineOnEllipsoid(const LatitudeLongitude
    LineOnEllipsoid line_on_ellipsoid(geolib_geodesic);
    return line_on_ellipsoid;
 }
+
 const ArcOnEllipsoid GeolibUtils::CreateArcOnEllipsoid(const LatitudeLongitudePoint &start_point,
                                                        const LatitudeLongitudePoint &end_point,
                                                        const LatitudeLongitudePoint &center_point,
@@ -87,7 +87,8 @@ const ArcOnEllipsoid GeolibUtils::CreateArcOnEllipsoid(const LatitudeLongitudePo
    ErrorSet error_set =
          createArc(&arc_primitive, center_point.GetGeolibPrimitiveLLPoint(), start_point.GetGeolibPrimitiveLLPoint(),
                    end_point.GetGeolibPrimitiveLLPoint(), arc_direction, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -109,11 +110,15 @@ const std::tuple<bool, LatitudeLongitudePoint, std::vector<Units::Length> >
                  line2.GetLineType(), &crs32, &distance_line2_start_to_intx_point, &intersection_point,
                  GEOLIB_TOLERANCE, GEOLIB_EPSILON);
 
-   bool return_this = true;
-   if (error_set && ErrorCodes::NO_INTERSECTION_ERR) {
+   if (HasErrorBitSet(error_set, ErrorCodes::NO_INTERSECTION_ERR)) {
       LOG4CPLUS_WARN(m_logger, formatErrorMessage(error_set));
-      return_this = false;
-   } else if (error_set != ErrorCodes::SUCCESS) {
+      LatitudeLongitudePoint no_point{};
+      std::vector<Units::Length> no_vector{};
+      return std::make_tuple(false, no_point, no_vector);
+   }
+
+   bool geolib_failed = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_failed) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -121,15 +126,16 @@ const std::tuple<bool, LatitudeLongitudePoint, std::vector<Units::Length> >
    std::vector<Units::Length> distances_to_intersection_point = {
          Units::NauticalMilesLength(distance_line1_start_to_intx_point),
          Units::NauticalMilesLength(distance_line2_start_to_intx_point)};
-   return std::make_tuple(return_this, LatitudeLongitudePoint::CreateFromGeolibPrimitive(intersection_point),
+   return std::make_tuple(true, LatitudeLongitudePoint::CreateFromGeolibPrimitive(intersection_point),
                           distances_to_intersection_point);
 }
 const bool GeolibUtils::IsPointOnLine(const LineOnEllipsoid &line, const LatitudeLongitudePoint &test_point) {
-   geolib_idealab::ErrorSet error_set = ErrorCodes::SUCCESS;
+   geolib_idealab::ErrorSet error_set{ErrorCodes::SUCCESS};
    int ret = geolib_idealab::ptIsOnGeo(
          line.GetStartPoint().GetGeolibPrimitiveLLPoint(), line.GetEndPoint().GetGeolibPrimitiveLLPoint(),
          test_point.GetGeolibPrimitiveLLPoint(), line.GetLineType(), &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -138,13 +144,14 @@ const bool GeolibUtils::IsPointOnLine(const LineOnEllipsoid &line, const Latitud
    return return_this;
 }
 const bool GeolibUtils::IsPointOnArc(const ArcOnEllipsoid &arc, const LatitudeLongitudePoint &test_point) {
-   geolib_idealab::ErrorSet error_set = ErrorCodes::SUCCESS;
+   geolib_idealab::ErrorSet error_set{ErrorCodes::SUCCESS};
    int ret = geolib_idealab::ptIsOnArc(
          arc.GetCenterPoint().GetGeolibPrimitiveLLPoint(), Units::NauticalMilesLength(arc.GetRadius()).value(),
          Units::UnsignedRadiansAngle(GeolibUtils::ConvertCourseFromEnuToNed(arc.GetStartAzimuthEnu())).value(),
          Units::UnsignedRadiansAngle(GeolibUtils::ConvertCourseFromEnuToNed(arc.GetEndAzimuthEnu())).value(),
          arc.GetArcDirection(), test_point.GetGeolibPrimitiveLLPoint(), &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -164,7 +171,8 @@ std::tuple<LatitudeLongitudePoint, Units::SignedAngle, Units::Length>
          point_not_on_line.GetGeolibPrimitiveLLPoint(), &point_on_line, &crs_ned_to_line_from_point_not_on_line,
          &distance_along_perpendicular_projection, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
 
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -177,7 +185,7 @@ std::tuple<LatitudeLongitudePoint, Units::SignedAngle, Units::Length>
 
 const bool GeolibUtils::IsPointInsideArcSegment(const ArcOnEllipsoid &finite_arc,
                                                 const LatitudeLongitudePoint &test_point) {
-   geolib_idealab::ErrorSet error_set = ErrorCodes::SUCCESS;
+   geolib_idealab::ErrorSet error_set{ErrorCodes::SUCCESS};
    int ret = geolib_idealab::ptIsInsideArc(
          finite_arc.GetCenterPoint().GetGeolibPrimitiveLLPoint(),
          Units::NauticalMilesLength(finite_arc.GetRadius()).value(),
@@ -185,7 +193,8 @@ const bool GeolibUtils::IsPointInsideArcSegment(const ArcOnEllipsoid &finite_arc
          Units::UnsignedRadiansAngle(GeolibUtils::ConvertCourseFromEnuToNed(finite_arc.GetEndAzimuthEnu())).value(),
          finite_arc.GetArcDirection(), test_point.GetGeolibPrimitiveLLPoint(), &error_set, GEOLIB_TOLERANCE,
          GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }
@@ -193,6 +202,7 @@ const bool GeolibUtils::IsPointInsideArcSegment(const ArcOnEllipsoid &finite_arc
    bool return_this = (ret != 0);
    return return_this;
 }
+
 std::pair<bool, const LatitudeLongitudePoint> GeolibUtils::FindNearestPointOnArcUsingPerpendiculorProjection(
       const ArcOnEllipsoid &arc, const LatitudeLongitudePoint &point_not_on_arc) {
    // line from arc center to point_not_on_arc
@@ -236,12 +246,12 @@ std::pair<bool, ArcOnEllipsoid> GeolibUtils::CreateArcTangentToTwoLines(const Li
 
    bool one_arc_found = true;
    ArcOnEllipsoid arc_to_return;
-   if (error_set == ErrorCodes::SUCCESS) {
+   if (GeolibUtils::IsSuccess(error_set)) {
       arc_to_return =
             CreateArcOnEllipsoid(LatitudeLongitudePoint::CreateFromGeolibPrimitive(arc_start_point),
                                  LatitudeLongitudePoint::CreateFromGeolibPrimitive(arc_end_point),
                                  LatitudeLongitudePoint::CreateFromGeolibPrimitive(arc_center_point), arc_direction);
-   } else if (error_set && ErrorCodes::NO_TANGENT_ARC_ERR) {
+   } else if (error_set & ErrorCodes::NO_TANGENT_ARC_ERR) {
       // this is okay, just return with no formed arc
       one_arc_found = false;
    } else {
@@ -261,15 +271,12 @@ ArcOnEllipsoid GeolibUtils::CreateArcFromInboundShapeAndEndPoint(const ShapeOnEl
          Units::UnsignedRadiansAngle(ConvertCourseFromEnuToNed(inbound_shape->GetForwardCourseEnuAtEndPoint())).value(),
          end_point.GetGeolibPrimitiveLLPoint(), &calculated_arc, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
 
-   ArcOnEllipsoid arc_to_return;
-   if (error_set == ErrorCodes::SUCCESS) {
-      arc_to_return = ArcOnEllipsoid(calculated_arc);
-   } else {
-      LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
-      throw std::runtime_error(m_basic_error_message);
+   if (GeolibUtils::IsSuccess(error_set)) {
+      return ArcOnEllipsoid(calculated_arc);
    }
 
-   return arc_to_return;
+   LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
+   throw std::runtime_error(m_basic_error_message);
 }
 
 std::vector<std::pair<bool, LatitudeLongitudePoint> > GeolibUtils::CalculateLineArcIntersectionPoints(
@@ -284,7 +291,7 @@ std::vector<std::pair<bool, LatitudeLongitudePoint> > GeolibUtils::CalculateLine
          intersection_pairs_on_circle, &number_of_intersections, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
 
    std::vector<std::pair<bool, LatitudeLongitudePoint> > return_this;
-   if (error_set == ErrorCodes::SUCCESS) {
+   if (GeolibUtils::IsSuccess(error_set)) {
       if (number_of_intersections == 0) {
          // no intersections found
          auto no_intersection_return = {
@@ -318,7 +325,7 @@ const ArcOnEllipsoid GeolibUtils::CreateFullCircleOnEllipsoid(const LatitudeLong
                                   arc_direction, end_point, &calculated_arc, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
 
    ArcOnEllipsoid arc_to_return;
-   if (error_set == ErrorCodes::SUCCESS) {
+   if (GeolibUtils::IsSuccess(error_set)) {
       arc_to_return = ArcOnEllipsoid(calculated_arc);
    } else {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
@@ -350,7 +357,8 @@ std::tuple<Units::Length, Units::SignedAngle, Units::SignedAngle>
    ErrorSet error_set =
          inverse(start_point.GetGeolibPrimitiveLLPoint(), end_point.GetGeolibPrimitiveLLPoint(),
                  &start_crs_radians_ned_unsigned, &end_course_radians_ned_unsigned, &distance_nm, GEOLIB_EPSILON);
-   if (error_set != SUCCESS) {
+   const bool geolib_fail = !GeolibUtils::IsSuccess(error_set);
+   if (geolib_fail) {
       LOG4CPLUS_ERROR(m_logger, m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(m_basic_error_message);
    }

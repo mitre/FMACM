@@ -28,6 +28,7 @@
 #include "utility/BoundedValue.h"
 
 using namespace fmacm;
+using namespace aaesim::open_source;
 
 log4cplus::Logger GuidanceDataLoader::m_logger = log4cplus::Logger::getInstance("GuidanceDataLoader");
 
@@ -43,7 +44,7 @@ bool GuidanceDataLoader::load(DecodedStream *input) {
    register_var("waypoint_sequence", &m_waypoint_sequence_file, false);
    m_loaded = complete();
 
-   if (tmp_altitude > INT32_MAX)
+   if (tmp_altitude < INT32_MAX)
       m_planned_descent_parameters.planned_transition_altitude = Units::FeetLength(tmp_altitude);
    if (tmp_ias > 0) m_planned_descent_parameters.planned_transition_ias = Units::KnotsSpeed(tmp_ias);
    if (tmp_mach > 0) m_planned_descent_parameters.planned_cruise_mach = tmp_mach;
@@ -126,7 +127,7 @@ std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>>
          lat_lon_position.latitude = line.GetStartPoint().GetLatitude();
          lat_lon_position.longitude = line.GetStartPoint().GetLongitude();
          EarthModel::LocalPositionEnu xy_position;
-         tangent_planes->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_planes->ConvertGeodeticToLocal(lat_lon_position, xy_position);
          first_segment.SetXYPositionMeters(Units::MetersLength(xy_position.x).value(),
                                            Units::MetersLength(xy_position.y).value());
 
@@ -140,7 +141,7 @@ std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>>
          lat_lon_position.latitude = terminating_waypoint_info.latitude;
          lat_lon_position.longitude = terminating_waypoint_info.longitude;
          EarthModel::LocalPositionEnu xy_position;
-         tangent_planes->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_planes->ConvertGeodeticToLocal(lat_lon_position, xy_position);
          horizontal_path_segment.SetXYPositionMeters(Units::MetersLength(xy_position.x).value(),
                                                      Units::MetersLength(xy_position.y).value());
          horizontal_path_segment.m_segment_type = HorizontalPath::STRAIGHT;
@@ -158,13 +159,13 @@ std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>>
          lat_lon_position.latitude = turn_arc.second.GetStartPoint().GetLatitude();
          lat_lon_position.longitude = turn_arc.second.GetStartPoint().GetLongitude();
          EarthModel::LocalPositionEnu xy_position;
-         tangent_planes->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_planes->ConvertGeodeticToLocal(lat_lon_position, xy_position);
          horizontal_path_segment_turn_point.SetXYPositionMeters(Units::MetersLength(xy_position.x).value(),
                                                                 Units::MetersLength(xy_position.y).value());
 
          lat_lon_position.latitude = turn_arc.second.GetCenterPoint().GetLatitude();
          lat_lon_position.longitude = turn_arc.second.GetCenterPoint().GetLongitude();
-         tangent_planes->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_planes->ConvertGeodeticToLocal(lat_lon_position, xy_position);
          horizontal_path_segment_turn_point.m_turn_info.x_position_meters = Units::MetersLength(xy_position.x).value();
          horizontal_path_segment_turn_point.m_turn_info.y_position_meters = Units::MetersLength(xy_position.y).value();
          horizontal_path_segment_turn_point.m_turn_info.radius = terminating_waypoint_info.turn_radius;
@@ -178,7 +179,7 @@ std::pair<std::shared_ptr<TangentPlaneSequence>, std::vector<HorizontalPath>>
          HorizontalPath horizontal_path_segment_after_turn;
          lat_lon_position.latitude = turn_arc.second.GetEndPoint().GetLatitude();
          lat_lon_position.longitude = turn_arc.second.GetEndPoint().GetLongitude();
-         tangent_planes->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_planes->ConvertGeodeticToLocal(lat_lon_position, xy_position);
          horizontal_path_segment_after_turn.SetXYPositionMeters(Units::MetersLength(xy_position.x).value(),
                                                                 Units::MetersLength(xy_position.y).value());
          horizontal_path_segment_after_turn.m_segment_type = HorizontalPath::STRAIGHT;
@@ -309,7 +310,7 @@ std::vector<HorizontalPath> GuidanceDataLoader::BuildHorizontalPathComputeEuclid
       lat_lon_position.latitude = hfp_reader.GetLatitude();
       lat_lon_position.longitude = hfp_reader.GetLongitude();
       EarthModel::LocalPositionEnu xy_position;
-      tangent_plane_sequence->convertGeodeticToLocal(lat_lon_position, xy_position);
+      tangent_plane_sequence->ConvertGeodeticToLocal(lat_lon_position, xy_position);
       horizontal_path_segment.SetXYPositionMeters(Units::MetersLength(xy_position.x).value(),
                                                   Units::MetersLength(xy_position.y).value());
       horizontal_path_segment.m_segment_type = hfp_reader.GetSegmentType();
@@ -317,7 +318,7 @@ std::vector<HorizontalPath> GuidanceDataLoader::BuildHorizontalPathComputeEuclid
       if (horizontal_path_segment.m_segment_type == HorizontalPath::SegmentType::TURN) {
          lat_lon_position.latitude = hfp_reader.GetTurnCenterLatitude();
          lat_lon_position.longitude = hfp_reader.GetTurnCenterLongitude();
-         tangent_plane_sequence->convertGeodeticToLocal(lat_lon_position, xy_position);
+         tangent_plane_sequence->ConvertGeodeticToLocal(lat_lon_position, xy_position);
 
          horizontal_path_segment.m_turn_info.x_position_meters = Units::MetersLength(xy_position.x).value();
          horizontal_path_segment.m_turn_info.y_position_meters = Units::MetersLength(xy_position.y).value();
@@ -338,8 +339,9 @@ std::vector<HorizontalPath> GuidanceDataLoader::BuildHorizontalPathComputeEuclid
 
 void GuidanceDataLoader::ComputeCourseColumnsInPlace(std::vector<HorizontalPath> &horizontal_path_sequence) const {
 
-   if (horizontal_path_sequence.cbegin()->m_segment_type == HorizontalPath::SegmentType::TURN ||
-       horizontal_path_sequence.cend()->m_segment_type == HorizontalPath::SegmentType::TURN) {
+   const auto start_at_turn = horizontal_path_sequence.front().m_segment_type == HorizontalPath::SegmentType::TURN;
+   const auto end_at_turn = horizontal_path_sequence.back().m_segment_type == HorizontalPath::SegmentType::TURN;
+   if (start_at_turn || end_at_turn) {
       std::string msg = "Invalid HFP data. Cannot start or end the path with a TURN segment";
       throw std::runtime_error(msg);
    }

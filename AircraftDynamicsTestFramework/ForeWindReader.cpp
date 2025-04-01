@@ -31,8 +31,8 @@ ForeWindReader::~ForeWindReader() {}
 bool ForeWindReader::ReadWind(aaesim::open_source::WeatherPrediction &weather_prediction) {
    const int ALTITUDE_COUNT(5);
 
-   weather_prediction.east_west.SetBounds(1, ALTITUDE_COUNT);
-   weather_prediction.north_south.SetBounds(1, ALTITUDE_COUNT);
+   weather_prediction.east_west().SetBounds(1, ALTITUDE_COUNT);
+   weather_prediction.north_south().SetBounds(1, ALTITUDE_COUNT);
    for (int i = 1; i <= ALTITUDE_COUNT; i++) {
       Advance();
       if (GetColumnCount() == 0) {
@@ -42,8 +42,8 @@ bool ForeWindReader::ReadWind(aaesim::open_source::WeatherPrediction &weather_pr
       Units::FeetLength altitude(GetDouble(0));
       Units::KnotsSpeed u(GetDouble(1));
       Units::KnotsSpeed v(GetDouble(2));
-      weather_prediction.east_west.Insert(i, altitude, u);
-      weather_prediction.north_south.Insert(i, altitude, v);
+      weather_prediction.east_west().Insert(i, altitude, u);
+      weather_prediction.north_south().Insert(i, altitude, v);
    }
 
    return true;

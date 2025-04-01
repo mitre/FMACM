@@ -19,14 +19,14 @@
 
 #pragma once
 
+#include "public/Atmosphere.h"
 #include "public/Wind.h"
-#include "public/StandardAtmosphere.h"
 
 namespace aaesim {
 namespace open_source {
-class WindZero : public Wind {
+class WindZero final : public Wind {
   public:
-   WindZero();
+   WindZero(std::shared_ptr<Atmosphere> atmosphere);
 
    virtual ~WindZero();
 
@@ -46,7 +46,7 @@ class WindZero : public Wind {
    Units::Pressure InterpolatePressure(Units::Angle latitude_in, Units::Angle longitude_in, Units::Length alt) override;
 
   private:
-   StandardAtmosphere m_standard_atmosphere;
+   std::shared_ptr<Atmosphere> m_atmosphere;
 };
 }  // namespace open_source
 }  // namespace aaesim

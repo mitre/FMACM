@@ -23,21 +23,20 @@
 #include "public/Guidance.h"
 #include "public/ControlCommands.h"
 #include "public/EquationsOfMotionState.h"
-#include "public/TangentPlaneSequence.h"
-#include "public/WeatherTruth.h"
+#include "public/TrueWeatherOperator.h"
 
 namespace aaesim {
 namespace open_source {
 class AircraftControl {
   public:
-   AircraftControl();
+   AircraftControl(const Units::Angle max_bank_angle);
    virtual ~AircraftControl() = default;
-   virtual void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
-                           const Units::Angle &max_bank_angle);
 
-   ControlCommands CalculateControlCommands(const Guidance &guidance,
-                                            const EquationsOfMotionState &equations_of_motion_state,
-                                            const WeatherTruth &weather_truth);
+   virtual void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance);
+
+   ControlCommands CalculateControlCommands(
+         const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+         std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> sensed_weather);
 
    const Units::Frequency &GetAltGain() const { return m_alt_gain; }
 
@@ -56,22 +55,18 @@ class AircraftControl {
     */
    void ConfigureFlapsAndEstimateKineticForces(
          const EquationsOfMotionState &equations_of_motion_state, Units::Force &lift, Units::Force &drag,
-         aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration, const WeatherTruth &weather);
+         aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration);
 
    virtual Units::Angle DoLateralControl(const Guidance &guidance,
                                          const EquationsOfMotionState &equations_of_motion_state);
 
    virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &eqmState, Units::Force &T_com,
                                   Units::Angle &gamma_com, Units::Speed &tas_com, double &speedBrakeCom,
-                                  aaesim::open_source::bada_utils::FlapConfiguration &newFlapConfig,
-                                  const WeatherTruth &weather){};
+                                  aaesim::open_source::bada_utils::FlapConfiguration &newFlapConfig){};
 
    void DoClimbingControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
                           Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
-                          aaesim::open_source::bada_utils::FlapConfiguration &new_flap_config,
-                          const WeatherTruth &weather_truth);
-
-   void CalculateSensedWind(const WeatherTruth &wind, const Units::MetersLength &altitude_msl);
+                          aaesim::open_source::bada_utils::FlapConfiguration &new_flap_config);
 
    Units::Frequency CalculateThrustGain();
 
@@ -81,13 +76,15 @@ class AircraftControl {
    Units::Speed m_Vwx, m_Vwy;
    Units::Frequency m_dVwx_dh, m_dVwy_dh;
    double m_speed_brake_gain;
-   Units::Angle m_max_bank_angle;  // Maximum bank angle for dynamics and speed_on_pitch_control_dynamics calculations
-                                   // (parameter max_bank_angle)
    std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
+   Units::Angle m_max_bank_angle;
    bool m_is_level_flight;
+   std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> m_sensed_weather;
 
   private:
    static log4cplus::Logger m_logger;
+   void CalculateSensedWind(std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather,
+                            const Units::MetersLength &altitude_msl);
 };
 }  // namespace open_source
 }  // namespace aaesim

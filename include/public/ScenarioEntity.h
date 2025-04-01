@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include "public/WeatherTruth.h"
 #include "public/LoggingLoadable.h"
 #include "public/SimulationTime.h"
 

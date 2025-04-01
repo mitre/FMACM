@@ -25,12 +25,12 @@
 
 namespace aaesim {
 namespace open_source {
-class NullAdsbTransmitter : public ADSBTransmitter {
-   const std::vector<Sensor::ADSB::ADSBSVReport> &GetAllTransmissions() const {
-      static std::vector<Sensor::ADSB::ADSBSVReport> empty;
+class NullAdsbTransmitter final : public ADSBTransmitter {
+   const std::vector<aaesim::open_source::ADSBSVReport> &GetAllTransmissions() const {
+      static std::vector<aaesim::open_source::ADSBSVReport> empty;
       return empty;
    }
-   void Initialize() {}
+   void Initialize(const std::list<Waypoint> &waypoints_along_route) {}
    void Transmit(const aaesim::open_source::SimulationTime &simulation_time,
                  const aaesim::open_source::AircraftState &nav_measurement) {}
 };

@@ -8,8 +8,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-sign-compare -O1 
 CPMAddPackage(
       NAME googletest
       GITHUB_REPOSITORY google/googletest
-      GIT_TAG release-1.12.1
-      VERSION 1.12.1
+      VERSION 1.15.2
       OPTIONS
       "INSTALL_GTEST OFF"
       "GTEST_FORCE_SHARED_CRT ON"

@@ -52,6 +52,14 @@ struct FixedMassAircraftPerformance {
          ) = 0;
 
    /**
+    * Calculate drag coefficients based on existing state.
+    */
+   virtual void GetCurrentDragCoefficients(double &cd0, /** [out] parasitic drag coefficient */
+                                           double &cd2, /** [out] induced drag coefficient */
+                                           double &gear /** [out] landing gear drag coefficient */
+   ) const = 0;
+
+   /**
     * Allow early configuration changes; use when extra drag is needed and speed is less than max configuration speed.
     */
    virtual void GetConfigurationForIncreasedDrag(

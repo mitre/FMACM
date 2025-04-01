@@ -27,27 +27,22 @@ class SinglePushBackStream : public PARENT {
   public:
    SinglePushBackStream(void) { pushed = false; }
 
-   //-------------------------------------------------------------------------------------------------------------------------
-
    Token get_next() {
       if (pushed) {
          pushed = false;
       } else {
-         old_token = PARENT::get_next();
+         old_token2 = PARENT::get_next();
       }
 
-      return old_token;
+      return old_token2;
    }
 
-   void push_back()  // call this to reject the last token
-   {
-      pushed = true;
-   }  // if you call this after you get a token you will get the same
-   // token again when you call get_next Again
+   void push_back() { pushed = true; }
 
-   bool set_html_output_file(const std::string &dump_file_name) { return PARENT::set_output_file(dump_file_name, 0); }
+   // bool set_html_output_file(const std::string &dump_file_name) { return PARENT::set_output_file(dump_file_name, 0);
+   // }
 
   private:
-   Token old_token;
+   Token old_token2;
    bool pushed;
 };

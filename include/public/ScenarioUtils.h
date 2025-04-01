@@ -38,14 +38,14 @@ class ScenarioUtils {
       }
       return "";
    }
-   static int GetUniqueIdForAircraftId(const std::string aircraft_id) {
+   static int GetUniqueIdForAircraftId(const std::string &aircraft_id) {
       bool is_in_map = m_aircraft_string_int_map.find(aircraft_id) != m_aircraft_string_int_map.end();
       if (is_in_map) {
          return m_aircraft_string_int_map[aircraft_id];
       }
       return AIRCRAFT_ID_NOT_IN_MAP;
    }
-   static int GenerateNewUniqueIdForAircraftId(const std::string aircraft_id) {
+   static int GenerateNewUniqueIdForAircraftId(const std::string &aircraft_id) {
       int old_id = GetUniqueIdForAircraftId(aircraft_id);
       if (old_id == AIRCRAFT_ID_NOT_IN_MAP) {
          int new_id = m_aircraft_string_int_map.size();

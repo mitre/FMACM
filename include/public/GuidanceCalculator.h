@@ -21,13 +21,14 @@
 
 #include "public/AircraftState.h"
 #include "public/Guidance.h"
+#include "public/ShapeOnEllipsoid.h"
 
 namespace aaesim {
 namespace open_source {
 struct GuidanceCalculator {
    virtual open_source::Guidance Update(const open_source::AircraftState &current_state) = 0;
-   static aaesim::open_source::Guidance CombineGuidance(const aaesim::open_source::Guidance &vertical_guidance,
-                                                        const aaesim::open_source::Guidance &horizontal_guidance) {
+   static aaesim::open_source::Guidance CombineGuidance(const aaesim::open_source::Guidance &horizontal_guidance,
+                                                        const aaesim::open_source::Guidance &vertical_guidance) {
       aaesim::open_source::Guidance full_guidance;
 
       full_guidance.m_cross_track_error = horizontal_guidance.m_cross_track_error;
@@ -46,6 +47,15 @@ struct GuidanceCalculator {
       full_guidance.SetValid(true);
       return full_guidance;
    }
+
+   static Units::Length AddSignToCrossTrack(Units::Length cross_track_measurement,
+                                            aaesim::ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE side_of_shape) {
+      assert(side_of_shape != ShapeOnEllipsoid::UNSET);
+      if (side_of_shape == ShapeOnEllipsoid::LEFT_OF_SHAPE) {
+         return -Units::abs(cross_track_measurement);
+      }
+      return Units::abs(cross_track_measurement);
+   };
 };
 }  // namespace open_source
 }  // namespace aaesim

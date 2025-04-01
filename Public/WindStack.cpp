@@ -20,10 +20,13 @@
 #include "public/WindStack.h"
 
 #include <algorithm>
+#include <list>
 
 #include "utility/CustomUnits.h"
+#include "public/CustomMath.h"
 
 using namespace aaesim::open_source;
+using namespace std;
 
 WindStack::WindStack() : m_altitude(), m_speed(), m_minimum_data_index(0), m_maximum_data_index(0) {
    SetBounds(m_minimum_data_index, m_maximum_data_index);
@@ -108,4 +111,166 @@ WindStack WindStack::CreateZeroSpeedStack() {
       altitude += altitude_step;
    }
    return wind_stack;
+}
+
+void WindStack::CalculateWindGradientAtAltitude(const Units::Length altitude_in, Units::Speed &wind_speed,
+                                                Units::Frequency &wind_gradient) const {
+   const WindStack &wind_stack(*this);  // was a parameter to a static function
+   Units::FeetLength altitude = altitude_in;
+
+   Units::FeetLength maximum_altitude = wind_stack.GetAltitude(wind_stack.GetMaxRow());
+   Units::FeetLength minimum_altitude = wind_stack.GetAltitude(wind_stack.GetMinRow());
+   if (altitude > maximum_altitude) {
+      altitude = maximum_altitude;
+   } else if (altitude < minimum_altitude) {
+      altitude = minimum_altitude;
+   }
+
+   // Find appropriate altitudes to sample for wind gradient. The wind data used will be from the low index through
+   // low index + 4.
+   int low_index;
+   int number_of_rows_of_wind_matrix = wind_stack.GetMaxRow() - wind_stack.GetMinRow() + 1;
+   if (number_of_rows_of_wind_matrix == 5) {
+      low_index = wind_stack.GetMinRow();
+   } else if (altitude <= wind_stack.GetAltitude(wind_stack.GetMinRow() + 2)) {
+      // Altitude at low end-take bottom 5 winds.
+      low_index = wind_stack.GetMinRow();
+   } else if (altitude >= wind_stack.GetAltitude(wind_stack.GetMaxRow() - 2)) {
+      // Altitude at high end-take top 5 winds.
+      low_index = wind_stack.GetMaxRow() - 4;
+   } else {
+      // Altitude somewhere in the middle-compute index to take.
+      low_index = wind_stack.GetMinRow();
+      while ((low_index < wind_stack.GetMaxRow()) && (wind_stack.GetAltitude(low_index) < altitude)) {
+         low_index++;
+      }
+
+      Units::FeetLength upper_bounding_altitude = wind_stack.GetAltitude(low_index);
+      Units::FeetLength lower_bounding_altitude = wind_stack.GetAltitude(low_index - 1);
+
+      if ((altitude - lower_bounding_altitude) < (upper_bounding_altitude - altitude)) {
+         low_index = low_index - 1;
+      }
+      low_index = low_index - 2;
+   }
+
+   DVector wind_altitudes_ft(1, 5);
+   DVector wind_velocities_knots(1, 5);
+
+   int row_index = 1;
+   for (int i = low_index; i <= (low_index + 4); i++) {
+      wind_altitudes_ft.Set(row_index, wind_stack.GetAltitude(i) / Units::FeetLength(1));
+      wind_velocities_knots.Set(row_index, wind_stack.GetSpeed(i) / Units::KnotsSpeed(1));
+      row_index++;
+   }
+
+   double A_original[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+   DMatrix A((double **)&A_original, 1, 3, 1, 3);
+
+   DVector B(1, 3);
+   DVector M_(1, 3);
+
+   double h2 = wind_altitudes_ft[2] - wind_altitudes_ft[1];
+   double h3 = wind_altitudes_ft[3] - wind_altitudes_ft[2];
+   double h4 = wind_altitudes_ft[4] - wind_altitudes_ft[3];
+   double h5 = wind_altitudes_ft[5] - wind_altitudes_ft[4];
+
+   // 1st Row of A Matrix
+   A.Set(1, 1, -1.0 / 2.0 * h2 - 1.0 / 3.0 * h3);
+   A.Set(1, 2, -1.0 / 6.0 * h3);
+   A.Set(1, 3, 0);
+   B.Set(1, (wind_velocities_knots[2] - wind_velocities_knots[1]) / h2 -
+                  (wind_velocities_knots[3] - wind_velocities_knots[2]) / h3);
+
+   // 2nd Row of A Matrix
+   A.Set(2, 1, -1.0 / 6.0 * h3);
+   A.Set(2, 2, -1.0 / 3.0 * h3 - 1.0 / 3.0 * h4);
+   A.Set(2, 3, -1.0 / 6.0 * h4);
+   B.Set(2, (wind_velocities_knots[3] - wind_velocities_knots[2]) / h3 -
+                  (wind_velocities_knots[4] - wind_velocities_knots[3]) / h4);
+
+   // 3rd Row of A Matrix
+   A.Set(3, 1, 0);
+   A.Set(3, 2, -1.0 / 6.0 * h4);
+   A.Set(3, 3, -1.0 / 3.0 * h4 - 1.0 / 2.0 * h5);
+   B.Set(3, (wind_velocities_knots[4] - wind_velocities_knots[3]) / h4 -
+                  (wind_velocities_knots[5] - wind_velocities_knots[4]) / h5);
+
+   DMatrix A_inverse(1, 3, 1, 3);
+   inverse(A, 3, A_inverse);
+
+   DVector tmp(1, 3);
+
+   matrix_times_vector(A_inverse, B, 3, M_);
+
+   DVector M(1, 5);
+   M.Set(1, M_[1]);
+   M.Set(2, M_[1]);
+   M.Set(3, M_[2]);
+   M.Set(4, M_[3]);
+   M.Set(5, M_[3]);
+
+   DVector a(1, 5);
+   DVector b(1, 5);
+   DVector c(1, 5);
+   DVector d(1, 5);
+   DVector x(1, 5);
+   for (int ind1 = 1; ind1 < 5; ind1++) {
+      double h = wind_altitudes_ft[ind1 + 1] - wind_altitudes_ft[ind1];
+      a.Set(ind1, (M[ind1 + 1] - M[ind1]) / (6 * h));
+      b.Set(ind1, M[ind1] / 2);
+      c.Set(ind1,
+            (wind_velocities_knots[ind1 + 1] - wind_velocities_knots[ind1]) / h - (M[ind1 + 1] + 2 * M[ind1]) / 6 * h);
+      d.Set(ind1, wind_velocities_knots[ind1]);
+      x.Set(ind1, wind_altitudes_ft[ind1]);
+   }
+
+   bool found = false;
+   DVector new_altitudes(wind_altitudes_ft.GetMin(), wind_altitudes_ft.GetMax() + 1);
+   for (int loop = wind_altitudes_ft.GetMin(); loop <= wind_altitudes_ft.GetMax(); loop++) {
+      if (wind_altitudes_ft[loop] <= altitude.value()) {
+         new_altitudes.Set(loop, wind_altitudes_ft[loop]);
+      } else if (wind_altitudes_ft[loop] > altitude.value() && found) {
+         new_altitudes.Set(loop, wind_altitudes_ft[loop - 1]);
+      } else {
+         found = true;
+         new_altitudes.Set(loop, altitude.value());
+      }
+   }
+
+   if (!found) {
+      new_altitudes.Set(new_altitudes.GetMax(), altitude.value());
+   } else {
+      new_altitudes.Set(new_altitudes.GetMax(), wind_altitudes_ft[wind_altitudes_ft.GetMax()]);
+   }
+
+   int index = new_altitudes.GetMin();
+   list<int> ind;
+   for (int loop = new_altitudes.GetMin(); loop < new_altitudes.GetMax(); loop++) {
+      if (new_altitudes[loop] == altitude.value()) {
+         ind.push_back(index);
+      }
+      index++;
+   }
+
+   if (ind.size() == 1 && (*ind.begin()) > 1) {
+      wind_speed = Units::KnotsSpeed(a[(*ind.begin()) - 1] * pow((altitude.value() - x[(*ind.begin()) - 1]), 3) +
+                                     b[(*ind.begin()) - 1] * pow(altitude.value() - x[(*ind.begin()) - 1], 2) +
+                                     c[(*ind.begin()) - 1] * (altitude.value() - x[(*ind.begin()) - 1]) +
+                                     d[(*ind.begin()) - 1]);
+      wind_gradient = Units::KnotsPerFootFrequency(
+            3 * a[(*ind.begin()) - 1] * pow(altitude.value() - x[(*ind.begin()) - 1], 2) +
+            2 * b[(*ind.begin()) - 1] * (altitude.value() - x[(*ind.begin()) - 1]) + c[(*ind.begin()) - 1]);
+   } else if (!ind.empty()) {
+      wind_speed = Units::KnotsSpeed(a[(*ind.begin())] * pow((altitude.value() - x[(*ind.begin())]), 3) +
+                                     b[(*ind.begin())] * pow(altitude.value() - x[(*ind.begin())], 2) +
+                                     c[(*ind.begin())] * (altitude.value() - x[(*ind.begin())]) + d[(*ind.begin())]);
+      wind_gradient = Units::KnotsPerFootFrequency(
+            3 * a[(*ind.begin())] * pow(altitude.value() - x[(*ind.begin())], 2) +
+            2 * b[(*ind.begin())] * (altitude.value() - x[(*ind.begin())]) + c[(*ind.begin())]);
+   }
+
+   if (wind_gradient != Units::zero()) {
+      wind_gradient = -wind_gradient;
+   }
 }

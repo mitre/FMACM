@@ -2,13 +2,12 @@ cmake_minimum_required(VERSION 3.14)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-include(${PROJECT_SOURCE_DIR}/.cmake/CPM.cmake)
+include(${PROJECT_SOURCE_DIR}/.cmake/get_cpm.cmake)
 
 CPMAddPackage(
         NAME geolib_idealab
         GIT_REPOSITORY https://github.com/mitre/geodetic_library.git
-        VERSION 3.2.7-SNAPSHOT
-        GIT_TAG main
+        GIT_TAG v3.2.8
 )
 if (geolib_idealab_ADDED)
     # set a variable for the includes. Use the variable later inside target_include_directories()
@@ -39,6 +38,7 @@ set(SOURCE_FILES
         AircraftSpeed.cpp
         AircraftState.cpp
         Atmosphere.cpp
+        BlendWindsVerticallyByAltitude.cpp
         CalcWindGradControl.cpp
         ConfigurationFileReader.cpp
         ControlCommands.cpp
@@ -47,13 +47,12 @@ set(SOURCE_FILES
         EllipsoidalEarthModel.cpp
         Environment.cpp
         EuclideanTrajectoryPredictor.cpp
-        EuclideanThreeDofDynamics.cpp
         FlightEnvelopeSpeedLimiter.cpp
-        Guidance.cpp
         HorizontalPath.cpp
         HorizontalTurnPath.cpp
         KinematicDescent4DPredictor.cpp
         KinematicTrajectoryPredictor.cpp
+        LegacyPositionEstimator.cpp
         LocalTangentPlane.cpp
         Logging.cpp
         LoggingLoadable.cpp
@@ -62,13 +61,12 @@ set(SOURCE_FILES
         PassThroughAssap.cpp
         PrecalcConstraint.cpp
         PrecalcWaypoint.cpp
-        PilotDelay.cpp
         ScenarioUtils.cpp
         SimulationTime.cpp
         SingleTangentPlaneSequence.cpp
         SpeedOnPitchControl.cpp
         SpeedOnThrustControl.cpp
-        StandardAtmosphere.cpp
+        StatisticalPilotDelay.cpp
         StereographicProjection.cpp
         TangentPlaneSequence.cpp
         ThreeDOFDynamics.cpp
@@ -89,7 +87,6 @@ set(SOURCE_FILES
         DataReader.cpp
         TvReader.cpp
         GeolibUtils.cpp
-        OutputHandler.cpp
         LatitudeLongitudePoint.cpp
         LineOnEllipsoid.cpp
         ArcOnEllipsoid.cpp
@@ -100,6 +97,9 @@ set(SOURCE_FILES
         InvalidIndexException.cpp
         RandomGenerator.cpp
         Wgs84PrecalcWaypoint.cpp
+        USStandardAtmosphere1976.cpp
+        ZeroWindTrueWeatherOperator.cpp
+        FullWindTrueWeatherOperator.cpp
 )
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
@@ -110,4 +110,8 @@ target_include_directories(pub PUBLIC
         ${aaesim_INCLUDE_DIRS}
         ${minicsv_INCLUDE_DIR})
 target_link_libraries(pub
-        loader geolib log4cplusS nlohmann_json::nlohmann_json)
+        loader 
+        geolib 
+        log4cplusS 
+        nlohmann_json::nlohmann_json 
+        "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.1>>:-lstdc++fs>")

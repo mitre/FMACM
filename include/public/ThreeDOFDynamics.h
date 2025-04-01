@@ -30,39 +30,31 @@
 #include "public/Guidance.h"
 #include "public/EquationsOfMotionState.h"
 #include "public/SimulationTime.h"
+#include "public/EllipsoidalPositionEstimator.h"
+#include "public/TrueWeatherOperator.h"
 #include <scalar/Angle.h>
 #include <scalar/Force.h>
 #include <scalar/Frequency.h>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 
-namespace aaesim {
-namespace open_source {
-class ThreeDOFDynamics {
+namespace aaesim::open_source {
+class ThreeDOFDynamics final {
   public:
-   ThreeDOFDynamics();
-   virtual ~ThreeDOFDynamics() = default;
+   ThreeDOFDynamics() = default;
+   ~ThreeDOFDynamics() = default;
 
-   /**
-    * Aircraft update method that calculates the new aircraft state from the given command state
-    *
-    * @param aircraft_state
-    * @param guidance
-    * @param aircraft_control
-    * @return
-    */
-   virtual AircraftState Update(const aaesim::open_source::SimulationTime &simtime, const Guidance &guidance,
-                                const std::shared_ptr<AircraftControl> &aircraft_control);
+   AircraftState Update(const int unique_acid, const aaesim::open_source::SimulationTime &simtime,
+                        const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control);
 
-   virtual void Initialize(
-         std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
-         const EarthModel::LocalPositionEnu &initial_position_enu, Units::Length initial_altitude_msl,
-         Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu, double initial_mass_fraction,
-         std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather);
+   void Initialize(std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
+                   const EarthModel::GeodeticPosition &initial_position,
+                   const EarthModel::LocalPositionEnu &initial_position_enu, Units::Length initial_altitude_msl,
+                   Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu,
+                   double initial_mass_fraction,
+                   std::shared_ptr<aaesim::open_source::EllipsoidalPositionEstimator> position_estimator,
+                   std::shared_ptr<aaesim::open_source::TrueWeatherOperator> true_weather_operator);
 
-   /**
-    * @return the pair <east-component, north-component>
-    */
    const std::pair<Units::Speed, Units::Speed> GetWindComponents() const;
 
    const DynamicsState GetDynamicsState() const;
@@ -71,52 +63,50 @@ class ThreeDOFDynamics {
 
    const EquationsOfMotionStateDeriv GetEquationsOfMotionStateDerivative() const;
 
-   virtual std::map<Units::Time, DynamicsState> GetDynamicsStateHistory() const;
+   std::map<Units::Time, DynamicsState> GetDynamicsStateHistory() const;
 
   private:
-   static log4cplus::Logger m_logger;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ThreeDOFDynamics"))};
 
-  protected:
-   virtual AircraftState Integrate(const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control);
+   DynamicsState Integrate(const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control);
 
    // Calculate the trim angle correction necessary and provides an updated state
-   virtual Units::SignedRadiansAngle CalculateTrimmedPsiForWind(Units::SignedAngle ground_track_enu);
+   Units::SignedRadiansAngle CalculateTrimmedPsiForWind(Units::SignedAngle ground_track_enu);
 
-   virtual EquationsOfMotionStateDeriv StatePropagation(Units::Frequency dVwx_dh, Units::Frequency dVwy_dh,
-                                                        Units::Frequency k_gamma, Units::Frequency k_t,
-                                                        Units::Frequency k_phi, double k_speedBrake,
-                                                        ControlCommands commands);
+   EquationsOfMotionStateDeriv StatePropagation(Units::Frequency dVwx_dh, Units::Frequency dVwy_dh,
+                                                Units::Frequency k_gamma, Units::Frequency k_t, Units::Frequency k_phi,
+                                                double k_speedBrake, ControlCommands commands);
 
-   virtual EquationsOfMotionStateDeriv StatePropagationOnRunway(ControlCommands commands, const Guidance &guidance);
+   EquationsOfMotionStateDeriv StatePropagationOnRunway(ControlCommands commands, const Guidance &guidance);
 
-   virtual void CalculateKineticForces(Units::Force &lift, Units::Force &drag);
+   void CalculateKineticForces(Units::Force &lift, Units::Force &drag);
 
-   virtual void CalculateEnvironmentalWind(WindStack &wind_east, WindStack &wind_north, Units::Frequency &dVwx_dh,
-                                           Units::Frequency &dVwy_dh);
+   void UpdateTrueWeatherConditions();
 
    DynamicsState ComputeDynamicsState(const EquationsOfMotionState &equations_of_motion_state,
                                       const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative);
 
-   std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
-   DynamicsState m_dynamics_state;
-   std::map<Units::Time, DynamicsState> m_dynamics_history;
-   EquationsOfMotionState m_equations_of_motion_state;
-   EquationsOfMotionStateDeriv m_equations_of_motion_state_derivative;
-
-   // True wind direction values computed by dynamics and speed_on_pitch_control_dynamics
-   Units::Speed m_wind_velocity_east;
-   Units::Speed m_wind_velocity_north;
-
-   double m_max_thrust_percent;
-   double m_min_thrust_percent;
-   std::shared_ptr<aaesim::open_source::WeatherTruth> m_true_weather;
+   std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator{};
+   std::shared_ptr<aaesim::open_source::EllipsoidalPositionEstimator> m_position_estimator;
+   std::map<Units::Time, DynamicsState> m_dynamics_history{};
+   EquationsOfMotionState m_equations_of_motion_state{};
+   EquationsOfMotionStateDeriv m_equations_of_motion_state_derivative{};
+   EarthModel::GeodeticPosition m_last_resolved_position{};
+   Units::Speed m_wind_velocity_east{Units::zero()};
+   Units::Speed m_wind_velocity_north{Units::zero()};
+   double m_max_thrust_percent{1.0};
+   double m_min_thrust_percent{1.0};
+   std::shared_ptr<aaesim::open_source::TrueWeatherOperator> m_true_weather_operator;
 };
 
 inline const std::pair<Units::Speed, Units::Speed> ThreeDOFDynamics::GetWindComponents() const {
    return std::make_pair(m_wind_velocity_east, m_wind_velocity_north);
 }
 
-inline const DynamicsState ThreeDOFDynamics::GetDynamicsState() const { return m_dynamics_state; }
+inline const DynamicsState ThreeDOFDynamics::GetDynamicsState() const {
+   if (m_dynamics_history.empty()) return DynamicsState{};
+   return std::prev(m_dynamics_history.cend())->second;
+}
 
 inline const EquationsOfMotionState ThreeDOFDynamics::GetEquationsOfMotionState() const {
    return m_equations_of_motion_state;
@@ -130,5 +120,4 @@ inline std::map<Units::Time, DynamicsState> ThreeDOFDynamics::GetDynamicsStateHi
    return m_dynamics_history;
 }
 
-}  // namespace open_source
-}  // namespace aaesim
+}  // namespace aaesim::open_source

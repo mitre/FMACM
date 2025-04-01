@@ -31,6 +31,7 @@
 #include "loader/Loadable.h"
 #include "public/Logging.h"
 #include "public/ScenarioUtils.h"
+#include <log4cplus/initializer.h>
 
 #define _MAX_PATH 260
 
@@ -44,9 +45,9 @@ static log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT(
 const std::string VERSION_FLAG("--version");
 
 int main(int argc, char *argv[]) {
-   InitializeLogging();
+   log4cplus::Initializer initializer;
+   LoadLoggerProperties();
    LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::getVersion());
-   HTMLDump::SetSoftwareVersion(aaesim::cppmanifest::getVersion());
 
    if (argc == 2) {
       std::string arg1(argv[1]);

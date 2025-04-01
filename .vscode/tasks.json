@@ -1,0 +1,139 @@
+{
+   "tasks": [
+       {
+           "type": "shell",
+           "label": "build project",
+           "dependsOrder": "sequence",
+           "dependsOn": [
+               "clean build dir",
+               "cmake",
+               "make math",
+           ],
+           "group": {
+               "kind": "build",
+               "isDefault": true
+           }
+       },
+       {
+            "label": "clean build dir",
+            "type": "shell",
+            "command": "rm -rf *",
+            "options": {
+                "cwd": "${workspaceFolder}/build",
+            },
+       },
+       {
+           "label": "cmake",
+           "type": "shell",
+           "command": "cmake -DUSE_CCACHE=YES -DCMAKE_BUILD_TYPE=Debug ..",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make clean",
+           "type": "shell",
+           "command": "make clean",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make aaesim",
+           "type": "shell",
+           "command": "make aaesim -j",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make fmacm",
+           "type": "shell",
+           "command": "make FMACM -j",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make post",
+           "type": "shell",
+           "command": "make post",
+           "options": {
+               "cwd": "${workspaceFolder}/regression",
+           },
+       },
+       {
+           "label": "make postmini",
+           "type": "shell",
+           "command": "make postmini",
+           "options": {
+               "cwd": "${workspaceFolder}/regression",
+           },
+       },
+       {
+           "label": "run tests",
+           "type": "shell",
+           "command": "make -j run_tests",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make public test",
+           "type": "shell",
+           "command": "make -j public_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make bada tests",
+           "type": "shell",
+           "command": "make -j bada_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make avionics tests",
+           "type": "shell",
+           "command": "make -j avionics_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make weather tests",
+           "type": "shell",
+           "command": "make -j weather_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make simulation tests",
+           "type": "shell",
+           "command": "make -j simulation_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make fmacm test",
+           "type": "shell",
+           "command": "make -j fmacm_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       },
+       {
+           "label": "make imalgs test",
+           "type": "shell",
+           "command": "make -j imalgs_test",
+           "options": {
+               "cwd": "${workspaceFolder}/build",
+           },
+       }
+   ],
+   "version": "2.0.0"
+}

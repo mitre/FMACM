@@ -26,8 +26,8 @@ aaesim::open_source::PassThroughAssap::PassThroughAssap()
 
 aaesim::open_source::AircraftState aaesim::open_source::PassThroughAssap::Update(
       const aaesim::open_source::AircraftState &state_to_sync_with,
-      const Sensor::ADSB::ADSBSVReport &most_recent_ads_b) const {
-   return aaesim::open_source::AircraftState::CreateFromADSBReport(most_recent_ads_b);
+      const aaesim::open_source::ADSBSVReport &most_recent_ads_b) const {
+   return aaesim::open_source::AircraftState::FromAdsbReport(most_recent_ads_b);
 }
 
 void aaesim::open_source::PassThroughAssap::Initialize(

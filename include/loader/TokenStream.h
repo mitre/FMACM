@@ -119,8 +119,6 @@ class TokenStream : public IndentManagement {
    bool echo;  // true or false for printing out to command line
 
   private:
-   /* static log4cplus::Logger logger; */
-
    bool error;  // for error checking
    // bool borrowed_dump; //bool to ensure only original file deletes itself
    // void print_to_dumpfile(string dump); //print the string to the dump file

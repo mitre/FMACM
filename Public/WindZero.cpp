@@ -21,7 +21,7 @@
 
 using namespace aaesim::open_source;
 
-WindZero::WindZero() : m_standard_atmosphere(Units::CelsiusTemperature(0)) {}
+WindZero::WindZero(std::shared_ptr<Atmosphere> atmosphere) : m_atmosphere(atmosphere) {}
 
 WindZero::~WindZero() {}
 
@@ -56,12 +56,12 @@ Units::KelvinTemperature WindZero::InterpolateTemperature(Units::Angle latitude_
                                                           Units::Length alt) {
 
    // use the standard atmosphere, ignoring lat/lon
-   return m_standard_atmosphere.GetTemperature(alt);
+   return m_atmosphere->GetTemperature(alt);
 }
 
 Units::Pressure WindZero::InterpolatePressure(Units::Angle latitude_in, Units::Angle longitude_in, Units::Length alt) {
    Units::Pressure pressure;
    Units::Density density;
-   m_standard_atmosphere.AirDensity(alt, density, pressure);
+   m_atmosphere->AirDensity(alt, density, pressure);
    return pressure;
 }

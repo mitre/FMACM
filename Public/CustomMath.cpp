@@ -218,7 +218,7 @@ void matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector 
  * matrix [x y z] is post-multiplied by the rotation
  * matrix.
  */
-DMatrix &createRotationMatrix(double l, double m, double n, const Units::Angle theta) {
+DMatrix &CreateRotationMatrix(double l, double m, double n, const Units::Angle theta) {
 
    // basic formula acquired from:
    // https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2

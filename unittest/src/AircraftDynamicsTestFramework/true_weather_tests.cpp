@@ -27,8 +27,8 @@ TEST(WeatherTruthFromStaticData, updated_using_simtime) {
    test_weather.Initialize("resources/test_env_file.csv", Units::zero(),
                            WeatherTruthFromStaticData::DataIndexParameter::SIMULATION_TIME);
    test_weather.Update(aaesim::open_source::SimulationTime::Of(Units::SecondsTime(1.0)), Units::zero(), Units::zero());
-   Units::KelvinTemperature actual_temp = test_weather.GetTemperature(Units::zero());
-   const Units::KelvinTemperature expected_temp(226.0);
+   Units::KelvinTemperature actual_temp = test_weather.GetTemperature();
+   const Units::KelvinTemperature expected_temp(226);
    EXPECT_NEAR(actual_temp.value(), expected_temp.value(), 1e-10);
 }
 
@@ -38,32 +38,28 @@ TEST(WeatherTruthFromStaticData, updated_using_dtg) {
                            WeatherTruthFromStaticData::DataIndexParameter::DISTANCE_TO_GO);
    test_weather.Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::MetersLength(900.0),
                        Units::zero());
-   Units::KelvinTemperature actual_temp = test_weather.GetTemperature(Units::zero());
-   const Units::KelvinTemperature expected_temp(226.0);
+   Units::KelvinTemperature actual_temp = test_weather.GetTemperature();
+   const Units::KelvinTemperature expected_temp(226);
    EXPECT_NEAR(actual_temp.value(), expected_temp.value(), 1e-10);
 }
 
 TEST(WeatherTruthFromStaticData, updated_interpolate_using_dtg) {
-   // FIXME Stuart this test should be the same as above
    WeatherTruthFromStaticData test_weather = WeatherTruthFromStaticData();
    test_weather.Initialize("resources/test_env_file.csv", Units::zero(),
                            WeatherTruthFromStaticData::DataIndexParameter::DISTANCE_TO_GO);
    test_weather.Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::MetersLength(900.0),
                        Units::zero());
    test_weather.LoadConditionsAt(Units::ZERO_ANGLE, Units::ZERO_ANGLE, Units::ZERO_LENGTH);
-   Units::KelvinTemperature actual_temp = test_weather.GetTemperature(Units::zero());
-   const Units::KelvinTemperature expected_temp(226.0);
+   Units::KelvinTemperature actual_temp = test_weather.GetTemperature();
+   const Units::KelvinTemperature expected_temp(226);
    EXPECT_NEAR(actual_temp.value(), expected_temp.value(), 1e-10);
 }
 
 TEST(WeatherTruthFromStaticData, create_zero) {
    WeatherTruthFromStaticData test_weather = WeatherTruthFromStaticData::CreateZeroTruthWind();
-   Units::KelvinTemperature actual_temp = test_weather.GetTemperature(Units::zero());
    test_weather.Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::zero(), Units::zero());
-   const auto zero_offset_atmosphere = StandardAtmosphere(Units::CelsiusTemperature(0));
-   const auto test_altitude = Units::zero();
-   Units::KelvinTemperature expected_temp = zero_offset_atmosphere.GetTemperature(test_altitude);
-   EXPECT_EQ(test_weather.GetTemperature(test_altitude).value(), expected_temp.value());
+   Units::KelvinTemperature expected_temp(288.15);
+   EXPECT_EQ(test_weather.GetTemperature().value(), expected_temp.value());
 }
 
 }  // namespace test

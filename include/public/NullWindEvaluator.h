@@ -36,7 +36,7 @@ class NullWindEvaluator : public PredictedWindEvaluator {
    virtual bool ArePredictedWindsAccurate(const aaesim::open_source::AircraftState &state,
                                           const WeatherPrediction &weather_prediction, const Units::Speed reference_cas,
                                           const Units::Length reference_altitude,
-                                          const Atmosphere *sensed_atmosphere) const;
+                                          const std::shared_ptr<Atmosphere> &sensed_atmosphere) const;
 
   private:
    static std::shared_ptr<PredictedWindEvaluator> m_instance;

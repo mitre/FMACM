@@ -57,6 +57,15 @@ class CoreUtils {
                                      const std::vector<double> &y_values);
 
    /**
+    * Linear interpolator for speed-typed y_values.
+    *
+    * @see LinearlyInterpolate
+    */
+   static Units::Speed LinearlyInterpolate(int upper_index, Units::Length x_interpolation_value,
+                                           const std::vector<double> &x_values,
+                                           const std::vector<Units::Speed> &y_values);
+
+   /**
     * @param xyLoc1: first x,y pair
     * @param xyLoc2  second x,y pair
     * @return The Euclidean straight line distance between the two points.

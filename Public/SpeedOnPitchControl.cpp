@@ -19,7 +19,6 @@
 
 #include <nlohmann/json.hpp>
 #include "public/SpeedOnPitchControl.h"
-#include "public/AircraftCalculations.h"
 
 using namespace aaesim::open_source;
 
@@ -30,7 +29,9 @@ double SpeedOnPitchControl::m_gain_speedbrake = 0.10;
 
 log4cplus::Logger SpeedOnPitchControl::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("SpeedOnPitchControl"));
 
-SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold, const Units::Length altitude_threshold) {
+SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold, const Units::Length altitude_threshold,
+                                         const Units::Angle max_bank_angle)
+   : SpeedOnThrustControl(max_bank_angle) {
    m_alt_gain = m_gain_alt;
    m_gamma_gain = m_gain_gamma;
    m_phi_gain = m_gain_phi;
@@ -46,28 +47,26 @@ SpeedOnPitchControl::SpeedOnPitchControl(const Units::Speed speed_threshold, con
    m_is_speed_brake_on = false;
 }
 
-void SpeedOnPitchControl::Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator,
-                                     const Units::Angle &max_bank_angle) {
-   AircraftControl::Initialize(bada_calculator, max_bank_angle);
+void SpeedOnPitchControl::Initialize(
+      std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator) {
+   AircraftControl::Initialize(bada_calculator);
    m_is_level_flight = true;
    m_min_thrust_counter = 0.0;
    m_speed_brake_counter = 0.0;
    m_is_speed_brake_on = false;
 }
 
-void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
-                                            const EquationsOfMotionState &equations_of_motion_state,
-                                            Units::Force &thrust_command, Units::Angle &gamma_command,
-                                            Units::Speed &true_airspeed_command, double &speed_brake_command,
-                                            aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration,
-                                            const WeatherTruth &true_weather) {
+void SpeedOnPitchControl::DoVerticalControl(
+      const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state, Units::Force &thrust_command,
+      Units::Angle &gamma_command, Units::Speed &true_airspeed_command, double &speed_brake_command,
+      aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration) {
    // Estimate kinetic forces for this state
    Units::Force lift, drag;
-   ConfigureFlapsAndEstimateKineticForces(equations_of_motion_state, lift, drag, new_flap_configuration, true_weather);
+   ConfigureFlapsAndEstimateKineticForces(equations_of_motion_state, lift, drag, new_flap_configuration);
 
    // Commands
    const Units::Speed ias_com = guidance.m_ias_command;
-   true_airspeed_command = true_weather.CAS2TAS(ias_com, equations_of_motion_state.altitude_msl);
+   true_airspeed_command = m_sensed_weather->GetTrueWeather()->CAS2TAS(ias_com, equations_of_motion_state.altitude_msl);
    const Units::Force max_thrust = Units::NewtonsForce(m_bada_calculator->GetMaxThrust(
          equations_of_motion_state.altitude_msl, new_flap_configuration,
          aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CRUISE, Units::ZERO_CELSIUS));
@@ -82,8 +81,7 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
    if (m_is_level_flight) {
       // manage speed with thrust and altitude with pitch
       SpeedOnThrustControl::DoVerticalControl(guidance, equations_of_motion_state, thrust_command, gamma_command,
-                                              true_airspeed_command, speed_brake_command, new_flap_configuration,
-                                              true_weather);
+                                              true_airspeed_command, speed_brake_command, new_flap_configuration);
 
       // determine if staying in level flight
       const static Units::Length tolerance = Units::FeetLength(200);
@@ -98,8 +96,8 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
 
    } else {
       // manage altitude with thrust, speed with pitch
-      double esf = true_weather.ESFconstantCAS(equations_of_motion_state.true_airspeed,
-                                               equations_of_motion_state.altitude_msl);
+      double esf = m_sensed_weather->GetTrueWeather()->ESFconstantCAS(equations_of_motion_state.true_airspeed,
+                                                                      equations_of_motion_state.altitude_msl);
 
       // adjust esf based on velocity error compared to the speed threshold
       if (error_tas <= -m_speed_threshold) {
@@ -145,8 +143,8 @@ void SpeedOnPitchControl::DoVerticalControl(const Guidance &guidance,
    }
 
    // Determine if speed brake is needed
-   Units::Speed v_cas =
-         true_weather.TAS2CAS(equations_of_motion_state.true_airspeed, equations_of_motion_state.altitude_msl);
+   Units::Speed v_cas = m_sensed_weather->GetTrueWeather()->TAS2CAS(equations_of_motion_state.true_airspeed,
+                                                                    equations_of_motion_state.altitude_msl);
 
    if (thrust_command == min_thrust) {
 

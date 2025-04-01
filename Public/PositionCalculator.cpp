@@ -19,9 +19,10 @@
 
 #include <public/PositionCalculator.h>
 #include <log4cplus/loggingmacros.h>
-#include <public/AircraftCalculations.h>
 #include <public/CoreUtils.h>
 #include "public/PositionCalculator.h"
+
+using namespace aaesim::open_source;
 
 log4cplus::Logger PositionCalculator::m_logger = log4cplus::Logger::getInstance("PositionCalculator");
 

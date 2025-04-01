@@ -47,7 +47,7 @@ class TangentPlaneSequence {
 
    virtual ~TangentPlaneSequence() = default;
 
-   TangentPlaneSequence(const TangentPlaneSequence &in);  // copy constructor
+   TangentPlaneSequence(const TangentPlaneSequence &in);
 
    /**
     * Converts a local ENU point to geodetic coordinates
@@ -60,7 +60,7 @@ class TangentPlaneSequence {
     * @param localPosition
     * @param waypoint
     */
-   void convertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
+   void ConvertLocalToGeodetic(EarthModel::LocalPositionEnu localPosition,
                                EarthModel::GeodeticPosition &geoPosition) const;
 
    /**
@@ -73,35 +73,35 @@ class TangentPlaneSequence {
     * @param localPosition
     * @param waypoint
     */
-   void convertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
+   void ConvertGeodeticToLocal(EarthModel::GeodeticPosition geoPosition,
                                EarthModel::LocalPositionEnu &localPosition) const;
 
    /**
     * Returns the ENU coordinates of each of the waypoints
     * supplied during construction.
     */
-   const std::vector<EarthModel::LocalPositionEnu> &getLocalPositionsFromInitialization() const;
+   const std::vector<EarthModel::LocalPositionEnu> &GetLocalPositionsFromInitialization() const;
 
    /**
     * Returns copies of the waypoints used during construction.
     */
-   const std::vector<Waypoint> &getWaypointsFromInitialization() const;
+   const std::vector<Waypoint> &GetWaypointsFromInitialization() const;
 
    /**
     * Returns tangent planes for each of the waypoints used during
     * construction.
     */
-   const std::vector<std::shared_ptr<LocalTangentPlane> > &getTangentPlanesFromInitialization() const;
+   const std::vector<std::shared_ptr<LocalTangentPlane> > &GetTangentPlanesFromInitialization() const;
 
   private:
-   static log4cplus::Logger logger;
+   inline static log4cplus::Logger logger_{log4cplus::Logger::getInstance("TangentPlaneSequence")};
 
-   void copy(const TangentPlaneSequence &in);  // helper method for copy constructor and assignment operator
+   void Copy(const TangentPlaneSequence &in);
 
   protected:
    virtual void Initialize(std::list<Waypoint> &waypoint_list);
 
-   std::vector<Waypoint> waypointsFromInitialization;
-   std::vector<std::shared_ptr<LocalTangentPlane> > tangentPlanesFromInitialization;
-   std::vector<EarthModel::LocalPositionEnu> localPositionsFromInitialization;
+   std::vector<Waypoint> waypoints_from_initialization_;
+   std::vector<std::shared_ptr<LocalTangentPlane> > tangent_planes_from_initialization_;
+   std::vector<EarthModel::LocalPositionEnu> local_positions_from_initialization_;
 };

@@ -18,14 +18,10 @@
 // ****************************************************************************
 
 #include <public/HorizontalPathTracker.h>
-#include <public/AircraftCalculations.h>
 
-log4cplus::Logger HorizontalPathTracker::m_logger = log4cplus::Logger::getInstance("HorizontalPathTracker");
-const Units::Length HorizontalPathTracker::EXTENSION_LENGTH = Units::NauticalMilesLength(1.0);
-const Units::MetersLength HorizontalPathTracker::ON_NODE_TOLERANCE = Units::MetersLength(1e-10);
-
-HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory,
-                                             TrajectoryIndexProgressionDirection expected_index_progression) {
+aaesim::open_source::HorizontalPathTracker::HorizontalPathTracker(
+      const std::vector<HorizontalPath> &horizontal_trajectory,
+      TrajectoryIndexProgressionDirection expected_index_progression) {
    m_index_progression_direction = expected_index_progression;
    m_unmodified_horizontal_trajectory = horizontal_trajectory;
    m_extended_horizontal_trajectory = ExtendHorizontalTrajectory(horizontal_trajectory);
@@ -37,16 +33,14 @@ HorizontalPathTracker::HorizontalPathTracker(const std::vector<HorizontalPath> &
    InitializeStartingIndex();
 }
 
-HorizontalPathTracker::~HorizontalPathTracker() = default;
-
-std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(
-      const std::vector<HorizontalPath> &horizontal_trajectory) {
+std::vector<aaesim::open_source::HorizontalPath> aaesim::open_source::HorizontalPathTracker::ExtendHorizontalTrajectory(
+      const std::vector<aaesim::open_source::HorizontalPath> &horizontal_trajectory) {
 
    // add one more straight segment to end
-   std::vector<HorizontalPath> extended_trajectory;
+   std::vector<aaesim::open_source::HorizontalPath> extended_trajectory;
    Units::RadiansAngle crs(horizontal_trajectory[0].m_path_course);
-   HorizontalPath hp;
-   hp.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
+   aaesim::open_source::HorizontalPath hp;
+   hp.m_segment_type = aaesim::open_source::HorizontalPath::SegmentType::STRAIGHT;
    hp.SetXYPositionMeters(horizontal_trajectory[0].GetXPositionMeters() -
                                 Units::MetersLength(EXTENSION_LENGTH).value() * Units::cos(crs),
                           horizontal_trajectory[0].GetYPositionMeters() -
@@ -57,15 +51,15 @@ std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(
 
    // extend all lengths
    for (auto itr = horizontal_trajectory.begin(); itr < horizontal_trajectory.end(); ++itr) {
-      HorizontalPath element = itr.operator*();
+      aaesim::open_source::HorizontalPath element = itr.operator*();
       element.m_path_length_cumulative_meters += Units::MetersLength(EXTENSION_LENGTH).value();
       extended_trajectory.push_back(element);
    }
 
    // add one more straigt segment to the beginning
    Units::RadiansAngle crs_back(horizontal_trajectory.back().m_path_course);
-   HorizontalPath hp_beginning;
-   hp_beginning.m_segment_type = HorizontalPath::SegmentType::STRAIGHT;
+   aaesim::open_source::HorizontalPath hp_beginning;
+   hp_beginning.m_segment_type = aaesim::open_source::HorizontalPath::SegmentType::STRAIGHT;
    hp_beginning.SetXYPositionMeters(
          horizontal_trajectory.back().GetXPositionMeters() +
                Units::MetersLength(EXTENSION_LENGTH).value() * Units::cos(crs_back),
@@ -79,7 +73,7 @@ std::vector<HorizontalPath> HorizontalPathTracker::ExtendHorizontalTrajectory(
    return extended_trajectory;
 }
 
-void HorizontalPathTracker::InitializeStartingIndex() {
+void aaesim::open_source::HorizontalPathTracker::InitializeStartingIndex() {
 
    switch (m_index_progression_direction) {
       case TrajectoryIndexProgressionDirection::DECREMENTING:
@@ -102,8 +96,8 @@ void HorizontalPathTracker::InitializeStartingIndex() {
    }
 }
 
-bool HorizontalPathTracker::ValidateIndexProgression(std::vector<HorizontalPath>::size_type index_to_check) {
-
+bool aaesim::open_source::HorizontalPathTracker::ValidateIndexProgression(
+      std::vector<aaesim::open_source::HorizontalPath>::size_type index_to_check) {
    bool is_progress_valid;
    switch (m_index_progression_direction) {
       case TrajectoryIndexProgressionDirection::DECREMENTING:
@@ -126,21 +120,24 @@ bool HorizontalPathTracker::ValidateIndexProgression(std::vector<HorizontalPath>
    return is_progress_valid;
 }
 
-HorizontalPathTracker::HorizontalPathTracker() {
-   m_current_index = 0;
-   m_extended_horizontal_trajectory = std::vector<HorizontalPath>();
-   m_unmodified_horizontal_trajectory = std::vector<HorizontalPath>();
-   m_is_passed_end_of_route = false;
-   m_index_progression_direction = TrajectoryIndexProgressionDirection::UNDEFINED;
-}
-
-void HorizontalPathTracker::UpdateHorizontalTrajectory(const std::vector<HorizontalPath> &horizontal_trajectory) {
+void aaesim::open_source::HorizontalPathTracker::UpdateHorizontalTrajectory(
+      const std::vector<aaesim::open_source::HorizontalPath> &horizontal_trajectory) {
+   const auto hp_to_find = m_extended_horizontal_trajectory[m_current_index];
    m_unmodified_horizontal_trajectory = horizontal_trajectory;
    m_extended_horizontal_trajectory = ExtendHorizontalTrajectory(horizontal_trajectory);
+
+   auto find_result =
+         std::find(m_extended_horizontal_trajectory.begin(), m_extended_horizontal_trajectory.end(), hp_to_find);
+   if (find_result == m_extended_horizontal_trajectory.end()) {
+      InitializeStartingIndex();
+      return;
+   }
+   m_current_index = std::distance(m_extended_horizontal_trajectory.begin(), find_result);
 }
 
-bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x, const Units::Length position_y,
-                                             std::vector<HorizontalPath>::size_type &node_index) {
+bool aaesim::open_source::HorizontalPathTracker::IsPositionOnNode(
+      const Units::Length position_x, const Units::Length position_y,
+      std::vector<aaesim::open_source::HorizontalPath>::size_type &node_index) {
    bool is_on_node =
          Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[m_current_index].GetXPositionMeters()) -
                     position_x) < ON_NODE_TOLERANCE &&
@@ -148,11 +145,11 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x, con
                     position_y) < ON_NODE_TOLERANCE;
 
    if (!is_on_node) {
-      std::vector<HorizontalPath>::size_type next_index;
+      std::vector<aaesim::open_source::HorizontalPath>::size_type next_index;
       switch (m_index_progression_direction) {
          case TrajectoryIndexProgressionDirection::DECREMENTING:
             if (m_current_index > 0) {
-               next_index = m_current_index - 1;  // can go UB
+               next_index = m_current_index - 1;
                auto x_diff =
                      Units::abs(Units::MetersLength(m_extended_horizontal_trajectory[next_index].GetXPositionMeters()) -
                                 position_x);
@@ -203,8 +200,9 @@ bool HorizontalPathTracker::IsPositionOnNode(const Units::Length position_x, con
    return is_on_node;
 }
 
-bool HorizontalPathTracker::IsDistanceAlongPathOnNode(const Units::Length distance_along_path,
-                                                      std::vector<HorizontalPath>::size_type &node_index) {
+bool aaesim::open_source::HorizontalPathTracker::IsDistanceAlongPathOnNode(
+      const Units::Length distance_along_path,
+      std::vector<aaesim::open_source::HorizontalPath>::size_type &node_index) {
    const Units::Length distance_to_check = distance_along_path + EXTENSION_LENGTH;
    bool is_on_node =
          Units::abs(
@@ -212,7 +210,7 @@ bool HorizontalPathTracker::IsDistanceAlongPathOnNode(const Units::Length distan
                distance_to_check) < ON_NODE_TOLERANCE;
 
    if (!is_on_node) {
-      std::vector<HorizontalPath>::size_type next_index;
+      std::vector<aaesim::open_source::HorizontalPath>::size_type next_index;
       switch (m_index_progression_direction) {
          case TrajectoryIndexProgressionDirection::DECREMENTING:
             next_index = m_current_index - 1;

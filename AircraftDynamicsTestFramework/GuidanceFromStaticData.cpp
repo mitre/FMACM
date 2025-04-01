@@ -21,10 +21,10 @@
 
 #include <scalar/AngularSpeed.h>
 
-#include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
 
 using namespace fmacm;
+using namespace aaesim::open_source;
 
 log4cplus::Logger GuidanceFromStaticData::m_logger = log4cplus::Logger::getInstance("GuidanceFromStaticData");
 
@@ -52,7 +52,7 @@ aaesim::open_source::Guidance GuidanceFromStaticData::Update(const aaesim::open_
    Units::UnsignedAngle estimated_course;
    Units::Length estimated_distance_to_go;
    m_decrementing_distance_calculator.CalculateAlongPathDistanceFromPosition(
-         state.GetPositionX(), state.GetPositionY(), estimated_distance_to_go, estimated_course);
+         state.GetPositionEnuX(), state.GetPositionEnuY(), estimated_distance_to_go, estimated_course);
    if (estimated_distance_to_go >= m_estimated_distance_to_go) {
       LOG4CPLUS_WARN(
             m_logger,
@@ -63,7 +63,7 @@ aaesim::open_source::Guidance GuidanceFromStaticData::Update(const aaesim::open_
 
    auto vertical_guidance = CalculateVerticalGuidance(state, estimated_distance_to_go, estimated_course);
    auto horizontal_guidance = CalculateHorizontalGuidance(state, estimated_distance_to_go, estimated_course);
-   auto complete_guidance = CombineGuidance(vertical_guidance, horizontal_guidance);
+   auto complete_guidance = CombineGuidance(horizontal_guidance, vertical_guidance);
    m_previous_guidance = complete_guidance;
    m_estimated_distance_to_go = estimated_distance_to_go;
    return complete_guidance;
@@ -74,7 +74,7 @@ aaesim::open_source::Guidance GuidanceFromStaticData::CalculateVerticalGuidance(
       const Units::UnsignedAngle &estimated_course) {
 
    aaesim::open_source::Guidance vertical_guidance;
-   vertical_guidance.m_reference_altitude = state.GetPositionZ();
+   vertical_guidance.m_reference_altitude = state.GetAltitudeMsl();
    vertical_guidance.m_vertical_speed = Units::ZERO_SPEED;
    vertical_guidance.m_ias_command = state.GetDynamicsState().v_indicated_airspeed;
    vertical_guidance.m_ground_speed = state.GetGroundSpeed();
@@ -112,7 +112,7 @@ aaesim::open_source::Guidance GuidanceFromStaticData::CalculateVerticalGuidance(
       vertical_guidance.m_vertical_speed = Units::MetersPerSecondSpeed(altitude_rate_target);
       vertical_guidance.m_ias_command = Units::MetersPerSecondSpeed(ias_target);
       vertical_guidance.m_ground_speed = Units::MetersPerSecondSpeed(groundspeed_target);
-      if (state.GetPositionZ() >= m_planned_descent_parameters.planned_transition_altitude) {
+      if (state.GetAltitudeMsl() >= m_planned_descent_parameters.planned_transition_altitude) {
          vertical_guidance.SetSelectedSpeed(aaesim::open_source::AircraftSpeed::OfMach(
                BoundedValue<double, 0, 1>(m_planned_descent_parameters.planned_cruise_mach)));
       } else {
@@ -144,13 +144,14 @@ aaesim::open_source::Guidance GuidanceFromStaticData::CalculateHorizontalGuidanc
    horizontal_guidance.m_enu_track_angle = course_at_position;
    if (horizontal_guidance.m_ground_speed <= Units::zero()) horizontal_guidance.m_ground_speed = state.GetGroundSpeed();
    if (m_horizontal_trajectory[traj_index].m_segment_type == HorizontalPath::SegmentType::TURN) {
-      Units::Length unsigned_cross_track = Units::sqrt(Units::sqr(state.GetPositionX() - estimated_position_on_path_x) +
-                                                       Units::sqr(state.GetPositionY() - estimated_position_on_path_y));
+      Units::Length unsigned_cross_track =
+            Units::sqrt(Units::sqr(state.GetPositionEnuX() - estimated_position_on_path_x) +
+                        Units::sqr(state.GetPositionEnuY() - estimated_position_on_path_y));
 
       Units::Length center_distance = Units::sqrt(
-            Units::sqr(state.GetPositionX() -
+            Units::sqr(state.GetPositionEnuX() -
                        Units::MetersLength(m_horizontal_trajectory[traj_index].m_turn_info.x_position_meters)) +
-            Units::sqr(state.GetPositionY() -
+            Units::sqr(state.GetPositionEnuY() -
                        Units::MetersLength(m_horizontal_trajectory[traj_index].m_turn_info.y_position_meters)));
 
       Units::FeetLength distance_to_waypoint =
@@ -170,7 +171,7 @@ aaesim::open_source::Guidance GuidanceFromStaticData::CalculateHorizontalGuidanc
 
       Units::Angle aircraft_course = Units::UnsignedRadiansAngle(
             Units::RadiansAngle(m_horizontal_trajectory[traj_index].m_path_course) + Units::PI_RADIANS_ANGLE);
-      Units::SignedRadiansAngle course_change = AircraftCalculations::Convert0to2Pi(estimated_course - aircraft_course);
+      Units::SignedRadiansAngle course_change = Units::ToSigned(estimated_course - aircraft_course);
 
       TurnDirection turn_direction = GetTurnDirection(course_change);
       // courseChange - positive is left turn, neg is right turn
@@ -197,9 +198,9 @@ aaesim::open_source::Guidance GuidanceFromStaticData::CalculateHorizontalGuidanc
       }
    } else {
       horizontal_guidance.m_cross_track_error =
-            -(state.GetPositionY() - Units::MetersLength(m_horizontal_trajectory[traj_index].GetYPositionMeters())) *
+            -(state.GetPositionEnuY() - Units::MetersLength(m_horizontal_trajectory[traj_index].GetYPositionMeters())) *
                   Units::cos(estimated_course) +
-            (state.GetPositionX() - Units::MetersLength(m_horizontal_trajectory[traj_index].GetXPositionMeters())) *
+            (state.GetPositionEnuX() - Units::MetersLength(m_horizontal_trajectory[traj_index].GetXPositionMeters())) *
                   Units::sin(estimated_course);
    }
 

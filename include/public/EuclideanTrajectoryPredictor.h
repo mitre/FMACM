@@ -30,33 +30,30 @@
 #include "public/PositionCalculator.h"
 #include "public/AlongPathDistanceCalculator.h"
 #include "public/TurnAnticipation.h"
+#include "public/EuclideanTightTurnResolver.h"
 
 namespace aaesim {
 namespace open_source {
 
 class EuclideanTrajectoryPredictor {
   public:
-   EuclideanTrajectoryPredictor(void);
+   EuclideanTrajectoryPredictor();
 
-   virtual ~EuclideanTrajectoryPredictor(void) = default;
-
-   EuclideanTrajectoryPredictor &operator=(const EuclideanTrajectoryPredictor &obj);
-
-   bool operator==(const EuclideanTrajectoryPredictor &obj) const;
-
-   bool operator!=(const EuclideanTrajectoryPredictor &boj) const;
+   virtual ~EuclideanTrajectoryPredictor() = default;
 
    virtual void CalculateWaypoints(const AircraftIntent &aircraft_intent,
                                    const aaesim::open_source::WeatherPrediction &weather_prediction);
 
    const std::vector<HorizontalPath> EstimateHorizontalTrajectory(
-         aaesim::open_source::WeatherPrediction weather_prediction);
+         const aaesim::open_source::WeatherPrediction &weather_prediction);
 
    virtual void BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                          const std::shared_ptr<TangentPlaneSequence> &position_converter,
                                           Units::Length start_altitude);
 
-   virtual void BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather, Units::Length start_altitude,
-                                          Units::Length aircraft_distance_to_go);
+   virtual void BuildTrajectoryPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                          const std::shared_ptr<TangentPlaneSequence> &position_converter,
+                                          Units::Length start_altitude, Units::Length aircraft_distance_to_go);
 
    aaesim::open_source::Guidance Update(const aaesim::open_source::AircraftState &state,
                                         const aaesim::open_source::Guidance &current_guidance);
@@ -90,26 +87,25 @@ class EuclideanTrajectoryPredictor {
    static double HalfTurn(HorizontalTurnPath turn);
 
   protected:
-   virtual void Copy(const EuclideanTrajectoryPredictor &obj);
-
-   void UpdateWeatherPrediction(aaesim::open_source::WeatherPrediction &weather) const;
+   void UpdateWeatherPrediction(aaesim::open_source::WeatherPrediction &weather,
+                                const std::shared_ptr<TangentPlaneSequence> &position_converter) const;
 
    /**
     * Forces altitude constraints to form a monotonic space.
     */
    virtual void AdjustConstraints(const Units::Speed start_speed);
 
-   std::vector<PrecalcWaypoint> m_waypoint_vector;
-   std::vector<HorizontalPath> m_horizontal_path;
-   std::shared_ptr<VerticalPredictor> m_vertical_predictor;
-   Units::Angle m_bank_angle;
-   Units::Length m_altitude_at_final_waypoint;
-   Units::Length m_aircraft_distance_to_go;
-
-   AircraftIntent m_aircraft_intent;
-   AlongPathDistanceCalculator m_distance_calculator;
-   PositionCalculator m_position_calculator;
-   std::shared_ptr<Atmosphere> m_atmosphere;
+   std::vector<PrecalcWaypoint> m_waypoint_vector{};
+   std::vector<HorizontalPath> m_horizontal_path{};
+   std::shared_ptr<VerticalPredictor> m_vertical_predictor{};
+   Units::Angle m_bank_angle{Units::DUMMY_DEGREES_ANGLE};
+   Units::Length m_altitude_at_final_waypoint{Units::FeetLength(-50.0)};
+   Units::Length m_aircraft_distance_to_go{Units::infinity()};
+   AircraftIntent m_aircraft_intent{};
+   AlongPathDistanceCalculator m_distance_calculator{};
+   PositionCalculator m_position_calculator{};
+   std::shared_ptr<Atmosphere> m_atmosphere{};
+   std::shared_ptr<aaesim::open_source::EuclideanTightTurnResolver> m_tight_turn_resolver{};
 
   private:
    static log4cplus::Logger m_logger;
@@ -166,12 +162,6 @@ class EuclideanTrajectoryPredictor {
 
    void DefineRoute();
 
-   void CalculateTrajUsingLawOfSines(const double courseChange1, const double courseChange2, const double legLength,
-                                     double &radius, double &turnDist);
-
-   void CalculateTrajUsingKite(const double courseChange1, const double courseChange2, const double legLength,
-                               double &radius, double &turnDist);
-
    void CalculateHorizontalTrajectory(const HorizontalTrajOption option);
 
    std::vector<aaesim::open_source::TurnAnticipation> CalculateTurnAnticipation(const HorizontalTrajOption option);
@@ -189,8 +179,8 @@ inline const std::vector<PrecalcWaypoint> &aaesim::open_source::EuclideanTraject
    return m_waypoint_vector;
 }
 
-inline const std::shared_ptr<VerticalPredictor>
-      &aaesim::open_source::EuclideanTrajectoryPredictor::GetVerticalPredictor() const {
+inline const std::shared_ptr<VerticalPredictor> &
+      aaesim::open_source::EuclideanTrajectoryPredictor::GetVerticalPredictor() const {
    return m_vertical_predictor;
 }
 

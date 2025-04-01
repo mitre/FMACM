@@ -35,12 +35,12 @@ Units::Length aaesim::ArcOnEllipsoid::GetShapeLength() const {
     * create a more computationally efficient computation of length, this calls directly into geolib_idealab here
     * with all the known arc information.
     */
-   ErrorSet error_set = ErrorCodes::SUCCESS;
+   ErrorSet error_set{ErrorCodes::SUCCESS};
    int steps = INT32_MIN;
    double length =
          arcLength(m_arc_primitive.centerPoint, m_arc_primitive.radius, m_arc_primitive.startAz, m_arc_primitive.endAz,
                    m_arc_primitive.dir, &steps, &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   if (!GeolibUtils::IsSuccess(error_set)) {
       LOG4CPLUS_ERROR(m_logger, GeolibUtils::m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(GeolibUtils::m_basic_error_message);
    }
@@ -67,7 +67,6 @@ geolib_idealab::ArcDirection ArcOnEllipsoid::GetArcDirection() const { return m_
 
 bool ArcOnEllipsoid::IsPointOnShape(const LatitudeLongitudePoint &test_point) const {
    return GeolibUtils::IsPointOnArc(*this, test_point);
-   ;
 }
 
 bool ArcOnEllipsoid::IsPointInsideArc(const LatitudeLongitudePoint &test_point) const {
@@ -142,7 +141,7 @@ LatitudeLongitudePoint ArcOnEllipsoid::GetNearestPointOnShape(
 
 Units::Length ArcOnEllipsoid::CalculateDistanceFromPointOnShapeToEnd(
       const LatitudeLongitudePoint &point_on_shape) const {
-   ErrorSet error_set = ErrorCodes::SUCCESS;
+   ErrorSet error_set{ErrorCodes::SUCCESS};
    int steps = INT32_MIN;
    const Units::SignedAngle start_azimuth_enu =
          GetCenterPoint().CalculateRelationshipBetweenPoints(point_on_shape).second;
@@ -150,7 +149,7 @@ Units::Length ArcOnEllipsoid::CalculateDistanceFromPointOnShapeToEnd(
    double length =
          arcLength(m_arc_primitive.centerPoint, m_arc_primitive.radius, start_azimuth_ned.value(),
                    m_arc_primitive.endAz, m_arc_primitive.dir, &steps, &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   if (!GeolibUtils::IsSuccess(error_set)) {
       LOG4CPLUS_ERROR(m_logger, GeolibUtils::m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(GeolibUtils::m_basic_error_message);
    }
@@ -165,7 +164,7 @@ LatitudeLongitudePoint ArcOnEllipsoid::CalculatePointAtDistanceFromStartPoint(
    ErrorSet error_set = arcFromLength(m_arc_primitive.centerPoint, m_arc_primitive.startPoint, m_arc_primitive.dir,
                                       Units::NauticalMilesLength(distance_along_shape_from_start_point).value(),
                                       &calculated_point, &calculated_subtended_angle, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
-   if (error_set != ErrorCodes::SUCCESS) {
+   if (!GeolibUtils::IsSuccess(error_set)) {
       LOG4CPLUS_ERROR(m_logger, GeolibUtils::m_basic_error_message << formatErrorMessage(error_set));
       throw std::runtime_error(GeolibUtils::m_basic_error_message);
    }

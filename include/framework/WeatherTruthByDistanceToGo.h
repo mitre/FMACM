@@ -19,12 +19,20 @@
 
 #pragma once
 
-#include <memory>
-#include "public/StandardAtmosphere.h"
 #include "public/WeatherTruth.h"
 #include "public/Wind.h"
 
-class WeatherTruthByDistanceToGo : public StandardAtmosphere, public aaesim::open_source::WeatherTruth, public Wind {
+#include <memory>
+
+#ifdef MITRE_BADA3_LIBRARY
+#include "bada/BadaAtmosphere37.h"
+#define ATMOSPHERE_IMPL aaesim::bada::BadaAtmosphere37
+#else
+#include "public/NullAtmosphere.h"
+#define ATMOSPHERE_IMPL NullAtmosphere
+#endif
+
+class WeatherTruthByDistanceToGo : public ATMOSPHERE_IMPL, public aaesim::open_source::WeatherTruth, public Wind {
   public:
    class Weather {
      public:

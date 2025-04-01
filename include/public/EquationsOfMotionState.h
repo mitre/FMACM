@@ -23,18 +23,16 @@
 #include <scalar/Force.h>
 #include <scalar/Speed.h>
 #include <scalar/Length.h>
-#include "public/EarthModel.h"
+#include "public/BadaUtils.h"
 
 class EquationsOfMotionState {
   public:
-   Units::Length enu_x, enu_y, altitude_msl;  // east, north, altitude msl
-   EarthModel::GeodeticPosition geodetic_position;
+   Units::Length enu_x, enu_y, altitude_msl;
    Units::Speed true_airspeed;
-   Units::Angle gamma;  // flight-path angle NOTE: for flight-path angle (gamma), heading down is positive; heading up
-                        // is negative
-   Units::SignedAngle psi_enu;  // heading measured from east counter-clockwise
+   Units::Angle gamma;
+   Units::SignedAngle psi_enu;
    Units::Force thrust;
-   Units::Angle phi;                                               // roll angle
-   double speedBrake;                                              // speed brake (% of deployment)
-   aaesim::open_source::bada_utils::FlapConfiguration flapConfig;  // flap configuration
+   Units::Angle phi;
+   double speed_brake_percentage;
+   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration;
 };

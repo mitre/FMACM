@@ -29,8 +29,9 @@ namespace open_source {
 struct ASSAP {  // Airborne Surveillance & Separation Assurance Processing
    virtual ~ASSAP() = default;
 
-   virtual aaesim::open_source::AircraftState Update(const aaesim::open_source::AircraftState &state_to_sync_with,
-                                                     const Sensor::ADSB::ADSBSVReport &most_recent_ads_b) const = 0;
+   virtual aaesim::open_source::AircraftState Update(
+         const aaesim::open_source::AircraftState &state_to_sync_with,
+         const aaesim::open_source::ADSBSVReport &most_recent_ads_b) const = 0;
 
    virtual std::shared_ptr<const aaesim::open_source::ADSBReceiver> GetAdsbReceiver() const = 0;
 

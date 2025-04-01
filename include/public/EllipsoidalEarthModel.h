@@ -17,42 +17,35 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-/*
- * EllipsoidalEarthModel.h
- *
- *  Created on: Jun 30, 2015
- *      Author: klewis
- */
-
 #pragma once
 
 #include "public/EarthModel.h"
 #include <scalar/Area.h>
 #include "public/LocalTangentPlane.h"
 #include "public/Logging.h"
+#include "public/WGS84EarthModelConstants.h"
 
-class EllipsoidalEarthModel : public EarthModel {
+class EllipsoidalEarthModel final : public EarthModel {
   public:
-   static const Units::Length m_wgs84_semimajor_radius;
-   static const double m_wgs84_eccentricity_squared;
+   EllipsoidalEarthModel()
+      : m_semi_major_radius_squared(aaesim::open_source::WGS84_SEMIMAJOR_AXIS *
+                                    aaesim::open_source::WGS84_SEMIMAJOR_AXIS),
+        m_eccentricity_4(aaesim::open_source::WGS84_ECCENTRICITY_SQUARED *
+                         aaesim::open_source::WGS84_ECCENTRICITY_SQUARED) {}
 
-   EllipsoidalEarthModel();
+   ~EllipsoidalEarthModel() = default;
 
-   virtual ~EllipsoidalEarthModel();
+   void ConvertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
+                                  EarthModel::AbsolutePositionEcef &ecef) const override;
 
-   virtual void ConvertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
-                                          EarthModel::AbsolutePositionEcef &ecef) const override;
+   void ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
+                                  EarthModel::GeodeticPosition &geo) const override;
 
-   virtual void ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
-                                          EarthModel::GeodeticPosition &geo) const override;
-
-   virtual std::shared_ptr<LocalTangentPlane> MakeEnuConverter(
-         const GeodeticPosition &pointOfTangencyGeo, const LocalPositionEnu &pointOfTangencyEnu) const override;
+   std::shared_ptr<LocalTangentPlane> MakeEnuConverter(const GeodeticPosition &pointOfTangencyGeo,
+                                                       const LocalPositionEnu &pointOfTangencyEnu) const override;
 
   private:
-   static log4cplus::Logger m_logger;
-   const Units::Length m_semi_major_radius;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("EllipsoidalEarthModel"))};
    const Units::Area m_semi_major_radius_squared;
-   const double m_eccentricity_squared;
    const double m_eccentricity_4;
 };

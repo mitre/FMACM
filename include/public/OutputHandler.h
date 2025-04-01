@@ -25,11 +25,14 @@
 struct OutputHandler {
 
   public:
+   OutputHandler() = default;
+
    /*
     * The constructor takes the scenario name, and the desired file extension to describe the
     * type of output contained in this file.
     */
-   OutputHandler(const std::string &scenario_name, const std::string &file_suffix);
+   OutputHandler(const std::string &scenario_name, const std::string &file_suffix)
+      : m_file_suffix(file_suffix), filename(scenario_name + file_suffix), os(), m_finished(false) {}
 
    virtual ~OutputHandler() = default;
 
@@ -48,6 +51,10 @@ struct OutputHandler {
     * using this function.
     */
    virtual void SetScenarioName(const std::string &scenario_name);
+
+   virtual std::string GetOutputFilename() const { return filename; }
+
+   std::string GetFileSuffix() const { return m_file_suffix; }
 
   protected:
    // Everything in the filename after the scenario name, e.g. "-waypoints.csv"

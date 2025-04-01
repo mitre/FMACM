@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include "utility/CustomUnits.h"
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 #include <scalar/Temperature.h>
 #include <scalar/Density.h>
-#include "utility/CustomUnits.h"
+#include <scalar/Pressure.h>
 #include "public/WindStack.h"
 #include <log4cplus/logger.h>
 
@@ -49,53 +50,96 @@ const Units::MetersSecondsKelvinGasConstant R(287.05287);
 // Temperature gradient (K/m)
 const Units::KelvinPerMeter K_T(-0.0065);
 
-// exponent for eq. 3.2-15, about 5.25583
-const double P_T_EXPONENT(-Units::ONE_G_ACCELERATION / (K_T * R));
-
-// exponent for eq. 3.2-6, about 4.25583
-const double RHO_T_EXPONENT(P_T_EXPONENT - 1);
-
 class Atmosphere {
   public:
-   Atmosphere();
+   enum AtmosphereType { UNKNOWN = 0, BADA37, BADA312 };
 
-   virtual ~Atmosphere();
+   Atmosphere() {}
+
+   virtual ~Atmosphere() = default;
+
+   virtual Atmosphere *Clone() const = 0;
+
+   virtual void SetTemperatureOffset(const Units::Temperature temperature_offset) {
+      m_temperature_offset = temperature_offset;
+   }
+
+   Units::CelsiusTemperature GetTemperatureOffset() const { return m_temperature_offset; }
+
+   /**
+    * Calculate the temperature offset which will yield the specified temperature
+    * at the specified altitude and then call SetTemperatureOffset.
+    */
+   virtual void CalibrateTemperatureAtAltitude(const Units::KelvinTemperature temperature,
+                                               const Units::Length altitude) = 0;
 
    virtual Units::KelvinTemperature GetTemperature(const Units::Length altitude_msl) const = 0;
 
-   void AirDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const;
+   virtual void AirDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const = 0;
 
-   void CalculateWindGradientAtAltitude(const Units::Length altitude_in,
-                                        const aaesim::open_source::WindStack &wind_stack, Units::Speed &wind_speed,
-                                        Units::Frequency &wind_gradient) const;
+   virtual Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Pressure p, const Units::Density rho) const = 0;
 
-   static Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Pressure p, const Units::Density rho);
+   Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Length alt) const {
+      // Get the air density
+      Units::KilogramsMeterDensity rho;
+      Units::Pressure p;
 
-   Units::Speed CAS2TAS(const Units::Speed vcas, const Units::Length alt) const;
+      AirDensity(alt, rho, p);
 
-   static Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Pressure p, const Units::Density rho);
+      Units::Speed vtas = CAS2TAS(vcas, p, rho);
+      return vtas;
+   }
 
-   Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Length alt) const;
+   virtual Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Pressure p, const Units::Density rho) const = 0;
 
-   virtual Units::Length GetMachIASTransition(const Units::Speed &ias, const double &mach) const;
+   Units::Speed TAS2CAS(const Units::Speed vtas, const Units::Length alt) const {
+      // Get the air density
+      Units::KilogramsMeterDensity rho;
+      Units::Pressure p;
 
-   Units::Speed MachToIAS(const double mach, const Units::Length alt) const;
+      AirDensity(alt, rho, p);
 
-   static Units::Speed SpeedOfSound(Units::KelvinTemperature temperature);
-   Units::Speed SpeedOfSound(Units::Length altitude) const;
+      Units::Speed vcas = TAS2CAS(vtas, p, rho);
+      return vcas;
+   }
+
+   virtual Units::Length GetMachIASTransition(const Units::Speed ias, const double mach) const = 0;
+
+   Units::Speed MachToIAS(const double mach, const Units::Length alt) const {
+      Units::Speed tas = mach * SpeedOfSound(alt);
+
+      return TAS2CAS(tas, alt);
+   }
+
+   double IASToMach(const Units::Speed ias, const Units::Length alt) const {
+      Units::Speed tas = CAS2TAS(ias, alt);
+
+      return tas / SpeedOfSound(alt);
+   }
+
+   virtual Units::Speed SpeedOfSound(Units::KelvinTemperature temperature) const = 0;
+
+   Units::Speed SpeedOfSound(Units::Length altitude) const {
+      Units::KelvinTemperature temperature = GetTemperature(altitude);
+      return SpeedOfSound(temperature);
+   }
 
    virtual Units::KelvinTemperature GetSeaLevelTemperature() const = 0;
-   virtual Units::Density GetSeaLevelDensity() const = 0;
 
    virtual Units::MetersLength GetTropopauseHeight() const = 0;
-   virtual Units::Density GetTropopauseDensity() const = 0;
    virtual Units::Pressure GetTropopausePressure() const = 0;
 
    /**
     * Calculate the Calibrated Airspeed BADA Energy Share Factor
     */
-   double ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude_msl,
-                         const Units::KelvinTemperature temperature);
+   virtual double ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude_msl,
+                                 const Units::KelvinTemperature temperature) const = 0;
+
+  protected:
+   Units::Temperature m_temperature_offset;
+
+   void AirDensity_Log(const Units::MetersLength h, const Units::KelvinTemperature t, const Units::PascalsPressure p,
+                       const Units::KilogramsMeterDensity rho) const;
 
   private:
    static log4cplus::Logger m_logger;

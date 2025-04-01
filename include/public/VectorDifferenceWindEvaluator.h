@@ -35,7 +35,7 @@ class VectorDifferenceWindEvaluator : public aaesim::open_source::PredictedWindE
    virtual bool ArePredictedWindsAccurate(const aaesim::open_source::AircraftState &state,
                                           const aaesim::open_source::WeatherPrediction &weather_prediction,
                                           const Units::Speed reference_cas, const Units::Length reference_altitude,
-                                          const Atmosphere *sensed_atmosphere) const;
+                                          const std::shared_ptr<Atmosphere> &sensed_atmosphere) const;
 
   private:
    static std::map<Units::Speed, std::weak_ptr<PredictedWindEvaluator> > m_instances;

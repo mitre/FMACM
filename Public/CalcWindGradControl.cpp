@@ -38,31 +38,29 @@ void CalcWindGradControl::ComputeWindGradients(const Units::Length &msl_altitude
                                                Units::Speed &wind_speed_y, Units::Frequency &wind_gradient_x,
                                                Units::Frequency &wind_gradient_y) {
 
-   bool computex = ((msl_altitude != m_altitude) || (weather_prediction.east_west != m_wind_x)) ||
+   bool computex = ((msl_altitude != m_altitude) || (weather_prediction.east_west() != m_wind_x)) ||
                    std::isnan(Units::KnotsSpeed(m_wind_speed_x).value());
-   bool computey = ((msl_altitude != m_altitude) || (weather_prediction.north_south != m_wind_y)) ||
+   bool computey = ((msl_altitude != m_altitude) || (weather_prediction.north_south() != m_wind_y)) ||
                    std::isnan(Units::KnotsSpeed(m_wind_speed_y).value());
 
    if (computex) {
-      weather_prediction.GetForecastAtmosphere()->CalculateWindGradientAtAltitude(
-            msl_altitude, weather_prediction.east_west, m_wind_speed_x, m_wind_gradient_x);
+      weather_prediction.east_west().CalculateWindGradientAtAltitude(msl_altitude, m_wind_speed_x, m_wind_gradient_x);
    }
 
    if (computey) {
-      weather_prediction.GetForecastAtmosphere()->CalculateWindGradientAtAltitude(
-            msl_altitude, weather_prediction.north_south, m_wind_speed_y, m_wind_gradient_y);
+      weather_prediction.north_south().CalculateWindGradientAtAltitude(msl_altitude, m_wind_speed_y, m_wind_gradient_y);
    }
 
    if (msl_altitude != m_altitude) {
       m_altitude = msl_altitude;
    }
 
-   if (weather_prediction.east_west != m_wind_x) {
-      m_wind_x = weather_prediction.east_west;
+   if (weather_prediction.east_west() != m_wind_x) {
+      m_wind_x = weather_prediction.east_west();
    }
 
-   if (weather_prediction.north_south != m_wind_y) {
-      m_wind_y = weather_prediction.north_south;
+   if (weather_prediction.north_south() != m_wind_y) {
+      m_wind_y = weather_prediction.north_south();
    }
 
    wind_speed_x = m_wind_speed_x;

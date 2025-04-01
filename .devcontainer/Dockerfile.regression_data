@@ -1,0 +1,12 @@
+FROM centos:7
+ENV container docker
+
+# MITRE SSL Fun
+RUN curl -ksSL \
+    https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh \
+    | MODE=centos sh
+
+RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm \
+    && yum -y install git
+
+RUN git clone -b main --depth 1 https://mustache.mitre.org/scm/aaes/regression_input_data.git /data/aaesim/regression_input_data 

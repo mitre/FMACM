@@ -35,23 +35,25 @@ class FrameworkAircraftLoader final : public LoggingLoadable {
 
   private:
    static double m_mass_fraction_default, m_start_time_default;
-   int m_start_time;
-   double m_mass_fraction;
-   std::string m_ac_type;
-   std::string m_speed_management_type;
-   std::string m_ttv_csv_file;
-   std::string m_forewind_csv_file;
-   std::string m_env_csv_file;
-   std::string m_env_csv_data_index;
-   fmacm::GuidanceDataLoader m_guidance_loader;
-   fmacm::ApplicationLoader m_flightdeck_application_loader;
+   int m_start_time{0};
+   double m_mass_fraction{0};
+   std::string m_ac_type{};
+   std::string m_speed_management_type{};
+   std::string m_ttv_csv_file{};
+   std::string m_forewind_csv_file{};
+   std::string m_env_csv_file{};
+   std::string m_env_csv_data_index{};
+   fmacm::GuidanceDataLoader m_guidance_loader{};
+   fmacm::ApplicationLoader m_flightdeck_application_loader{};
+   EarthModel::LocalPositionEnu m_initial_local_position{};
 
    std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> BuildAircraftPerformance(
          std::string bada_aircraft_code);
    std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> BuildAircraftDynamics(
          std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &performance,
          std::shared_ptr<fmacm::WeatherTruthFromStaticData> &true_weather,
-         std::shared_ptr<fmacm::GuidanceFromStaticData> &guidance);
+         std::shared_ptr<fmacm::GuidanceFromStaticData> &guidance,
+         const EarthModel::GeodeticPosition &initial_wgs84_position);
    std::shared_ptr<aaesim::open_source::AircraftControl> BuildAircraftControl(
          std::string control_method,
          std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &bada_calculator);
@@ -61,7 +63,7 @@ class FrameworkAircraftLoader final : public LoggingLoadable {
    std::shared_ptr<aaesim::open_source::ADSBReceiver> BuildAdsbReceiver(std::string ttv_csv_file);
    aaesim::open_source::AircraftState BuildInitialState(
          std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> &dynamics, Units::Time start_time,
-         Units::Length initial_altitude);
+         Units::Length initial_altitude, const EarthModel::GeodeticPosition &wgs84_position);
    EarthModel::LocalPositionEnu ComputeInitialPositionOnPath(std::shared_ptr<GuidanceFromStaticData> &guidance);
    std::tuple<bool, EarthModel::LocalPositionEnu> IsDistanceAlongPathValid(
          std::shared_ptr<fmacm::GuidanceFromStaticData> &guidance,

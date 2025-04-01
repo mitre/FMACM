@@ -22,10 +22,18 @@
 #include <memory>
 
 #include "framework/WindInterpolator.h"
-#include "public/StandardAtmosphere.h"
 #include "public/WeatherTruth.h"
 #include "scalar/Speed.h"
+#include "public/NullAtmosphere.h"
 #include "public/SimulationTime.h"
+
+#ifdef MITRE_BADA3_LIBRARY
+#include "bada/BadaAtmosphere37.h"
+#define ATMOSPHERE_IMPL aaesim::bada::BadaAtmosphere37
+#else
+#include "public/NullAtmosphere.h"
+#define ATMOSPHERE_IMPL NullAtmosphere
+#endif
 
 namespace fmacm {
 class WeatherTruthFromStaticData : public aaesim::open_source::WeatherTruth {
@@ -51,8 +59,6 @@ class WeatherTruthFromStaticData : public aaesim::open_source::WeatherTruth {
 
    void Update(const aaesim::open_source::SimulationTime &simulation_time, const Units::Length &current_distance_to_go,
                const Units::Length &altitude_msl);
-
-   virtual Units::KelvinTemperature GetTemperature(const Units::Length h) const;
 
    void LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude,
                          const Units::Length altitude) override;
@@ -87,7 +93,7 @@ class WeatherTruthFromStaticData : public aaesim::open_source::WeatherTruth {
 
 inline void WeatherTruthFromStaticData::InitializeWithZeros() {
    m_data_index = DataIndexParameter::SIMULATION_TIME;
-   const auto zero_offset_atmosphere = StandardAtmosphere(Units::CelsiusTemperature(0));
+   const auto zero_offset_atmosphere = ATMOSPHERE_IMPL(Units::zero());
    fmacm::WindInterpolator::WeatherDataPoint data_point;
    data_point.temperature =
          Units::AbsKelvinTemperature(zero_offset_atmosphere.GetTemperature(Units::ZERO_LENGTH).value());

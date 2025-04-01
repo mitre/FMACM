@@ -65,7 +65,7 @@ class ArchiveStreamEcho : public PARENT {
 
    // makes sure that the old_token is still written into the secondary open archive file
    // before it is closed
-   void write_Last_Token(std::string old_token) {
+   void write_Last_Token(const std::string &old_token) {
       if (archive_file.is_open()) {
          archive_file << old_token;
       }

@@ -26,6 +26,7 @@
 #include "public/AircraftIntent.h"
 #include "public/WeatherPrediction.h"
 #include "public/ASSAP.h"
+#include "public/TangentPlaneSequence.h"
 namespace aaesim {
 namespace open_source {
 struct OwnshipPerformanceParameters {
@@ -36,20 +37,21 @@ struct OwnshipPerformanceParameters {
 };
 
 struct OwnshipFmsPredictionParameters {
-   Units::Angle maximum_allowable_bank_angle;
-   Units::Speed transition_ias;
-   double transition_mach;
-   Units::Length transition_altitude;
-   Units::Length expected_cruise_altitude;
-   WeatherPrediction weather_prediction;    // FIXME Stuart this type probably needs to be a shared_ptr
-   AircraftIntent ownship_aircraft_intent;  // FIXME Stuart this is an IM-centric term. fms_intent is better
+   Units::Angle maximum_allowable_bank_angle{};
+   Units::Speed transition_ias{};
+   double transition_mach{};
+   Units::Length transition_altitude{};
+   Units::Length expected_cruise_altitude{};
+   WeatherPrediction weather_prediction{};
+   AircraftIntent fms_intent{};
 };
 
 struct FlightDeckApplicationInitializer {
    virtual ~FlightDeckApplicationInitializer() = default;
-   OwnshipFmsPredictionParameters fms_prediction_paramters;
-   OwnshipPerformanceParameters performance_parameters;
-   std::shared_ptr<const aaesim::open_source::ASSAP> surveillance_processor;
+   OwnshipFmsPredictionParameters fms_prediction_parameters{};
+   OwnshipPerformanceParameters performance_parameters{};
+   std::shared_ptr<const aaesim::open_source::ASSAP> surveillance_processor{};
+   std::shared_ptr<TangentPlaneSequence> position_converter{};
 };
 
 struct FlightDeckApplication {

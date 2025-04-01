@@ -23,6 +23,8 @@
 #include <vector>
 #include <log4cplus/logger.h>
 
+namespace aaesim::open_source {
+
 /**
  * Use to define the direction of index travel along the horizontal path.
  */
@@ -46,10 +48,10 @@ enum TrajectoryIndexProgressionDirection {
 class HorizontalPathTracker {
 
   public:
-   HorizontalPathTracker();
+   HorizontalPathTracker() = default;
    HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory,
                          TrajectoryIndexProgressionDirection expected_index_progression);
-   virtual ~HorizontalPathTracker();
+   virtual ~HorizontalPathTracker() = default;
 
    TrajectoryIndexProgressionDirection GetExpectedProgressionDirection() const;
 
@@ -85,11 +87,11 @@ class HorizontalPathTracker {
    const HorizontalPath GetActivePathSegment() const;
 
   protected:
-   static const Units::Length EXTENSION_LENGTH;
-   std::vector<HorizontalPath>::size_type m_current_index;
-   std::vector<HorizontalPath> m_extended_horizontal_trajectory, m_unmodified_horizontal_trajectory;
-   bool m_is_passed_end_of_route;
-   TrajectoryIndexProgressionDirection m_index_progression_direction;
+   inline static const Units::Length EXTENSION_LENGTH{Units::NauticalMilesLength(1.0)};
+   std::vector<HorizontalPath>::size_type m_current_index{0};
+   std::vector<HorizontalPath> m_extended_horizontal_trajectory{}, m_unmodified_horizontal_trajectory{};
+   bool m_is_passed_end_of_route{false};
+   TrajectoryIndexProgressionDirection m_index_progression_direction{TrajectoryIndexProgressionDirection::UNDEFINED};
 
    /**
     * @brief Subclasses can call this to verify that the index is progressing appropriately.
@@ -118,8 +120,8 @@ class HorizontalPathTracker {
                                   std::vector<HorizontalPath>::size_type &node_index);
 
   private:
-   static log4cplus::Logger m_logger;
-   static const Units::MetersLength ON_NODE_TOLERANCE;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance("HorizontalPathTracker")};
+   inline static const Units::MetersLength ON_NODE_TOLERANCE{Units::MetersLength(1e-10)};
 };
 
 inline bool HorizontalPathTracker::IsPassedEndOfRoute() const { return m_is_passed_end_of_route; }
@@ -143,3 +145,5 @@ inline void HorizontalPathTracker::UpdateCurrentIndex(std::vector<HorizontalPath
 inline const HorizontalPath HorizontalPathTracker::GetActivePathSegment() const {
    return m_extended_horizontal_trajectory[m_current_index];
 }
+
+}  // namespace aaesim::open_source

@@ -17,14 +17,10 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include "public/Atmosphere.h"
 #include "public/WeatherPrediction.h"
-#include "public/StandardAtmosphere.h"
 
 using namespace aaesim::open_source;
-
-const PredictedWindOption WeatherPrediction::PWOValues[3] = {SINGLE_DTG, MULTIPLE_DTG_LEGACY, MULTIPLE_DTG_ALONG_ROUTE};
-
-WeatherPrediction::WeatherPrediction() : WeatherEstimate(), m_predicted_wind_option(SINGLE_DTG), m_update_count(0) {}
 
 WeatherPrediction::WeatherPrediction(PredictedWindOption option, std::shared_ptr<Wind> wind,
                                      std::shared_ptr<Atmosphere> atmosphere)
@@ -34,12 +30,16 @@ WeatherPrediction::WeatherPrediction(PredictedWindOption option, std::shared_ptr
    m_temperature_available = false;
 }
 
-WeatherPrediction::~WeatherPrediction() = default;
-
-const void WeatherPrediction::Dump() const {
-   for (int iAlt = east_west.GetMinRow(); iAlt <= east_west.GetMaxRow(); iAlt++) {
-      std::cout << iAlt << ":  " << east_west.GetAltitude(iAlt) << " " << east_west.GetSpeed(iAlt) << " "
-                << north_south.GetSpeed(iAlt) << std::endl;
-   }
-   std::cout << std::endl;
+WeatherPrediction WeatherPrediction::CreateZeroWindPrediction(std::shared_ptr<Atmosphere> atmosphere) {
+   aaesim::open_source::WindStack zeroWinds(1, 5);
+   zeroWinds.Insert(1, Units::FeetLength(0.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(2, Units::FeetLength(10000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(3, Units::FeetLength(20000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(4, Units::FeetLength(30000.), Units::KnotsSpeed(0.));
+   zeroWinds.Insert(5, Units::FeetLength(50000.), Units::KnotsSpeed(0.));
+   WeatherPrediction zeroWeather;
+   zeroWeather.east_west() = zeroWinds;
+   zeroWeather.north_south() = zeroWinds;
+   zeroWeather.SetAtmosphere(atmosphere);
+   return zeroWeather;
 }

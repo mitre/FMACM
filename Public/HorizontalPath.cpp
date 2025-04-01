@@ -19,30 +19,16 @@
 
 #include "public/HorizontalPath.h"
 
-HorizontalPath::HorizontalPath() {
-   m_segment_type = HorizontalPath::SegmentType::UNSET;
-   m_x_position_meters = 0;
-   m_y_position_meters = 0;
-   m_path_length_cumulative_meters = 0;
-   m_path_course = 0;
-}
+double aaesim::open_source::HorizontalPath::GetXPositionMeters() const { return m_x_position_meters; }
 
-bool HorizontalPath::operator==(const HorizontalPath &that) const {
-   return (
-         (this->m_x_position_meters == that.m_x_position_meters) &&
-         (this->m_y_position_meters == that.m_y_position_meters) && (this->m_segment_type == that.m_segment_type) &&
-         (this->m_path_length_cumulative_meters == that.m_path_length_cumulative_meters) &&
-         (this->m_path_course == that.m_path_course) &&
-         ((this->m_segment_type == HorizontalPath::SegmentType::STRAIGHT) || (this->m_turn_info == that.m_turn_info)));
-}
+double aaesim::open_source::HorizontalPath::GetYPositionMeters() const { return m_y_position_meters; }
 
-HorizontalPath::~HorizontalPath() = default;
-
-double HorizontalPath::GetXPositionMeters() const { return m_x_position_meters; }
-
-double HorizontalPath::GetYPositionMeters() const { return m_y_position_meters; }
-
-void HorizontalPath::SetXYPositionMeters(double x_position_meters, double y_position_meters) {
+void aaesim::open_source::HorizontalPath::SetXYPositionMeters(double x_position_meters, double y_position_meters) {
    m_x_position_meters = x_position_meters;
    m_y_position_meters = y_position_meters;
+}
+
+bool aaesim::open_source::HorizontalPath::operator==(const HorizontalPath &that) const {
+   return (this->m_x_position_meters == that.m_x_position_meters) &&
+          (this->m_y_position_meters == that.m_y_position_meters) && (this->m_segment_type == that.m_segment_type);
 }

@@ -48,7 +48,7 @@ class VerticalPredictor {
 
    bool operator!=(const VerticalPredictor &obj) const;
 
-   virtual void BuildVerticalPrediction(std::vector<HorizontalPath> &horizontal_path,
+   virtual void BuildVerticalPrediction(std::vector<aaesim::open_source::HorizontalPath> &horizontal_path,
                                         std::vector<PrecalcWaypoint> &precalc_waypoints,
                                         const aaesim::open_source::WeatherPrediction &weather,
                                         const Units::Length &start_altitude,
@@ -138,9 +138,10 @@ class VerticalPredictor {
 
    const bool IsCruiseMachValid() const;
 
-   static const Units::MetersPerSecondSpeed SPEED_DIFFERENCE_THRESHOLD;
-   static const Units::KnotsSpeed HIGH_SPEED_CONSTRAINT_THRESHOLD;
-   static const Units::FeetLength ALT_DIFFERENCE_THRESHOLD;
+   inline static const double TIME_STEP_SECONDS{0.5};
+   inline static const Units::MetersPerSecondSpeed SPEED_DIFFERENCE_THRESHOLD{-0.1};
+   inline static const Units::KnotsSpeed HIGH_SPEED_CONSTRAINT_THRESHOLD{1000};
+   inline static const Units::FeetLength ALT_DIFFERENCE_THRESHOLD{100};
 
    const Units::KnotsSpeed m_low_groundspeed_warning;
    const Units::KnotsSpeed m_low_groundspeed_fatal;
@@ -148,8 +149,6 @@ class VerticalPredictor {
    const Units::DegreesAngle m_descent_angle_warning;
    int m_current_trajectory_index;
    Units::Length m_cruise_altitude_msl;
-   Units::Speed m_ias_in_tracon;
-   Units::Length m_altitude_msl_in_tracon;
    Units::Time m_descent_start_time;
    Units::Speed m_transition_ias;
    Units::Length m_transition_altitude_msl;
@@ -159,7 +158,7 @@ class VerticalPredictor {
    aaesim::open_source::CalcWindGradControl m_wind_calculator;
    Units::MetersLength m_start_altitude_msl;
    VerticalPath m_vertical_path;
-   DirectionOfFlightCourseCalculator m_course_calculator;
+   aaesim::open_source::DirectionOfFlightCourseCalculator m_course_calculator;
    Units::Speed m_ias_at_end_of_route;
    std::shared_ptr<Atmosphere> m_atmosphere;
    std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;

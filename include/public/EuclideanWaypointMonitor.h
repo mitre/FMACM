@@ -47,8 +47,8 @@ class EuclideanWaypointMonitor : public WaypointPassingMonitor {
    void PerformFakeTranslationToEuclidean(const aaesim::LatitudeLongitudePoint &lat_lon_point, Units::Length &x,
                                           Units::Length &y);
 
-   bool m_is_passed_waypoint;
-   aaesim::LatitudeLongitudePoint m_point_to_monitor;
+   bool m_is_passed_waypoint{false};
+   aaesim::LatitudeLongitudePoint m_point_to_monitor{};
 };
 }  // namespace open_source
 }  // namespace aaesim

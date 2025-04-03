@@ -1,0 +1,15 @@
+aircraft_intent
+{
+	planned_cruise_mach 0.78
+	planned_cruise_altitude 35000
+
+	descent_waypoints
+	{
+	    ; TF->RF->TF
+	    ; Fly west, turn north following RF leg, fly north
+		EQTR1 0.0 0.0 35000 0 280 0.78 0 50000 0 1000 0 0 0 0
+		EQTR2 0.0 -1.0 35000 0 280 0.78 0 50000 0 1000 0 0 0 0
+		EQTR3 0.5 -1.5 35000 0 280 0.78 0 25000 24000 250 0 30 0.5 -1.0
+		FAF 1.0 -1.5 7000 0 170 0 0 3000 3000 170 170 0 0 0
+	}
+}

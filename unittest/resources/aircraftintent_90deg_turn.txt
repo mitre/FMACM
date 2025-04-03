@@ -1,0 +1,13 @@
+aircraft_intent
+{
+	planned_cruise_mach 0.78
+	planned_cruise_altitude 35000
+
+	descent_waypoints
+	{
+		START 1.0 3.0 7000 0 200 0 0 7000 7000 200 200 0 0 0
+		SCOND 1.0 1.0 35000 0 200 0 0 50000 0 200 200 0 0 0
+		EQTR1 0.0 1.0 35000 0 200 0 0 50000 0 200 200 0 0 0
+		END 0.0 0.0 3000 0 170 0 0 3000 3000 170 170 0 0 0
+	}
+}

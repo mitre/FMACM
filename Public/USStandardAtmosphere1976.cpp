@@ -41,6 +41,9 @@ const double USStandardAtmosphere1976::P_T_EXPONENT(std::log(P_TROP / P0_ISA) / 
 const double USStandardAtmosphere1976::RHO_T_EXPONENT(std::log(RHO_TROP / RHO0_ISA) / std::log(T_TROP / T0));
 
 USStandardAtmosphere1976::USStandardAtmosphere1976() { Atmosphere::SetTemperatureOffset(Units::CelsiusTemperature(0)); }
+USStandardAtmosphere1976::USStandardAtmosphere1976(const Units::Temperature temperature_offset) {
+   Atmosphere::SetTemperatureOffset(temperature_offset);
+}
 
 Atmosphere *USStandardAtmosphere1976::Clone() const { return new USStandardAtmosphere1976(); }
 

@@ -35,6 +35,13 @@ class NullAircraftPerformance final : public aaesim::open_source::FixedMassAircr
       throw std::runtime_error("intentionally unimplemented code: please implement BADA v3.7");
    }
 
+   void GetCurrentDragCoefficients(double &cd0, /** [out] parasitic drag coefficient */
+                                   double &cd2, /** [out] induced drag coefficient */
+                                   double &gear /** [out] landing gear drag coefficient */
+   ) const {
+      throw std::runtime_error("intentionally unimplemented code: please implement BADA v3.7");
+   }
+
    void GetDragCoefficientsAndIncrementFlapConfiguration(
          const Units::Speed &calibrated_airspeed, const Units::Length &altitude_msl, double &cd0, double &cd2,
          double &gear, aaesim::open_source::bada_utils::FlapConfiguration &updated_flap_setting) override {

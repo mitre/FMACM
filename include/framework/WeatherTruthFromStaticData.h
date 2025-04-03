@@ -31,8 +31,8 @@
 #include "bada/BadaAtmosphere37.h"
 #define ATMOSPHERE_IMPL aaesim::bada::BadaAtmosphere37
 #else
-#include "public/NullAtmosphere.h"
-#define ATMOSPHERE_IMPL NullAtmosphere
+#include "public/USStandardAtmosphere1976.h"
+#define ATMOSPHERE_IMPL USStandardAtmosphere1976
 #endif
 
 namespace fmacm {

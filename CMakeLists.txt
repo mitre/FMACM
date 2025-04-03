@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 5.0.2.1) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 4.3.0.1) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 20)
 
@@ -62,15 +62,14 @@ endif()
 
 CPMAddPackage(
     NAME unitslib
-    GIT_REPOSITORY https://mustache.mitre.org/scm/aaes/cpp-uom.git
-    GIT_TAG 07445f7ec0f98b55cdd6e6188083145a293415a7
-    DOWNLOAD_ONLY TRUE
+    GIT_REPOSITORY https://mustache.mitre.org/scm/uom/cpp-uom.git
+    GIT_TAG v2.1
 )
 
 CPMAddPackage(
     NAME log4cplus
     GITHUB_REPOSITORY log4cplus/log4cplus
-    GIT_TAG REL_2_1_1
+    GIT_TAG REL_2_0_8
     OPTIONS
      "BUILD_SHARED_LIBS FALSE"
      "LOG4CPLUS_BUILD_TESTING FALSE"
@@ -88,23 +87,13 @@ if (log4cplus_ADDED)
 endif ()
 
 set (LOADER_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
-set (AVIONICS_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/Avionics)
-set (BADA_DIR            ${CMAKE_CURRENT_SOURCE_DIR}/Bada)
-set (SIMULATION_DIR      ${CMAKE_CURRENT_SOURCE_DIR}/AAESim)
 set (PUBLIC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Public)
-set (IM_DIR              ${CMAKE_CURRENT_SOURCE_DIR}/IntervalManagement)
-set (WEATHER_DIR         ${CMAKE_CURRENT_SOURCE_DIR}/Weather)
 set (FRAMEWORK_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include )
 set (UNITTEST_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
 
 add_subdirectory(${LOADER_DIR})
 add_subdirectory(${PUBLIC_DIR})
-add_subdirectory(${WEATHER_DIR})
 
-include(${IM_DIR}/im.cmake OPTIONAL)
-include(${SIMULATION_DIR}/aaesim.cmake OPTIONAL)
 include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
 include(${FRAMEWORK_DIR}/framework.cmake OPTIONAL)
-include(${AVIONICS_DIR}/avionics.cmake OPTIONAL)
-include(${BADA_DIR}/bada.cmake OPTIONAL)

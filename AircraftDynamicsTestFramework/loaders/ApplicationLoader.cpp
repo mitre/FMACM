@@ -20,6 +20,7 @@
 #include "framework/ApplicationLoader.h"
 
 #include "public/NullFlightDeckApplication.h"
+#include "public/StatisticalPilotDelay.h"
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
 #include "imalgs/FIMAlgorithmAdapter.h"

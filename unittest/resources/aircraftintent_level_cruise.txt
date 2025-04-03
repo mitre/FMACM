@@ -1,0 +1,12 @@
+aircraft_intent
+{
+	planned_cruise_mach 0.78
+	planned_cruise_altitude 36000
+
+	descent_waypoints
+	{
+		EQTR1 0.0 0.0 36000 0 280 0 50000 0 1000 0 0 0 0
+		EQTR2 0.0 1.0 36000 0 280 0 50000 0 1000 0 0 0 0
+		EQTR3 0.0 2.0 36000 0 280 0 50000 0 1000 0 0 0 0
+	}
+}

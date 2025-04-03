@@ -31,6 +31,7 @@
 class USStandardAtmosphere1976 final : public Atmosphere {
   public:
    USStandardAtmosphere1976();
+   USStandardAtmosphere1976(const Units::Temperature temperature_offset);
 
    virtual ~USStandardAtmosphere1976() = default;
 

@@ -21,6 +21,7 @@
 #include "public/SingleTangentPlaneSequence.h"
 
 using namespace std;
+using namespace aaesim::open_source;
 
 std::vector<HorizontalPath> aaesim::test::utils::PublicUtils::CreateStraightHorizontalPath(Quadrant quadrant) {
    static const Units::MetersLength unity = Units::MetersLength(1);

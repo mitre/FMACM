@@ -1,0 +1,10 @@
+aircraft_intent
+{
+	planned_cruise_mach 0.78
+	planned_cruise_altitude 35000
+        descent_waypoints
+        {
+                Start 37.5025 -106.1304 35000 0 270 0 35000 0 270 270
+                FAF   33.431  -111.8818 35000 0 270 0 35000 0 270 270
+        }
+}

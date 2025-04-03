@@ -1,0 +1,8 @@
+planned_cruise_mach 0.78
+planned_cruise_altitude 34000
+
+descent_waypoints
+{
+    CIM   36.4913833 -104.8720083 34000 0 280 0 50000 0 1000 0 0 0 0
+    ZUN   34.9657388 -109.1545222 34000 0 280 0 50000 0 1000 0 0 0 0
+}

@@ -23,14 +23,6 @@
 
 #include "MiniCSV/minicsv.h"
 
-#ifdef MITRE_BADA3_LIBRARY
-#include "bada/BadaAtmosphere37.h"
-#define ATMOSPHERE_IMPL aaesim::bada::BadaAtmosphere37
-#else
-#include "public/USStandardAtmosphere1976.h"
-#define ATMOSPHERE_IMPL USStandardAtmosphere1976
-#endif
-
 using namespace fmacm;
 
 WeatherTruthFromStaticData::WeatherTruthFromStaticData()
@@ -41,7 +33,7 @@ WeatherTruthFromStaticData::WeatherTruthFromStaticData()
    m_wind_interpolator = std::make_shared<fmacm::WindInterpolator>();
    m_wind_interpolator->SetUseWind(true);
    m_wind = std::static_pointer_cast<Wind>(m_wind_interpolator);
-   SetAtmosphere(std::make_shared<ATMOSPHERE_IMPL>(Units::zero()));
+   SetAtmosphere(std::make_shared<ATMOSPHERE_IMPL>());
 }
 
 void WeatherTruthFromStaticData::Update(const aaesim::open_source::SimulationTime &simulation_time,
@@ -80,7 +72,7 @@ Units::KelvinTemperature WeatherTruthFromStaticData::Initialize(const std::strin
    LoadEnvFile(env_csv_file);
    Update(aaesim::open_source::SimulationTime::Of(Units::ZERO_TIME), Units::Infinity(), altitude);
 
-   const ATMOSPHERE_IMPL basic_atm(Units::zero());
+   const ATMOSPHERE_IMPL basic_atm;
    Units::Temperature offset_difference = GetTemperature() - basic_atm.GetTemperature(altitude);
    Units::Temperature offset = basic_atm.GetTemperatureOffset() + offset_difference;
    std::shared_ptr<Atmosphere> atmosphere_with_offset = std::make_shared<ATMOSPHERE_IMPL>(offset);

@@ -7,7 +7,7 @@ include(${PROJECT_SOURCE_DIR}/.cmake/get_cpm.cmake)
 CPMAddPackage(
         NAME geolib_idealab
         GIT_REPOSITORY https://github.com/mitre/geodetic_library.git
-        GIT_TAG v3.2.8
+        GIT_TAG v3.2.9
 )
 if (geolib_idealab_ADDED)
     # set a variable for the includes. Use the variable later inside target_include_directories()
@@ -27,7 +27,7 @@ endif ()
 CPMAddPackage(
     NAME nlohmann_json
     GITHUB_REPOSITORY nlohmann/json
-    VERSION 3.9.1
+    VERSION 3.11.3
 )
 
 set(SOURCE_FILES

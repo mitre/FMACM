@@ -45,6 +45,7 @@ struct VerticalPathUtils {
       aaesim::open_source::bada_utils::FlapConfiguration flap_setting{
             aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
       int resolved_index{INT32_MIN};
+      VerticalPath::PredictionAlgorithmType algorithm_type{VerticalPath::PredictionAlgorithmType::UNDETERMINED};
    };
 
    static Units::Time CalculateTimeToFly(const VerticalPath &vertical_path,
@@ -64,6 +65,9 @@ struct VerticalPathUtils {
                                                       Units::Length estimated_distance_to_path_end);
 
    static VerticalPathDataSet GetPathDataAtIndex(const VerticalPath &vertical_path, int index);
+
+   static std::vector<aaesim::open_source::VerticalPathUtils::VerticalPathDataSet> ConvertToPathDataSet(
+         const VerticalPath &vertical_path);
 };
 }  // namespace open_source
 }  // namespace aaesim
@@ -75,6 +79,15 @@ inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
    const auto reference_lookup_index =
          CoreUtils::FindNearestIndex(distance_to_go.value(), vertical_path.along_path_distance_m);
    return GetPathDataAtIndex(vertical_path, reference_lookup_index);
+}
+
+inline std::vector<aaesim::open_source::VerticalPathUtils::VerticalPathDataSet>
+      aaesim::open_source::VerticalPathUtils::ConvertToPathDataSet(const VerticalPath &vertical_path) {
+   std::vector<aaesim::open_source::VerticalPathUtils::VerticalPathDataSet> path_data_set{};
+   for (auto idx = 0; idx < vertical_path.along_path_distance_m.size(); ++idx) {
+      path_data_set.push_back(aaesim::open_source::VerticalPathUtils::GetPathDataAtIndex(vertical_path, idx));
+   }
+   return path_data_set;
 }
 
 inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
@@ -95,6 +108,7 @@ inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
    single_data_row.wind_velocity_east = vertical_path.wind_velocity_east[index];
    single_data_row.wind_velocity_north = vertical_path.wind_velocity_north[index];
    single_data_row.flap_setting = vertical_path.flap_setting[index];
+   single_data_row.algorithm_type = vertical_path.algorithm_type[index];
    return single_data_row;
 }
 
@@ -144,6 +158,7 @@ inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
          CoreUtils::LinearlyInterpolate(reference_lookup_index, distance_to_go, vertical_path.along_path_distance_m,
                                         vertical_path.wind_velocity_north);
    single_data_row.flap_setting = vertical_path.flap_setting[reference_lookup_index];
+   single_data_row.algorithm_type = vertical_path.algorithm_type[reference_lookup_index];
    return single_data_row;
 }
 

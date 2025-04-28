@@ -31,7 +31,6 @@ WeatherTruthFromStaticData::WeatherTruthFromStaticData()
      m_weather_data_point(),
      m_data_index(DataIndexParameter::SIMULATION_TIME) {
    m_wind_interpolator = std::make_shared<fmacm::WindInterpolator>();
-   m_wind_interpolator->SetUseWind(true);
    m_wind = std::static_pointer_cast<Wind>(m_wind_interpolator);
    SetAtmosphere(std::make_shared<ATMOSPHERE_IMPL>());
 }
@@ -112,7 +111,6 @@ void WeatherTruthFromStaticData::LoadEnvFile(const std::string &env_csv_file) {
       }
    }
    input_stream.close();
-   Wind::SetUseWind(true);
 }
 
 void WeatherTruthFromStaticData::LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude,

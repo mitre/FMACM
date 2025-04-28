@@ -19,10 +19,10 @@
 
 #include "public/WeatherEstimate.h"
 #include "public/Wind.h"
+#include "public/CoreUtils.h"
+#include "public/WindZero.h"
 
 using namespace aaesim::open_source;
-
-log4cplus::Logger WeatherEstimate::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherEstimate"));
 
 WeatherEstimate::WeatherEstimate()
    : m_shared_members(std::make_shared<shared_members>()),
@@ -36,7 +36,7 @@ WeatherEstimate::WeatherEstimate(std::shared_ptr<Wind> wind, std::shared_ptr<Atm
      m_temperature_checked(false),
      m_temperature_available(false) {
 
-   if (!Wind::UseWind()) {
+   if (CoreUtils::InstanceOf<WindZero>(wind.get())) {
       m_temperature_checked = true;
       m_temperature_available = false;
    }

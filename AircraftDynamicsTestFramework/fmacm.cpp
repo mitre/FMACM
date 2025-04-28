@@ -24,7 +24,6 @@
 #include <string>
 #include <unistd.h>
 
-#include "cppmanifest/version.h"
 #include "cppmanifest/cppmanifest.h"
 #include "framework/TestFrameworkScenario.h"
 #include "loader/RunFileArchiveDirector.h"
@@ -47,16 +46,16 @@ const std::string VERSION_FLAG("--version");
 int main(int argc, char *argv[]) {
    log4cplus::Initializer initializer;
    LoadLoggerProperties();
-   LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::getVersion());
+   LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::GetVersion());
 
    if (argc == 2) {
       std::string arg1(argv[1]);
       if (arg1 == VERSION_FLAG) {
-         std::cout << "fmacm version " << aaesim::cppmanifest::getVersion() << std::endl;
+         std::cout << "fmacm version " << aaesim::cppmanifest::GetVersion() << std::endl;
          return 0;
       } else if (arg1 == aaesim::cppmanifest::BUILDINFO_CLI_FLAG) {
          std::cout << "fmacm build info:" << std::endl;
-         aaesim::cppmanifest::printMetaData();
+         aaesim::cppmanifest::PrintMetaData();
          return 0;
       }
    } else {

@@ -29,35 +29,14 @@ using std::shared_ptr;
 using std::string;
 using namespace aaesim::open_source;
 
-/**
- * Interpolates wind into a pair of WindStack objects,
- * but only if m_use_wind is true.  Also includes temperature.
- */
 void Wind::InterpolateTrueWind(const Units::Angle lat_in, const Units::Angle lon_in, const Units::Length altitude,
                                aaesim::open_source::WindStack &east_west, aaesim::open_source::WindStack &north_south) {
-   if (!m_use_wind) {
-      for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
-         east_west.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
-      }
-
-      for (int i = north_south.GetMinRow(); i <= north_south.GetMaxRow(); i++) {
-         north_south.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
-      }
-      return;
-   }
-
    InterpolateWindMatrix(lat_in, lon_in, altitude, east_west, north_south);
 }
 
 void Wind::InterpolateForecastWind(const shared_ptr<TangentPlaneSequence> &tangentPlaneSequence,
                                    const Units::Length x_in, const Units::Length y_in, const Units::Length altitude,
                                    Units::Speed &east_west, Units::Speed &north_south) {
-   if (!m_use_wind) {
-      east_west = Units::KnotsSpeed(0.);
-      north_south = Units::KnotsSpeed(0.);
-      return;
-   }
-
    Units::RadiansAngle lat(0.), lon(0.);
 
    EarthModel::LocalPositionEnu localPosition;

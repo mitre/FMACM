@@ -52,7 +52,7 @@ const Units::KelvinPerMeter K_T(-0.0065);
 
 class Atmosphere {
   public:
-   enum AtmosphereType { UNKNOWN = 0, BADA37, BADA312 };
+   enum AtmosphereType { UNKNOWN = 0, BADA37, BADA312, BADA316 };
 
    Atmosphere() {}
 

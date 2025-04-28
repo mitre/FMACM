@@ -53,7 +53,7 @@ void TestFrameworkScenario::PostLoad(const std::string &bada_data_path,
                                      std::vector<fmacm::FrameworkAircraftLoader> &aircraft_loaders) {
 
 #ifdef MITRE_BADA3_LIBRARY
-   aaesim::bada::Bada3Factory::SetBadaDataPath(bada_data_path);
+   aaesim::bada::Bada3Factory::SetBadaDataPath(bada_data_path, Atmosphere::AtmosphereType::BADA37);
 #endif
 
    aaesim::open_source::SimulationTime::SetSimulationTimeStep(SIMULATION_TIME_STEP);

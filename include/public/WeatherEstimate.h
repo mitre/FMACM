@@ -49,7 +49,7 @@ class WeatherEstimate {
    std::shared_ptr<shared_members> m_shared_members;
 
   private:
-   static log4cplus::Logger m_logger;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("WeatherEstimate"))};
 
   public:
    aaesim::open_source::WindStack &east_west() const { return m_shared_members->east_west; }
@@ -89,12 +89,12 @@ class WeatherEstimate {
 
    void SetLocation(const Units::Angle latitude, const Units::Angle longitude, const Units::Length altitude);
 
-   std::shared_ptr<Wind> m_wind;
-   Units::KelvinTemperature m_temperature;
-   Units::Pressure m_pressure;
-   Units::Density m_density;
-   mutable bool m_temperature_checked, m_temperature_available;
-   std::pair<std::pair<Units::Angle, Units::Angle>, Units::Length> m_location_of_current_conditions;
+   std::shared_ptr<Wind> m_wind{};
+   Units::KelvinTemperature m_temperature{};
+   Units::Pressure m_pressure{};
+   Units::Density m_density{};
+   mutable bool m_temperature_checked{true}, m_temperature_available{false};
+   std::pair<std::pair<Units::Angle, Units::Angle>, Units::Length> m_location_of_current_conditions{};
 };
 
 inline void WeatherEstimate::SetAtmosphere(std::shared_ptr<Atmosphere> atmosphere) {

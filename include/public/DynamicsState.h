@@ -30,7 +30,7 @@
 namespace aaesim {
 namespace open_source {
 
-typedef struct {
+struct DynamicsState {
    // This structure is not used at all within the EOM function. It only serves to
    // represent the state outside the EOM function. Within the EOM function, the state is
    // represented with EquationsOfMotionState.
@@ -51,6 +51,6 @@ typedef struct {
          aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
    Units::Mass current_mass;
    Units::AbsCelsiusTemperature true_temperature;
-} DynamicsState;
+};
 }  // namespace open_source
 }  // namespace aaesim

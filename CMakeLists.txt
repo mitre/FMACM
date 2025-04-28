@@ -33,7 +33,7 @@ CPMAddPackage(
 CPMAddPackage(
         NAME cppmanifest
         GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
-        GIT_TAG v1.3
+        GIT_TAG v1.4
         DOWNLOAD_ONLY TRUE
 )
 if (cppmanifest_ADDED)

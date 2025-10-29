@@ -19,23 +19,24 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <set>
+#include <assert.h>
+
 #include <list>
 #include <map>
-#include <assert.h>
-#include <scalar/Angle.h>
-#include <scalar/Speed.h>
-#include "log4cplus/logger.h"
+#include <memory>
+#include <set>
+#include <string>
+
 #include "loader/DecodedStream.h"
-#include "loader/LoaderLink.h"
-#include "loader/NativeLoaderLink.h"
-#include "loader/LoadableLoaderLink.h"
-#include "loader/NamedElementLoaderLink.h"
 #include "loader/ListLoaderLink.h"
-#include "loader/LoaderSupport.h"
+#include "loader/LoadableLoaderLink.h"
 #include "loader/LoadableLoaderLinkWithBrackets.h"
+#include "loader/LoaderLink.h"
+#include "loader/LoaderSupport.h"
+#include "loader/NamedElementLoaderLink.h"
+#include "loader/NativeLoaderLink.h"
+#include "scalar/Angle.h"
+#include "scalar/Speed.h"
 
 class Loadable : public LoaderSupport {
   public:
@@ -282,7 +283,7 @@ class Loadable : public LoaderSupport {
     */
    virtual bool complete();
 
-   virtual void dump(){/* intentionally empty */};  // dump them to cout
+   virtual void dump() { /* intentionally empty */ };  // dump them to cout
 
    virtual void report_error(std::string error_message);
 
@@ -310,9 +311,9 @@ class Loadable : public LoaderSupport {
 
    std::shared_ptr<LoaderLink> getLoaderLink(const std::string &name);
 
-   std::map<std::string, std::shared_ptr<LoaderLink>> lookup_table;
+   std::map<std::string, std::shared_ptr<LoaderLink>> lookup_table{};
 
-   bool was_load_successful;
+   bool was_load_successful{false};
 
   private:  //----------------------------------------------------------------
 #ifdef _DEBUG

@@ -32,8 +32,6 @@ class TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 
 namespace open_source {
 
-enum PredictedWindOption { SINGLE_DTG = 0, MULTIPLE_DTG_ALONG_ROUTE = 1 };
-
 class WeatherPrediction final : public WeatherEstimate {
    friend class aaesim::test::Wind_populate_predicted_wind_matrices_Test;
 
@@ -44,14 +42,11 @@ class WeatherPrediction final : public WeatherEstimate {
    friend class aaesim::test::TrajectoryPredictor_startAndEndAltitudeInDescentAltList_Test;
 
   public:
-   inline static const PredictedWindOption PWOValues[2] = {SINGLE_DTG, MULTIPLE_DTG_ALONG_ROUTE};
    static aaesim::open_source::WeatherPrediction CreateZeroWindPrediction(std::shared_ptr<Atmosphere> atmosphere);
 
    WeatherPrediction() = default;
-   WeatherPrediction(PredictedWindOption option, std::shared_ptr<Wind> wind, std::shared_ptr<Atmosphere> atmosphere);
+   WeatherPrediction(std::shared_ptr<Wind> wind, std::shared_ptr<Atmosphere> atmosphere);
    virtual ~WeatherPrediction() = default;
-
-   PredictedWindOption GetPredictedWindOption() const;
 
    std::shared_ptr<Wind> GetForecastWind() const;
 
@@ -62,11 +57,8 @@ class WeatherPrediction final : public WeatherEstimate {
    int GetUpdateCount() const;
 
   private:
-   PredictedWindOption m_predicted_wind_option{SINGLE_DTG};
    int m_update_count{0};
 };
-
-inline PredictedWindOption WeatherPrediction::GetPredictedWindOption() const { return m_predicted_wind_option; }
 
 inline int WeatherPrediction::IncrementUpdateCount() {
    m_update_count++;

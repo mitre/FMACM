@@ -19,24 +19,25 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include "public/FixedMassAircraftPerformance.h"
-#include "public/EquationsOfMotionStateDeriv.h"
-#include "public/DynamicsState.h"
-#include "public/AircraftControl.h"
-#include "public/AircraftState.h"
-#include "public/ControlCommands.h"
-#include "public/Guidance.h"
-#include "public/EquationsOfMotionState.h"
-#include "public/SimulationTime.h"
-#include "public/EllipsoidalPositionEstimator.h"
-#include "public/TrueWeatherOperator.h"
 #include <scalar/Angle.h>
 #include <scalar/Force.h>
 #include <scalar/Frequency.h>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
+
+#include <map>
+#include <string>
+
+#include "public/AircraftControl.h"
+#include "public/AircraftState.h"
+#include "public/DynamicsState.h"
+#include "public/EllipsoidalPositionEstimator.h"
+#include "public/EquationsOfMotionState.h"
+#include "public/EquationsOfMotionStateDeriv.h"
+#include "public/FixedMassAircraftPerformance.h"
+#include "public/Guidance.h"
+#include "public/SimulationTime.h"
+#include "public/TrueWeatherOperator.h"
 
 namespace aaesim::open_source {
 class ThreeDOFDynamics final {
@@ -47,7 +48,8 @@ class ThreeDOFDynamics final {
    AircraftState Update(const int unique_acid, const aaesim::open_source::SimulationTime &simtime,
                         const Guidance &guidance, const std::shared_ptr<AircraftControl> &aircraft_control);
 
-   void Initialize(std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
+   void Initialize(const aaesim::open_source::SimulationTime &simulation_time,
+                   std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
                    const EarthModel::GeodeticPosition &initial_position,
                    const EarthModel::LocalPositionEnu &initial_position_enu, Units::Length initial_altitude_msl,
                    Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu,
@@ -63,7 +65,7 @@ class ThreeDOFDynamics final {
 
    const EquationsOfMotionStateDeriv GetEquationsOfMotionStateDerivative() const;
 
-   std::map<Units::Time, DynamicsState> GetDynamicsStateHistory() const;
+   std::map<const aaesim::open_source::SimulationTime, const DynamicsState> GetDynamicsStateHistory() const;
 
   private:
    inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ThreeDOFDynamics"))};
@@ -84,11 +86,11 @@ class ThreeDOFDynamics final {
    void UpdateTrueWeatherConditions();
 
    DynamicsState ComputeDynamicsState(const EquationsOfMotionState &equations_of_motion_state,
-                                      const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative);
+                                      const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative) const;
 
    std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator{};
    std::shared_ptr<aaesim::open_source::EllipsoidalPositionEstimator> m_position_estimator;
-   std::map<Units::Time, DynamicsState> m_dynamics_history{};
+   std::map<const aaesim::open_source::SimulationTime, const DynamicsState> m_dynamics_history{};
    EquationsOfMotionState m_equations_of_motion_state{};
    EquationsOfMotionStateDeriv m_equations_of_motion_state_derivative{};
    EarthModel::GeodeticPosition m_last_resolved_position{};
@@ -116,7 +118,8 @@ inline const EquationsOfMotionStateDeriv ThreeDOFDynamics::GetEquationsOfMotionS
    return m_equations_of_motion_state_derivative;
 }
 
-inline std::map<Units::Time, DynamicsState> ThreeDOFDynamics::GetDynamicsStateHistory() const {
+inline std::map<const aaesim::open_source::SimulationTime, const DynamicsState>
+      ThreeDOFDynamics::GetDynamicsStateHistory() const {
    return m_dynamics_history;
 }
 

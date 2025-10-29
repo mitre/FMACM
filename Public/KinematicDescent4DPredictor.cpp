@@ -17,10 +17,12 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/Waypoint.h"
-#include <cmath>
 #include "public/KinematicDescent4DPredictor.h"
+
+#include <cmath>
+
 #include "public/SimulationTime.h"
+#include "public/Waypoint.h"
 
 using namespace std;
 using namespace aaesim::open_source;
@@ -96,7 +98,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                                                           double const_gamma_cas_er, double const_gamma_mach,
                                                           const WeatherPrediction &weather_prediction,
                                                           const Units::Length &aircraft_distance_to_go) {
-
    m_vertical_path_waypoint_index.clear();
    VerticalPath trajTemp;
    trajTemp.mass_kg.push_back(-1.0);
@@ -211,7 +212,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                   horizontal_path, weather_prediction, aircraft_distance_to_go);
 
          } else if (m_precalculated_constraints.active_flag == ActiveFlagType::BELOW_ALT_SLOW) {
-
             if (m_precalculated_constraints.index < precalc_waypoints.size()) {
                m_vertical_path = ConstantDecelerationVerticalPath(
                      m_vertical_path, m_precalculated_constraints.constraint_along_path_distance,
@@ -235,10 +235,10 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                            (Units::MetersLength(m_precalculated_constraints.constraint_along_path_distance).value() -
                             last_state.along_path_distance_m.back()));
                Units::DegreesAngle uFPA = Units::RadiansAngle(FPA);
-               if (FPA > Units::RadiansAngle(m_descent_angle_max).value())
+               if (FPA > Units::RadiansAngle(DESCENT_ANGLE_MAX).value())
                   LOG4CPLUS_WARN(m_logger, "prediction FPA is " << uFPA.value() << " which is greater than "
-                                                                << m_descent_angle_warning.value());
-               if (uFPA < m_descent_angle_max) {
+                                                                << DESCENT_ANGLE_WARNING.value());
+               if (uFPA < DESCENT_ANGLE_MAX) {
                   m_vertical_path = ConstantFpaDecelerationVerticalPath(
                         last_state, Units::MetersLength(m_precalculated_constraints.constraint_altLow).value(),
                         m_deceleration_fpa_mps,
@@ -377,7 +377,7 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
          double altitude_to_aircraft_m =
                Units::MetersLength(m_start_altitude_msl).value() - m_vertical_path.altitude_m[start_index];
          double FPA = atan2(altitude_to_aircraft_m, distance_to_aircraft_m);
-         if (FPA < Units::RadiansAngle(m_descent_angle_max).value()) {
+         if (FPA < Units::RadiansAngle(DESCENT_ANGLE_MAX).value()) {
             // found a point where the FPA is not too large.  Check if FPA will violate altitude constraints
             fpa_start_found = true;
             for (unsigned int loop = start_index + 1; loop < precalc_waypoints.size(); loop++) {
@@ -412,7 +412,6 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
       }
 
       if (m_vertical_path.altitude_m.back() < Units::MetersLength(m_start_altitude_msl).value()) {
-
          LOG4CPLUS_TRACE(m_logger,
                          "Did not complete FPA above transition altitude. " << m_vertical_path.altitude_m.back());
       }
@@ -974,7 +973,6 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
                                                                         vector<HorizontalPath> &horizontal_path,
                                                                         const WeatherPrediction &weather_prediction,
                                                                         const Units::Length &aircraft_distance_to_go) {
-
    VerticalPath result = vertical_path;
 
    const double delta_t = -TIME_STEP_SECONDS;
@@ -1064,7 +1062,6 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
                                                                         vector<HorizontalPath> &horizontal_path,
                                                                         const WeatherPrediction &weather_prediction,
                                                                         const Units::Length &aircraft_distance_to_go) {
-
    VerticalPath result = vertical_path;
 
    const double delta_t = -TIME_STEP_SECONDS;
@@ -1368,7 +1365,6 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaToCurrentPositionVerticalPa
       VerticalPath vertical_path, std::vector<HorizontalPath> &horizontal_path,
       std::vector<PrecalcWaypoint> &precalc_waypoints, double const_gamma_mach,
       const WeatherPrediction &weather_prediction, const Units::Length &aircraft_distance_to_go) {
-
    Units::Length distance_to_plan = aircraft_distance_to_go;
 
    // Should probably throw exception if trying to re-predict with aircraft distance to go set to infinite
@@ -1410,8 +1406,8 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaToCurrentPositionVerticalPa
          LOG4CPLUS_TRACE(m_logger, "Aircraft position too close to waypoint for adequate FPA.  See Issue AAES-1025");
          LOG4CPLUS_TRACE(m_logger, "dist_left: " << (distance_left - dist) << ", alt_change: "
                                                  << (m_start_altitude_msl.value() - h) << ", fpa: " << fpa);
-         if (fpa > Units::RadiansAngle(m_descent_angle_max).value()) {
-            fpa = Units::RadiansAngle(m_descent_angle_max).value();
+         if (fpa > Units::RadiansAngle(DESCENT_ANGLE_MAX).value()) {
+            fpa = Units::RadiansAngle(DESCENT_ANGLE_MAX).value();
          }
          result = ConstantGeometricFpaVerticalPath(result, altitude_at_end, fpa, horizontal_path, precalc_waypoints,
                                                    weather_prediction, Units::Length(Units::infinity()));

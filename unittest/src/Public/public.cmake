@@ -26,6 +26,9 @@ target_link_libraries(public_test
 )
 target_include_directories(public_test PUBLIC
         ${aaesim_INCLUDE_DIRS}
+        ${minicsv_INCLUDE_DIR}
+        ${nlohmann_json_INCLUDE_DIR}
+        ${LOG4CPLUS_DIRS}
         ${UNITTEST_DIR}/src
         ${geolib_idealab_INCLUDE_DIRS})
 set_target_properties(public_test PROPERTIES

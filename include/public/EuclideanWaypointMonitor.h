@@ -19,13 +19,13 @@
 
 #pragma once
 
+#include "public/LatitudeLongitudePoint.h"
 #include "public/WaypointPassingMonitor.h"
 #include "public/Wgs84PrecalcWaypoint.h"
-#include "public/LatitudeLongitudePoint.h"
 
 namespace aaesim {
 namespace open_source {
-class EuclideanWaypointMonitor : public WaypointPassingMonitor {
+class EuclideanWaypointMonitor final : public WaypointPassingMonitor {
   public:
    ~EuclideanWaypointMonitor() = default;
 

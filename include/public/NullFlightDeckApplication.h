@@ -23,12 +23,11 @@
 
 namespace aaesim {
 namespace open_source {
-class NullFlightDeckApplication : public aaesim::open_source::FlightDeckApplication {
+class NullFlightDeckApplication final : public aaesim::open_source::FlightDeckApplication {
   public:
    NullFlightDeckApplication() = default;
    virtual ~NullFlightDeckApplication() = default;
-   void Initialize(FlightDeckApplicationInitializer &initializer_visitor) override { /**/
-   }
+   void Initialize(FlightDeckApplicationInitializer &initializer_visitor) override { /**/ }
    aaesim::open_source::Guidance Update(const aaesim::open_source::SimulationTime &simtime,
                                         const aaesim::open_source::Guidance &current_guidance,
                                         const aaesim::open_source::DynamicsState &dynamics_state,

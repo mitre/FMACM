@@ -17,10 +17,9 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/PositionCalculator.h>
-#include <log4cplus/loggingmacros.h>
-#include <public/CoreUtils.h>
 #include "public/PositionCalculator.h"
+
+#include "public/CoreUtils.h"
 
 using namespace aaesim::open_source;
 
@@ -75,17 +74,19 @@ bool PositionCalculator::CalculatePositionFromAlongPathDistance(const Units::Len
       // happen. For now, it helps a lot to allow this. But, we should consider this deprecated behavior and throw in
       // the future.
       char msg[300];
-      std::sprintf(msg, "Very long distance_along_path encountered. Too long for path. Allowing for now: %f",
-                   Units::MetersLength(distance_along_path).value());
+      std::snprintf(msg, sizeof(msg),
+                    "Very long distance_along_path encountered. Too long for path. Allowing for now: %f",
+                    Units::MetersLength(distance_along_path).value());
       LOG4CPLUS_ERROR(m_logger, msg);
 
    } else {
       // resolved_index looks incorrect. Throw.
       char msg[300];
-      std::sprintf(msg,
-                   "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
-                   "%lu, resolved_index %lu",
-                   m_current_index, resolved_index);
+      std::snprintf(
+            msg, sizeof(msg),
+            "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
+            "%lu, resolved_index %lu",
+            m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
       throw std::logic_error(msg);
    }
@@ -99,7 +100,6 @@ bool PositionCalculator::CalculatePosition(const Units::Length &distance_along_p
                                            Units::Length &x_position, Units::Length &y_position,
                                            Units::UnsignedAngle &course,
                                            std::vector<HorizontalPath>::size_type &resolved_trajectory_index) {
-
    Units::Angle turn_theta;
    Units::Length turn_radius;
    const bool found = CalculateForwardCourse(distance_along_path, horizontal_trajectory, starting_trajectory_index,

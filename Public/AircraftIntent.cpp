@@ -20,89 +20,26 @@
 #include "public/AircraftIntent.h"
 
 #include <stdexcept>
+
 #include "public/CoreUtils.h"
 #include "public/InvalidIndexException.h"
 #include "public/SingleTangentPlaneSequence.h"
 
-log4cplus::Logger AircraftIntent::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftIntent"));
+AircraftIntent::AircraftIntent() { Initialize(); }
 
-const int AircraftIntent::UNINITIALIZED_AIRCRAFT_ID = -1;
-
-AircraftIntent::AircraftIntent()
-   : m_route_data(),
-     m_planned_cruise_mach(0),
-     m_all_waypoints(),
-     m_is_loaded(false),
-     m_ascent_waypoints(),
-     m_cruise_waypoints(),
-     m_descent_waypoints(),
-     m_planned_cruise_altitude(),
-     m_id(UNINITIALIZED_AIRCRAFT_ID),
-     m_arinc424_dictionary() {
+AircraftIntent::AircraftIntent(const AircraftIntent &in) {
    Initialize();
-}
-
-AircraftIntent::AircraftIntent(const AircraftIntent &in)
-   : m_route_data(),
-     m_planned_cruise_mach(0),
-     m_all_waypoints(),
-     m_is_loaded(false),
-     m_ascent_waypoints(),
-     m_cruise_waypoints(),
-     m_descent_waypoints(),
-     m_planned_cruise_altitude(),
-     m_id(UNINITIALIZED_AIRCRAFT_ID),
-     m_arinc424_dictionary() {
-   Initialize();
-
    Copy(in);
 }
 
 void AircraftIntent::Initialize() {
    m_all_waypoints.clear();
-
-   m_route_data.m_name.clear();
-   m_route_data.m_nominal_altitude.clear();
-   m_route_data.m_latitude.clear();
-   m_route_data.m_longitude.clear();
-   m_route_data.m_nominal_ias.clear();
-
-   // the new constraint values
-   m_route_data.m_high_altitude_constraint.clear();
-   m_route_data.m_low_altitude_constraint.clear();
-   m_route_data.m_high_speed_constraint.clear();
-   m_route_data.m_low_speed_constraint.clear();
-
-   // RF Leg values
-   m_route_data.m_rf_latitude.clear();
-   m_route_data.m_rf_longitude.clear();
-   m_route_data.m_rf_radius.clear();
-   m_route_data.m_rf_latitude.clear();
-   m_route_data.m_rf_longitude.clear();
-
+   DeleteRouteDataContent();
    m_planned_cruise_altitude = Units::ZERO_LENGTH;
-
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("IF", AircraftIntent::Arinc424LegType::IF));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("UNSET", AircraftIntent::Arinc424LegType::UNSET));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("RF", AircraftIntent::Arinc424LegType::RF));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("TF", AircraftIntent::Arinc424LegType::TF));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("VI", AircraftIntent::Arinc424LegType::VI));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("CF", AircraftIntent::Arinc424LegType::CF));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("VA", AircraftIntent::Arinc424LegType::VA));
-   m_arinc424_dictionary.insert(
-         std::pair<std::string, AircraftIntent::Arinc424LegType>("CA", AircraftIntent::Arinc424LegType::CA));
 }
 
 AircraftIntent &AircraftIntent::operator=(const AircraftIntent &in) {
    Copy(in);
-
    return *this;
 }
 
@@ -133,7 +70,6 @@ void AircraftIntent::DeleteRouteDataContent() {
 void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &ascent_waypoints,
                                                    const std::vector<Waypoint> &cruise_waypoints,
                                                    const std::vector<Waypoint> &descent_waypoints) {
-
    m_ascent_waypoints = ascent_waypoints;
    m_cruise_waypoints = cruise_waypoints;
    m_descent_waypoints = descent_waypoints;
@@ -194,7 +130,6 @@ void AircraftIntent::ClearAndResetRouteDataContent(const std::vector<Waypoint> &
 void AircraftIntent::LoadWaypointsFromList(const std::list<Waypoint> &ascent_waypoints,
                                            const std::list<Waypoint> &cruise_waypoints,
                                            const std::list<Waypoint> &descent_waypoints) {
-
    const bool has_ascent = !ascent_waypoints.empty();
    const bool has_cruise = !cruise_waypoints.empty();
    const bool has_descent = !descent_waypoints.empty();
@@ -312,15 +247,12 @@ void AircraftIntent::Dump(std::ostream &fileOut) const {
 }
 
 void AircraftIntent::Copy(const AircraftIntent &in) {
+   DeleteRouteDataContent();
    m_id = in.m_id;
    m_planned_cruise_altitude = in.m_planned_cruise_altitude;
    m_planned_cruise_mach = in.m_planned_cruise_mach;
    m_is_loaded = in.m_is_loaded;
-
-   DeleteRouteDataContent();
-
    m_route_data = in.m_route_data;
-
    m_tangent_plane_sequence = in.m_tangent_plane_sequence;
    m_all_waypoints = in.m_all_waypoints;
    m_descent_waypoints = in.m_descent_waypoints;
@@ -329,7 +261,6 @@ void AircraftIntent::Copy(const AircraftIntent &in) {
 }
 
 bool AircraftIntent::load(DecodedStream *input) {
-
    set_stream(input);
 
    std::list<Waypoint> waypoints, descent_waypoints;
@@ -371,7 +302,6 @@ void AircraftIntent::DumpParms(std::string str) const {
 
 void AircraftIntent::GetLatLonFromXYZ(const Units::Length &xMeters, const Units::Length &yMeters,
                                       const Units::Length &zMeters, Units::Angle &lat, Units::Angle &lon) const {
-
    // use the ellipsoidal model
    EarthModel::LocalPositionEnu localPos;
    localPos.x = xMeters;
@@ -398,7 +328,6 @@ std::pair<int, int> AircraftIntent::FindCommonWaypoint(const AircraftIntent &int
 
    while ((ix >= 0) && (tx >= 0)) {
       if (GetWaypointName(ix) == intent.GetWaypointName(tx)) {
-
          thisIndex = ix;
          thatIndex = tx;
          ix--;
@@ -439,7 +368,6 @@ void AircraftIntent::InsertPairAtIndex(const std::string &wpname, const Units::L
 }
 
 void AircraftIntent::InsertWaypointAtIndex(const Waypoint &wp, int index) {
-
    if (index < m_ascent_waypoints.size()) {
       std::vector<Waypoint> new_vector(m_ascent_waypoints);
       auto itr = std::next(new_vector.begin(), index);

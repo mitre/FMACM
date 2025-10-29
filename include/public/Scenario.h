@@ -30,10 +30,6 @@ class Scenario {
    virtual const std::string &GetScenarioName() const;
    void SetScenarioName(const std::string &in);
 
-   //  const std::string& GetScenarioPath() { return m_scenario_path};
-   //  const std::string& GetOutputPath() {return m_output_path};
-   //  const double GetStartTimeRngSeed() {return m_start_time_rng_seed};
-
   private:
    std::string m_scenario_name;
 };

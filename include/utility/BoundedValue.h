@@ -2,8 +2,8 @@
 Original idea in the public domain from: https://stackoverflow.com/a/13730310
 */
 #pragma once
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 #define STRINGIZE(x) #x
 #define STRINGIFY(x) STRINGIZE( x )
@@ -28,6 +28,7 @@ class BoundedValue {
    // compile-time checked constructors:
    BoundedValue(SelfType const &other) : val_(other) {}
    BoundedValue(SelfType &&other) : val_(other) {}
+   BoundedValue() : val_(Tmin) {}
 
    template <typename otherT, int otherTmin, int otherTmax>
    BoundedValue(BoundedValue<otherT, otherTmin, otherTmax> const &other)

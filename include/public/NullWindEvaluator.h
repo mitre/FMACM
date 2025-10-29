@@ -27,7 +27,7 @@
 namespace aaesim {
 namespace open_source {
 
-class NullWindEvaluator : public PredictedWindEvaluator {
+class NullWindEvaluator final : public PredictedWindEvaluator {
   public:
    const static std::shared_ptr<PredictedWindEvaluator> GetInstance();
 

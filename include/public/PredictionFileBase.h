@@ -19,19 +19,19 @@
 
 #pragma once
 
+#include <scalar/Angle.h>
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Temperature.h>
+#include <scalar/Time.h>
+
 #include <map>
 #include <vector>
 
-#include "public/Logging.h"
 #include "public/AircraftState.h"
+#include "public/Logging.h"
 #include "public/OutputHandler.h"
 #include "public/VerticalPath.h"
-
-#include <scalar/Time.h>
-#include <scalar/Length.h>
-#include <scalar/Speed.h>
-#include <scalar/Angle.h>
-#include <scalar/Temperature.h>
 
 struct PredictionFileBase {
   public:
@@ -74,7 +74,6 @@ struct PredictionFileBase {
                                                                      const std::string &acid,
                                                                      const VerticalPath &vertical_path,
                                                                      const PredictionData::DataSource &source) {
-
       std::vector<PredictionFileBase::PredictionData> prediction_data;
 
       for (auto m = 0; m < vertical_path.along_path_distance_m.size(); ++m) {

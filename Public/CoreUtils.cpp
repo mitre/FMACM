@@ -17,23 +17,19 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <stdexcept>
+#include "public/CoreUtils.h"
+
 #include <cfloat>
 #include <iomanip>
+#include <stdexcept>
 
-#include "public/CoreUtils.h"
-#include "public/SimulationTime.h"
 #include "public/GeolibUtils.h"
 #include "public/LatitudeLongitudePoint.h"
+#include "public/SimulationTime.h"
 
 using namespace std;
 
-log4cplus::Logger CoreUtils::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CoreUtils"));
-const std::string CoreUtils::INTERMEDIATE_WAYPOINT_ROOT_NAME = "intermediate";
-Units::NauticalMilesLength CoreUtils::MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH(10);
-
 int CoreUtils::FindNearestIndex(const double &value_to_find, const vector<double> &vector_to_search) {
-
    int idx;
    if (value_to_find > vector_to_search.back()) {
       // Special handling that upper_bound() won't accomplish
@@ -48,10 +44,10 @@ int CoreUtils::FindNearestIndex(const double &value_to_find, const vector<double
 
 double CoreUtils::LinearlyInterpolate(int upper_index, double x_interpolation_value,
                                       const std::vector<double> &x_values, const std::vector<double> &y_values) {
-
    if (upper_index < 1 || upper_index >= x_values.size()) {
       char msg[200];
-      sprintf(msg, "upper_index (%d) is not between 1 and %d", upper_index, static_cast<int>(x_values.size() - 1));
+      snprintf(msg, sizeof(msg), "upper_index (%d) is not between 1 and %d", upper_index,
+               static_cast<int>(x_values.size() - 1));
       LOG4CPLUS_FATAL(m_logger, msg);
       throw out_of_range(msg);
    }
@@ -63,7 +59,7 @@ double CoreUtils::LinearlyInterpolate(int upper_index, double x_interpolation_va
 
    if ((x_interpolation_value - v1) * (x_interpolation_value - v2) > 0) {
       char msg[200];
-      sprintf(msg, "ratio (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
+      snprintf(msg, sizeof(msg), "ratio (%lf) is not between %lf and %lf.", x_interpolation_value, v1, v2);
 
       double ratio = (x_interpolation_value - v1) / (x_interpolation_value - v2);
       if (upper_index + 1 == x_values.size() && (ratio < .1 || ratio > 10)) {
@@ -105,7 +101,6 @@ const int CoreUtils::SignOfValue(double value) { return (((value) == (0)) ? 0 : 
 
 std::list<Waypoint> CoreUtils::ShortenLongLegs(const std::list<Waypoint> &ordered_waypoints,
                                                Units::Length maximum_allowable_length) {
-
    using namespace geolib_idealab;
    using namespace aaesim;
 
@@ -135,7 +130,6 @@ std::list<Waypoint> CoreUtils::ShortenLongLegs(const std::list<Waypoint> &ordere
 
 std::list<Waypoint> CoreUtils::GetIntermediateWaypointsForLongLeg(const aaesim::LineOnEllipsoid &line_on_ellipsoid,
                                                                   Units::Length maximum_allowable_single_leg_distance) {
-
    using namespace geolib_idealab;
    using namespace aaesim;
 

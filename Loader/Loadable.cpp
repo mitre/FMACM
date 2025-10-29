@@ -18,6 +18,7 @@
 // ****************************************************************************
 
 #include "loader/Loadable.h"
+
 #include "loader/LoadError.h"
 
 using namespace std;
@@ -39,7 +40,10 @@ void Loadable::operator=(const Loadable &in) {
    stream = in.stream;
 }
 
-void Loadable::cleanup() { lookup_table.clear(); }
+void Loadable::cleanup() {
+   lookup_table.clear();
+   stream = nullptr;
+}
 
 bool Loadable::test_load() {
    string error_message;

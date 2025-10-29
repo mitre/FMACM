@@ -22,7 +22,6 @@
 #include "public/TangentPlaneSequence.h"
 
 class SingleTangentPlaneSequence final : public TangentPlaneSequence {
-
   public:
    static void ClearStaticMembers();
    SingleTangentPlaneSequence(const std::list<Waypoint> &waypoint_list);
@@ -30,5 +29,5 @@ class SingleTangentPlaneSequence final : public TangentPlaneSequence {
   private:
    static std::list<Waypoint> m_master_waypoint_sequence;
    static log4cplus::Logger m_logger;
-   void Initialize(const std::list<Waypoint> &waypoint_list);
+   void Initialize(const std::list<Waypoint> &waypoint_list) override;
 };

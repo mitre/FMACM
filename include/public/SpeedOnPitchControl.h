@@ -19,36 +19,27 @@
 
 #pragma once
 
+#include "public/AbstractDescentController.h"
 #include "public/SpeedOnThrustControl.h"
 
-namespace aaesim {
-namespace open_source {
-class SpeedOnPitchControl : public SpeedOnThrustControl {
+namespace aaesim::open_source {
+class SpeedOnPitchControl final : public AbstractDescentController {
   public:
-   SpeedOnPitchControl(const Units::Speed speed_threshold, const Units::Length altitude_threshold,
-                       const Units::Angle max_bank_angle);
-
-   SpeedOnPitchControl() = default;
-
-   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator) override;
+   SpeedOnPitchControl(const Units::Speed speed_threshold, const Units::Length altitude_threshold)
+      : speed_threshold_{speed_threshold}, altitude_threshold_{altitude_threshold} {};
+   SpeedOnPitchControl() = delete;
+   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &aircraft_performance) override;
+   void ComputeVerticalCommands(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+                                std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather,
+                                Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
+                                BoundedValue<double, 0, 1> &speed_brake_command,
+                                aaesim::open_source::bada_utils::FlapConfiguration &flap_configuration) override;
 
   private:
-   static log4cplus::Logger m_logger;
-   static Units::Frequency m_gain_alt, m_gain_gamma, m_gain_phi;
-   static double m_gain_speedbrake;
-
-   Units::Frequency m_gain_velocity;
-   Units::Length m_altitude_threshold;
-   Units::Speed m_speed_threshold;
-   int m_min_thrust_counter;
-   int m_speed_brake_counter;
-   bool m_is_speed_brake_on;
-
-  protected:
-   virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
-                                  Units::Force &thrust_command, Units::Angle &gamma_command,
-                                  Units::Speed &true_airspeed_command, double &speed_brake_command,
-                                  aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration) override;
+   inline static log4cplus::Logger logger_{log4cplus::Logger::getInstance("SpeedOnPitchControl")};
+   Units::Speed speed_threshold_{Units::KnotsSpeed{20.0}};
+   Units::Length altitude_threshold_{Units::FeetLength{500.0}};
+   bool is_level_flight_{true};
+   std::shared_ptr<SpeedOnThrustControl> speed_on_thrust_controller_{std::make_shared<SpeedOnThrustControl>()};
 };
-}  // namespace open_source
-}  // namespace aaesim
+}  // namespace aaesim::open_source

@@ -25,7 +25,6 @@
 #include "bada/Bada3Factory.h"
 #endif
 
-const Units::SecondsTime TestFrameworkScenario::SIMULATION_TIME_STEP = Units::SecondsTime(1.0);
 log4cplus::Logger TestFrameworkScenario::m_logger = log4cplus::Logger::getInstance("TestFrameworkScenario");
 
 TestFrameworkScenario::TestFrameworkScenario() : Scenario(), m_aircraft_in_scenario() {
@@ -51,12 +50,9 @@ bool TestFrameworkScenario::load(DecodedStream *input) {
 
 void TestFrameworkScenario::PostLoad(const std::string &bada_data_path,
                                      std::vector<fmacm::FrameworkAircraftLoader> &aircraft_loaders) {
-
 #ifdef MITRE_BADA3_LIBRARY
    aaesim::bada::Bada3Factory::SetBadaDataPath(bada_data_path, Atmosphere::AtmosphereType::BADA37);
 #endif
-
-   aaesim::open_source::SimulationTime::SetSimulationTimeStep(SIMULATION_TIME_STEP);
 
    std::for_each(aircraft_loaders.begin(), aircraft_loaders.end(), [this](fmacm::FrameworkAircraftLoader loader) {
       m_aircraft_in_scenario.push_back(loader.BuildAircraft());
@@ -64,7 +60,6 @@ void TestFrameworkScenario::PostLoad(const std::string &bada_data_path,
 }
 
 void TestFrameworkScenario::SimulateAllIterations() {
-
 #ifdef SAMPLE_ALGORITHM_LIBRARY
    m_sample_algorithm_writer->SetScenarioName(GetScenarioName());
    m_sample_algorithm_kinematic_writer->SetScenarioName(GetScenarioName());

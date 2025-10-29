@@ -19,13 +19,14 @@
 
 #pragma once
 
-#include <vector>
-#include <iostream>
 #include <scalar/Speed.h>
+
+#include <iostream>
+#include <vector>
+
 #include "public/BadaUtils.h"
 
-class VerticalPath {
-
+class VerticalPath final {
   public:
    enum PredictionAlgorithmType {
       UNDETERMINED = 0,

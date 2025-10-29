@@ -19,72 +19,114 @@
 
 #pragma once
 
+#include "public/DefaultLateralController.h"
+#include "public/EquationsOfMotionState.h"
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/Guidance.h"
-#include "public/ControlCommands.h"
-#include "public/EquationsOfMotionState.h"
+#include "public/LateralController.h"
 #include "public/TrueWeatherOperator.h"
+#include "public/VerticalController.h"
 
-namespace aaesim {
-namespace open_source {
-class AircraftControl {
+namespace aaesim::open_source {
+struct ControlCommands {
+   Units::Angle roll_angle_command{Units::zero()};
+   Units::Force thrust_command{Units::zero()};
+   Units::Angle flight_path_angle_command{Units::zero()};
+   Units::Speed true_airspeed_command{Units::zero()};
+   double speed_brake_command{0.0};
+   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration{
+         aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
+};
+
+struct ControlGains {
+   Units::Frequency k_flight_path_angle{Units::zero()};
+   Units::Frequency k_thrust{Units::zero()};
+   Units::Frequency k_roll{Units::zero()};
+   double k_speed_brake{0.0};
+};
+
+class AircraftControl final {
   public:
-   AircraftControl(const Units::Angle max_bank_angle);
+   AircraftControl(
+         const std::map<aaesim::open_source::GuidanceFlightPhase,
+                        std::pair<std::shared_ptr<aaesim::open_source::LateralController>,
+                                  std::shared_ptr<aaesim::open_source::VerticalController>>> &controller_pairs);
+
    virtual ~AircraftControl() = default;
 
-   virtual void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance);
+   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance);
 
-   ControlCommands CalculateControlCommands(
+   std::pair<ControlCommands, ControlGains> CalculateControlCommands(
          const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
          std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> sensed_weather);
 
-   const Units::Frequency &GetAltGain() const { return m_alt_gain; }
+   class Builder {
+     public:
+      Builder &WithCruiseDescentVerticalController(std::shared_ptr<VerticalController> ctrl) {
+         descent_vertical_controller_ = std::move(ctrl);
+         return *this;
+      }
+      Builder &WithTakeoffVerticalController(std::shared_ptr<VerticalController> ctrl) {
+         takeoff_vertical_controller_ = std::move(ctrl);
+         return *this;
+      }
+      Builder &WithClimbVerticalController(std::shared_ptr<VerticalController> ctrl) {
+         climb_vertical_controller_ = std::move(ctrl);
+         return *this;
+      }
+      Builder &WithTakeoffLateralController(std::shared_ptr<LateralController> ctrl) {
+         takeoff_lateral_controller_ = std::move(ctrl);
+         return *this;
+      }
+      Builder &WithClimbLateralController(std::shared_ptr<LateralController> ctrl) {
+         climb_lateral_controller_ = std::move(ctrl);
+         return *this;
+      }
+      Builder &WithCruiseDescentLateralController(std::shared_ptr<LateralController> ctrl) {
+         cruise_descent_lateral_controller_ = std::move(ctrl);
+         return *this;
+      }
+      std::shared_ptr<AircraftControl> Build() const {
+         std::map<aaesim::open_source::GuidanceFlightPhase,
+                  std::pair<std::shared_ptr<aaesim::open_source::LateralController>,
+                            std::shared_ptr<aaesim::open_source::VerticalController>>>
+               controller_map;
 
-   const Units::Frequency &GetGammaGain() const { return m_gamma_gain; }
+         if (takeoff_lateral_controller_ && takeoff_vertical_controller_) {
+            controller_map.emplace(aaesim::open_source::GuidanceFlightPhase::TAKEOFF_ROLL,
+                                   std::make_pair(takeoff_lateral_controller_, takeoff_vertical_controller_));
+         }
 
-   const Units::Frequency &GetPhiGain() const { return m_phi_gain; }
+         if (climb_lateral_controller_ && climb_vertical_controller_) {
+            controller_map.emplace(aaesim::open_source::GuidanceFlightPhase::CLIMB,
+                                   std::make_pair(climb_lateral_controller_, climb_vertical_controller_));
+         }
 
-   double GetSpeedBrakeGain() const { return m_speed_brake_gain; }
+         if (cruise_descent_lateral_controller_ && descent_vertical_controller_) {
+            controller_map.emplace(aaesim::open_source::GuidanceFlightPhase::CRUISE_DESCENT,
+                                   std::make_pair(cruise_descent_lateral_controller_, descent_vertical_controller_));
+         }
 
-   const Units::Frequency &GetThrustGain() const { return m_thrust_gain; }
+         if (controller_map.size() == 0) {
+            throw std::runtime_error(
+                  "Configuration Error: AircraftControl cannot be built because there are no controllers provided");
+         }
+         return std::make_shared<AircraftControl>(controller_map);
+      }
 
-  protected:
-   /**
-    * Use this to estimate the kinetic forces of lift and drag on the aircraft
-    * in it's current state.
-    */
-   void ConfigureFlapsAndEstimateKineticForces(
-         const EquationsOfMotionState &equations_of_motion_state, Units::Force &lift, Units::Force &drag,
-         aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration);
-
-   virtual Units::Angle DoLateralControl(const Guidance &guidance,
-                                         const EquationsOfMotionState &equations_of_motion_state);
-
-   virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &eqmState, Units::Force &T_com,
-                                  Units::Angle &gamma_com, Units::Speed &tas_com, double &speedBrakeCom,
-                                  aaesim::open_source::bada_utils::FlapConfiguration &newFlapConfig){};
-
-   void DoClimbingControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
-                          Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
-                          aaesim::open_source::bada_utils::FlapConfiguration &new_flap_config);
-
-   Units::Frequency CalculateThrustGain();
-
-   Units::Mass m_ac_mass;
-   Units::Area m_wing_area;
-   Units::Frequency m_alt_gain, m_gamma_gain, m_phi_gain, m_thrust_gain, m_natural_frequency;
-   Units::Speed m_Vwx, m_Vwy;
-   Units::Frequency m_dVwx_dh, m_dVwy_dh;
-   double m_speed_brake_gain;
-   std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> m_bada_calculator;
-   Units::Angle m_max_bank_angle;
-   bool m_is_level_flight;
-   std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> m_sensed_weather;
+     private:
+      std::shared_ptr<VerticalController> descent_vertical_controller_{};
+      std::shared_ptr<VerticalController> takeoff_vertical_controller_{};
+      std::shared_ptr<VerticalController> climb_vertical_controller_{};
+      std::shared_ptr<LateralController> takeoff_lateral_controller_{};
+      std::shared_ptr<LateralController> climb_lateral_controller_{};
+      std::shared_ptr<LateralController> cruise_descent_lateral_controller_{};
+   };
 
   private:
-   static log4cplus::Logger m_logger;
-   void CalculateSensedWind(std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather,
-                            const Units::MetersLength &altitude_msl);
+   std::map<aaesim::open_source::GuidanceFlightPhase,
+            std::pair<std::shared_ptr<aaesim::open_source::LateralController>,
+                      std::shared_ptr<aaesim::open_source::VerticalController>>>
+         controller_map_{};
 };
-}  // namespace open_source
-}  // namespace aaesim
+}  // namespace aaesim::open_source

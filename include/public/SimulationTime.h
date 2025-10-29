@@ -20,45 +20,67 @@
 #pragma once
 
 #include <string>
-#include <scalar/Time.h>
-#include "public/Logging.h"
 
-namespace aaesim {
-namespace open_source {
+#include "scalar/Time.h"
+
+namespace aaesim::open_source {
 class SimulationTime final {
   public:
-   static const Units::SecondsTime GetSimulationTimeStep() { return m_simulation_time_step; }
-
-   static const SimulationTime Of(const Units::SecondsTime time);
+   static inline const Units::SecondsTime SIMULATION_TIME_STEP = Units::SecondsTime(1.0);
 
    // visible for testing
    static void SetSimulationTimeStep(Units::Time in) { m_simulation_time_step = in; }
 
-   SimulationTime();
+   static const Units::SecondsTime GetSimulationTimeStep() { return m_simulation_time_step; }
 
+   static const SimulationTime Of(const Units::SecondsTime time) {
+      int cyc = static_cast<int>(Units::SecondsTime(time / m_simulation_time_step).value());
+      SimulationTime simtime;
+      simtime.SetCycle(cyc);
+      return simtime;
+   }
+
+   SimulationTime() = default;
    ~SimulationTime() = default;
+   SimulationTime(const SimulationTime &in) { Copy(in); }
 
-   SimulationTime(const SimulationTime &in);
+   SimulationTime &operator=(const SimulationTime &in) {
+      if (this != &in) {
+         Copy(in);
+      }
+      return *this;
+   }
 
-   SimulationTime &operator=(const SimulationTime &in);
+   bool operator<(const SimulationTime &in) const { return m_cycle < in.m_cycle; }
 
-   void Increment();
+   bool operator>(const SimulationTime &in) const { return not(*this < in); }
 
-   Units::SecondsTime GetCurrentSimulationTime() const;
+   void Increment() {
+      ++m_cycle;
+      m_current_time += m_simulation_time_step;
+   }
 
-   std::string GetCurrentSimulationTimeAsString() const;
+   Units::SecondsTime GetCurrentSimulationTime() const { return m_current_time; }
 
-   int GetCycle() const;
+   std::string GetCurrentSimulationTimeAsString() const { return std::to_string(m_current_time.value()); }
 
-   void SetCycle(int cycle_in);
+   int GetCycle() const { return m_cycle; }
+
+   // visible for testing
+   void SetCycle(int cycle_in) {
+      m_cycle = cycle_in;
+      m_current_time = m_simulation_time_step * m_cycle;
+   }
 
   private:
-   void Copy(SimulationTime const &in);
+   void Copy(SimulationTime const &in) {
+      m_current_time = in.m_current_time;
+      m_cycle = in.m_cycle;
+      m_simulation_time_step = in.m_simulation_time_step;
+   }
 
-   int m_cycle;
-   Units::SecondsTime m_current_time;
-   static Units::SecondsTime m_simulation_time_step;
-   static log4cplus::Logger m_logger;
+   int m_cycle{0};
+   Units::SecondsTime m_current_time{Units::zero()};
+   inline static Units::SecondsTime m_simulation_time_step{SIMULATION_TIME_STEP};
 };
-}  // namespace open_source
-}  // namespace aaesim
+}  // namespace aaesim::open_source

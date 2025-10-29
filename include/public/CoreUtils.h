@@ -20,18 +20,18 @@
 #pragma once
 
 #include <vector>
-#include <scalar/Time.h>
-#include <scalar/Length.h>
 
-#include "public/Logging.h"
+#include "public/AircraftIntent.h"
 #include "public/AircraftState.h"
 #include "public/HorizontalPath.h"
-#include "public/AircraftIntent.h"
 #include "public/LineOnEllipsoid.h"
+#include "public/Logging.h"
+#include "scalar/Length.h"
+#include "scalar/Time.h"
 
 class CoreUtils {
   public:
-   static const std::string INTERMEDIATE_WAYPOINT_ROOT_NAME;
+   inline static const std::string INTERMEDIATE_WAYPOINT_ROOT_NAME{"intermediate"};
 
    /**
     * Find the index of a value in a vector. Uses STL upper_bound(), but with one modified return.
@@ -130,8 +130,8 @@ class CoreUtils {
    }
 
   private:
-   static log4cplus::Logger m_logger;
-   static Units::NauticalMilesLength MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH;
+   inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("CoreUtils"))};
+   inline static Units::NauticalMilesLength MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH{Units::infinity()};
 
    static std::list<Waypoint> GetIntermediateWaypointsForLongLeg(const aaesim::LineOnEllipsoid &line_on_ellipsoid,
                                                                  Units::Length maximum_allowable_single_leg_distance);
@@ -142,5 +142,5 @@ inline void CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::Length new_v
 }
 
 inline void CoreUtils::ResetMaximumAllowableSingleLegLength() {
-   MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH = Units::NauticalMilesLength(10);
+   MAXIMUM_ALLOWABLE_SINGLE_LEG_LENGTH = Units::NauticalMilesLength(Units::infinity());
 }

@@ -125,8 +125,9 @@ inline
 AbsTemperature_<ValueType_> &
 AbsTemperature_<ValueType_>::operator+=(Temperature const & temperature)
 {
-  _value += temperature._value;
-  return *this;
+  // _value += temperature._value;
+  // return *this;
+  throw std::runtime_error("Cannot use the + operator with Temperature");
 }
 
 template <typename ValueType_>
@@ -134,8 +135,9 @@ inline
 AbsTemperature_<ValueType_> &
 AbsTemperature_<ValueType_>::operator-=(Temperature const & temperature)
 {
-  _value -= temperature._value;
-  return *this;
+  // _value -= temperature._value;
+  // return *this;
+  throw std::runtime_error("Cannot use the + operator with Temperature");
 }
 
 

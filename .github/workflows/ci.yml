@@ -17,7 +17,7 @@ jobs:
             container: ''
             install: |
               brew update
-              brew install cmake ninja
+              brew upgrade
           - os: ubuntu-latest
             container: rockylinux:9
             install: |

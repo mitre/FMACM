@@ -30,16 +30,16 @@ CPMAddPackage(
   VERSION 1.2.5
 )
 
-CPMAddPackage(
-        NAME cppmanifest
-        GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
-        GIT_TAG v1.7
-        DOWNLOAD_ONLY TRUE
-)
-if (cppmanifest_ADDED)
-    include(${cppmanifest_SOURCE_DIR}/cppmanifest_configure.cmake)
-    cppmanifest_configure(${PROJECT_SOURCE_DIR}/include/cppmanifest)
-endif()
+# CPMAddPackage(
+#         NAME cppmanifest
+#         GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
+#         GIT_TAG v1.7
+#         DOWNLOAD_ONLY TRUE
+# )
+# if (cppmanifest_ADDED)
+#     include(${cppmanifest_SOURCE_DIR}/cppmanifest_configure.cmake)
+#     cppmanifest_configure(${PROJECT_SOURCE_DIR}/include/cppmanifest)
+# endif()
 
 # cppmanifest does not do strings in the version, but we want them.
 # Append -SNAPSHOT to the version name if this is a pre-release version

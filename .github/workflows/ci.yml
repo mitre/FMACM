@@ -21,7 +21,8 @@ jobs:
           - os: ubuntu-latest
             container: rockylinux:9
             install: |
-              dnf -y install gcc gcc-c++ make cmake git ninja-devel
+              dnf config-manager --enable crb
+              dnf -y install gcc gcc-c++ make cmake git ninja-build
     steps:
       - uses: actions/checkout@v4
 

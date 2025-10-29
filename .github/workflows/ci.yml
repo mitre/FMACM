@@ -30,7 +30,7 @@ jobs:
 
       - name: Configure and Build
         run: |
-          cmake -G Ninja -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
           cmake --build build --target FMACM -j
           ./bin/FMACM --version
 

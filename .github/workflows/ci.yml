@@ -22,6 +22,10 @@ jobs:
             container: rockylinux:9
             install: |
               dnf -y install gcc gcc-c++ make cmake git
+          - os: ubuntu-latest
+            container: rockylinux:10
+            install: |
+              dnf -y install gcc gcc-c++ make cmake git
     steps:
       - uses: actions/checkout@v4
 

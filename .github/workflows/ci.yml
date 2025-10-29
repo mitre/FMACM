@@ -56,17 +56,17 @@ jobs:
         run: |
           cmake --build build --target run_public_test run_fmacm_test -j
 
-      # - name: Upload test results
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: public-test-results
-      #     path: unittest/*results.xml
-
-      - name: Publish JUnit test results
-        uses: dorny/test-reporter@v2
-        if: always()
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
         with:
-          name: Public Library Tests
+          name: public-test-results
           path: unittest/*results.xml
-          reporter: jest-junit
-          fail-on-error: true
+
+      # - name: Publish JUnit test results
+      #   uses: dorny/test-reporter@v2
+      #   if: always()
+      #   with:
+      #     name: Public Library Tests
+      #     path: unittest/*results.xml
+      #     reporter: jest-junit
+      #     fail-on-error: true

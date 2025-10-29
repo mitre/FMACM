@@ -7,6 +7,27 @@ on:
     branches: [ main, master ]
 
 jobs:
+  build_fmacm:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf -y install gcc gcc-c++ make cmake git
+
+      - name: Build project
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build binary
+        run: |
+          cmake --build build --target FMACM
+          ./bin/FMACM --buildinfo
+
   run_public_test:
     runs-on: ubuntu-latest
     container:

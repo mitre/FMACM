@@ -71,10 +71,12 @@ jobs:
 
       - name: Publish JUnit test results
         uses: dorny/test-reporter@v1
+        if: always()
         with:
-          name: Public Tests
+          name: Public Library Tests
           path: unittest/public_unit_test_results.xml
           reporter: java-junit
+          fail-on-error: true
 
   run_fmacm_test:
     runs-on: ubuntu-latest
@@ -104,7 +106,9 @@ jobs:
 
       - name: Publish JUnit test results
         uses: dorny/test-reporter@v1
+        if: always()
         with:
-          name: FMACM Tests
+          name: FMACM Library Tests
           path: unittest/fmacm_unit_test_results.xml
           reporter: java-junit
+          fail-on-error: true

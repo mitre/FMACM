@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  run_public_test:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf -y install gcc gcc-c++ make cmake git
+
+      - name: Build project
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+
+      - name: Run public tests
+        run: |
+          cmake --build build --target run_public_test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-test-results
+          path: unittest/public_unit_test_results.xml
+
+      - name: Publish JUnit test results
+        uses: dorny/test-reporter@v1
+        with:
+          name: Public Tests
+          path: unittest/public_unit_test_results.xml
+          reporter: java-junit
+
+  run_fmacm_test:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux:9
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf -y install gcc gcc-c++ make cmake git
+
+      - name: Build project
+        run: |
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
+
+      - name: Run FMACM tests
+        run: |
+          cmake --build build --target run_fmacm_test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: fmacm-test-results
+          path: unittest/fmacm_unit_test_results.xml
+
+      - name: Publish JUnit test results
+        uses: dorny/test-reporter@v1
+        with:
+          name: FMACM Tests
+          path: unittest/fmacm_unit_test_results.xml
+          reporter: java-junit

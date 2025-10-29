@@ -60,11 +60,11 @@ jobs:
         run: |
           cmake --build build --target run_public_test run_fmacm_test -j
 
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: public-test-results
-          path: unittest/*results.xml
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: public-test-results
+      #     path: unittest/*results.xml
 
       - name: Publish JUnit test results
         uses: dorny/test-reporter@v2

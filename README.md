@@ -30,4 +30,8 @@ This project contains content developed by The MITRE Corporation. If this code i
 
 ## Documentation
 
-Review the [online documentation](https://mitre.github.io/FMACM/).
+:eyes: Dive [right in](https://mitre.github.io/FMACM/)! :four_leaf_clover:
+
+---
+
+Happy Simulating!

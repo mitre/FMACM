@@ -1,10 +1,32 @@
-FROM artifacts.mitre.org:8200/idealab/rocky/idealab-basic:2.1.0
-ENV container docker
+FROM rockylinux:9 AS build
+ENV container=docker
+
+# ----------------------------------------------------------------------------
+# Internal MITRE only...comment out otherwise
+# ----------------------------------------------------------------------------
+RUN curl -ksSL \
+    https://gitlab.mitre.org/mitre-scripts/mitre-pki/raw/master/os_scripts/install_certs.sh \
+    | MODE=centos sh
 
 # Set the TZ
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-RUN dnf install -y ccache
+
+RUN dnf -y install epel-release dnf-plugins-core
+RUN dnf -y install initscripts \
+        ccache \
+        git \
+        gcc \
+        gcc-c++ \
+        cmake \
+        make \
+        wget \
+        tar \
+        netcdf-devel \
+        netcdf-cxx \
+        libaec \
+        eccodes
+RUN dnf --enablerepo=devel install -y eccodes-devel
 
 # ----------------------------------------------------------------------------
 # AAESim-specific artifacts are pulled into the container below
@@ -12,22 +34,13 @@ RUN dnf install -y ccache
 # BUILD DEPENDENCIES---
 
 # RUN DEPENDENCIES---
-# BADA data (needed by AAESim/FMACM in order to run a scenario)
-RUN mkdir /data \
-    && mkdir /data/aaesim \
-    && mkdir /data/aaesim/regressionScens \
-    && git clone -b master --depth 1 https://mustache.mitre.org/scm/aaes/bada-data.git /data/aaesim/regressionScens/bada
 
 # TEST DEPENDENCIES---
-# NOTE: you only need this repo if you intend to run aaesim unit/regression tests inside the container
-# BEWARE: this clone operation takes a long time for some reason
-# RUN git clone -b main --depth 1 https://mustache.mitre.org/scm/aaes/regression_input_data.git /data/aaesim/regression_input_data 
-COPY --from=artifacts.mitre.org:8200/docker/sbowman/aaesim_regression_data:latest /data/aaesim/regression_input_data /data/aaesim/regression_input_data
 
 # ----------------------------------------------------------------------------
 # Final configuration steps
-RUN dnf -y install zsh dotnet-sdk-7.0 aspnetcore-runtime-7.0
+# RUN dnf -y install zsh dotnet-sdk-7.0 aspnetcore-runtime-7.0
 
 # Make sure sshd is running (clion uses this for communication)
-CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config"]  
+# CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config"]  
 

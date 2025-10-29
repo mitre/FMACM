@@ -13,13 +13,13 @@
       }
    },
    "containerEnv": {"CPM_SOURCE_CACHE":"/tmp/cpm_cache/"},
-   "workspaceMount": "source=${localWorkspaceFolder},target=/home/demo/gitrepos/aaesim,type=bind,consistency=cached", 
-   "workspaceFolder": "/home/demo/gitrepos/aaesim",
+   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/fmacm,type=bind,consistency=cached", 
+   "workspaceFolder": "/workspace/fmacm",
    // "mounts": [
    //    "source=/Users/sbowman/gitrepos/fmacm-airs-scenarios,target=/home/demo/gitrepos/aaesim/fmacm-validation-scenarios,type=bind,consistency=cached",
    //    "source=/Users/sbowman/gitrepos/aaesim-to-fmacm,target=/home/demo/gitrepos/aaesim/aaesim-to-fmacm,type=bind,consistency=cached"
    //  ]
-   "mounts": [
-      "source=/Users/sbowman/gitrepos/fmacm-airs-scenarios,target=/home/demo/gitrepos/aaesim/fmacm-validation-scenarios,type=bind,consistency=cached"
-    ]
+   // "mounts": [
+   //    "source=/Users/sbowman/gitrepos/fmacm-airs-scenarios,target=/home/demo/gitrepos/aaesim/fmacm-validation-scenarios,type=bind,consistency=cached"
+   //  ]
  }

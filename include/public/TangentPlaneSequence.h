@@ -20,11 +20,11 @@
 #pragma once
 
 #include <list>
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "public/Waypoint.h"
 #include "public/LocalTangentPlane.h"
+#include "public/Waypoint.h"
 
 /**
  * This class takes a series of waypoints and creates a LocalTangentPlane
@@ -99,7 +99,7 @@ class TangentPlaneSequence {
    void Copy(const TangentPlaneSequence &in);
 
   protected:
-   virtual void Initialize(std::list<Waypoint> &waypoint_list);
+   virtual void Initialize(const std::list<Waypoint> &waypoint_list);
 
    std::vector<Waypoint> waypoints_from_initialization_;
    std::vector<std::shared_ptr<LocalTangentPlane> > tangent_planes_from_initialization_;

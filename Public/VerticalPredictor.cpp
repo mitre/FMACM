@@ -18,6 +18,7 @@
 // ****************************************************************************
 
 #include "public/VerticalPredictor.h"
+
 #include "public/CoreUtils.h"
 
 using namespace std;
@@ -25,11 +26,7 @@ using namespace aaesim::open_source;
 using namespace aaesim::open_source::constants;
 
 VerticalPredictor::VerticalPredictor()
-   : m_low_groundspeed_warning(50),
-     m_low_groundspeed_fatal(0.1),
-     m_descent_angle_max(6.0),
-     m_descent_angle_warning(4.0) {
-
+   : LOW_GROUNDSPEED_WARNING(50), LOW_GROUNDSPEED_FATAL(0.1), DESCENT_ANGLE_MAX(6.0), DESCENT_ANGLE_WARNING(4.0) {
    m_transition_altitude_msl = Units::FeetLength(0.0);
    m_cruise_altitude_msl = Units::FeetLength(37000);
    m_transition_ias = Units::KnotsSpeed(310);
@@ -49,7 +46,6 @@ void VerticalPredictor::SetMembers(const VerticalPredictor &vertical_predictor) 
 
 Guidance VerticalPredictor::Update(const AircraftState &current_state, const Guidance &current_guidance,
                                    const Units::Length distance_to_go) {
-
    Guidance guidanceout = CalculateGuidanceCommands(current_state, distance_to_go, current_guidance);
 
    return guidanceout;
@@ -220,7 +216,6 @@ Guidance VerticalPredictor::CalculateGuidanceCommands(const AircraftState &state
 
 double VerticalPredictor::CalculateEsfUsingConstantCAS(const double true_airspeed_mps, const double altitude_msl_meter,
                                                        const Units::Temperature temperature) {
-
    double esf;
    const Units::KelvinTemperature temperature_kelvin(temperature);
    double mach;
@@ -307,7 +302,6 @@ void VerticalPredictor::TrimDuplicatesFromVerticalPath() {
 }
 
 VerticalPredictor &VerticalPredictor::operator=(const VerticalPredictor &obj) {
-
    if (this != &obj) {
       this->m_wind_calculator = obj.m_wind_calculator;
       this->m_transition_altitude_msl = obj.m_transition_altitude_msl;
@@ -327,7 +321,6 @@ VerticalPredictor &VerticalPredictor::operator=(const VerticalPredictor &obj) {
 }
 
 bool VerticalPredictor::operator==(const VerticalPredictor &obj) const {
-
    // Note: not including mCalcWind comparison here because differences
    // between this->mCalcWind and obj.mCalcWind should not affect
    // processing.

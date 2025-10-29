@@ -14,6 +14,11 @@ target_link_libraries(fmacm_test
    gtest
    framework
 )
+target_include_directories(fmacm_test
+    PRIVATE
+    ${nlohmann_json_INCLUDE_DIR}
+    ${LOG4CPLUS_DIRS}
+)
 set_target_properties(fmacm_test PROPERTIES
    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
    EXCLUDE_FROM_ALL TRUE)

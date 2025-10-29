@@ -35,7 +35,7 @@ void TangentPlaneSequence::Copy(const TangentPlaneSequence &in) {
    this->waypoints_from_initialization_ = in.waypoints_from_initialization_;
 }
 
-void TangentPlaneSequence::Initialize(std::list<Waypoint> &waypoint_list) {
+void TangentPlaneSequence::Initialize(const std::list<Waypoint> &waypoint_list) {
    shared_ptr<LocalTangentPlane> tangent_plane = shared_ptr<LocalTangentPlane>((LocalTangentPlane *)NULL);
    EarthModel::LocalPositionEnu enu;
    enu.x = enu.y = enu.z = Units::zero();
@@ -99,7 +99,6 @@ void TangentPlaneSequence::ConvertLocalToGeodetic(EarthModel::LocalPositionEnu l
 
 void TangentPlaneSequence::ConvertGeodeticToLocal(EarthModel::GeodeticPosition geo_position,
                                                   EarthModel::LocalPositionEnu &local_position) const {
-
    EarthModel::AbsolutePositionEcef ecef_position;
    Environment::GetInstance()->GetEarthModel()->ConvertGeodeticToAbsolute(geo_position, ecef_position);
    std::vector<Units::Area> areas;

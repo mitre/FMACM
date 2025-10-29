@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "public/FixedMassAircraftPerformance.h"
-
 #include <stdexcept>
+
+#include "public/FixedMassAircraftPerformance.h"
 
 namespace fmacm {
 class NullAircraftPerformance final : public aaesim::open_source::FixedMassAircraftPerformance {
@@ -38,7 +38,7 @@ class NullAircraftPerformance final : public aaesim::open_source::FixedMassAircr
    void GetCurrentDragCoefficients(double &cd0, /** [out] parasitic drag coefficient */
                                    double &cd2, /** [out] induced drag coefficient */
                                    double &gear /** [out] landing gear drag coefficient */
-   ) const {
+   ) const override {
       throw std::runtime_error("intentionally unimplemented code: please implement BADA v3.7");
    }
 

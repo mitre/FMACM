@@ -32,7 +32,7 @@ using namespace aaesim::open_source;
 AircraftState ThreeDOFDynamics::Update(const int unique_acid, const aaesim::open_source::SimulationTime &simtime,
                                        const Guidance &guidance, const shared_ptr<AircraftControl> &aircraft_control) {
    auto dynamics_state = Integrate(guidance, aircraft_control);
-   m_dynamics_history.insert(std::make_pair(simtime.GetCurrentSimulationTime(), dynamics_state));
+   m_dynamics_history.insert(std::make_pair(simtime, dynamics_state));
 
    LatLonDerivative position_rate;
    m_position_estimator->ComputePosition(simtime, m_equations_of_motion_state, m_equations_of_motion_state_derivative,
@@ -68,20 +68,20 @@ DynamicsState ThreeDOFDynamics::Integrate(const Guidance &guidance,
                                           const shared_ptr<AircraftControl> &aircraft_control) {
    const Units::SecondsTime dt = SimulationTime::GetSimulationTimeStep();
    UpdateTrueWeatherConditions();
-   ControlCommands control_commands =
+   const auto controller_response =
          aircraft_control->CalculateControlCommands(guidance, m_equations_of_motion_state, m_true_weather_operator);
-   bool perform_takeoff_roll_logic =
-         control_commands.getFlapMode() == bada_utils::TAKEOFF &&
-         control_commands.getTrueAirspeed() < m_bada_calculator->GetAerodynamicsInformation().take_off.V_stall;
+   bool perform_takeoff_roll_logic = controller_response.first.flap_configuration == bada_utils::TAKEOFF &&
+                                     controller_response.first.true_airspeed_command <
+                                           m_bada_calculator->GetAerodynamicsInformation().take_off.V_stall;
    if (perform_takeoff_roll_logic) {
-      m_equations_of_motion_state_derivative = StatePropagationOnRunway(control_commands, guidance);
+      m_equations_of_motion_state_derivative = StatePropagationOnRunway(controller_response.first, guidance);
    } else {
       // First-order derivative of the state calculated by the EOM
-      m_equations_of_motion_state_derivative =
-            StatePropagation(m_true_weather_operator->GetWindSpeedVerticalDerivativeEast(),
-                             m_true_weather_operator->GetWindSpeedVerticalDerivativeNorth(),
-                             aircraft_control->GetGammaGain(), aircraft_control->GetThrustGain(),
-                             aircraft_control->GetPhiGain(), aircraft_control->GetSpeedBrakeGain(), control_commands);
+      m_equations_of_motion_state_derivative = StatePropagation(
+            m_true_weather_operator->GetWindSpeedVerticalDerivativeEast(),
+            m_true_weather_operator->GetWindSpeedVerticalDerivativeNorth(),
+            controller_response.second.k_flight_path_angle, controller_response.second.k_thrust,
+            controller_response.second.k_roll, controller_response.second.k_speed_brake, controller_response.first);
    }
 
    // Integrate the state
@@ -96,6 +96,10 @@ DynamicsState ThreeDOFDynamics::Integrate(const Guidance &guidance,
    m_equations_of_motion_state.speed_brake_percentage +=
          m_equations_of_motion_state_derivative.speed_brake_deriv * dt.value();
    m_equations_of_motion_state.flap_configuration = m_equations_of_motion_state_derivative.flap_configuration;
+
+   m_equations_of_motion_state.speed_brake_percentage = m_equations_of_motion_state.speed_brake_percentage < 1e-10
+                                                              ? 0.0
+                                                              : m_equations_of_motion_state.speed_brake_percentage;
    return ComputeDynamicsState(m_equations_of_motion_state, m_equations_of_motion_state_derivative);
 }
 
@@ -124,15 +128,15 @@ EquationsOfMotionStateDeriv ThreeDOFDynamics::StatePropagation(Units::Frequency 
    dX.enu_velocity_z = Units::MetersPerSecondSpeed(-true_airspeed * sin(gamma));
    dX.true_airspeed_deriv = (thrust - drag) / ac_mass + Units::ONE_G_ACCELERATION * sin(gamma) +
                             true_airspeed * (dVwx_dh * cos(psi) + dVwy_dh * sin(psi)) * sin(gamma) * cos(gamma);
-   dX.gamma_deriv = k_gamma * (commands.getGamma() - gamma) -
+   dX.gamma_deriv = k_gamma * (commands.flight_path_angle_command - gamma) -
                     (dVwx_dh * cos(psi) + dVwy_dh * sin(psi)) * pow(sin(gamma), 2) * Units::ONE_RADIAN_ANGLE;
    dX.heading_deriv = (-lift * sin(phi) / (ac_mass * true_airspeed * cos(gamma)) -
                        (dVwx_dh * sin(psi) - dVwy_dh * cos(psi)) * tan(gamma)) *
                       Units::ONE_RADIAN_ANGLE;
-   dX.thrust_deriv = k_t * (commands.getThrust() - thrust);
-   dX.roll_rate = k_phi * (commands.getPhi() - phi);
-   dX.speed_brake_deriv = k_speedBrake * (commands.getSpeedBrake() - speed_brake_percentage);
-   dX.flap_configuration = commands.getFlapMode();
+   dX.thrust_deriv = k_t * (commands.thrust_command - thrust);
+   dX.roll_rate = k_phi * (commands.roll_angle_command - phi);
+   dX.speed_brake_deriv = k_speedBrake * (commands.speed_brake_command - speed_brake_percentage);
+   dX.flap_configuration = commands.flap_configuration;
 
    return dX;
 }
@@ -225,6 +229,7 @@ Units::SignedRadiansAngle ThreeDOFDynamics::CalculateTrimmedPsiForWind(Units::Si
 }
 
 void ThreeDOFDynamics::Initialize(
+      const aaesim::open_source::SimulationTime &simulation_time,
       std::shared_ptr<const aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance,
       const EarthModel::GeodeticPosition &initial_position, const EarthModel::LocalPositionEnu &initial_position_enu,
       Units::Length initial_altitude_msl, Units::Speed initial_true_airspeed, Units::Angle initial_ground_course_enu,
@@ -301,7 +306,7 @@ void ThreeDOFDynamics::Initialize(
       }
       m_equations_of_motion_state.thrust = equilibrium_thrust_required;
    }
-   m_dynamics_history.insert(std::make_pair(Units::SecondsTime{-1}, initial_dynamics_state));
+   m_dynamics_history.insert(std::make_pair(simulation_time, initial_dynamics_state));
 }
 
 EquationsOfMotionStateDeriv ThreeDOFDynamics::StatePropagationOnRunway(ControlCommands commands,
@@ -311,7 +316,7 @@ EquationsOfMotionStateDeriv ThreeDOFDynamics::StatePropagationOnRunway(ControlCo
    const Units::Mass ac_mass = m_bada_calculator->GetAircraftMass();
    const Units::Speed true_airspeed = m_equations_of_motion_state.true_airspeed;
    const Units::Force thrust =
-         m_bada_calculator->GetMaxThrust(m_equations_of_motion_state.altitude_msl, commands.getFlapMode(),
+         m_bada_calculator->GetMaxThrust(m_equations_of_motion_state.altitude_msl, commands.flap_configuration,
                                          bada_utils::EngineThrustMode::MAXIMUM_CLIMB, Units::ZERO_CELSIUS);
    const Units::Speed wind_magnitude =
          Units::sqrt(Units::sqr(m_wind_velocity_east) + Units::sqr(m_wind_velocity_north));
@@ -336,13 +341,13 @@ EquationsOfMotionStateDeriv ThreeDOFDynamics::StatePropagationOnRunway(ControlCo
    dX.thrust_deriv = Units::zero();
    dX.roll_rate = Units::zero();
    dX.speed_brake_deriv = 0;
-   dX.flap_configuration = commands.getFlapMode();
+   dX.flap_configuration = commands.flap_configuration;
    return dX;
 }
 
 DynamicsState ThreeDOFDynamics::ComputeDynamicsState(
       const EquationsOfMotionState &equations_of_motion_state,
-      const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative) {
+      const EquationsOfMotionStateDeriv &equations_of_motion_state_derivative) const {
    DynamicsState dynamics_state;
 
    dynamics_state.h = m_equations_of_motion_state.altitude_msl;
@@ -360,8 +365,6 @@ DynamicsState ThreeDOFDynamics::ComputeDynamicsState(
    dynamics_state.current_mass = m_bada_calculator->GetAircraftMass();
    dynamics_state.xd = equations_of_motion_state_derivative.enu_velocity_x;
    dynamics_state.yd = equations_of_motion_state_derivative.enu_velocity_y;
-
-   // Check Thrust Limits and Limit Appropriately
 
    aaesim::open_source::bada_utils::FlapConfiguration mode = m_bada_calculator->GetCurrentFlapConfiguration();
    Units::Force max_thrust, min_thrust;

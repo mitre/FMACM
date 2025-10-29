@@ -30,11 +30,32 @@ class Waypoint : public LoggingLoadable {
 
    Waypoint();
 
+   ~Waypoint() = default;
+
    Waypoint(const std::string &name, Units::Angle latitude, Units::Angle longitude,
             Units::Length altitude_constraint_upper = MAX_ALTITUDE_CONSTRAINT,
             Units::Length altitude_constraint_lower = MIN_ALTITUDE_CONSTRAINT,
             Units::Speed speed_constraint = MAX_SPEED_CONSTRAINT, Units::Length nominal_altitude = Units::ZERO_LENGTH,
             Units::Speed nominal_ias = Units::ZERO_SPEED, std::string arinc424_leg_type = "");
+
+   Waypoint &operator=(const Waypoint &in) {
+      stream = NULL;
+      was_load_successful = in.was_load_successful;
+      m_name = in.m_name;
+      m_latitude = in.m_latitude;
+      m_longitude = in.m_longitude;
+      m_altitude = in.m_altitude;
+      m_nominal_ias = in.m_nominal_ias;
+      m_altitude_constraint_high = in.m_altitude_constraint_high;
+      m_altitude_constraint_low = in.m_altitude_constraint_low;
+      m_speed_constraint_high = in.m_speed_constraint_high;
+      m_speed_constraint_low = in.m_speed_constraint_low;
+      m_rf_turn_center_latitude = in.m_rf_turn_center_latitude;
+      m_rf_turn_center_longitude = in.m_rf_turn_center_longitude;
+      m_rf_turn_arc_radius = in.m_rf_turn_arc_radius;
+      m_arinc424_leg_type = in.m_arinc424_leg_type;
+      return *this;
+   }
 
    bool load(DecodedStream *input);
 
@@ -91,19 +112,19 @@ class Waypoint : public LoggingLoadable {
    std::string GetArinc424LegType() const;
 
   private:
-   std::string m_name;
-   Units::Angle m_latitude;
-   Units::Angle m_longitude;
-   Units::Length m_altitude;
-   Units::Speed m_nominal_ias;
-   Units::Length m_altitude_constraint_high;
-   Units::Length m_altitude_constraint_low;
-   Units::Speed m_speed_constraint_high;
-   Units::Speed m_speed_constraint_low;
-   Units::Angle m_rf_turn_center_latitude;
-   Units::Angle m_rf_turn_center_longitude;
-   Units::Length m_rf_turn_arc_radius;
-   std::string m_arinc424_leg_type;
+   std::string m_name{};
+   Units::Angle m_latitude{Units::zero()};
+   Units::Angle m_longitude{Units::zero()};
+   Units::Length m_altitude{Units::zero()};
+   Units::Speed m_nominal_ias{Units::zero()};
+   Units::Length m_altitude_constraint_high{Units::zero()};
+   Units::Length m_altitude_constraint_low{Units::zero()};
+   Units::Speed m_speed_constraint_high{Units::zero()};
+   Units::Speed m_speed_constraint_low{Units::zero()};
+   Units::Angle m_rf_turn_center_latitude{Units::zero()};
+   Units::Angle m_rf_turn_center_longitude{Units::zero()};
+   Units::Length m_rf_turn_arc_radius{Units::zero()};
+   std::string m_arinc424_leg_type{};
 };
 
 inline const std::string &Waypoint::GetName() const { return m_name; }

@@ -22,9 +22,8 @@
 
 using namespace aaesim::open_source;
 
-WeatherPrediction::WeatherPrediction(PredictedWindOption option, std::shared_ptr<Wind> wind,
-                                     std::shared_ptr<Atmosphere> atmosphere)
-   : WeatherEstimate(std::move(wind), std::move(atmosphere)), m_predicted_wind_option(option), m_update_count(0) {
+WeatherPrediction::WeatherPrediction(std::shared_ptr<Wind> wind, std::shared_ptr<Atmosphere> atmosphere)
+   : WeatherEstimate(std::move(wind), std::move(atmosphere)), m_update_count(0) {
    // inhibit 3-D predicted temperature for now.
    m_temperature_checked = true;
    m_temperature_available = false;

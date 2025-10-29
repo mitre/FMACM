@@ -19,31 +19,25 @@
 
 #pragma once
 
-#include "public/AircraftControl.h"
+#include "public/AbstractDescentController.h"
 
 namespace aaesim {
 namespace open_source {
-class SpeedOnThrustControl : public AircraftControl {
-
+class SpeedOnThrustControl final : public AbstractDescentController {
   public:
-   SpeedOnThrustControl(const Units::Angle max_bank_angle);
-
-   void Initialize(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> bada_calculator) override;
+   SpeedOnThrustControl() = default;
+   ~SpeedOnThrustControl() = default;
+   void ComputeVerticalCommands(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+                                std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather,
+                                Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
+                                BoundedValue<double, 0, 1> &speed_brake_command,
+                                aaesim::open_source::bada_utils::FlapConfiguration &flap_configuration) override;
 
   private:
-   static log4cplus::Logger m_logger;
-   static Units::Frequency m_gain_altitude, m_gain_gamma, m_gain_phi;
-   static double m_gain_speedbrake;
-   Units::Frequency m_gain_velocity;
-   unsigned int m_min_thrust_counter;
-   unsigned int m_speedbrake_counter;
-   bool m_is_speedbrake_on;
-
-  protected:
-   virtual void DoVerticalControl(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
-                                  Units::Force &thrust_command, Units::Angle &gamma_command, Units::Speed &tas_command,
-                                  double &speed_brake_command,
-                                  aaesim::open_source::bada_utils::FlapConfiguration &new_flap_configuration) override;
+   inline static log4cplus::Logger logger_{log4cplus::Logger::getInstance("SpeedOnThrustControl")};
+   inline static const Units::Frequency gain_altitude_{Units::HertzFrequency(0.20)};
+   inline static const Units::Frequency gain_true_airspeed_{Units::sqr(natural_frequency_) / thrust_gain_};
+   unsigned int min_thrust_counter_{0};
 };
 }  // namespace open_source
 }  // namespace aaesim

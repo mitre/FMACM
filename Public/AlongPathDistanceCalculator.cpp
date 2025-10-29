@@ -17,12 +17,11 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/AlongPathDistanceCalculator.h>
-
-#include <algorithm>
+#include "public/AlongPathDistanceCalculator.h"
 
 #include <public/AircraftCalculations.h>
-#include "public/AlongPathDistanceCalculator.h"
+
+#include <algorithm>
 
 using namespace aaesim::open_source;
 
@@ -34,7 +33,6 @@ Units::Length AlongPathDistanceCalculator::CAPTURE_CROSS_TRACK_TOLERANCE = Units
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                                                          TrajectoryIndexProgressionDirection expected_index_progression)
    : HorizontalPathTracker(horizontal_path, expected_index_progression) {
-
    m_is_first_call = true;
    m_cross_track_tolerance = CROSS_TRACK_TOLERANCE;
 }
@@ -84,7 +82,6 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
                                                                          Units::Length &distance_along_path,
                                                                          Units::UnsignedAngle &course,
                                                                          Units::UnsignedAngle &pt_to_pt_course) {
-
    std::vector<HorizontalPath>::size_type resolved_index;
    Units::Length calculated_distance_along_path;
    bool return_boolean = IsPositionOnNode(position_x, position_y, resolved_index);
@@ -138,10 +135,11 @@ bool AlongPathDistanceCalculator::CalculateAlongPathDistanceFromPosition(const U
    } else {
       // resolved_index looks incorrect. Throw.
       char msg[300];
-      std::sprintf(msg,
-                   "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
-                   "%lu, resolved_index %lu",
-                   m_current_index, resolved_index);
+      std::snprintf(
+            msg, sizeof(msg),
+            "Invalid index progression encountered from CalculatePositionFromDistanceAlongPath(), current_index "
+            "%lu, resolved_index %lu",
+            m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
       auto high_index = std::max(m_current_index, resolved_index) + 1;
       auto low_index = std::min(m_current_index, resolved_index);

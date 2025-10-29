@@ -32,7 +32,6 @@ DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator(
       const std::vector<HorizontalPath> &horizontal_path,
       TrajectoryIndexProgressionDirection expected_index_progression)
    : HorizontalPathTracker(horizontal_path, expected_index_progression) {
-
    m_end_course = Units::RadiansAngle(horizontal_path.front().m_path_course) + Units::PI_RADIANS_ANGLE;
    m_start_course = Units::RadiansAngle(horizontal_path.back().m_path_course) + Units::PI_RADIANS_ANGLE;
 }
@@ -82,17 +81,18 @@ bool DirectionOfFlightCourseCalculator::CalculateCourseAtAlongPathDistance(const
       // happen. For now, it helps a lot to allow this. But, we should consider this deprecated behavior and throw in
       // the future.
       char msg[300];
-      std::sprintf(msg, "Very long distance_along_path encountered. Too long for path. Allowing for now: %f",
-                   Units::MetersLength(distance_along_path).value());
+      std::snprintf(msg, sizeof(msg),
+                    "Very long distance_along_path encountered. Too long for path. Allowing for now: %f",
+                    Units::MetersLength(distance_along_path).value());
       LOG4CPLUS_ERROR(m_logger, msg);
 
    } else {
       // resolved_index looks incorrect. Throw.
       char msg[300];
-      std::sprintf(msg,
-                   "Invalid index progression encountered from CalculateCourseAtAlongPathDistance(), current_index "
-                   "%lu, resolved_index %lu",
-                   m_current_index, resolved_index);
+      std::snprintf(msg, sizeof(msg),
+                    "Invalid index progression encountered from CalculateCourseAtAlongPathDistance(), current_index "
+                    "%lu, resolved_index %lu",
+                    m_current_index, resolved_index);
       LOG4CPLUS_FATAL(m_logger, msg);
       throw std::logic_error(msg);
    }

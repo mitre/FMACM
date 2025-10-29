@@ -18,6 +18,7 @@
 // ****************************************************************************
 
 #include "loader/DecodedStream.h"
+
 #include <limits>
 
 using namespace std;
@@ -283,11 +284,8 @@ bool DecodedStream::get_datum(bool &s) {
 
 bool DecodedStream::get_datum(long &s) {
    string temp = get_next().get_Data();
-   static const long big = numeric_limits<long>::max();
-   static const long small = numeric_limits<long>::min();
 
-   if (temp.empty() || !DecodedStream::ok())  // if temp is empty or stream not ok
-   {
+   if (temp.empty() || !DecodedStream::ok()) {
       return false;
    }
 
@@ -295,22 +293,20 @@ bool DecodedStream::get_datum(long &s) {
       return false;
    }
 
-   if (atoi(temp.c_str()) == big)  // too big to be int
-   {
-      return false;
-   }
-   if (atoi(temp.c_str()) == small)  // too small to be int
-   {
-      return false;
-   }
-   if (temp != "0") {
-      if (atoi(temp.c_str()) == 0) {
+   try {
+      size_t idx = 0;
+      long value = std::stol(temp, &idx, 10);
+      if (idx != temp.size()) {
+         // Not all characters were consumed, so not a valid number
          return false;
       }
+      s = value;
+      return true;
+   } catch (const std::invalid_argument &) {
+      return false;
+   } catch (const std::out_of_range &) {
+      return false;
    }
-   s = atoi(temp.c_str());
-
-   return true;
 }
 
 bool DecodedStream::get_datum(float &s) {

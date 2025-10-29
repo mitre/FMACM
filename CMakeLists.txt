@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 4.3.0.1) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 5.2.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 20)
 
@@ -27,13 +27,13 @@ include(${PROJECT_SOURCE_DIR}/.cmake/functions.cmake)
 CPMAddPackage(
   NAME Ccache.cmake
   GITHUB_REPOSITORY TheLartians/Ccache.cmake
-  VERSION 1.2
+  VERSION 1.2.5
 )
 
 CPMAddPackage(
         NAME cppmanifest
         GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
-        GIT_TAG v1.4
+        GIT_TAG v1.7
         DOWNLOAD_ONLY TRUE
 )
 if (cppmanifest_ADDED)

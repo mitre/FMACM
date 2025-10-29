@@ -19,29 +19,28 @@
 
 #pragma once
 
-#include "public/PredictedWindEvaluator.h"
+#include "public/EquationsOfMotionState.h"
+#include "public/Guidance.h"
+#include "public/TrueWeatherOperator.h"
+#include "scalar/Angle.h"
 
-/**
- * NullWindEvaluator always indicates that winds are accurate.
- */
-namespace aaesim {
-namespace open_source {
-
-class NullWindEvaluator final : public PredictedWindEvaluator {
-  public:
-   const static std::shared_ptr<PredictedWindEvaluator> GetInstance();
-
-   virtual ~NullWindEvaluator();
-
-   virtual bool ArePredictedWindsAccurate(const aaesim::open_source::AircraftState &state,
-                                          const WeatherPrediction &weather_prediction, const Units::Speed reference_cas,
-                                          const Units::Length reference_altitude,
-                                          const std::shared_ptr<Atmosphere> &sensed_atmosphere) const;
-
-  private:
-   static std::shared_ptr<PredictedWindEvaluator> m_instance;
-
-   NullWindEvaluator();
+namespace aaesim::open_source {
+struct LateralController {
+   virtual Units::Angle ComputeRollCommand(
+         const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+         std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather) = 0;
+   virtual Units::Frequency GetRollGain() const = 0;
 };
-}  // namespace open_source
-}  // namespace aaesim
+
+class NoTurnLateralController final : public LateralController {
+  public:
+   NoTurnLateralController() = default;
+   ~NoTurnLateralController() = default;
+   Units::Angle ComputeRollCommand(
+         const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+         std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather) override {
+      return Units::zero();
+   };
+   Units::Frequency GetRollGain() const override { return Units::zero(); }
+};
+}  // namespace aaesim::open_source

@@ -22,7 +22,7 @@
 using namespace aaesim;
 
 Wgs84PrecalcWaypoint::Wgs84PrecalcWaypoint() {
-   m_name = "noname";
+   m_name = "";
    m_leg_type = AircraftIntent::Arinc424LegType::UNSET;
    m_leg_length = Units::zero();
    m_enu_course_in_angle = Units::DegreesAngle(0.0);
@@ -40,7 +40,6 @@ Wgs84PrecalcWaypoint::Wgs84PrecalcWaypoint() {
 }
 
 bool Wgs84PrecalcWaypoint::operator==(const Wgs84PrecalcWaypoint &obj) const {
-
    bool match = (m_leg_length == obj.m_leg_length);
    match = match && (m_name == obj.m_name);
    match = match && (m_bank_angle == obj.m_bank_angle);

@@ -23,7 +23,7 @@
 
 namespace aaesim {
 namespace open_source {
-class NullSpeedLimiter : public SpeedCommandLimiter {
+class NullSpeedLimiter final : public SpeedCommandLimiter {
   public:
    NullSpeedLimiter();
 

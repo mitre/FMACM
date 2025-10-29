@@ -51,11 +51,11 @@ class PrecalcConstraint {
 
    bool operator==(const PrecalcConstraint &obj) const;
 
-   Units::Length constraint_along_path_distance;  // cumulative along-path distance of this constraint
-   Units::Length constraint_altHi;                // altitude max constraints
-   Units::Length constraint_altLow;               // altitude min constraints
-   Units::Speed constraint_speedHi;               // speed max contraint
-   Units::Speed constraint_speedLow;              // speed min contraint
+   Units::Length constraint_along_path_distance;
+   Units::Length constraint_altHi;
+   Units::Length constraint_altLow;
+   Units::Speed constraint_speedHi;
+   Units::Speed constraint_speedLow;
    int index;
    ActiveFlagType active_flag;
    bool violation_flag;

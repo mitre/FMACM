@@ -19,29 +19,13 @@
 
 #pragma once
 
-#include "public/PredictedWindEvaluator.h"
-
-/**
- * NullWindEvaluator always indicates that winds are accurate.
- */
-namespace aaesim {
-namespace open_source {
-
-class NullWindEvaluator final : public PredictedWindEvaluator {
-  public:
-   const static std::shared_ptr<PredictedWindEvaluator> GetInstance();
-
-   virtual ~NullWindEvaluator();
-
-   virtual bool ArePredictedWindsAccurate(const aaesim::open_source::AircraftState &state,
-                                          const WeatherPrediction &weather_prediction, const Units::Speed reference_cas,
-                                          const Units::Length reference_altitude,
-                                          const std::shared_ptr<Atmosphere> &sensed_atmosphere) const;
-
-  private:
-   static std::shared_ptr<PredictedWindEvaluator> m_instance;
-
-   NullWindEvaluator();
+#include "public/VerticalController.h"
+namespace aaesim::open_source {
+struct AscentController {
+   virtual void ComputeAscentCommands(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,
+                                      std::shared_ptr<const aaesim::open_source::TrueWeatherOperator> &sensed_weather,
+                                      Units::Force &thrust_command, Units::Angle &gamma_command,
+                                      Units::Speed &tas_command,
+                                      aaesim::open_source::bada_utils::FlapConfiguration &flap_command) = 0;
 };
-}  // namespace open_source
-}  // namespace aaesim
+}  // namespace aaesim::open_source

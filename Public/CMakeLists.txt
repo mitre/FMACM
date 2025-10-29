@@ -62,7 +62,6 @@ set(SOURCE_FILES
         PrecalcConstraint.cpp
         PrecalcWaypoint.cpp
         ScenarioUtils.cpp
-        SimulationTime.cpp
         SingleTangentPlaneSequence.cpp
         SpeedOnPitchControl.cpp
         SpeedOnThrustControl.cpp
@@ -100,6 +99,8 @@ set(SOURCE_FILES
         USStandardAtmosphere1976.cpp
         ZeroWindTrueWeatherOperator.cpp
         FullWindTrueWeatherOperator.cpp
+        DefaultLateralController.cpp
+        ClimbPhaseVerticalController.cpp
 )
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)

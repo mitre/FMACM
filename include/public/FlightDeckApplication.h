@@ -19,14 +19,14 @@
 
 #pragma once
 
-#include "public/BadaUtils.h"
-#include "public/Guidance.h"
-#include "public/DynamicsState.h"
-#include "public/AircraftState.h"
-#include "public/AircraftIntent.h"
-#include "public/WeatherPrediction.h"
 #include "public/ASSAP.h"
+#include "public/AircraftIntent.h"
+#include "public/AircraftState.h"
+#include "public/BadaUtils.h"
+#include "public/DynamicsState.h"
+#include "public/Guidance.h"
 #include "public/TangentPlaneSequence.h"
+#include "public/WeatherPrediction.h"
 namespace aaesim {
 namespace open_source {
 struct OwnshipPerformanceParameters {
@@ -55,6 +55,7 @@ struct FlightDeckApplicationInitializer {
 };
 
 struct FlightDeckApplication {
+   virtual ~FlightDeckApplication() = default;
    virtual void Initialize(FlightDeckApplicationInitializer &initializer_visitor) = 0;
    virtual aaesim::open_source::Guidance Update(const aaesim::open_source::SimulationTime &simtime,
                                                 const aaesim::open_source::Guidance &current_guidance,

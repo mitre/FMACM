@@ -19,14 +19,15 @@
 
 #pragma once
 
-#include <string>
 #include <fstream>
-#include <scalar/Speed.h>
-#include <nlohmann/json.hpp>
-#include "public/LoggingLoadable.h"
+#include <string>
+
+#include "nlohmann/json.hpp"
 #include "public/Logging.h"
-#include "public/Waypoint.h"
+#include "public/LoggingLoadable.h"
 #include "public/TangentPlaneSequence.h"
+#include "public/Waypoint.h"
+#include "scalar/Speed.h"
 #include "utility/UtilityConstants.h"
 
 class AircraftIntent : public LoggingLoadable {
@@ -36,25 +37,25 @@ class AircraftIntent : public LoggingLoadable {
    enum Arinc424LegType { UNSET = -1, IF, VI, TF, RF, CF, VA, CA };
 
    struct RouteData {
-      std::vector<std::string> m_name;
-      std::vector<WaypointPhaseOfFlight> m_waypoint_phase_of_flight;
-      std::vector<Units::MetersLength> m_x;
-      std::vector<Units::MetersLength> m_y;
-      std::vector<Units::MetersLength> m_z;
-      std::vector<Units::MetersLength> m_nominal_altitude;
-      std::vector<Units::RadiansAngle> m_latitude;
-      std::vector<Units::RadiansAngle> m_longitude;
-      std::vector<Units::FeetPerSecondSpeed> m_nominal_ias;
-      std::vector<Units::MetersLength> m_high_altitude_constraint;
-      std::vector<Units::MetersLength> m_low_altitude_constraint;
-      std::vector<Units::MetersPerSecondSpeed> m_high_speed_constraint;
-      std::vector<Units::MetersPerSecondSpeed> m_low_speed_constraint;
-      std::vector<Arinc424LegType> m_leg_type;
-      std::vector<Units::MetersLength> m_x_rf_center;
-      std::vector<Units::MetersLength> m_y_rf_center;
-      std::vector<Units::MetersLength> m_rf_radius;
-      std::vector<Units::SignedRadiansAngle> m_rf_latitude;
-      std::vector<Units::SignedRadiansAngle> m_rf_longitude;
+      std::vector<std::string> m_name{};
+      std::vector<WaypointPhaseOfFlight> m_waypoint_phase_of_flight{};
+      std::vector<Units::MetersLength> m_x{};
+      std::vector<Units::MetersLength> m_y{};
+      std::vector<Units::MetersLength> m_z{};
+      std::vector<Units::MetersLength> m_nominal_altitude{};
+      std::vector<Units::RadiansAngle> m_latitude{};
+      std::vector<Units::RadiansAngle> m_longitude{};
+      std::vector<Units::FeetPerSecondSpeed> m_nominal_ias{};
+      std::vector<Units::MetersLength> m_high_altitude_constraint{};
+      std::vector<Units::MetersLength> m_low_altitude_constraint{};
+      std::vector<Units::MetersPerSecondSpeed> m_high_speed_constraint{};
+      std::vector<Units::MetersPerSecondSpeed> m_low_speed_constraint{};
+      std::vector<Arinc424LegType> m_leg_type{};
+      std::vector<Units::MetersLength> m_x_rf_center{};
+      std::vector<Units::MetersLength> m_y_rf_center{};
+      std::vector<Units::MetersLength> m_rf_radius{};
+      std::vector<Units::RadiansAngle> m_rf_latitude{};
+      std::vector<Units::RadiansAngle> m_rf_longitude{};
    };
 
    AircraftIntent();
@@ -151,6 +152,12 @@ class AircraftIntent : public LoggingLoadable {
                                                        const std::string &waypoint_name);
 
   protected:
+   static inline std::map<std::string, Arinc424LegType> m_arinc424_dictionary{
+         {"IF", AircraftIntent::Arinc424LegType::IF}, {"UNSET", AircraftIntent::Arinc424LegType::UNSET},
+         {"RF", AircraftIntent::Arinc424LegType::RF}, {"TF", AircraftIntent::Arinc424LegType::TF},
+         {"VI", AircraftIntent::Arinc424LegType::VI}, {"CF", AircraftIntent::Arinc424LegType::CF},
+         {"VA", AircraftIntent::Arinc424LegType::VA}, {"CA", AircraftIntent::Arinc424LegType::CA},
+   };
    std::list<Waypoint> AddConnectingLeg(const std::list<Waypoint> &first_waypoint_vector,
                                         const std::list<Waypoint> &second_waypoint_vector) const;
 
@@ -166,23 +173,21 @@ class AircraftIntent : public LoggingLoadable {
 
    void DoRouteDataLogging() const;
 
-   struct RouteData m_route_data;
-   std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence;
-   double m_planned_cruise_mach;
-   std::vector<Waypoint> m_all_waypoints;
-   bool m_is_loaded;
-   std::vector<Waypoint> m_ascent_waypoints, m_cruise_waypoints, m_descent_waypoints;
-   Units::MetersLength m_planned_cruise_altitude;
-   std::map<std::string, Arinc424LegType> m_arinc424_dictionary;
+   struct RouteData m_route_data{};
+   std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence{};
+   double m_planned_cruise_mach{0};
+   std::vector<Waypoint> m_all_waypoints{};
+   bool m_is_loaded{false};
+   std::vector<Waypoint> m_ascent_waypoints{}, m_cruise_waypoints{}, m_descent_waypoints{};
+   Units::MetersLength m_planned_cruise_altitude{Units::ZERO_LENGTH};
 
   private:
-   static const int UNINITIALIZED_AIRCRAFT_ID;
-   static log4cplus::Logger m_logger;
+   static inline log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("AircraftIntent"))};
 
    void DeleteRouteDataContent();
    void AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints, enum WaypointPhaseOfFlight add_as_phase);
    friend std::ostream &operator<<(std::ostream &out, const AircraftIntent &intent);
-   int m_id;
+   int m_id{-1};
 };
 
 inline const AircraftIntent::RouteData &AircraftIntent::GetRouteData() const { return m_route_data; }

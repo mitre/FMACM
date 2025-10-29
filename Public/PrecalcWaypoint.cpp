@@ -20,7 +20,7 @@
 #include "public/PrecalcWaypoint.h"
 
 PrecalcWaypoint::PrecalcWaypoint() {
-   m_name = "noname";
+   m_name = "";
    m_leg_length = Units::zero();
    m_course_angle = Units::DegreesAngle(0.0);
 

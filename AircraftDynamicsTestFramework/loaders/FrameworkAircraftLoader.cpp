@@ -19,21 +19,22 @@
 
 #include "framework/FrameworkAircraftLoader.h"
 
-#include "loader/NullLoader.h"
-#include "public/SpeedOnPitchControl.h"
-#include "public/SpeedOnThrustControl.h"
-#include "public/NullADSBReceiver.h"
-#include "public/NullAtmosphere.h"
-#include "public/WeatherPrediction.h"
-#include "public/PassThroughAssap.h"
-#include "public/NullFlightDeckApplication.h"
-#include "public/EllipsoidalPositionEstimator.h"
-#include "public/LegacyPositionEstimator.h"
-#include "framework/PreloadedAdsbReceiver.h"
 #include "framework/ForeWindReader.h"
 #include "framework/NullAircraftPerformance.h"
+#include "framework/PreloadedAdsbReceiver.h"
+#include "loader/NullLoader.h"
+#include "public/AircraftControllerFactory.h"
+#include "public/EllipsoidalPositionEstimator.h"
 #include "public/FullWindTrueWeatherOperator.h"
+#include "public/LegacyPositionEstimator.h"
+#include "public/NullADSBReceiver.h"
+#include "public/NullAtmosphere.h"
+#include "public/NullFlightDeckApplication.h"
+#include "public/PassThroughAssap.h"
+#include "public/SpeedOnPitchControl.h"
+#include "public/SpeedOnThrustControl.h"
 #include "public/USStandardAtmosphere1976.h"
+#include "public/WeatherPrediction.h"
 #include "scalar/Length.h"
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
@@ -140,7 +141,8 @@ std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> FrameworkAircraftLoader::
    std::shared_ptr<aaesim::open_source::TrueWeatherOperator> true_weather_operator =
          std::make_shared<aaesim::open_source::FullWindTrueWeatherOperator>(true_weather);
    auto dynamics = std::make_shared<aaesim::open_source::ThreeDOFDynamics>();
-   dynamics->Initialize(performance, initial_wgs84_position, m_initial_local_position, initial_altitude, initial_tas,
+   dynamics->Initialize(aaesim::open_source::SimulationTime::Of(Units::SecondsTime(m_start_time)), performance,
+                        initial_wgs84_position, m_initial_local_position, initial_altitude, initial_tas,
                         initial_heading, m_mass_fraction, position_estimator, true_weather_operator);
    return dynamics;
 }
@@ -215,17 +217,19 @@ std::shared_ptr<fmacm::WeatherTruthFromStaticData> FrameworkAircraftLoader::Buil
 
 std::shared_ptr<aaesim::open_source::AircraftControl> FrameworkAircraftLoader::BuildAircraftControl(
       std::string control_method, std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &bada_calculator) {
-   std::shared_ptr<aaesim::open_source::AircraftControl> aircraft_control;
-
-   const Units::Angle max_bank_angle = Units::DegreesAngle(30);
+   AircraftControllerFactory::DescentSpeedControlStrategy descent_strategy{
+         AircraftControllerFactory::DescentSpeedControlStrategy::NONE};
+   std::transform(control_method.cbegin(), control_method.cend(), control_method.begin(),
+                  [](unsigned char c) { return std::tolower(c); });
    if (control_method == "thrust") {
-      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnThrustControl>(max_bank_angle);
+      descent_strategy = AircraftControllerFactory::DescentSpeedControlStrategy::THRUST;
    } else if (control_method == "pitch") {
-      aircraft_control = std::make_shared<aaesim::open_source::SpeedOnPitchControl>(
-            Units::KnotsSpeed(20.0), Units::FeetLength(500.0), max_bank_angle);
-   } else {
-      throw std::runtime_error("Supported speed_management_type values are 'thrust' and 'pitch'");
+      descent_strategy = AircraftControllerFactory::DescentSpeedControlStrategy::PITCH;
    }
+   auto descent_config = AircraftControllerFactory::DescentSpeedControlConfig{descent_strategy, Units::KnotsSpeed(20.0),
+                                                                              Units::FeetLength(500.0)};
+   auto config = AircraftControllerFactory::AircraftControllerConfig{descent_config, Units::DegreesAngle{30}};
+   auto aircraft_control = AircraftControllerFactory::BuildForCruiseDescentOnly(config);
    aircraft_control->Initialize(bada_calculator);
    return aircraft_control;
 }

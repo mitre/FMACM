@@ -2,11 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
+  build_macos:
+    runs-on: macos-latest # Or a specific macOS version like macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-cpp@v1 # Action to set up C++ environment
+        with:
+          compiler: clang
+          cmake: true
+          ninja: true
+      - name: Configure and Build
+        run: |
+          cmake -G Ninja -S. -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target FMACM
+          ./bin/FMACM --buildinfo
+
   build_fmacm:
     runs-on: ubuntu-latest
     container:

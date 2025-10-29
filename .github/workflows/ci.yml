@@ -42,7 +42,7 @@ jobs:
           cmake --build build --target FMACM
           ./bin/FMACM --buildinfo
 
-  run_public_test:
+  run_all_tests:
     runs-on: ubuntu-latest
     container:
       image: rockylinux:9
@@ -60,54 +60,19 @@ jobs:
 
       - name: Run public tests
         run: |
-          cmake --build build --target run_public_test
+          cmake --build build --target run_public_test run_fmacm_test
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
           name: public-test-results
-          path: unittest/public_unit_test_results.xml
+          path: unittest/*results.xml
 
       - name: Publish JUnit test results
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: always()
         with:
           name: Public Library Tests
-          path: unittest/public_unit_test_results.xml
-          reporter: java-junit
-          fail-on-error: true
-
-  run_fmacm_test:
-    runs-on: ubuntu-latest
-    container:
-      image: rockylinux:9
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          dnf -y install gcc gcc-c++ make cmake git
-
-      - name: Build project
-        run: |
-          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
-
-      - name: Run FMACM tests
-        run: |
-          cmake --build build --target run_fmacm_test
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: fmacm-test-results
-          path: unittest/fmacm_unit_test_results.xml
-
-      - name: Publish JUnit test results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: FMACM Library Tests
-          path: unittest/fmacm_unit_test_results.xml
+          path: unittest/*results.xml
           reporter: java-junit
           fail-on-error: true

@@ -1,4 +1,4 @@
-# FMACM
+# MOPS Aircraft & Control Model
 
 > This is the copyright work of The MITRE Corporation, and was produced
 for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
@@ -30,7 +30,9 @@ This project contains content developed by The MITRE Corporation. If this code i
 
 ## Documentation
 
-:eyes: Dive [right in](https://mitre.github.io/FMACM/)! :four_leaf_clover:
+This is an application. It models aircraft dynamics and controls for use in closed-loop testing of [RTCA](https://www.rtca.org) requirements. But you should know a lot more before you try to use this.
+
+:eyes: You [right in](https://mitre.github.io/FMACM/) to the documentation! :four_leaf_clover:
 
 ---
 

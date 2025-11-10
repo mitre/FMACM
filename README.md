@@ -1,17 +1,10 @@
 # MOPS Aircraft & Control Model
 
-> This is the copyright work of The MITRE Corporation, and was produced
-for the U. S. Government under Contract Number DTFAWA-10-C-00080, and
-is subject to Federal Aviation Administration Acquisition Management
-System Clause 3.5-13, Rights In Data-General, Alt. III and Alt. IV
-(Oct. 1996).  No other use other than that granted to the U. S.
-Government, or to those acting on behalf of the U. S. Government,
-under that Clause is authorized without the express written
-permission of The MITRE Corporation. For further information, please
-contact The MITRE Corporation, Contracts Office, 7515 Colshire Drive,
-McLean, VA  22102-7539, (703) 983-6000.
+> This is the copyright work of The MITRE Corporation, and was produced for the U. S. Government under Contract Number 693KA8-22-C-00001, and is subject
+to Federal Aviation Administration Acquisition Management System Clause 3.5-13, Rights In Data-General (Oct. 2014), Alt. III and Alt. IV (Jan. 2009).  No other use other than that granted to the U. S. Government, or to those acting on behalf of the U. S. Government, under that Clause is authorized without the express written permission of The MITRE Corporation. For further information, please contact The MITRE Corporation, Contracts Management Office, 7515 Colshire Drive, McLean, VA  22102-7539, (703) 983-6000.
 >
-> Copyright 2020 The MITRE Corporation. All Rights Reserved.
+> (c) 2025 The MITRE Corporation. All Rights Reserved.
+>
 > Approved for Public Release; Distribution Unlimited. 15-1482
 
 This project contains content developed by The MITRE Corporation. If this code is used in a deployment or embedded within another project, it is requested that you send an email to [opensource@mitre.org](mailto:opensource@mitre.org) in order to let us know where this software is being used.
@@ -30,9 +23,9 @@ This project contains content developed by The MITRE Corporation. If this code i
 
 ## Documentation
 
-This is an application. It models aircraft dynamics and controls for use in closed-loop testing of [RTCA](https://www.rtca.org) requirements. But you should know a lot more before you try to use this.
+This is an application. It models aircraft dynamics and controls for use in closed-loop testing of [RTCA](https://www.rtca.org) avionics requirements. But you should know a lot more before you try to use this.
 
-:eyes: You [right in](https://mitre.github.io/FMACM/) to the documentation! :four_leaf_clover:
+You should go deeper into [the documentation](https://mitre.github.io/FMACM/). :four_leaf_clover:
 
 ---
 

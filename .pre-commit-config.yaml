@@ -9,6 +9,6 @@ repos:
         args:
           [
             --verbose=3,
-            "--filter=-legal/copyright, -build/namespaces, -build/storage_class, -build/c++11, -build/c++17, -build/include_what_you_use, -build/include, -build/include_subdir, -runtime/string, -runtime/int, -build/header_guard, -whitespace/ending_newline, -whitespace/operators, -whitespace/comma, -whitespace/indent, -whitespace/semicolon, -whitespace/newline, -whitespace/blank_line, -whitespace/braces, -whitespace/comments, -whitespace/parens, -runtime/explicit, -build/include_order, -readability/casting, -readability/inheritance, -readability/braces, -readability/utf8, -readability/multiline_comment, -runtime/printf",
+            "--filter=-legal/copyright, -build/namespaces, -build/storage_class, +build/c++20, -build/include_what_you_use, -build/include, -build/include_subdir, -runtime/string, -runtime/int, -build/header_guard, -whitespace/ending_newline, -whitespace/operators, -whitespace/comma, -whitespace/indent, -whitespace/semicolon, -whitespace/newline, -whitespace/blank_line, -whitespace/braces, -whitespace/comments, -whitespace/parens, -runtime/explicit, -build/include_order, -readability/casting, -readability/inheritance, -readability/braces, -readability/utf8, -readability/multiline_comment, -runtime/printf",
           ]
         files: \.(c|cc|cxx|cpp|cu|h|hpp|hxx)$

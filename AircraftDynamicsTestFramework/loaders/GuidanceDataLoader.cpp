@@ -14,18 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/GuidanceDataLoader.h"
 
-#include "utility/CsvParser.h"
 #include "framework/HfpReader2020.h"
-#include "public/CoreUtils.h"
 #include "framework/WaypointSequenceReader.h"
+#include "public/CoreUtils.h"
 #include "public/GeolibUtils.h"
 #include "public/SingleTangentPlaneSequence.h"
 #include "utility/BoundedValue.h"
+#include "utility/CsvParser.h"
 
 using namespace fmacm;
 using namespace aaesim::open_source;
@@ -338,7 +338,6 @@ std::vector<HorizontalPath> GuidanceDataLoader::BuildHorizontalPathComputeEuclid
 }
 
 void GuidanceDataLoader::ComputeCourseColumnsInPlace(std::vector<HorizontalPath> &horizontal_path_sequence) const {
-
    const auto start_at_turn = horizontal_path_sequence.front().m_segment_type == HorizontalPath::SegmentType::TURN;
    const auto end_at_turn = horizontal_path_sequence.back().m_segment_type == HorizontalPath::SegmentType::TURN;
    if (start_at_turn || end_at_turn) {

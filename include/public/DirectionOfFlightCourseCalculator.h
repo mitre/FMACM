@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -27,7 +27,6 @@ namespace aaesim::open_source {
  * @brief Calculates the forward course along a horizontal path. "Forward" is defined as the direction of flight.
  */
 class DirectionOfFlightCourseCalculator : public HorizontalPathTracker {
-
   public:
    DirectionOfFlightCourseCalculator();
    DirectionOfFlightCourseCalculator(const std::vector<HorizontalPath> &horizontal_path,

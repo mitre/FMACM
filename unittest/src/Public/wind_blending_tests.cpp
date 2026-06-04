@@ -14,13 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
 
-#include "public/WeatherPrediction.h"
 #include "public/BlendWindsVerticallyByAltitude.h"
+#include "public/WeatherPrediction.h"
 
 using namespace std;
 using namespace aaesim::open_source;
@@ -28,7 +28,6 @@ using namespace aaesim::open_source;
 namespace aaesim::test {
 
 TEST(BlendWindsVerticallyByAltitude, update_predicted_winds_at_altitude_from_sensed_wind) {
-
    // Get expected values
    const int predicted_matrix_rows = 4;
    const Units::Speed predicted_wind_at_20k_x(Units::KnotsSpeed(20));
@@ -94,7 +93,6 @@ TEST(BlendWindsVerticallyByAltitude, update_predicted_winds_at_altitude_from_sen
 }
 
 TEST(BlendWindsVerticallyByAltitude, update_predicted_winds_at_higher_altitude) {
-
    // Set expected values
    const int predicted_matrix_rows = 4;
    const Units::Speed predicted_wind_at_20k_x(Units::KnotsSpeed(20));

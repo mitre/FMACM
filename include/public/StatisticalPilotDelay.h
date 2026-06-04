@@ -14,24 +14,22 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/PilotDelay.h"
-
 #include <map>
 
-#include "public/Logging.h"
-#include "scalar/Length.h"
-#include "scalar/Time.h"
-#include "scalar/Speed.h"
 #include "public/Atmosphere.h"
+#include "public/Logging.h"
+#include "public/PilotDelay.h"
+#include "scalar/Length.h"
+#include "scalar/Speed.h"
+#include "scalar/Time.h"
 
 namespace aaesim::open_source {
 class StatisticalPilotDelay final : public PilotDelay {
-
   public:
    static StatisticalPilotDelay NoDelay();
    static StatisticalPilotDelay WithDelayDefaults(std::shared_ptr<Atmosphere> atmosphere);

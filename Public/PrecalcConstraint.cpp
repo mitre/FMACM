@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcConstraint.h"
@@ -22,7 +22,6 @@
 bool operator<=(ActiveFlagType l, ActiveFlagType r) { return ((static_cast<int>(l)) <= (static_cast<int>(r))); }
 
 PrecalcConstraint::PrecalcConstraint() {
-
    active_flag = ActiveFlagType::UNSET;
    constraint_along_path_distance = Units::MetersLength(0.0);  // distance constraints-meters.
    constraint_altHi = Units::MetersLength(0);                  // altitude max constraints-meters.
@@ -37,7 +36,6 @@ PrecalcConstraint::~PrecalcConstraint() = default;
 
 PrecalcConstraint &PrecalcConstraint::operator=(const PrecalcConstraint &obj) {
    if (this != &obj) {
-
       constraint_along_path_distance = obj.constraint_along_path_distance;
       constraint_altHi = obj.constraint_altHi;
       constraint_altLow = obj.constraint_altLow;

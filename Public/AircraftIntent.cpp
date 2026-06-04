@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftIntent.h"
@@ -490,17 +490,26 @@ Units::MetersLength AircraftIntent::GetWaypointY(unsigned int i) const {
 
 std::list<Waypoint> AircraftIntent::RemoveZeroLengthLegs(const std::list<Waypoint> &waypoints) {
    std::list<Waypoint> resolved_waypoints;
-   for (auto wpt_itr = waypoints.begin(); wpt_itr != waypoints.end(); ++wpt_itr) {
+   if (waypoints.empty()) {
+      return resolved_waypoints;
+   }
+   auto wpt_itr = waypoints.begin();
+   auto next_itr = std::next(wpt_itr);
+   for (; next_itr != waypoints.end(); ++wpt_itr, ++next_itr) {
       const auto lat1 = wpt_itr->GetLatitude();
       const auto lon1 = wpt_itr->GetLongitude();
-      const auto lat2 = std::next(wpt_itr)->GetLatitude();
-      const auto lon2 = std::next(wpt_itr)->GetLongitude();
+      const auto lat2 = next_itr->GetLatitude();
+      const auto lon2 = next_itr->GetLongitude();
       const auto lat_diff = Units::abs(lat1 - lat2);
       const auto lon_diff = Units::abs(lon1 - lon2);
       const auto tolerance = Units::DegreesAngle(1e-5);
       const bool skip_waypoint = lat_diff < tolerance && lon_diff < tolerance;
-      if (!skip_waypoint) resolved_waypoints.push_back(*wpt_itr);
+      if (!skip_waypoint) {
+         resolved_waypoints.push_back(*wpt_itr);
+      }
    }
+   // always include the last waypoint
+   resolved_waypoints.push_back(waypoints.back());
    return resolved_waypoints;
 }
 

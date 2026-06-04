@@ -14,10 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VectorDifferenceWindEvaluator.h"
+
 #include "public/Environment.h"
 
 using namespace aaesim::open_source;
@@ -45,7 +46,6 @@ bool VectorDifferenceWindEvaluator::ArePredictedWindsAccurate(
       const aaesim::open_source::AircraftState &state, const aaesim::open_source::WeatherPrediction &weather_prediction,
       const Units::Speed reference_cas, const Units::Length reference_altitude,
       const std::shared_ptr<Atmosphere> &sensed_atmosphere) const {
-
    Units::MetersPerSecondSpeed windeastcomp, windnorthcomp;  // units of mps as returned from AircraftCalculations
    Units::Frequency dtmp;
    weather_prediction.east_west().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()),

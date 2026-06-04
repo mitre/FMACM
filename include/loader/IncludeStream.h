@@ -14,16 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "loader/Token.h"
-#include "loader/RunFileArchiveDirector.h"
-#include "loader/FilePath.h"
 #include <assert.h>
+
 #include <memory>
+
+#include "loader/FilePath.h"
+#include "loader/RunFileArchiveDirector.h"
+#include "loader/Token.h"
 
 template <class PARENT>
 class IncludeStream : public PARENT {
@@ -161,7 +163,6 @@ class IncludeStream : public PARENT {
 
             // if(included_file.get_Num_Dir()>1 && included_file.get_Disk()!="" && included_file.get_Type()!="")
             if (has_mult_dirs && has_drive && has_file_ext) {
-
                local_path = included_file;
                abs_path_flag = true;
                break;
@@ -170,7 +171,6 @@ class IncludeStream : public PARENT {
             local_path = FilePath(local_path.get_Full_Path() + "\\" + included_file.get_Full_Path());
 #else
             if (has_mult_dirs && has_file_ext) {
-
                local_path = included_file;
                break;
             }

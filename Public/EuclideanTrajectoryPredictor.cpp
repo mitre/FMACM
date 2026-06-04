@@ -14,17 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <stdexcept>
-#include <iomanip>
-
 #include "public/EuclideanTrajectoryPredictor.h"
-#include "public/Wind.h"
-#include "public/LawOfSinesResolver.h"
+
 #include <public/AlongPathDistanceCalculator.h>
 #include <scalar/AngularSpeed.h>
+
+#include <iomanip>
+#include <stdexcept>
+
+#include "public/LawOfSinesResolver.h"
+#include "public/Wind.h"
 
 using namespace std;
 using namespace aaesim::open_source::constants;
@@ -99,7 +101,6 @@ EuclideanTrajectoryPredictor::EuclideanTrajectoryPredictor() {
 
 void EuclideanTrajectoryPredictor::CalculateWaypoints(
       const AircraftIntent &aircraft_intent, const aaesim::open_source::WeatherPrediction &weather_prediction) {
-
    m_aircraft_intent = aircraft_intent;
 
    // Set altitude at FAF to final altitude in feet.
@@ -928,7 +929,6 @@ aaesim::open_source::Guidance EuclideanTrajectoryPredictor::Update(
    m_distance_calculator.CalculateAlongPathDistanceFromPosition(state.GetPositionEnuX(), state.GetPositionEnuY(),
                                                                 distance_to_go, course_at_dtg);
    if (!m_distance_calculator.IsPassedEndOfRoute()) {
-
       result = m_vertical_predictor->Update(
             state, current_guidance,
             distance_to_go);  // calls the 4D Precalculated Descent and issues altitude and speed Guidance

@@ -14,13 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
+#include "public/CustomMath.h"
 
 #include <math.h>
 #include <stdlib.h>
+
 #include <stdexcept>
-#include "public/CustomMath.h"
+
 #include "utility/UtilityConstants.h"
 
 using namespace aaesim::open_source::constants;
@@ -29,7 +32,6 @@ using namespace aaesim::open_source::constants;
 // From "Numerical Recipe"
 
 double atan3(double x, double y) {
-
    // returns arc tangent as an angle measured from north in the range 0, 2pi
 
    double temp;
@@ -141,8 +143,8 @@ bool inverse(DMatrix &in, int n, DMatrix &out) {
                   return false;
                }
             }  // end for(int k=1; k<=n; k++)
-         }     // end if(ipiv.get(j) != 1.)
-      }        // end for(int j=1; i<=n; j++)
+         }  // end if(ipiv.get(j) != 1.)
+      }  // end for(int j=1; i<=n; j++)
       ipiv.Set(icol, ipiv.Get(icol) + 1);
       if (irow != icol) {
          // swap
@@ -152,7 +154,7 @@ bool inverse(DMatrix &in, int n, DMatrix &out) {
             a.Set(irow, l, a.Get(icol, l));
             a.Set(icol, l, temp_swap);
          }  // end for(int l=1; l<=n; l++)
-      }     // end if(irow != icol)
+      }  // end if(irow != icol)
       indxr.Set(i, (double)irow);
       indxc.Set(i, (double)icol);
       if (a.Get(icol, icol) == 0.0) {
@@ -173,9 +175,9 @@ bool inverse(DMatrix &in, int n, DMatrix &out) {
             for (int l = 1; l <= n; l++) {
                a.Set(ll, l, a.Get(ll, l) - dum * a.Get(icol, l));
             }  // end for(int l=1; l<=n; l++)
-         }     // end if(ll != icol)
-      }        // end for(int ll=1; ll<=n; ll++)
-   }           // end for(int i=1; i<=n; i++)
+         }  // end if(ll != icol)
+      }  // end for(int ll=1; ll<=n; ll++)
+   }  // end for(int i=1; i<=n; i++)
 
    for (int l = n; l >= 1; l--) {
       if (indxr.Get(l) != indxc.Get(l)) {
@@ -187,7 +189,7 @@ bool inverse(DMatrix &in, int n, DMatrix &out) {
             a.Set(k, (int)indxc.Get(l), temp);
          }
       }  // end if(indxr.get(l) != indxc.get(l))
-   }     // end for(int l=n; l>=1; l--)
+   }  // end for(int l=n; l>=1; l--)
 
    // copy the "a" matrix into the "out" matrix:
    int out_min_row = out.GetMinRow();
@@ -201,7 +203,6 @@ bool inverse(DMatrix &in, int n, DMatrix &out) {
 }
 
 void matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector &vector_out) {
-
    for (int i = 0; i < n; i++) {
       int ii = i + vector_out.GetMin();
       vector_out[ii] = 0.0;
@@ -219,7 +220,6 @@ void matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector 
  * matrix.
  */
 DMatrix &CreateRotationMatrix(double l, double m, double n, const Units::Angle theta) {
-
    // basic formula acquired from:
    // https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
    // Wikipedia uses T * coord_column, while we use coord_row * T.

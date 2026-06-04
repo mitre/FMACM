@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/GuidanceFromStaticData.h"
@@ -72,7 +72,6 @@ aaesim::open_source::Guidance GuidanceFromStaticData::Update(const aaesim::open_
 aaesim::open_source::Guidance GuidanceFromStaticData::CalculateVerticalGuidance(
       const aaesim::open_source::AircraftState &state, const Units::MetersLength &estimated_distance_to_go,
       const Units::UnsignedAngle &estimated_course) {
-
    aaesim::open_source::Guidance vertical_guidance;
    vertical_guidance.m_reference_altitude = state.GetAltitudeMsl();
    vertical_guidance.m_vertical_speed = Units::ZERO_SPEED;

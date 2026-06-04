@@ -14,14 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <stdexcept>
-#include "utility/CustomUnits.h"
+
 #include "scalar/Area.h"
+#include "utility/CustomUnits.h"
 
 namespace aaesim {
 namespace open_source {

@@ -14,14 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/HorizontalPath.h"
-#include "public/AircraftIntent.h"
 #include <vector>
+
+#include "public/AircraftIntent.h"
+#include "public/HorizontalPath.h"
 
 namespace aaesim {
 namespace test {
@@ -33,7 +34,6 @@ static const double TOLERANCE_METERS_TIGHT = 1e-8;
 enum Quadrant { FIRST, SECOND, THIRD, FOURTH };
 
 class PublicUtils {
-
   public:
    static std::vector<aaesim::open_source::HorizontalPath> CreateStraightHorizontalPath(Quadrant quadrant);
    static AircraftIntent LoadAircraftIntent(std::string parmsfile);

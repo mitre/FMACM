@@ -14,28 +14,28 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/ScenarioEntity.h"
-
-#include <vector>
-#include <memory>
 #include <scalar/Length.h>
 
+#include <memory>
+#include <vector>
+
+#include "framework/GuidanceFromStaticData.h"
+#include "framework/WeatherTruthFromStaticData.h"
 #include "public/AircraftControl.h"
 #include "public/AircraftState.h"
-#include "public/SimulationTime.h"
-#include "public/ThreeDOFDynamics.h"
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/FlightDeckApplication.h"
 #include "public/NullADSBReceiver.h"
 #include "public/NullFlightDeckApplication.h"
+#include "public/ScenarioEntity.h"
+#include "public/SimulationTime.h"
+#include "public/ThreeDOFDynamics.h"
 #include "public/WeatherTruth.h"
-#include "framework/WeatherTruthFromStaticData.h"
-#include "framework/GuidanceFromStaticData.h"
 
 class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
   public:

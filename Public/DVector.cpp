@@ -14,11 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <iostream>
 #include "public/DVector.h"
+
+#include <iostream>
+
 #include "public/InvalidIndexException.h"
 
 using std::cout;
@@ -32,7 +34,6 @@ DVector::DVector() {
 
 // NOTE: max index is inclusive
 DVector::DVector(int min, int max) {
-
    int size = max - min + 1;
 
    m_min_index = min;

@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
+#include "public/GeolibUtils.h"
 
 #include <cfloat>
 #include <cmath>
-#include "public/GeolibUtils.h"
 
 using namespace aaesim;
 using namespace geolib_idealab;
@@ -82,7 +83,6 @@ const ArcOnEllipsoid GeolibUtils::CreateArcOnEllipsoid(const LatitudeLongitudePo
                                                        const LatitudeLongitudePoint &end_point,
                                                        const LatitudeLongitudePoint &center_point,
                                                        const geolib_idealab::ArcDirection &arc_direction) {
-
    Arc arc_primitive;
    ErrorSet error_set =
          createArc(&arc_primitive, center_point.GetGeolibPrimitiveLLPoint(), start_point.GetGeolibPrimitiveLLPoint(),
@@ -99,7 +99,6 @@ const ArcOnEllipsoid GeolibUtils::CreateArcOnEllipsoid(const LatitudeLongitudePo
 
 const std::tuple<bool, LatitudeLongitudePoint, std::vector<Units::Length> >
       GeolibUtils::CalculateLineLineIntersectionPoint(const LineOnEllipsoid &line1, const LineOnEllipsoid &line2) {
-
    // Line-Line intersection
    double crs31, distance_line1_start_to_intx_point, crs32, distance_line2_start_to_intx_point;
    geolib_idealab::LLPoint intersection_point;
@@ -231,7 +230,6 @@ bool GeolibUtils::ArePointsMathematicallyEqual(const LatitudeLongitudePoint &poi
 std::pair<bool, ArcOnEllipsoid> GeolibUtils::CreateArcTangentToTwoLines(const LineOnEllipsoid &line1,
                                                                         const LineOnEllipsoid &line2,
                                                                         const Units::Length &required_radius) {
-
    LLPoint arc_center_point;
    LLPoint arc_start_point;
    LLPoint arc_end_point;
@@ -264,7 +262,6 @@ std::pair<bool, ArcOnEllipsoid> GeolibUtils::CreateArcTangentToTwoLines(const Li
 
 ArcOnEllipsoid GeolibUtils::CreateArcFromInboundShapeAndEndPoint(const ShapeOnEllipsoid *inbound_shape,
                                                                  const LatitudeLongitudePoint &end_point) {
-
    geolib_idealab::Arc calculated_arc;
    ErrorSet error_set = arcFromStartAndEnd(
          inbound_shape->GetEndPoint().GetGeolibPrimitiveLLPoint(),
@@ -281,7 +278,6 @@ ArcOnEllipsoid GeolibUtils::CreateArcFromInboundShapeAndEndPoint(const ShapeOnEl
 
 std::vector<std::pair<bool, LatitudeLongitudePoint> > GeolibUtils::CalculateLineArcIntersectionPoints(
       const LineOnEllipsoid &line, const ArcOnEllipsoid &arc) {
-
    LLPointPair intersection_pairs_on_circle;
    int number_of_intersections = INT32_MIN;
    ErrorSet error_set = geoArcIntx(
@@ -316,7 +312,6 @@ std::vector<std::pair<bool, LatitudeLongitudePoint> > GeolibUtils::CalculateLine
 const ArcOnEllipsoid GeolibUtils::CreateFullCircleOnEllipsoid(const LatitudeLongitudePoint &center_point,
                                                               const Units::Length &arc_radius,
                                                               const geolib_idealab::ArcDirection &arc_direction) {
-
    geolib_idealab::Arc calculated_arc;
    LatitudeLongitudePoint start_point = center_point.ProjectDistanceAlongCourse(arc_radius, Units::ZERO_ANGLE);
    LLPoint end_point = start_point.GetGeolibPrimitiveLLPoint();
@@ -337,7 +332,6 @@ const ArcOnEllipsoid GeolibUtils::CreateFullCircleOnEllipsoid(const LatitudeLong
 
 LineOnEllipsoid GeolibUtils::CreateLineOfZeroLength(const LatitudeLongitudePoint &location,
                                                     const Units::SignedAngle &course_enu) {
-
    geolib_idealab::Geodesic zero_length_geodesic;
    zero_length_geodesic.length = 0;
    zero_length_geodesic.startPoint = location.GetGeolibPrimitiveLLPoint();

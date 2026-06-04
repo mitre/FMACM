@@ -14,10 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VerticalPath.h"
+
 #include "utility/UtilityConstants.h"
 
 using namespace std;
@@ -48,7 +49,6 @@ void VerticalPath::Append(const VerticalPath &in) {
 void VerticalPath::operator+=(const VerticalPath &in) { Append(in); }
 
 bool VerticalPath::operator==(const VerticalPath &obj) const {
-
    bool match = (along_path_distance_m.size() == obj.along_path_distance_m.size());
    match = match && (altitude_m.size() == obj.altitude_m.size());
    match = match && (cas_mps.size() == obj.cas_mps.size());

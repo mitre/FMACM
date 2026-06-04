@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WindZero.h"
@@ -27,14 +27,12 @@ WindZero::~WindZero() {}
 
 void WindZero::InterpolateWind(Units::Angle latitude_in, Units::Angle longitude_in, Units::Length alt, Units::Speed &u,
                                Units::Speed &v) {
-
    u = Units::KnotsSpeed(0);
    v = Units::KnotsSpeed(0);
 }
 
 void WindZero::InterpolateWindScalar(Units::Angle lat_in, Units::Angle lon_in, Units::Length altitude,
                                      Units::Speed &east_west, Units::Speed &north_south) {
-
    east_west = Units::KnotsSpeed(0);
    north_south = Units::KnotsSpeed(0);
 }
@@ -42,7 +40,6 @@ void WindZero::InterpolateWindScalar(Units::Angle lat_in, Units::Angle lon_in, U
 void WindZero::InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, Units::Length alt_in,
                                      aaesim::open_source::WindStack &east_west,
                                      aaesim::open_source::WindStack &north_south) {
-
    for (int i = east_west.GetMinRow(); i <= east_west.GetMaxRow(); i++) {
       east_west.Insert(i, Units::FeetLength((i - 1) * 1000), Units::KnotsSpeed(0));
    }
@@ -54,7 +51,6 @@ void WindZero::InterpolateWindMatrix(Units::Angle lat_in, Units::Angle lon_in, U
 
 Units::KelvinTemperature WindZero::InterpolateTemperature(Units::Angle latitude_in, Units::Angle longitude_in,
                                                           Units::Length alt) {
-
    // use the standard atmosphere, ignoring lat/lon
    return m_atmosphere->GetTemperature(alt);
 }

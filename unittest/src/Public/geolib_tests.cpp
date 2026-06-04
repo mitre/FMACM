@@ -14,17 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
+
+#include "MiniCSV/minicsv.h"
+#include "geolib/Geolib.h"
 #include "public/ArcOnEllipsoid.h"
 #include "public/EarthModel.h"
-#include "public/LatitudeLongitudePoint.h"
-#include "geolib/Geolib.h"
-#include "public/LineOnEllipsoid.h"
 #include "public/GeolibUtils.h"
-#include "MiniCSV/minicsv.h"
+#include "public/LatitudeLongitudePoint.h"
+#include "public/LineOnEllipsoid.h"
 
 using namespace geolib_idealab;
 using namespace aaesim;
@@ -76,7 +77,6 @@ TEST(GeolibLibrary, basic_internal_consistency_test) {
 }
 
 TEST(LatitudeLongitudePoint, createObject) {
-
    LLPoint test_point;
    test_point.latitude = 10 * M_PI / 180;
    test_point.longitude = 5 * M_PI / 180;
@@ -124,7 +124,6 @@ TEST(LineOnEllipsoid, calculate_course_at_point_on_shape) {
 }
 
 TEST(LineOnEllipsoid, createLineFromTwoPoints) {
-
    LatitudeLongitudePoint start_point(Units::SignedDegreesAngle(4), Units::SignedRadiansAngle(-10));
    LatitudeLongitudePoint end_point(Units::SignedDegreesAngle(3), Units::SignedRadiansAngle(-103));
 
@@ -162,7 +161,6 @@ TEST(LineOnEllipsoid, createLineFromTwoPoints) {
 }
 
 TEST(GeolibUtils, createArcFromThreeKnownPoints) {
-
    // Calculate an arc
    const Units::NauticalMilesLength expected_radius(2.5);
    const LatitudeLongitudePoint center_point(Units::SignedDegreesAngle(33.3862), Units::SignedRadiansAngle(-111.887));
@@ -192,7 +190,6 @@ TEST(GeolibUtils, createArcFromThreeKnownPoints) {
 }
 
 TEST(LatitudeLongitudePoint, calculate_new_point_1nm) {
-
    const LatitudeLongitudePoint start_point(Units::DegreesAngle(0.0), Units::DegreesAngle(0));
    const Units::NauticalMilesLength distance(1.0);
    const Units::SignedDegreesAngle go_north_enu(0);
@@ -220,7 +217,6 @@ TEST(LatitudeLongitudePoint, calculate_new_point_1nm) {
 }
 
 TEST(LatitudeLongitudePoint, calculate_new_point_1meter) {
-
    const LatitudeLongitudePoint start_point(Units::DegreesAngle(0.0), Units::DegreesAngle(0));
    const Units::MetersLength distance(1.0);
    const Units::SignedDegreesAngle go_east_enu(90);
@@ -450,7 +446,6 @@ TEST(GeolibUtils, test_CalculateLineLineIntersectionPoint) {
 }
 
 TEST(GeolibUtils, test_NoPossibleLineLineIntersectionPoint) {
-
    // Define two lines that are guaranteed not to intersect
    const LatitudeLongitudePoint start_point1(Units::DegreesAngle(38.0), Units::DegreesAngle(-77.3));
    const LatitudeLongitudePoint end_point1 =
@@ -766,7 +761,6 @@ TEST(GeolibUtils, FindNearestPointOnArc) {
 }
 
 TEST(GeolibUtils, PointsAreMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -780,7 +774,6 @@ TEST(GeolibUtils, PointsAreMathematicallyEqual) {
 }
 
 TEST(GeolibUtils, PointsAreNotMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -796,7 +789,6 @@ TEST(GeolibUtils, PointsAreNotMathematicallyEqual) {
 }
 
 TEST(LatitudeLongitudePoint, PointsAreMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -810,7 +802,6 @@ TEST(LatitudeLongitudePoint, PointsAreMathematicallyEqual) {
 }
 
 TEST(LatitudeLongitudePoint, PointsAreNotMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -1383,7 +1374,6 @@ TEST(ArcOnEllipsoid, GetRelativeDirection) {
       const LatitudeLongitudePoint center_point_approximate = LatitudeLongitudePoint::CreateFromWaypoint(wpt);
 
       for (geolib_idealab::ArcDirection arc_direction : arc_directions) {
-
          for (double arc_start_course_ned = 3 * M_PI / 2; arc_start_course_ned <= 2 * M_PI;
               arc_start_course_ned += M_PI / 2) {
             const Units::SignedRadiansAngle arc_start_course_enu =

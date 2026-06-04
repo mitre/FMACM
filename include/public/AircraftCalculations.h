@@ -14,25 +14,26 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/Atmosphere.h"
-#include "public/AircraftState.h"
-#include "public/HorizontalPath.h"
-#include <vector>
-#include <scalar/UnsignedAngle.h>
-#include <scalar/Length.h>
-#include <scalar/Time.h>
-#include <scalar/Speed.h>
 #include <scalar/Area.h>
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Time.h>
+#include <scalar/UnsignedAngle.h>
+
+#include <vector>
+
+#include "public/AircraftState.h"
+#include "public/Atmosphere.h"
+#include "public/HorizontalPath.h"
 
 namespace aaesim::open_source {
 
 class AircraftCalculations {
-
   public:
    /**
     * Get the position and course of an Aircraft based on current distance and precalculated Horizontal Trajectory

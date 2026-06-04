@@ -14,19 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include <vector>
 #include <scalar/Angle.h>
+
+#include <vector>
+
+#include "public/AircraftIntent.h"
 #include "public/EuclideanTrajectoryPredictor.h"
+#include "public/Guidance.h"
+#include "public/HorizontalPath.h"
 #include "public/KinematicDescent4DPredictor.h"
 #include "public/PrecalcWaypoint.h"
-#include "public/HorizontalPath.h"
-#include "public/AircraftIntent.h"
-#include "public/Guidance.h"
 
 namespace aaesim {
 namespace open_source {

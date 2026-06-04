@@ -14,17 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <map>
 #include <vector>
-#include "scalar/Length.h"
-#include "public/SimulationTime.h"
+
 #include "public/ADSBSVReport.h"
 #include "public/AircraftState.h"
+#include "public/SimulationTime.h"
+#include "scalar/Length.h"
 
 namespace aaesim {
 namespace open_source {

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "public/ADSBSVReport.h"
-#include "public/SimulationTime.h"
 #include "public/AircraftState.h"
+#include "public/SimulationTime.h"
 #include "public/Waypoint.h"
 
 namespace aaesim {
@@ -40,7 +40,6 @@ static const Units::FeetPerSecondSpeed CPR_Z_RATE_QUANT(0.490);
 static const Units::FeetLength CPR_ALT_QUANT(25.0);
 
 struct ADSBTransmitter {
-
    virtual void Initialize(const std::list<Waypoint> &waypoints_along_route) = 0;
    virtual void Transmit(const aaesim::open_source::SimulationTime &simulation_time,
                          const aaesim::open_source::AircraftState &nav_measurement) = 0;

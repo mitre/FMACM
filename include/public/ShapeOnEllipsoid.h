@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <scalar/Length.h>
+
 #include "LatitudeLongitudePoint.h"
 
 /*
@@ -39,30 +40,26 @@ class ShapeOnEllipsoid {
 
    virtual SHAPE_TYPE GetShapeType() const { return NO_SHAPE; };
 
-   virtual Units::SignedAngle GetForwardCourseEnuAtStartPoint() const { return Units::ZERO_ANGLE; };
+   virtual Units::SignedAngle GetForwardCourseEnuAtStartPoint() const = 0;
 
-   virtual Units::SignedAngle GetForwardCourseEnuAtEndPoint() const { return Units::ZERO_ANGLE; }
+   virtual Units::SignedAngle GetForwardCourseEnuAtEndPoint() const = 0;
 
-   virtual LatitudeLongitudePoint GetStartPoint() const { return LatitudeLongitudePoint(); };
+   virtual LatitudeLongitudePoint GetStartPoint() const = 0;
 
-   virtual LatitudeLongitudePoint GetEndPoint() const { return LatitudeLongitudePoint(); };
+   virtual LatitudeLongitudePoint GetEndPoint() const = 0;
 
    virtual LatitudeLongitudePoint CalculatePointAtDistanceFromStartPoint(
-         const Units::Length &distance_along_shape_from_start_point) const {
-      return LatitudeLongitudePoint();
-   }
+         const Units::Length &distance_along_shape_from_start_point) const = 0;
 
    virtual std::pair<Units::SignedAngle, LatitudeLongitudePoint> CalculateCourseAtDistanceFromStartPoint(
-         const Units::Length &distance_along_shape_from_start_point) const {
-      return std::make_pair(Units::ZERO_ANGLE, LatitudeLongitudePoint());
-   }
+         const Units::Length &distance_along_shape_from_start_point) const = 0;
 
    /**
     * Returns the length of the shape along the ellipsoid.
     *
     * @return a Units::Length object. Any negative value indicates a failed calculation.
     */
-   virtual Units::Length GetShapeLength() const { return Units::negInfinity(); }
+   virtual Units::Length GetShapeLength() const = 0;
 
    /**
     * For a given latitude_longitude_point, determines the side relative to the shape's direction (defined by the start

@@ -14,10 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
+
 #include "public/AircraftIntent.h"
 #include "public/CoreUtils.h"
 #include "public/SingleTangentPlaneSequence.h"
@@ -102,7 +103,6 @@ TEST(AircraftIntent, AddConnectingTfLeg_test_2) {
 }
 
 TEST(AircraftIntent, LoadEndToEndWaypoints) {
-
    std::string test_file_to_load = "./resources/aircraftintent_full_route_kden_kphx.txt";
    FILE *fp;
    fp = fopen(test_file_to_load.c_str(), "r");
@@ -141,7 +141,6 @@ TEST(AircraftIntent, LoadEndToEndWaypoints) {
 }
 
 TEST(AircraftIntent, LoadOldWaypointDefinitionCleanly) {
-
    std::string test_file_to_load = "./resources/aircraft_intent_tight_turn.txt";
    FILE *fp;
    fp = fopen(test_file_to_load.c_str(), "r");
@@ -489,7 +488,6 @@ TEST(AircraftIntent, insertNewPointAtBeginning) {
 }
 
 TEST(AircraftIntent, findWaypointIx) {
-
    CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
 
    AircraftIntent intent = PublicUtils::PrepareAircraftIntent("./resources/findIndexIntent.txt");

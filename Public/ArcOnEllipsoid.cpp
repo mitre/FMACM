@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ArcOnEllipsoid.h"
-#include "utility/CustomUnits.h"
+
 #include "public/GeolibUtils.h"
+#include "utility/CustomUnits.h"
 
 using namespace geolib_idealab;
 using namespace aaesim;

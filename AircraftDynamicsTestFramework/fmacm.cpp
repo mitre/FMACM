@@ -14,23 +14,24 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <log4cplus/initializer.h>
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
 #include <stdlib.h>
-#include <string>
 #include <unistd.h>
+
+#include <fstream>
+#include <iostream>
+#include <string>
 
 #include "cppmanifest/cppmanifest.h"
 #include "framework/TestFrameworkScenario.h"
-#include "loader/RunFileArchiveDirector.h"
 #include "loader/Loadable.h"
+#include "loader/RunFileArchiveDirector.h"
 #include "public/Logging.h"
 #include "public/ScenarioUtils.h"
-#include <log4cplus/initializer.h>
 
 #define _MAX_PATH 260
 

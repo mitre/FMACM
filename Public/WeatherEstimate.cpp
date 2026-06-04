@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WeatherEstimate.h"
-#include "public/Wind.h"
+
 #include "public/CoreUtils.h"
+#include "public/Wind.h"
 #include "public/WindZero.h"
 
 using namespace aaesim::open_source;
@@ -35,7 +36,6 @@ WeatherEstimate::WeatherEstimate(std::shared_ptr<Wind> wind, std::shared_ptr<Atm
      m_wind(wind),
      m_temperature_checked(false),
      m_temperature_available(false) {
-
    if (CoreUtils::InstanceOf<WindZero>(wind.get())) {
       m_temperature_checked = true;
       m_temperature_available = false;
@@ -50,7 +50,6 @@ WeatherEstimate::~WeatherEstimate() {}
 
 void WeatherEstimate::LoadConditionsAt(const Units::Angle latitude, const Units::Angle longitude,
                                        const Units::Length altitude) {
-
    SetLocation(latitude, longitude, altitude);
    m_wind->InterpolateTrueWind(latitude, longitude, altitude, east_west(), north_south());
 
@@ -71,7 +70,6 @@ Units::Pressure WeatherEstimate::GetPressure() const { return m_pressure; }
 Units::KelvinTemperature WeatherEstimate::GetTemperature() const { return m_temperature; }
 
 Units::Speed WeatherEstimate::MachToTAS(const double mach, const Units::Length altitude) const {
-
    Units::MetersPerSecondSpeed speed_of_sound;
 
    if (m_temperature_available) {
@@ -86,7 +84,6 @@ Units::Speed WeatherEstimate::MachToTAS(const double mach, const Units::Length a
 }
 
 Units::Speed WeatherEstimate::MachToCAS(const double mach, const Units::Length altitude) const {
-
    Units::Speed true_airspeed = MachToTAS(mach, altitude);
    Units::Speed calibrated_airspeed = TAS2CAS(true_airspeed, altitude);
 
@@ -94,7 +91,6 @@ Units::Speed WeatherEstimate::MachToCAS(const double mach, const Units::Length a
 }
 
 double WeatherEstimate::ESFconstantCAS(const Units::Speed true_airspeed, const Units::Length altitude) const {
-
    Units::KelvinTemperature temperature;
    if (!m_temperature_available) {
       /* assume LoadConditionsAt has been called with the current location to set m_temperature */
@@ -109,7 +105,6 @@ double WeatherEstimate::ESFconstantCAS(const Units::Speed true_airspeed, const U
 
 bool WeatherEstimate::IsTemperatureAvailable(const Units::Angle latitude, const Units::Angle longitude,
                                              const Units::Length altitude) const {
-
    if (!m_temperature_checked) {
       /*
        * This check changes values of boolean fields, but we consider it
@@ -131,7 +126,6 @@ bool WeatherEstimate::IsTemperatureAvailable(const Units::Angle latitude, const 
 }
 
 Units::Speed WeatherEstimate::TAS2CAS(const Units::Speed true_airspeed, const Units::Length altitude) const {
-
    Units::Speed calibrated_airspeed;
 
    if (m_temperature_available) {
@@ -145,7 +139,6 @@ Units::Speed WeatherEstimate::TAS2CAS(const Units::Speed true_airspeed, const Un
 }
 
 double WeatherEstimate::TAS2Mach(const Units::Speed true_airspeed, const Units::Length altitude) const {
-
    Units::MetersPerSecondSpeed speed_of_sound;
 
    if (m_temperature_available) {
@@ -160,7 +153,6 @@ double WeatherEstimate::TAS2Mach(const Units::Speed true_airspeed, const Units::
 }
 
 Units::Speed WeatherEstimate::CAS2TAS(const Units::Speed calibrated_airspeed, const Units::Length altitude) const {
-
    Units::Speed true_airspeed;
 
    if (m_temperature_available) {

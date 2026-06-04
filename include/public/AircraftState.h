@@ -14,25 +14,24 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
 
-#include "public/Logging.h"
 #include "public/ADSBSVReport.h"
 #include "public/BadaUtils.h"
 #include "public/DynamicsState.h"
-
+#include "public/Logging.h"
+#include "scalar/AngularSpeed.h"
 #include "scalar/Density.h"
 #include "scalar/Frequency.h"
 #include "scalar/Pressure.h"
 #include "scalar/Speed.h"
 #include "scalar/Temperature.h"
 #include "scalar/UnsignedAngle.h"
-#include "scalar/AngularSpeed.h"
 
 namespace aaesim {
 namespace open_source {

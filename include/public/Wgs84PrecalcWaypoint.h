@@ -14,17 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/LoggingLoadable.h"
-#include "public/PrecalcConstraint.h"
-#include "public/LatitudeLongitudePoint.h"
-#include "public/AircraftIntent.h"
-#include <scalar/UnsignedAngle.h>
 #include <scalar/SignedAngle.h>
+#include <scalar/UnsignedAngle.h>
+
+#include "public/AircraftIntent.h"
+#include "public/LatitudeLongitudePoint.h"
+#include "public/PrecalcConstraint.h"
 
 namespace aaesim {
 

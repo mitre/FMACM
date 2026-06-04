@@ -14,20 +14,22 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Atmosphere.h"
-#include "public/CustomMath.h"
-#include <list>
+
 #include <log4cplus/loggingmacros.h>
+
+#include <list>
 #include <nlohmann/json.hpp>
+
+#include "public/CustomMath.h"
 
 log4cplus::Logger Atmosphere::m_logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("Atmosphere"));
 
 void Atmosphere::AirDensity_Log(const Units::MetersLength h, const Units::KelvinTemperature t,
                                 const Units::PascalsPressure p, const Units::KilogramsMeterDensity rho) const {
-
    if (m_logger.getLogLevel() <= log4cplus::TRACE_LOG_LEVEL) {
       nlohmann::json j;
       j["altitude"] = h.value();

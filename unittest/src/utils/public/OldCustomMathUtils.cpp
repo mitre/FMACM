@@ -14,14 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /* OldCustomMath.cpp		Initial code from Survsim 2.00R1  11/2/99*/
 
-#include <stdio.h>
-#include <math.h>
 #include "OldCustomMathUtils.h"
+
+#include <math.h>
+#include <stdio.h>
+
 #include "utility/UtilityConstants.h"
 
 #define IA 16807
@@ -57,7 +59,6 @@ double OldCustomMath::uniform(double &seed)  // seed should not be 0.0
 }
 
 double OldCustomMath::gauss(double mean, double sigma, double &seed) {
-
    // returns gaussian distributed random variable with mean mean and standard
    // deviation sigma.
    // usage example:  x = gauss(0., 32.);
@@ -79,7 +80,6 @@ double OldCustomMath::gauss(double mean, double sigma, double &seed) {
 }  // gauss
 
 double OldCustomMath::trunc_gauss(double mean, double sigma, double max_std_dev, double &seed) {
-
    // returns truncated gaussian random varialbe with mean mean, standard
    // deviation sigma, and maximum standard deviation max_std_dev
    const double seed0 = seed;
@@ -101,7 +101,6 @@ double OldCustomMath::trunc_gauss(double mean, double sigma, double max_std_dev,
 }  // trunc_gauss
 
 double OldCustomMath::Rayleigh(double mean, double sigma, double &seed) {
-
    // returns Rayleigh distributed random variable with mean mean and standard
    // deviation sigma.
    // usage example:  x = Rayleigh(0., 32.);
@@ -120,7 +119,6 @@ double OldCustomMath::Rayleigh(double mean, double sigma, double &seed) {
 }  // Rayleigh
 
 double OldCustomMath::atan3(double x, double y) {
-
    // returns arc tangent as an angle measured from north in the range 0, 2pi
 
    double temp;
@@ -136,7 +134,6 @@ double OldCustomMath::atan3(double x, double y) {
 }  // atan3
 
 double OldCustomMath::laplace(double lambda, double &seed) {
-
    // returns laplacian r.v. with parameter lambda.
    const double seed0 = seed;
 
@@ -224,7 +221,6 @@ double OldCustomMath::subtract_headings(double hd1, double hd2) {
 // Speed conversion using MACH & altitude as inputs; unit of output is FPS
 //-------------------------------------------------------------
 double OldCustomMath::MachToTas(double mach, double altitude) {
-
    float speedOfSound;
    double tas;
 
@@ -309,8 +305,8 @@ bool OldCustomMath::inverse(DMatrix &in, int n, DMatrix &out) {
                   return false;
                }
             }  // end for(int k=1; k<=n; k++)
-         }     // end if(ipiv.get(j) != 1.)
-      }        // end for(int j=1; i<=n; j++)
+         }  // end if(ipiv.get(j) != 1.)
+      }  // end for(int j=1; i<=n; j++)
       ipiv.Set(icol, ipiv.Get(icol) + 1);
       if (irow != icol) {
          // swap
@@ -320,7 +316,7 @@ bool OldCustomMath::inverse(DMatrix &in, int n, DMatrix &out) {
             a.Set(irow, l, a.Get(icol, l));
             a.Set(icol, l, temp_swap);
          }  // end for(int l=1; l<=n; l++)
-      }     // end if(irow != icol)
+      }  // end if(irow != icol)
       indxr.Set(i, (double)irow);
       indxc.Set(i, (double)icol);
       if (a.Get(icol, icol) == 0.0) {
@@ -341,9 +337,9 @@ bool OldCustomMath::inverse(DMatrix &in, int n, DMatrix &out) {
             for (int l = 1; l <= n; l++) {
                a.Set(ll, l, a.Get(ll, l) - dum * a.Get(icol, l));
             }  // end for(int l=1; l<=n; l++)
-         }     // end if(ll != icol)
-      }        // end for(int ll=1; ll<=n; ll++)
-   }           // end for(int i=1; i<=n; i++)
+         }  // end if(ll != icol)
+      }  // end for(int ll=1; ll<=n; ll++)
+   }  // end for(int i=1; i<=n; i++)
 
    for (int l = n; l >= 1; l--) {
       if (indxr.Get(l) != indxc.Get(l)) {
@@ -355,7 +351,7 @@ bool OldCustomMath::inverse(DMatrix &in, int n, DMatrix &out) {
             a.Set(k, (int)indxc.Get(l), temp);
          }
       }  // end if(indxr.get(l) != indxc.get(l))
-   }     // end for(int l=n; l>=1; l--)
+   }  // end for(int l=n; l>=1; l--)
 
    // copy the "a" matrix into the "out" matrix:
    int out_min_row = out.GetMinRow();
@@ -369,7 +365,6 @@ bool OldCustomMath::inverse(DMatrix &in, int n, DMatrix &out) {
 }
 
 void OldCustomMath::matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, int n, DVector &vector_out) {
-
    for (int i = 0; i < n; i++) {
       int ii = i + vector_out.GetMin();
       vector_out[ii] = 0.0;
@@ -387,7 +382,6 @@ void OldCustomMath::matrix_times_vector(DMatrix &matrix_in, DVector &vector_in, 
  * matrix.
  */
 DMatrix &OldCustomMath::createRotationMatrix(double l, double m, double n, const Units::Angle theta) {
-
    // basic formula acquired from:
    // https://en.wikipedia.org/wiki/Transformation_matrix#Rotation_2
    // Wikipedia uses T * coord_column, while we use coord_row * T.

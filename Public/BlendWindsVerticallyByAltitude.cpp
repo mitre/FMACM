@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/BlendWindsVerticallyByAltitude.h"
@@ -71,7 +71,6 @@ void BlendWindsVerticallyByAltitude::BlendSensedWithPredicted(
    Units::Length altFromPrediction;
 
    for (iRow = local_blended_x.GetMaxRow(); iRow >= 1; --iRow) {
-
       altFromPrediction = local_blended_x.GetAltitude(iRow);  // this will go down in altitude from highest to lowest
                                                               // value stored in local_blended_x
 
@@ -116,7 +115,6 @@ void BlendWindsVerticallyByAltitude::BlendSensedWithPredicted(
    weather_prediction.east_west().SetBounds(1, newMaxBound);    // this will delete all data
    weather_prediction.north_south().SetBounds(1, newMaxBound);  // this will delete all data
    for (iRow = local_blended_x.GetMinRow(); iRow <= local_blended_x.GetMaxRow(); iRow++) {
-
       if (iRow != currentAltIx) {
          // Take winds from blended matrix.
          weather_prediction.east_west().Insert(iRow, local_blended_x.GetAltitude(iRow), local_blended_x.GetSpeed(iRow));

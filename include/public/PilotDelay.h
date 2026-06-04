@@ -14,18 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "scalar/Length.h"
-#include "scalar/Time.h"
 #include "scalar/Speed.h"
+#include "scalar/Time.h"
 
 namespace aaesim::open_source {
 struct PilotDelay {
-
    virtual Units::Speed UpdateIAS(Units::Speed previous_speed_command_ias, Units::Speed proposed_speed_command_ias,
                                   Units::Length current_altitude, Units::Length altitude_at_end_of_route) = 0;
 

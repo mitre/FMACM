@@ -14,28 +14,28 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
 
-#include "public/CustomMath.h"
 #include "public/AircraftCalculations.h"
 #include "public/AircraftIntent.h"
 #include "public/AlongPathDistanceCalculator.h"
 #include "public/CoreUtils.h"
+#include "public/CustomMath.h"
 #include "public/DirectionOfFlightCourseCalculator.h"
+#include "public/EuclideanWaypointMonitor.h"
 #include "public/FlightEnvelopeSpeedLimiter.h"
 #include "public/Guidance.h"
 #include "public/HorizontalPathTracker.h"
-#include "public/VectorDifferenceWindEvaluator.h"
+#include "public/InvalidIndexException.h"
 #include "public/PositionCalculator.h"
 #include "public/ScenarioUtils.h"
 #include "public/SimulationTime.h"
-#include "public/WindZero.h"
+#include "public/VectorDifferenceWindEvaluator.h"
 #include "public/Wgs84PrecalcWaypoint.h"
-#include "public/EuclideanWaypointMonitor.h"
-#include "public/InvalidIndexException.h"
+#include "public/WindZero.h"
 #include "utility/CustomUnits.h"
 #include "utils/public/OldCustomMathUtils.h"
 #include "utils/public/PublicUtils.h"
@@ -208,7 +208,6 @@ TEST(AircraftCalculations, ComputeCrossProduct_trivial) {
 }
 
 TEST(SimulationTime, basicTests) {
-
    // Tests various SimulationTime functions.
 
    // NOTE:This not a complete test of SimulationTime.  These
@@ -273,7 +272,6 @@ TEST(HorizontalPathTracker, consistency_check_straight_line_reverse) {
    const Units::MetersLength tolXY(100.0), tol_distance(1e-9);
    const Units::DegreesAngle tolCrs(0.5);
    for (int quad = aaesim::test::utils::Quadrant::FIRST; quad <= aaesim::test::utils::Quadrant::FOURTH; ++quad) {
-
       const std::vector<HorizontalPath> horizontal_trajectory =
             aaesim::test::utils::PublicUtils::CreateStraightHorizontalPath(
                   static_cast<aaesim::test::utils::Quadrant>(quad));
@@ -531,7 +529,6 @@ TEST(CustomMath, quantize) {
 }
 
 TEST(RandomGenerator, uniformSample) {
-
    double seed = 15;
    ScenarioUtils::RANDOM_NUMBER_GENERATOR.SetSeed(seed);
 

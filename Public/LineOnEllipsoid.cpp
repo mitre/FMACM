@@ -14,11 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2025 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/EllipsoidalEarthModel.h>
 #include "public/LineOnEllipsoid.h"
+
+#include <public/EllipsoidalEarthModel.h>
+
 #include "public/GeolibUtils.h"
 
 using namespace aaesim;
@@ -170,7 +172,6 @@ LatitudeLongitudePoint LineOnEllipsoid::CalculatePointAtDistanceFromStartPoint(
 }
 std::pair<Units::SignedAngle, LatitudeLongitudePoint> LineOnEllipsoid::CalculateCourseAtDistanceFromStartPoint(
       const Units::Length &distance_along_shape_from_start_point) const {
-
    double temp_course_1, temp_course_2, dist_to_point;
    ErrorSet error_set{ErrorCodes::SUCCESS};
    LatitudeLongitudePoint point_on_geodesic =

@@ -14,24 +14,27 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/EarthModel.h"
 #include <scalar/Area.h>
+
+#include <memory>
+
+#include "loader/Logging.h"
+#include "public/EarthModel.h"
 #include "public/LocalTangentPlane.h"
-#include "public/Logging.h"
 #include "public/WGS84EarthModelConstants.h"
 
 class EllipsoidalEarthModel final : public EarthModel {
   public:
    EllipsoidalEarthModel()
-      : m_semi_major_radius_squared(aaesim::open_source::WGS84_SEMIMAJOR_AXIS *
-                                    aaesim::open_source::WGS84_SEMIMAJOR_AXIS),
-        m_eccentricity_4(aaesim::open_source::WGS84_ECCENTRICITY_SQUARED *
-                         aaesim::open_source::WGS84_ECCENTRICITY_SQUARED) {}
+      : m_semi_major_radius_squared(aaesim::open_source::kWgs84SemiMajorAxis *
+                                    aaesim::open_source::kWgs84SemiMajorAxis),
+        m_eccentricity_4(aaesim::open_source::kWgs84EccentricitySquared *
+                         aaesim::open_source::kWgs84EccentricitySquared) {}
 
    ~EllipsoidalEarthModel() = default;
 

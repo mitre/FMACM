@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -28,17 +28,20 @@
 
 #pragma once
 
-#include "public/DataReader.h"
-#include <scalar/Length.h>
 #include <scalar/Angle.h>
+#include <scalar/Length.h>
 #include <scalar/Speed.h>
+
+#include <string>
+
+#include "public/DataReader.h"
 
 namespace testvector {
 
 class HfpReaderPre2020 final : public aaesim::open_source::DataReader {
   public:
    static const size_t EXPECTED_TV_COLUMN_COUNT;
-   HfpReaderPre2020(std::string file_name, int header_lines);
+   HfpReaderPre2020(const std::string &file_name, int header_lines);
    HfpReaderPre2020(std::shared_ptr<std::istream> input_stream, int header_lines);
    HfpReaderPre2020();
    virtual ~HfpReaderPre2020();

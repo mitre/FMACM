@@ -14,14 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "loader/FilePath.h"
 #include <iostream>
 #include <map>
+#include <string>
+
+#include "loader/FilePath.h"
 
 class RunFileArchiveDirector {
   public:
@@ -43,7 +45,7 @@ class RunFileArchiveDirector {
       if (dest == "") {
          return "";
       } else {
-         FilePath dest1 = destination.Push(dest);
+         FilePath dest1 = destination.Push(FilePath(dest));
          return dest1.GetFullPath();
       }
    }  //------------------------------------------------------------------------

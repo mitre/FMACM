@@ -14,14 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/CoreUtils.h"
 
 #include <cfloat>
+#include <cstdio>
 #include <iomanip>
+#include <list>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 #include "public/GeolibUtils.h"
 #include "public/LatitudeLongitudePoint.h"

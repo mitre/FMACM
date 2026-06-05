@@ -14,19 +14,22 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ArcOnEllipsoid.h"
-#include "utility/CustomUnits.h"
+
+#include <utility>
+
 #include "public/GeolibUtils.h"
+#include "utility/CustomUnits.h"
 
 using namespace geolib_idealab;
 using namespace aaesim;
 
 log4cplus::Logger ArcOnEllipsoid::m_logger = log4cplus::Logger::getInstance("ArcOnEllipsoid");
 
-ArcOnEllipsoid::ArcOnEllipsoid(const geolib_idealab::Arc &arc) { m_arc_primitive = arc; }
+ArcOnEllipsoid::ArcOnEllipsoid(const geolib_idealab::Arc &arc) : m_arc_primitive(arc) {}
 
 Units::Length aaesim::ArcOnEllipsoid::GetShapeLength() const {
    /*
@@ -101,9 +104,9 @@ LatitudeLongitudePoint ArcOnEllipsoid::GetEndPoint() const {
    return LatitudeLongitudePoint::CreateFromGeolibPrimitive(m_arc_primitive.endPoint);
 }
 
-ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE ArcOnEllipsoid::GetRelativeDirection(
+ShapeOnEllipsoid::kDirectionRelativeToShape ArcOnEllipsoid::GetRelativeDirection(
       const LatitudeLongitudePoint &latitude_longitude_point) const {
-   ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE return_this = ShapeOnEllipsoid::UNSET;
+   ShapeOnEllipsoid::kDirectionRelativeToShape return_this = ShapeOnEllipsoid::UNSET;
    if (IsPointOnShape(latitude_longitude_point)) {
       return_this = ShapeOnEllipsoid::ON_SHAPE;
    } else {

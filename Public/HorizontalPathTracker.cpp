@@ -14,28 +14,25 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <public/HorizontalPathTracker.h>
 
+#include <vector>
+
 aaesim::open_source::HorizontalPathTracker::HorizontalPathTracker(
       const std::vector<HorizontalPath> &horizontal_trajectory,
-      TrajectoryIndexProgressionDirection expected_index_progression) {
-   m_index_progression_direction = expected_index_progression;
-   m_unmodified_horizontal_trajectory = horizontal_trajectory;
-   m_extended_horizontal_trajectory = ExtendHorizontalTrajectory(horizontal_trajectory);
-   if (expected_index_progression == TrajectoryIndexProgressionDirection::INCREMENTING) {
-      m_is_passed_end_of_route = true;
-   } else {
-      m_is_passed_end_of_route = false;
-   }
+      TrajectoryIndexProgressionDirection expected_index_progression)
+   : m_extended_horizontal_trajectory(ExtendHorizontalTrajectory(horizontal_trajectory)),
+     m_unmodified_horizontal_trajectory(horizontal_trajectory),
+     m_is_passed_end_of_route(expected_index_progression == TrajectoryIndexProgressionDirection::INCREMENTING),
+     m_index_progression_direction(expected_index_progression) {
    InitializeStartingIndex();
 }
 
 std::vector<aaesim::open_source::HorizontalPath> aaesim::open_source::HorizontalPathTracker::ExtendHorizontalTrajectory(
       const std::vector<aaesim::open_source::HorizontalPath> &horizontal_trajectory) {
-
    // add one more straight segment to end
    std::vector<aaesim::open_source::HorizontalPath> extended_trajectory;
    Units::RadiansAngle crs(horizontal_trajectory[0].m_path_course);
@@ -74,7 +71,6 @@ std::vector<aaesim::open_source::HorizontalPath> aaesim::open_source::Horizontal
 }
 
 void aaesim::open_source::HorizontalPathTracker::InitializeStartingIndex() {
-
    switch (m_index_progression_direction) {
       case TrajectoryIndexProgressionDirection::DECREMENTING:
          if (m_extended_horizontal_trajectory.size() > 1) {

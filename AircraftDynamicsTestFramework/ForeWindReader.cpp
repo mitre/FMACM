@@ -14,14 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/ForeWindReader.h"
 
+#include <string>
+
 namespace testvector {
 
-ForeWindReader::ForeWindReader(std::string file_name, int header_lines) : DataReader(file_name, header_lines, 0) {}
+ForeWindReader::ForeWindReader(const std::string &file_name, int header_lines)
+   : DataReader(file_name, header_lines, 0) {}
 
 ForeWindReader::ForeWindReader(std::shared_ptr<std::istream> input_stream, int header_lines)
    : DataReader(input_stream, header_lines, 0) {}

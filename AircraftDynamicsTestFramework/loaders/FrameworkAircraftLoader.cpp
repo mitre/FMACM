@@ -14,10 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/FrameworkAircraftLoader.h"
+
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
 
 #include "framework/ForeWindReader.h"
 #include "framework/NullAircraftPerformance.h"
@@ -111,7 +117,7 @@ std::shared_ptr<TestFrameworkAircraft> FrameworkAircraftLoader::BuildAircraft() 
 }
 
 std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> FrameworkAircraftLoader::BuildAircraftPerformance(
-      std::string bada_aircraft_code) {
+      const std::string &bada_aircraft_code) {
 #ifdef MITRE_BADA3_LIBRARY
    aaesim::bada::BadaPerformanceInitialConditions initial_conditions;
    initial_conditions.faf_altitude_msl = Units::FeetLength(1500);
@@ -203,7 +209,7 @@ EarthModel::LocalPositionEnu FrameworkAircraftLoader::ComputeInitialPositionOnPa
 }
 
 std::shared_ptr<fmacm::WeatherTruthFromStaticData> FrameworkAircraftLoader::BuildTrueWeather(
-      std::string env_csv_file, std::string env_csv_data_index, Units::Length initial_altitude) {
+      const std::string &env_csv_file, const std::string &env_csv_data_index, Units::Length initial_altitude) {
    if (!env_csv_file.empty()) {
       auto weather_truth = std::make_shared<fmacm::WeatherTruthFromStaticData>();
       weather_truth->Initialize(env_csv_file, initial_altitude,

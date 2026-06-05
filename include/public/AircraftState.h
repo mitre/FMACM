@@ -14,25 +14,24 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
 
-#include "public/Logging.h"
+#include "loader/Logging.h"
 #include "public/ADSBSVReport.h"
 #include "public/BadaUtils.h"
 #include "public/DynamicsState.h"
-
+#include "scalar/AngularSpeed.h"
 #include "scalar/Density.h"
 #include "scalar/Frequency.h"
 #include "scalar/Pressure.h"
 #include "scalar/Speed.h"
 #include "scalar/Temperature.h"
 #include "scalar/UnsignedAngle.h"
-#include "scalar/AngularSpeed.h"
 
 namespace aaesim {
 namespace open_source {
@@ -61,7 +60,7 @@ class AircraftState final {
    Units::AngularSpeed GetLongitudeRate() const;
    Units::Angle GetFlightPathAngle() const;
    Units::SecondsTime GetTime() const;
-   aaesim::open_source::DynamicsState GetDynamicsState() const;
+   const aaesim::open_source::DynamicsState &GetDynamicsState() const;
    Units::Angle GetPsi() const;
    Units::UnsignedRadiansAngle GetHeadingCcwFromEastRadians() const;
    Units::Speed GetGroundSpeed() const;
@@ -100,7 +99,7 @@ class AircraftState final {
      public:
       Builder(int unique_acid, int time_since_epoch_seconds);
       Builder(int unique_acid, Units::Time timestamp);
-      Builder(const AircraftState &state_to_copy);
+      explicit Builder(const AircraftState &state_to_copy);
       ~Builder() = default;
       AircraftState Build();
       Builder *Position(Units::FeetLength enu_x, Units::FeetLength enu_y);
@@ -151,7 +150,7 @@ class AircraftState final {
       Units::SignedAngle GetLongitude() const { return longitude_; };
       Units::AngularSpeed GetLatitudeRate() const { return latitude_rate_; };
       Units::AngularSpeed GetLongitudeRate() const { return longitude_rate_; };
-      aaesim::open_source::DynamicsState GetDynamicsState() const { return dynamics_state_; };
+      const aaesim::open_source::DynamicsState &GetDynamicsState() const { return dynamics_state_; };
       Units::Angle GetPsi() const { return psi_; };
    };
 
@@ -188,7 +187,7 @@ inline Units::SignedAngle AircraftState::GetLatitude() const { return m_latitude
 inline Units::SignedAngle AircraftState::GetLongitude() const { return m_longitude; }
 inline Units::AngularSpeed AircraftState::GetLatitudeRate() const { return m_latitude_rate; }
 inline Units::AngularSpeed AircraftState::GetLongitudeRate() const { return m_longitude_rate; }
-inline aaesim::open_source::DynamicsState AircraftState::GetDynamicsState() const { return m_dynamics_state; }
+inline const aaesim::open_source::DynamicsState &AircraftState::GetDynamicsState() const { return m_dynamics_state; }
 inline Units::SecondsTime AircraftState::GetTime() const { return m_time; }
 inline int AircraftState::GetUniqueId() const { return m_id; }
 inline Units::Angle AircraftState::GetPsi() const { return m_psi; }

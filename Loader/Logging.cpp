@@ -17,7 +17,7 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/Logging.h"
+#include "loader/Logging.h"
 
 #include <math.h>
 #include <unistd.h>

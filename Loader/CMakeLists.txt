@@ -12,6 +12,8 @@ add_library(loader STATIC
     Loadable.cpp
     LoaderLink.cpp
     LoaderSupport.cpp
+    Logging.cpp
+    LoggingLoadable.cpp
     RunFileArchiveDirector.cpp
     TokenStream.cpp)
 target_link_libraries(loader log4cplusS)

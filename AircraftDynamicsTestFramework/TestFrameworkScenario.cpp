@@ -14,10 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkScenario.h"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "framework/AircraftStateWriter.h"
 
@@ -29,8 +33,10 @@ log4cplus::Logger TestFrameworkScenario::m_logger = log4cplus::Logger::getInstan
 
 TestFrameworkScenario::TestFrameworkScenario() : Scenario(), m_aircraft_in_scenario() {
 #ifdef SAMPLE_ALGORITHM_LIBRARY
-   m_sample_algorithm_writer = std::make_unique<interval_management::open_source::FIMAlgorithmDataWriter>();
-   m_sample_algorithm_kinematic_writer = std::make_unique<interval_management::open_source::PredictionFileKinematic>();
+   m_sample_algorithm_writer =  // cppcheck-suppress useInitializationList
+         std::make_unique<interval_management::open_source::FIMAlgorithmDataWriter>();
+   m_sample_algorithm_kinematic_writer =  // cppcheck-suppress useInitializationList
+         std::make_unique<interval_management::open_source::PredictionFileKinematic>();
 #endif
 }
 

@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AlongPathDistanceCalculator.h"
@@ -22,6 +22,7 @@
 #include <public/AircraftCalculations.h>
 
 #include <algorithm>
+#include <vector>
 
 using namespace aaesim::open_source;
 
@@ -51,10 +52,9 @@ AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<Horiz
 AlongPathDistanceCalculator::AlongPathDistanceCalculator(const std::vector<HorizontalPath> &horizontal_path,
                                                          TrajectoryIndexProgressionDirection expected_index_progression,
                                                          Units::Length specified_cross_track_tolerance)
-   : HorizontalPathTracker(horizontal_path, expected_index_progression) {
-   m_is_first_call = true;
-   m_cross_track_tolerance = specified_cross_track_tolerance;
-}
+   : HorizontalPathTracker(horizontal_path, expected_index_progression),
+     m_is_first_call(true),
+     m_cross_track_tolerance(specified_cross_track_tolerance) {}
 
 AlongPathDistanceCalculator AlongPathDistanceCalculator::CreateForCaptureClearance(
       const std::vector<HorizontalPath> &horizontal_path) {

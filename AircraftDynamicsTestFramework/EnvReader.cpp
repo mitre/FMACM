@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,10 +25,14 @@
  */
 
 #include "framework/EnvReader.h"
-#include "utility/UtilityConstants.h"
+
 #include <scalar/Angle.h>
 #include <scalar/Speed.h>
 #include <scalar/Temperature.h>
+
+#include <string>
+
+#include "utility/UtilityConstants.h"
 
 namespace testvector {
 
@@ -41,7 +45,7 @@ const size_t EnvReader::EXPECTED_ENV_COLUMN_COUNT(7);
  * expected_columns to 0 in the superclass constructor,
  * which inhibits column-count checking.
  */
-EnvReader::EnvReader(std::string file_name, int header_lines)
+EnvReader::EnvReader(const std::string &file_name, int header_lines)
    : DataReader(file_name, header_lines, 0 /* EXPECTED_ENV_COLUMN_COUNT */) {}
 
 EnvReader::EnvReader(std::shared_ptr<std::istream> input_stream, int header_lines)

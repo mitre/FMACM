@@ -14,28 +14,32 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <log4cplus/initializer.h>
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
 #include <stdlib.h>
-#include <string>
 #include <unistd.h>
+
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "cppmanifest/cppmanifest.h"
 #include "framework/TestFrameworkScenario.h"
-#include "loader/RunFileArchiveDirector.h"
 #include "loader/Loadable.h"
-#include "public/Logging.h"
+#include "loader/Logging.h"
+#include "loader/RunFileArchiveDirector.h"
 #include "public/ScenarioUtils.h"
-#include <log4cplus/initializer.h>
 
 #define _MAX_PATH 260
 
 const std::vector<std::pair<std::string, std::shared_ptr<TestFrameworkScenario>>> LoadConfigurationFile(
-      std::string str);
+      const std::string &filename);
 
 void ProcessScenarioDescriptions(
       const std::vector<std::pair<std::string, std::shared_ptr<TestFrameworkScenario>>> &scenarios);
@@ -52,39 +56,46 @@ int main(int argc, char *argv[]) {
       std::string arg1(argv[1]);
       if (arg1 == VERSION_FLAG) {
          std::cout << "fmacm version " << aaesim::cppmanifest::GetVersion() << std::endl;
-         return 0;
+         return EXIT_SUCCESS;
       } else if (arg1 == aaesim::cppmanifest::BUILDINFO_CLI_FLAG) {
          std::cout << "fmacm build info:" << std::endl;
          aaesim::cppmanifest::PrintMetaData();
-         return 0;
+         return EXIT_SUCCESS;
       }
    } else {
       std::string error_msg = "Invalid number of command line arguments; only one is allowed.";
       LOG4CPLUS_FATAL(logger, error_msg);
-      throw std::runtime_error(error_msg);
+      return EXIT_FAILURE;
    }
 
    std::string configuration_filename = argv[1];
    if (configuration_filename.empty()) {
       std::string error_msg = "No configuration file provided. Must provide a configuration file.";
       LOG4CPLUS_FATAL(logger, error_msg);
-      throw std::runtime_error(error_msg);
+      return EXIT_FAILURE;
    }
 
-   auto scenario_descriptions = LoadConfigurationFile(configuration_filename);
-   ProcessScenarioDescriptions(scenario_descriptions);
-   scenario_descriptions.clear();
-   return 0;
+   try {
+      auto scenario_descriptions = LoadConfigurationFile(configuration_filename);
+      ProcessScenarioDescriptions(scenario_descriptions);
+      scenario_descriptions.clear();
+   } catch (const std::exception &e) {
+      std::string error_msg = "Error occurred while processing configuration file: " + std::string(e.what());
+      LOG4CPLUS_FATAL(logger, error_msg);
+      return EXIT_FAILURE;
+   }
+
+   return EXIT_SUCCESS;
 }
 
 const std::vector<std::pair<std::string, std::shared_ptr<TestFrameworkScenario>>> LoadConfigurationFile(
-      std::string arg) {
+      const std::string &filename) {
    std::string configuration_filename("");
-   if (arg.find('/') != std::string::npos) {
-      configuration_filename = arg;
+   if (filename.find('/') != std::string::npos) {
+      configuration_filename = filename;
    } else {
       configuration_filename = "../Run_Files/";
-      configuration_filename += arg.c_str();
+      configuration_filename += filename.c_str();
    }
 
    FILE *fp;
@@ -130,7 +141,7 @@ void ProcessScenarioDescriptions(
                throw std::runtime_error(msg);
             }
             stream.set_echo(false);
-            stream.set_Local_Path(cwd);
+            stream.set_Local_Path(FilePath(cwd));
             stream.set_Archive_Director(std::make_shared<RunFileArchiveDirector>());
             auto scenario_root_name = aaesim::open_source::ScenarioUtils::ResolveScenarioRootName(scenario_file_name);
             scenario->SetScenarioName(scenario_root_name);

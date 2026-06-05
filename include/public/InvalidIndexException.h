@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #ifndef INVALIDINDEXEXCEPTION_H
@@ -26,7 +26,7 @@ class InvalidIndexException : public std::exception {
   public:
    InvalidIndexException(const int value, const int low_limit, const int high_limit);
 
-   InvalidIndexException(char *);
+   explicit InvalidIndexException(char *);
 };
 
 #endif

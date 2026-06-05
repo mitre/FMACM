@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,6 +26,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "loader/DecodedStream.h"
 #include "loader/ListLoaderLink.h"
@@ -330,7 +331,8 @@ class Loadable : public LoaderSupport {
 #endif
 
    template <class TYPE>
-   void register_var(const std::string &name, TYPE *var_address, bool isRequired, LoaderDeprecatedMetaInfo depInfo) {
+   void register_var(const std::string &name, TYPE *var_address, bool isRequired,
+                     const LoaderDeprecatedMetaInfo &depInfo) {
       std::string varnameclean = clean_token(name);
 
 #ifdef _DEBUG
@@ -349,7 +351,7 @@ class Loadable : public LoaderSupport {
 
    template <class LOADABLE_TYPE>
    void register_loadable_with_brackets(const std::string &name, LOADABLE_TYPE *target, bool isRequired,
-                                        LoaderDeprecatedMetaInfo depInfo) {
+                                        const LoaderDeprecatedMetaInfo &depInfo) {
       std::string varnameclean = clean_token(name);
 
 #ifdef _DEBUG
@@ -368,7 +370,7 @@ class Loadable : public LoaderSupport {
 
    template <class LOADABLE_TYPE>
    void register_loadable(const std::string &name, LOADABLE_TYPE *target, bool isRequired,
-                          LoaderDeprecatedMetaInfo info) {
+                          const LoaderDeprecatedMetaInfo &info) {
       std::string varnameclean = clean_token(name);
 
 #ifdef _DEBUG
@@ -387,7 +389,7 @@ class Loadable : public LoaderSupport {
    template <class LOADABLE_TYPE>
    // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
    void register_named_list(const std::string &name, std::list<LOADABLE_TYPE> *target, bool isRequired,
-                            LoaderDeprecatedMetaInfo info) {
+                            const LoaderDeprecatedMetaInfo &info) {
       std::string varnameclean = clean_token(name);
 
 #ifdef _DEBUG
@@ -406,7 +408,7 @@ class Loadable : public LoaderSupport {
    template <class LOADABLE_TYPE>
    // LOADABLE_TYPE Must be a child of loadable or provide the necessary load function
    void register_named_vector_item(const std::string &name, std::vector<LOADABLE_TYPE> *target, bool isRequired,
-                                   LoaderDeprecatedMetaInfo info) {
+                                   const LoaderDeprecatedMetaInfo &info) {
       std::string varnameclean = clean_token(name);
 
 #ifdef _DEBUG

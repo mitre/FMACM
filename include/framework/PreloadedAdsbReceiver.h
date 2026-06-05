@@ -14,10 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "public/ADSBReceiver.h"
 #include "public/TangentPlaneSequence.h"
@@ -26,7 +31,7 @@ namespace fmacm {
 class PreloadedAdsbReceiver final : public aaesim::open_source::ADSBReceiver {
   public:
    PreloadedAdsbReceiver() = default;
-   PreloadedAdsbReceiver(std::string ttv_csv_file, std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence);
+   PreloadedAdsbReceiver(const std::string &ttv_csv_file, std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence);
 
    aaesim::open_source::ADSBSVReport GetCurrentADSBReport(int id) const override;
    aaesim::open_source::ADSBSVReport GetADSBReportBefore(int id, Units::Time time) const override;

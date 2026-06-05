@@ -14,18 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <utility>
+
 #include "public/LatitudeLongitudePoint.h"
 #include "public/ShapeOnEllipsoid.h"
-#include <scalar/Length.h>
-#include <geolib/Shape.h>
+#include "scalar/Length.h"
 
 namespace aaesim {
-class LineOnEllipsoid : public ShapeOnEllipsoid {
+class LineOnEllipsoid final : public ShapeOnEllipsoid {
   public:
    LineOnEllipsoid() = default;
 
@@ -33,7 +34,7 @@ class LineOnEllipsoid : public ShapeOnEllipsoid {
 
    ~LineOnEllipsoid() = default;
 
-   SHAPE_TYPE GetShapeType() const override;
+   kShapeType GetShapeType() const override;
 
    Units::SignedAngle GetForwardCourseEnuAtStartPoint() const override;
 
@@ -53,7 +54,7 @@ class LineOnEllipsoid : public ShapeOnEllipsoid {
 
    LineOnEllipsoid CreateExtendedLine(const Units::Length extended_distance) const;
 
-   DIRECTION_RELATIVE_TO_SHAPE GetRelativeDirection(const LatitudeLongitudePoint &point_not_on_shape) const override;
+   kDirectionRelativeToShape GetRelativeDirection(const LatitudeLongitudePoint &point_not_on_shape) const override;
 
    Units::Length GetDistanceToEndPoint(const LatitudeLongitudePoint &latitude_longitude_point) const override;
 
@@ -73,10 +74,12 @@ class LineOnEllipsoid : public ShapeOnEllipsoid {
 
   private:
    static log4cplus::Logger m_logger;
+   void ComputeUnitVectorNormalToLineStartEnd();
 
-   geolib_idealab::Geodesic m_geolib_geodesic;
+   geolib_idealab::Geodesic geolib_geodesic_{};
+   EarthModel::AbsolutePositionEcef unit_vector_normal_to_line_start_end_;
 };
 
-inline ShapeOnEllipsoid::SHAPE_TYPE LineOnEllipsoid::GetShapeType() const { return LINE; }
+inline ShapeOnEllipsoid::kShapeType LineOnEllipsoid::GetShapeType() const { return LINE; }
 
 }  // namespace aaesim

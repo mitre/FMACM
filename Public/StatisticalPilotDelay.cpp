@@ -14,14 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
+
+#include "public/StatisticalPilotDelay.h"
 
 #include <iomanip>
 
-#include "public/StatisticalPilotDelay.h"
-#include "public/ScenarioUtils.h"
 #include "public/CustomMath.h"
+#include "public/ScenarioUtils.h"
 
 using namespace aaesim::open_source;
 
@@ -87,7 +88,6 @@ Units::Speed StatisticalPilotDelay::UpdateMach(double previous_speed_command_mac
 Units::Speed StatisticalPilotDelay::UpdateIAS(Units::Speed previous_speed_command_ias,
                                               Units::Speed proposed_speed_command_ias, Units::Length current_altitude,
                                               Units::Length altitude_at_end_of_route) {
-
    if (proposed_speed_command_ias != previous_speed_command_ias) {
       // ias has changed.
       if (m_time_to_next_speed_change < Units::zero()) {
@@ -176,7 +176,6 @@ void StatisticalPilotDelay::SetPilotDelayParameters(const Units::Time mean, cons
  * Sets the guidance IAS to the converted Mach if known; otherwise the provided fallback.
  */
 void StatisticalPilotDelay::SetInitialIAS(Units::Length current_altitude, Units::Speed fallback_IAS) {
-
    // Have we been using Mach?
    if (m_guidance_mach != 0) {
       m_guidance_ias = m_atmosphere->MachToIAS(m_guidance_mach, current_altitude);

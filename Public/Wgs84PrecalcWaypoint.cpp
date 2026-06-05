@@ -14,30 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/Wgs84PrecalcWaypoint.h"
 
-using namespace aaesim;
-
-Wgs84PrecalcWaypoint::Wgs84PrecalcWaypoint() {
-   m_name = "";
-   m_leg_type = AircraftIntent::Arinc424LegType::UNSET;
-   m_leg_length = Units::zero();
-   m_enu_course_in_angle = Units::DegreesAngle(0.0);
-   m_enu_course_out_angle = Units::DegreesAngle(0.0);
-
-   m_position = LatitudeLongitudePoint(Units::SignedRadiansAngle(0.0), Units::SignedRadiansAngle(0.0));
-
-   m_rf_leg_center = LatitudeLongitudePoint(Units::SignedRadiansAngle(0.0), Units::SignedRadiansAngle(0.0));
-   m_radius_rf_leg = Units::MetersLength(0);
-
-   // m_precalc_constraints initialized by constructor
-
-   m_bank_angle = Units::RadiansAngle(0);
-   m_ground_speed = Units::MetersPerSecondSpeed(0.0);
-}
+using namespace aaesim::open_source;
 
 bool Wgs84PrecalcWaypoint::operator==(const Wgs84PrecalcWaypoint &obj) const {
    bool match = (m_leg_length == obj.m_leg_length);

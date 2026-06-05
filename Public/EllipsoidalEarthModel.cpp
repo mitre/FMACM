@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,7 +25,9 @@
  */
 
 #include "public/EllipsoidalEarthModel.h"
+
 #include <iomanip>
+#include <memory>
 
 using namespace aaesim::open_source;
 
@@ -33,20 +35,19 @@ void EllipsoidalEarthModel::ConvertGeodeticToAbsolute(const EarthModel::Geodetic
                                                       EarthModel::AbsolutePositionEcef &ecef) const {
    const double sinLat = sin(geo.latitude);
    const double cosLat = cos(geo.latitude);
-   const Units::Length N = WGS84_SEMIMAJOR_AXIS / sqrt(1.0 - WGS84_ECCENTRICITY_SQUARED * sinLat * sinLat);
+   const Units::Length N = kWgs84SemiMajorAxis / sqrt(1.0 - kWgs84EccentricitySquared * sinLat * sinLat);
    ecef.x = N * cosLat * cos(geo.longitude);
    ecef.y = N * cosLat * sin(geo.longitude);
-   ecef.z = N * (1.0 - WGS84_ECCENTRICITY_SQUARED) * sinLat;
+   ecef.z = N * (1.0 - kWgs84EccentricitySquared) * sinLat;
 }
 
 void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePositionEcef &ecef,
                                                       EarthModel::GeodeticPosition &geo) const {
-
    // Convert ECEF to Geodetic
    Units::Length z = ecef.z;
 
    // Ferrari's Solution (Wikipedia)
-   double zeta = (1 - WGS84_ECCENTRICITY_SQUARED) * z * z / m_semi_major_radius_squared;
+   double zeta = (1 - kWgs84EccentricitySquared) * z * z / m_semi_major_radius_squared;
    Units::Length p = sqrt(ecef.x * ecef.x + ecef.y * ecef.y);
    double s = (m_eccentricity_4 * zeta * p * p) / (m_semi_major_radius_squared * 4);
    double rho = (p * p / m_semi_major_radius_squared + zeta - m_eccentricity_4) / 6;
@@ -54,8 +55,8 @@ void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(const EarthModel::Absolute
    double t = pow(rhocubed + s + sqrt(s * (s + 2 * rhocubed)), 0.333333333333);
    double u = rho + t + (rho * rho) / t;
    double v = sqrt(u * u + m_eccentricity_4 * zeta);
-   double w = WGS84_ECCENTRICITY_SQUARED * (u + v - zeta) / (2 * v);
-   double kappa = 1 + (WGS84_ECCENTRICITY_SQUARED * (sqrt(u + v + w * w) + w)) / (u + v);
+   double w = kWgs84EccentricitySquared * (u + v - zeta) / (2 * v);
+   double kappa = 1 + (kWgs84EccentricitySquared * (sqrt(u + v + w * w) + w)) / (u + v);
 
    // Now solve for lat & lon
    double latRadians = atan(kappa * z / p);
@@ -67,7 +68,6 @@ void EllipsoidalEarthModel::ConvertAbsoluteToGeodetic(const EarthModel::Absolute
 
 std::shared_ptr<LocalTangentPlane> EllipsoidalEarthModel::MakeEnuConverter(
       const GeodeticPosition &pointOfTangencyGeo, const LocalPositionEnu &pointOfTangencyEnu) const {
-
    EarthModel::AbsolutePositionEcef ecef;
    ConvertGeodeticToAbsolute(pointOfTangencyGeo, ecef);
 

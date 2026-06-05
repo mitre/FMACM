@@ -14,20 +14,22 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/Logging.h"
-
 #include <filesystem>
+#include <string>
+#include <vector>
+
+#include "loader/Logging.h"
 
 namespace aaesim::open_source {
 class ConfigurationFileReader {
   public:
    ~ConfigurationFileReader() = default;
-   static const std::vector<std::filesystem::path> LoadConfigurationFile(std::string suggested_filename);
+   static const std::vector<std::filesystem::path> LoadConfigurationFile(const std::string &suggested_filename);
 
   private:
    ConfigurationFileReader() = default;

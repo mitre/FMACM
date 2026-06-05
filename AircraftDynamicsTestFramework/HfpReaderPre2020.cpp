@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,13 +25,15 @@
  */
 
 #include "framework/HfpReaderPre2020.h"
+
 #include <stdexcept>
+#include <string>
 
 using namespace std;
 
 namespace testvector {
 
-HfpReaderPre2020::HfpReaderPre2020(std::string file_name, int header_lines) : DataReader(file_name, 0, 0) {
+HfpReaderPre2020::HfpReaderPre2020(const std::string &file_name, int header_lines) : DataReader(file_name, 0, 0) {
    SetColumnIndexesFromHeader(header_lines);
 }
 

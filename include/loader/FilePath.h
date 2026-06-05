@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -28,21 +28,21 @@ class FilePath {
 
    virtual ~FilePath();
 
-   FilePath(const std::string &name);
+   explicit FilePath(const std::string &name);
 
-   std::string GetFullPath() const;
+   const std::string &GetFullPath() const;
 
-   std::string GetType() const;
+   const std::string &GetType() const;
 
-   std::string GetDisk() const;
+   const std::string &GetDisk() const;
 
-   std::string RemoveLastDirectory() const;
+   const std::string &RemoveLastDirectory() const;
 
    int GetNumberOfDirectories() const;
 
-   std::vector<std::string> ListDirectories() const;
+   const std::vector<std::string> &ListDirectories() const;
 
-   std::string GetName() const;
+   const std::string &GetName() const;
 
    FilePath Pop() const;
 
@@ -76,4 +76,4 @@ class FilePath {
    bool m_error;
 };
 
-inline std::string FilePath::GetName() const { return m_file_name; }
+inline const std::string &FilePath::GetName() const { return m_file_name; }

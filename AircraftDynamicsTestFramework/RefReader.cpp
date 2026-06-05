@@ -14,14 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/RefReader.h"
 
+#include <string>
+
 namespace testvector {
 
-RefReader::RefReader(std::string file_name, int header_lines, size_t expected_columns)
+RefReader::RefReader(const std::string &file_name, int header_lines, size_t expected_columns)
    : DataReader(file_name, header_lines, expected_columns) {}
 
 RefReader::RefReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns)

@@ -14,17 +14,20 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <list>
+#include <string>
 
 #include "loader/LoaderLink.h"
 
 template <class DATA>
 class ListLoaderLink : public LoaderLink {
   public:
-   ListLoaderLink(std::list<DATA> *address) {
+   explicit ListLoaderLink(std::list<DATA> *address) {
       var_address = address;
       must_load_only_once = false;
       is_a_list = true;

@@ -14,20 +14,27 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <algorithm>
 #include <fstream>
+#include <list>
+#include <map>
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "loader/Logging.h"
+#include "loader/LoggingLoadable.h"
 #include "nlohmann/json.hpp"
-#include "public/Logging.h"
-#include "public/LoggingLoadable.h"
 #include "public/TangentPlaneSequence.h"
 #include "public/Waypoint.h"
 #include "scalar/Speed.h"
+#include "utility/BoundedValue.h"
 #include "utility/UtilityConstants.h"
 
 class AircraftIntent : public LoggingLoadable {
@@ -123,7 +130,7 @@ class AircraftIntent : public LoggingLoadable {
 
    void Dump(std::ostream &fileOut) const;
 
-   void DumpParms(std::string) const;
+   void DumpParms(const std::string &str) const;
 
    bool ContainsAscentWaypoints() const;
 
@@ -139,7 +146,9 @@ class AircraftIntent : public LoggingLoadable {
 
    double GetPlannedCruiseMach() const;
 
-   bool ContainsWaypointName(std::string waypoint_name) const;
+   void SetPlannedCruiseMach(BoundedValue<double, 0, 1> mach_number);
+
+   bool ContainsWaypointName(const std::string &waypoint_name) const;
 
    /**
     * @brief trim all waypoints after the named waypoint, returning a functional updated object
@@ -173,9 +182,9 @@ class AircraftIntent : public LoggingLoadable {
 
    void DoRouteDataLogging() const;
 
-   struct RouteData m_route_data{};
+   struct RouteData route_data_{};
    std::shared_ptr<TangentPlaneSequence> m_tangent_plane_sequence{};
-   double m_planned_cruise_mach{0};
+   double planned_cruise_mach_{0};
    std::vector<Waypoint> m_all_waypoints{};
    bool m_is_loaded{false};
    std::vector<Waypoint> m_ascent_waypoints{}, m_cruise_waypoints{}, m_descent_waypoints{};
@@ -190,34 +199,28 @@ class AircraftIntent : public LoggingLoadable {
    int m_id{-1};
 };
 
-inline const AircraftIntent::RouteData &AircraftIntent::GetRouteData() const { return m_route_data; }
+inline const AircraftIntent::RouteData &AircraftIntent::GetRouteData() const { return route_data_; }
 
 inline int AircraftIntent::GetId() const { return m_id; }
 
 inline void AircraftIntent::SetId(int id_in) { m_id = id_in; }
 
-inline unsigned int AircraftIntent::GetNumberOfWaypoints() const { return m_route_data.m_name.size(); }
+inline unsigned int AircraftIntent::GetNumberOfWaypoints() const { return route_data_.m_name.size(); }
 
 inline Units::MetersLength AircraftIntent::GetPlannedCruiseAltitude() const { return m_planned_cruise_altitude; }
 
 inline bool AircraftIntent::IsLoaded() const { return m_is_loaded; }
 
 inline std::list<Waypoint> AircraftIntent::GetWaypointList() const {
-   std::list<Waypoint> output;
-   std::copy(m_all_waypoints.begin(), m_all_waypoints.end(), std::back_inserter(output));
-   return output;
+   return std::list<Waypoint>(m_all_waypoints.begin(), m_all_waypoints.end());
 }
 
 inline std::vector<Waypoint> AircraftIntent::ConvertListToVector(const std::list<Waypoint> &waypoint_list) {
-   std::vector<Waypoint> dest;
-   std::copy(waypoint_list.begin(), waypoint_list.end(), std::back_inserter(dest));
-   return dest;
+   return std::vector<Waypoint>(waypoint_list.begin(), waypoint_list.end());
 }
 
 inline std::list<Waypoint> AircraftIntent::ConvertVectorToList(const std::vector<Waypoint> &waypoint_vector) {
-   std::list<Waypoint> dest;
-   std::copy(waypoint_vector.begin(), waypoint_vector.end(), std::back_inserter(dest));
-   return dest;
+   return std::list<Waypoint>(waypoint_vector.begin(), waypoint_vector.end());
 }
 
 inline void AircraftIntent::AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints,
@@ -225,20 +228,20 @@ inline void AircraftIntent::AddWaypointsToRouteDataVectors(const std::vector<Way
    auto waypoint_itr = waypoints.begin();
    while (waypoint_itr != waypoints.end()) {
       m_all_waypoints.push_back(*waypoint_itr);
-      m_route_data.m_name.push_back(waypoint_itr->GetName());
-      m_route_data.m_waypoint_phase_of_flight.push_back(add_as_phase);
-      m_route_data.m_nominal_altitude.emplace_back(waypoint_itr->GetAltitude());
-      m_route_data.m_latitude.emplace_back(waypoint_itr->GetLatitude());
-      m_route_data.m_longitude.emplace_back(waypoint_itr->GetLongitude());
-      m_route_data.m_nominal_ias.emplace_back(waypoint_itr->GetNominalIas());
-      m_route_data.m_leg_type.push_back(m_arinc424_dictionary[waypoint_itr->GetArinc424LegType()]);
-      m_route_data.m_high_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintHigh());
-      m_route_data.m_low_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintLow());
-      m_route_data.m_high_speed_constraint.emplace_back(waypoint_itr->GetSpeedConstraintHigh());
-      m_route_data.m_low_speed_constraint.emplace_back(waypoint_itr->GetSpeedConstraintLow());
-      m_route_data.m_rf_latitude.emplace_back(waypoint_itr->GetRfTurnCenterLatitude());
-      m_route_data.m_rf_longitude.emplace_back(waypoint_itr->GetRfTurnCenterLongitude());
-      m_route_data.m_rf_radius.emplace_back(waypoint_itr->GetRfTurnArcRadius());
+      route_data_.m_name.push_back(waypoint_itr->GetName());
+      route_data_.m_waypoint_phase_of_flight.push_back(add_as_phase);
+      route_data_.m_nominal_altitude.emplace_back(waypoint_itr->GetAltitude());
+      route_data_.m_latitude.emplace_back(waypoint_itr->GetLatitude());
+      route_data_.m_longitude.emplace_back(waypoint_itr->GetLongitude());
+      route_data_.m_nominal_ias.emplace_back(waypoint_itr->GetNominalIas());
+      route_data_.m_leg_type.push_back(m_arinc424_dictionary[waypoint_itr->GetArinc424LegType()]);
+      route_data_.m_high_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintHigh());
+      route_data_.m_low_altitude_constraint.emplace_back(waypoint_itr->GetAltitudeConstraintLow());
+      route_data_.m_high_speed_constraint.emplace_back(waypoint_itr->GetSpeedConstraintHigh());
+      route_data_.m_low_speed_constraint.emplace_back(waypoint_itr->GetSpeedConstraintLow());
+      route_data_.m_rf_latitude.emplace_back(waypoint_itr->GetRfTurnCenterLatitude());
+      route_data_.m_rf_longitude.emplace_back(waypoint_itr->GetRfTurnCenterLongitude());
+      route_data_.m_rf_radius.emplace_back(waypoint_itr->GetRfTurnArcRadius());
 
       ++waypoint_itr;
    }
@@ -273,40 +276,40 @@ inline bool AircraftIntent::ContainsCruiseWaypoints() const { return !m_cruise_w
 
 inline bool AircraftIntent::ContainsDescentWaypoints() const { return !m_descent_waypoints.empty(); }
 
-inline double AircraftIntent::GetPlannedCruiseMach() const { return m_planned_cruise_mach; }
+inline double AircraftIntent::GetPlannedCruiseMach() const { return planned_cruise_mach_; }
 
 inline void AircraftIntent::DoRouteDataLogging() const {
    using json = nlohmann::json;
    if (m_logger.getLogLevel() == log4cplus::TRACE_LOG_LEVEL) {
-      for (auto idx = 0; idx < m_route_data.m_name.size(); ++idx) {
+      for (auto idx = 0; idx < route_data_.m_name.size(); ++idx) {
          json j;
          j["segment_index"] = idx;
-         j["name"] = m_route_data.m_name[idx];
-         j["phase_of_flight_int"] = m_route_data.m_waypoint_phase_of_flight[idx];
-         j["x_position_m"] = Units::MetersLength(m_route_data.m_x[idx]).value();
-         j["y_position_m"] = Units::MetersLength(m_route_data.m_y[idx]).value();
-         j["z_position_m"] = Units::MetersLength(m_route_data.m_z[idx]).value();
-         j["nominal_alitude_ft"] = Units::FeetLength(m_route_data.m_nominal_altitude[idx]).value();
-         j["latitude_deg"] = Units::DegreesAngle(m_route_data.m_latitude[idx]).value();
-         j["longitude_deg"] = Units::DegreesAngle(m_route_data.m_longitude[idx]).value();
-         j["nominal_ias_kts"] = Units::KnotsSpeed(m_route_data.m_nominal_ias[idx]).value();
-         j["alt_high_ft"] = Units::FeetLength(m_route_data.m_high_altitude_constraint[idx]).value();
-         j["alt_low_ft"] = Units::FeetLength(m_route_data.m_low_altitude_constraint[idx]).value();
-         j["speed_high_knots"] = Units::KnotsSpeed(m_route_data.m_high_speed_constraint[idx]).value();
-         j["speed_low_knots"] = Units::KnotsSpeed(m_route_data.m_low_speed_constraint[idx]).value();
-         j["leg_type_int"] = m_route_data.m_leg_type[idx];
-         j["rf_turn_x_position_m"] = Units::MetersLength(m_route_data.m_x_rf_center[idx]).value();
-         j["rf_turn_y_position_m"] = Units::MetersLength(m_route_data.m_y_rf_center[idx]).value();
-         j["rf_turn_radius_nm"] = Units::NauticalMilesLength(m_route_data.m_rf_radius[idx]).value();
-         j["rf_turn_lat_deg"] = Units::SignedDegreesAngle(m_route_data.m_rf_latitude[idx]).value();
-         j["rf_turn_lon_deg"] = Units::SignedDegreesAngle(m_route_data.m_rf_longitude[idx]).value();
+         j["name"] = route_data_.m_name[idx];
+         j["phase_of_flight_int"] = route_data_.m_waypoint_phase_of_flight[idx];
+         j["x_position_m"] = Units::MetersLength(route_data_.m_x[idx]).value();
+         j["y_position_m"] = Units::MetersLength(route_data_.m_y[idx]).value();
+         j["z_position_m"] = Units::MetersLength(route_data_.m_z[idx]).value();
+         j["nominal_alitude_ft"] = Units::FeetLength(route_data_.m_nominal_altitude[idx]).value();
+         j["latitude_deg"] = Units::DegreesAngle(route_data_.m_latitude[idx]).value();
+         j["longitude_deg"] = Units::DegreesAngle(route_data_.m_longitude[idx]).value();
+         j["nominal_ias_kts"] = Units::KnotsSpeed(route_data_.m_nominal_ias[idx]).value();
+         j["alt_high_ft"] = Units::FeetLength(route_data_.m_high_altitude_constraint[idx]).value();
+         j["alt_low_ft"] = Units::FeetLength(route_data_.m_low_altitude_constraint[idx]).value();
+         j["speed_high_knots"] = Units::KnotsSpeed(route_data_.m_high_speed_constraint[idx]).value();
+         j["speed_low_knots"] = Units::KnotsSpeed(route_data_.m_low_speed_constraint[idx]).value();
+         j["leg_type_int"] = route_data_.m_leg_type[idx];
+         j["rf_turn_x_position_m"] = Units::MetersLength(route_data_.m_x_rf_center[idx]).value();
+         j["rf_turn_y_position_m"] = Units::MetersLength(route_data_.m_y_rf_center[idx]).value();
+         j["rf_turn_radius_nm"] = Units::NauticalMilesLength(route_data_.m_rf_radius[idx]).value();
+         j["rf_turn_lat_deg"] = Units::SignedDegreesAngle(route_data_.m_rf_latitude[idx]).value();
+         j["rf_turn_lon_deg"] = Units::SignedDegreesAngle(route_data_.m_rf_longitude[idx]).value();
          LOG4CPLUS_TRACE(m_logger, j.dump());
       }
    }
 }
 
-inline bool AircraftIntent::ContainsWaypointName(std::string waypoint_name) const {
-   auto name_comparator = [waypoint_name](const Waypoint &waypoint_to_test) {
+inline bool AircraftIntent::ContainsWaypointName(const std::string &waypoint_name) const {
+   auto name_comparator = [&waypoint_name](const Waypoint &waypoint_to_test) {
       return waypoint_to_test.GetName().compare(waypoint_name) == 0;
    };
    return std::any_of(m_all_waypoints.rbegin(), m_all_waypoints.rend(), name_comparator);

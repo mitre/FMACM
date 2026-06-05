@@ -14,11 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/WeatherTruthFromStaticData.h"
 
+#include <algorithm>
+#include <memory>
 #include <string>
 
 #include "MiniCSV/minicsv.h"
@@ -29,8 +31,8 @@ WeatherTruthFromStaticData::WeatherTruthFromStaticData()
    : m_weather_data_points_by_time(),
      m_weather_data_points_by_dtg(),
      m_weather_data_point(),
+     m_wind_interpolator(std::make_shared<fmacm::WindInterpolator>()),
      m_data_index(DataIndexParameter::SIMULATION_TIME) {
-   m_wind_interpolator = std::make_shared<fmacm::WindInterpolator>();
    m_wind = std::static_pointer_cast<Wind>(m_wind_interpolator);
    SetAtmosphere(std::make_shared<ATMOSPHERE_IMPL>());
 }

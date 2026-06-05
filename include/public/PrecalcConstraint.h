@@ -14,15 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
-#include <fstream>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 
-enum class ActiveFlagType {
+#include <fstream>
+#include <string>
+
+namespace aaesim::open_source {
+
+enum ActiveFlagType {
    UNSET = 0,
    BELOW_ALT_ON_SPEED = 1,
    AT_ALT_ON_SPEED,
@@ -31,34 +35,54 @@ enum class ActiveFlagType {
    SEG_END_MID_ALT,
    AT_ALT_SLOW,
    SEG_END_AT_ALT,
-   AT_250_BELOW_10K
+   AT_250_BELOW_10K,
+   AT_ALT_FAST
 };
 
-bool operator<=(ActiveFlagType l, ActiveFlagType r);
+static std::string ActiveFlagAsString(const ActiveFlagType &flag) {
+   switch (flag) {
+      case UNSET:
+         return "UNSET";
+      case BELOW_ALT_ON_SPEED:
+         return "BELOW_ALT_ON_SPEED";
+      case AT_ALT_ON_SPEED:
+         return "AT_ALT_ON_SPEED";
+      case BELOW_ALT_SLOW:
+         return "BELOW_ALT_SLOW";
+      case SEG_END_LOW_ALT:
+         return "SEG_END_LOW_ALT";
+      case SEG_END_MID_ALT:
+         return "SEG_END_MID_ALT";
+      case AT_ALT_SLOW:
+         return "AT_ALT_SLOW";
+      case SEG_END_AT_ALT:
+         return "SEG_END_AT_ALT";
+      case AT_250_BELOW_10K:
+         return "AT_250_BELOW_10K";
+      case AT_ALT_FAST:
+         return "AT_ALT_FAST";
+      default:
+         throw std::runtime_error("Developer Error: This should be impossible");
+   }
+};
 
-class PrecalcConstraint {
-
-  public:
-   PrecalcConstraint();
-
-   virtual ~PrecalcConstraint();
+struct PrecalcConstraint final {
+   PrecalcConstraint() = default;
+   ~PrecalcConstraint() = default;
 
    PrecalcConstraint &operator=(const PrecalcConstraint &obj);
-
    bool operator<(const PrecalcConstraint &obj) const;
-
    bool operator!=(const PrecalcConstraint &obj) const;
-
    bool operator==(const PrecalcConstraint &obj) const;
 
-   Units::Length constraint_along_path_distance;
-   Units::Length constraint_altHi;
-   Units::Length constraint_altLow;
-   Units::Speed constraint_speedHi;
-   Units::Speed constraint_speedLow;
-   int index;
-   ActiveFlagType active_flag;
-   bool violation_flag;
+   Units::Length constraint_along_path_distance{Units::zero()};
+   Units::Length constraint_altHi{Units::zero()};
+   Units::Length constraint_altLow{Units::zero()};
+   Units::Speed constraint_speedHi{Units::zero()};
+   Units::Speed constraint_speedLow{Units::zero()};
+   int index{-1};
+   ActiveFlagType active_flag{ActiveFlagType::UNSET};
+   bool violation_flag{false};
+   bool is_last_constraint{false};
 };
-
-std::ostream &operator<<(std::ostream &out, const PrecalcConstraint &constraint);
+}  // namespace aaesim::open_source

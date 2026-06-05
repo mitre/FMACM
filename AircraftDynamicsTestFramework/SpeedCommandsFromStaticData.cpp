@@ -14,22 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/SpeedCommandsFromStaticData.h"
 
-SpeedCommandsFromStaticData::SpeedCommandsFromStaticData() : m_speed_data(), m_ias_hist(), m_pilot_delay_seconds(0) {
-   for (double &i : m_ias_hist) {
-      i = 0.0;
-   }
-}
+#include <vector>
+
+SpeedCommandsFromStaticData::SpeedCommandsFromStaticData() : m_speed_data(), m_pilot_delay_seconds(0) {}
 
 SpeedCommandsFromStaticData::SpeedCommandsFromStaticData(
-      const std::vector<SpeedCommandsFromStaticData::SpeedRecord> &speed_data, Units::Time pilot_delay_duration) {
-   m_speed_data = speed_data;
-   m_pilot_delay_seconds = pilot_delay_duration;
-}
+      const std::vector<SpeedCommandsFromStaticData::SpeedRecord> &speed_data, Units::Time pilot_delay_duration)
+   : m_speed_data(speed_data), m_pilot_delay_seconds(pilot_delay_duration) {}
 
 aaesim::open_source::Guidance SpeedCommandsFromStaticData::Update(Units::Time time) {
    aaesim::open_source::Guidance guidance;

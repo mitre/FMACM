@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VerticalPredictor.h"
+
+#include <vector>
 
 #include "public/CoreUtils.h"
 
@@ -26,14 +28,17 @@ using namespace aaesim::open_source;
 using namespace aaesim::open_source::constants;
 
 VerticalPredictor::VerticalPredictor()
-   : LOW_GROUNDSPEED_WARNING(50), LOW_GROUNDSPEED_FATAL(0.1), DESCENT_ANGLE_MAX(6.0), DESCENT_ANGLE_WARNING(4.0) {
-   m_transition_altitude_msl = Units::FeetLength(0.0);
-   m_cruise_altitude_msl = Units::FeetLength(37000);
-   m_transition_ias = Units::KnotsSpeed(310);
-   m_cruise_mach = m_transition_mach = 0.8;
-   m_current_trajectory_index = 0;
-   m_descent_start_time = Units::SecondsTime(0.0);
-}
+   : LOW_GROUNDSPEED_WARNING(50),
+     LOW_GROUNDSPEED_FATAL(0.1),
+     DESCENT_ANGLE_MAX(6.0),
+     DESCENT_ANGLE_WARNING(4.0),
+     m_transition_altitude_msl(Units::FeetLength(0.0)),
+     m_cruise_altitude_msl(Units::FeetLength(37000)),
+     m_transition_ias(Units::KnotsSpeed(310)),
+     m_transition_mach(0.8),
+     m_cruise_mach(0.8),
+     m_current_trajectory_index(0),
+     m_descent_start_time(Units::SecondsTime(0.0)) {}
 
 void VerticalPredictor::SetMembers(const VerticalPredictor &vertical_predictor) {
    m_descent_start_time = vertical_predictor.m_descent_start_time;
@@ -80,11 +85,11 @@ PrecalcConstraint VerticalPredictor::CheckActiveConstraint(double along_path_dis
       result.violation_flag = true;
 
       if ((calibrated_airspeed_mps - Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value()) <
-                Units::MetersPerSecondSpeed(SPEED_DIFFERENCE_THRESHOLD).value() &&
+                Units::MetersPerSecondSpeed(SPEED_HIGH_CONSTRAINT_TOLERANCE).value() &&
           Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value() <
-                Units::MetersPerSecondSpeed(HIGH_SPEED_CONSTRAINT_THRESHOLD).value() &&
+                Units::MetersPerSecondSpeed(SPEED_HIGH_MAXIMUM).value() &&
           (Units::MetersLength(constraints.constraint_altHi).value() - altitude_msl_meter) <=
-                Units::MetersLength(ALT_DIFFERENCE_THRESHOLD).value() &&
+                Units::MetersLength(ALT_HIGH_CONSTRAINT_TOLERANCE).value() &&
           altitude_msl_meter < transition_altitude_meter) {
          result.active_flag = ActiveFlagType::AT_ALT_SLOW;
       } else {
@@ -93,23 +98,23 @@ PrecalcConstraint VerticalPredictor::CheckActiveConstraint(double along_path_dis
    }
    // else accelerate to upper speed constraint
    else if ((calibrated_airspeed_mps - Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value()) <
-                  Units::MetersPerSecondSpeed(SPEED_DIFFERENCE_THRESHOLD).value() &&
+                  Units::MetersPerSecondSpeed(SPEED_HIGH_CONSTRAINT_TOLERANCE).value() &&
             // Numerical precision tolerance
             calibrated_airspeed_mps < Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value() &&
             Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value() <
-                  Units::MetersPerSecondSpeed(HIGH_SPEED_CONSTRAINT_THRESHOLD).value() &&
+                  Units::MetersPerSecondSpeed(SPEED_HIGH_MAXIMUM).value() &&
             (Units::MetersLength(constraints.constraint_altHi).value() - altitude_msl_meter) >
-                  Units::MetersLength(ALT_DIFFERENCE_THRESHOLD).value()) {
+                  Units::MetersLength(ALT_HIGH_CONSTRAINT_TOLERANCE).value()) {
       result.violation_flag = true;
       result.active_flag = ActiveFlagType::BELOW_ALT_SLOW;
    } else if ((calibrated_airspeed_mps - Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value()) <
-                    Units::MetersPerSecondSpeed(SPEED_DIFFERENCE_THRESHOLD).value() &&
+                    Units::MetersPerSecondSpeed(SPEED_HIGH_CONSTRAINT_TOLERANCE).value() &&
               // Numerical precision tolerance
               calibrated_airspeed_mps < Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value() &&
               Units::MetersPerSecondSpeed(constraints.constraint_speedHi).value() <
-                    Units::MetersPerSecondSpeed(HIGH_SPEED_CONSTRAINT_THRESHOLD).value() &&
+                    Units::MetersPerSecondSpeed(SPEED_HIGH_MAXIMUM).value() &&
               (Units::MetersLength(constraints.constraint_altHi).value() - altitude_msl_meter) <=
-                    Units::MetersLength(ALT_DIFFERENCE_THRESHOLD).value() &&
+                    Units::MetersLength(ALT_HIGH_CONSTRAINT_TOLERANCE).value() &&
               altitude_msl_meter < transition_altitude_meter) {
       result.violation_flag = true;
       result.active_flag = ActiveFlagType::AT_ALT_SLOW;
@@ -221,13 +226,13 @@ double VerticalPredictor::CalculateEsfUsingConstantCAS(const double true_airspee
    double mach;
    double temp1, temp2, temp3;
 
-   mach = true_airspeed_mps / sqrt(GAMMA * R.value() * temperature_kelvin.value());
+   mach = true_airspeed_mps / sqrt(kGamma * R.value() * temperature_kelvin.value());
 
-   temp1 = 1.0 + (GAMMA - 1.0) / 2 * pow(mach, 2);
-   temp2 = (pow(temp1, (-1.0 / (GAMMA - 1)))) * (pow(temp1, (GAMMA / (GAMMA - 1))) - 1.0);
+   temp1 = 1.0 + (kGamma - 1.0) / 2 * pow(mach, 2);
+   temp2 = (pow(temp1, (-1.0 / (kGamma - 1)))) * (pow(temp1, (kGamma / (kGamma - 1))) - 1.0);
 
    if (altitude_msl_meter <= GetAtmosphere()->GetTropopauseHeight().value()) {
-      temp3 = 1.0 + (GAMMA * R.value() * K_T.value()) / (2 * GRAVITY_METERS_PER_SECOND) * pow(mach, 2) + temp2;
+      temp3 = 1.0 + (kGamma * R.value() * K_T.value()) / (2 * GRAVITY_METERS_PER_SECOND) * pow(mach, 2) + temp2;
    } else {
       temp3 = 1.0 + temp2;
    }
@@ -242,10 +247,10 @@ double VerticalPredictor::CalculateEsfUsingConstantMach(const double true_airspe
    const Units::KelvinTemperature temperature_kelvin(temperature);
    double mach;
 
-   mach = true_airspeed_mps / sqrt(GAMMA * R.value() * temperature_kelvin.value());
+   mach = true_airspeed_mps / sqrt(kGamma * R.value() * temperature_kelvin.value());
 
    if (altitude_msl_meter <= GetAtmosphere()->GetTropopauseHeight().value()) {
-      esf = 1.0 / (1.0 + (GAMMA * R.value() * K_T.value()) / (2 * GRAVITY_METERS_PER_SECOND) * pow(mach, 2));
+      esf = 1.0 / (1.0 + (kGamma * R.value() * K_T.value()) / (2 * GRAVITY_METERS_PER_SECOND) * pow(mach, 2));
    }
 
    return esf;

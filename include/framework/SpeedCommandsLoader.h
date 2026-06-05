@@ -14,16 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "loader/Loadable.h"
-
 #include <filesystem>
+#include <string>
+#include <vector>
 
 #include "framework/SpeedCommandsFromStaticData.h"
+#include "loader/Loadable.h"
 
 namespace fmacm::loader {
 class SpeedCommandsLoader final : public Loadable {

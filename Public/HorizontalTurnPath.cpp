@@ -14,10 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/HorizontalTurnPath.h"
+
 #include "public/HorizontalPath.h"
 
 /**
@@ -29,7 +30,6 @@
  */
 aaesim::open_source::HorizontalTurnPath::TURN_DIRECTION aaesim::open_source::HorizontalTurnPath::GetTurnDirection(
       const HorizontalPath &p0, const HorizontalPath &p1) const {
-
    if (turn_type == UNKNOWN) return NO_TURN;
 
    double dx1 = p1.GetXPositionMeters() - p0.GetXPositionMeters();

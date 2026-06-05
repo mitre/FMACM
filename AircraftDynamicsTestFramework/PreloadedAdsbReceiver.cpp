@@ -14,19 +14,23 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/PreloadedAdsbReceiver.h"
 
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "public/EarthModel.h"
 #include "public/TvReader.h"
 
-fmacm::PreloadedAdsbReceiver::PreloadedAdsbReceiver(std::string ttv_csv_file,
-                                                    std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence) {
-   m_ttv_filename = ttv_csv_file;
-   m_tanget_plane_sequence = tangent_plane_sequence;
-}
+fmacm::PreloadedAdsbReceiver::PreloadedAdsbReceiver(const std::string &ttv_csv_file,
+                                                    std::shared_ptr<TangentPlaneSequence> tangent_plane_sequence)
+   : m_ttv_filename(ttv_csv_file), m_tanget_plane_sequence(tangent_plane_sequence) {}
 
 aaesim::open_source::ADSBSVReport fmacm::PreloadedAdsbReceiver::GetCurrentADSBReport(int id) const {
    if (m_most_recent_adsb_reports.empty()) return aaesim::open_source::ADSBSVReport::EMPTY_REPORT;

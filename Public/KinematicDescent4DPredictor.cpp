@@ -14,12 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/KinematicDescent4DPredictor.h"
 
+#include <algorithm>
 #include <cmath>
+#include <string>
+#include <vector>
 
 #include "public/SimulationTime.h"
 #include "public/Waypoint.h"
@@ -446,12 +449,10 @@ void KinematicDescent4DPredictor::ConstrainedVerticalPath(vector<HorizontalPath>
                                        horizontal_path, weather_prediction, aircraft_distance_to_go);
 }
 
-VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(VerticalPath vertical_path, double altitude_at_end,
-                                                                  vector<HorizontalPath> &horizontal_path,
-                                                                  vector<PrecalcWaypoint> &precalc_waypoints,
-                                                                  double CAS_gamma,
-                                                                  const WeatherPrediction &weather_prediction,
-                                                                  const Units::Length &aircraft_distance_to_go) {
+VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(
+      const VerticalPath &vertical_path, double altitude_at_end, vector<HorizontalPath> &horizontal_path,
+      vector<PrecalcWaypoint> &precalc_waypoints, double CAS_gamma, const WeatherPrediction &weather_prediction,
+      const Units::Length &aircraft_distance_to_go) {
    VerticalPath result;
 
    const double delta_t = -TIME_STEP_SECONDS;
@@ -578,12 +579,10 @@ VerticalPath KinematicDescent4DPredictor::ConstantCasVerticalPath(VerticalPath v
    return result;
 }
 
-VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(VerticalPath vertical_path, double altitude_at_end,
-                                                                   vector<HorizontalPath> &horizontal_path,
-                                                                   vector<PrecalcWaypoint> &precalc_waypoints,
-                                                                   double gamma,
-                                                                   const WeatherPrediction &weather_prediction,
-                                                                   const Units::Length &aircraft_distance_to_go) {
+VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(
+      const VerticalPath &vertical_path, double altitude_at_end, vector<HorizontalPath> &horizontal_path,
+      vector<PrecalcWaypoint> &precalc_waypoints, double gamma, const WeatherPrediction &weather_prediction,
+      const Units::Length &aircraft_distance_to_go) {
    VerticalPath result;
 
    const double delta_t = -TIME_STEP_SECONDS;
@@ -715,7 +714,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantMachVerticalPath(VerticalPath 
 }
 
 VerticalPath KinematicDescent4DPredictor::ConstantGeometricFpaVerticalPath(
-      VerticalPath vertical_path, double altitude_at_end, double flight_path_angle,
+      const VerticalPath &vertical_path, double altitude_at_end, double flight_path_angle,
       vector<HorizontalPath> &horizontal_path, vector<PrecalcWaypoint> &precalc_waypoints,
       const WeatherPrediction &weather_prediction, const Units::Length &aircraft_distance_to_go) {
    VerticalPath result = vertical_path;
@@ -851,7 +850,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantGeometricFpaVerticalPath(
 }
 
 VerticalPath KinematicDescent4DPredictor::ConstantFpaDecelerationVerticalPath(
-      VerticalPath vertical_path, double altitude_at_end, double deceleration_mps, double velocity_cas_end,
+      const VerticalPath &vertical_path, double altitude_at_end, double deceleration_mps, double velocity_cas_end,
       double flight_path_angle, vector<HorizontalPath> &horizontal_path, vector<PrecalcWaypoint> &precalc_waypoints,
       const WeatherPrediction &weather_prediction, const Units::Length &aircraft_distance_to_go) {
    VerticalPath result = vertical_path;
@@ -968,8 +967,8 @@ VerticalPath KinematicDescent4DPredictor::ConstantFpaDecelerationVerticalPath(
    return result;
 }
 
-VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(VerticalPath vertical_path, double deceleration,
-                                                                        double velocity_cas_end,
+VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(const VerticalPath &vertical_path,
+                                                                        double deceleration, double velocity_cas_end,
                                                                         vector<HorizontalPath> &horizontal_path,
                                                                         const WeatherPrediction &weather_prediction,
                                                                         const Units::Length &aircraft_distance_to_go) {
@@ -1056,7 +1055,7 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
    return result;
 }
 
-VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(VerticalPath vertical_path,
+VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(const VerticalPath &vertical_path,
                                                                         Units::Length distance_to_go,
                                                                         double deceleration, double velocity_cas_end,
                                                                         vector<HorizontalPath> &horizontal_path,
@@ -1147,7 +1146,7 @@ VerticalPath KinematicDescent4DPredictor::LevelDecelerationVerticalPath(Vertical
    return result;
 }
 
-VerticalPath KinematicDescent4DPredictor::LevelVerticalPath(VerticalPath vertical_path, double x_end,
+VerticalPath KinematicDescent4DPredictor::LevelVerticalPath(const VerticalPath &vertical_path, double x_end,
                                                             vector<HorizontalPath> &horizontal_path,
                                                             const WeatherPrediction &weather_prediction,
                                                             const Units::Length &aircraft_distance_to_go) {
@@ -1244,7 +1243,7 @@ VerticalPath KinematicDescent4DPredictor::LevelVerticalPath(VerticalPath vertica
 
 // TODO: change velocity_cas_end to Units
 VerticalPath KinematicDescent4DPredictor::ConstantDecelerationVerticalPath(
-      VerticalPath vertical_path, Units::Length distance_to_go, Units::Length altitude_high, double deceleration,
+      const VerticalPath &vertical_path, Units::Length distance_to_go, Units::Length altitude_high, double deceleration,
       double velocity_cas_end, vector<HorizontalPath> &horizontal_path, const WeatherPrediction &weather_prediction,
       const Units::Length &aircraft_distance_to_go) {
    VerticalPath result = vertical_path;
@@ -1362,7 +1361,7 @@ VerticalPath KinematicDescent4DPredictor::ConstantDecelerationVerticalPath(
 }
 
 VerticalPath KinematicDescent4DPredictor::ConstantFpaToCurrentPositionVerticalPath(
-      VerticalPath vertical_path, std::vector<HorizontalPath> &horizontal_path,
+      const VerticalPath &vertical_path, std::vector<HorizontalPath> &horizontal_path,
       std::vector<PrecalcWaypoint> &precalc_waypoints, double const_gamma_mach,
       const WeatherPrediction &weather_prediction, const Units::Length &aircraft_distance_to_go) {
    Units::Length distance_to_plan = aircraft_distance_to_go;

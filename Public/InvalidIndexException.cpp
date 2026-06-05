@@ -14,12 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <iostream>
 #include "public/InvalidIndexException.h"
-#include "public/Logging.h"
+
+#include <iostream>
+
+#include "loader/Logging.h"
 
 InvalidIndexException::InvalidIndexException(const int value, const int low_limit, const int high_limit) : exception() {
    log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("InvalidIndexException"));

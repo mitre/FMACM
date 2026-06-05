@@ -14,10 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ScenarioUtils.h"
+
+#include <map>
+#include <string>
 
 RandomGenerator aaesim::open_source::ScenarioUtils::RANDOM_NUMBER_GENERATOR;
 const int aaesim::open_source::ScenarioUtils::AIRCRAFT_ID_NOT_IN_MAP = -1;

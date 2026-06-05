@@ -14,25 +14,27 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <scalar/Angle.h>
 #include <scalar/Force.h>
-#include <scalar/Speed.h>
 #include <scalar/Length.h>
+#include <scalar/Speed.h>
+
 #include "public/BadaUtils.h"
 
 class EquationsOfMotionState {
   public:
-   Units::Length enu_x, enu_y, altitude_msl;
-   Units::Speed true_airspeed;
-   Units::Angle gamma;
-   Units::SignedAngle psi_enu;
-   Units::Force thrust;
-   Units::Angle phi;
-   double speed_brake_percentage;
-   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration;
+   Units::Length enu_x{}, enu_y{}, altitude_msl{};
+   Units::Speed true_airspeed{};
+   Units::Angle gamma{};
+   Units::SignedAngle psi_enu{};
+   Units::Force thrust{};
+   Units::Angle phi{};
+   double speed_brake_percentage{0};
+   aaesim::open_source::bada_utils::FlapConfiguration flap_configuration{
+         aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
 };

@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <string>
 
 #include "loader/DecodedStream.h"
 
@@ -25,8 +27,8 @@
  * Meta info for the concept of deprecated in the Loadable system.
  */
 struct LoaderDeprecatedMetaInfo {
-   bool isDeprecated;
-   std::string supersededByTagName;
+   bool isDeprecated{false};
+   std::string supersededByTagName{};
    //	std::string deprecatedInVersion; // keep this commented out until a final concept of versioning is implemented in
    // AAESim
 };
@@ -71,7 +73,7 @@ class LoaderLink {
 
    void set_deprecated_info(const LoaderDeprecatedMetaInfo &info) { deprecatedInfo = info; }
 
-   LoaderDeprecatedMetaInfo get_deprecated_info() { return deprecatedInfo; }
+   const LoaderDeprecatedMetaInfo &get_deprecated_info() const { return deprecatedInfo; }
 
   protected:
    bool loaded;

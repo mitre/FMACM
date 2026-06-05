@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -45,8 +45,9 @@ class VerticalPath final {
       ESF_CLIMB,
       CONSTANT_CAS_CLIMB,
       CONSTANT_MACH_CLIMB,
-      LEVEL_ACCEL,
-      LEVEL_FLIGHT
+      LEVEL_ACCEL_ASCENDING,
+      LEVEL_FLIGHT,
+      LEVEL_ACCEL_DESCENDING
    };
 
    VerticalPath();

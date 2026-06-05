@@ -14,16 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/WindStack.h"
 
 #include <algorithm>
 #include <list>
+#include <utility>
+#include <vector>
 
-#include "utility/CustomUnits.h"
 #include "public/CustomMath.h"
+#include "utility/CustomUnits.h"
 
 using namespace aaesim::open_source;
 using namespace std;

@@ -14,11 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/SpeedOnThrustControl.h"
 
+#include <memory>
 #include <nlohmann/json.hpp>
 
 #include "public/Environment.h"
@@ -42,8 +43,14 @@ void SpeedOnThrustControl::ComputeVerticalCommands(
    }
    gamma_command = Units::RadiansAngle(asin(temp_gamma));
 
-   tas_command =
-         sensed_weather->GetTrueWeather()->CAS2TAS(guidance.m_ias_command, equations_of_motion_state.altitude_msl);
+   SpeedValueType speed_type = guidance.GetSelectedSpeed().GetSpeedType();
+   if (speed_type == SpeedValueType::MACH_SPEED) {
+      tas_command = sensed_weather->GetTrueWeather()->MachToTAS(guidance.m_mach_command,
+                                                                equations_of_motion_state.altitude_msl);
+   } else {
+      tas_command =
+            sensed_weather->GetTrueWeather()->CAS2TAS(guidance.m_ias_command, equations_of_motion_state.altitude_msl);
+   }
 
    const Units::Speed error_tas = tas_command - equations_of_motion_state.true_airspeed;
    const Units::Acceleration vel_dot_com = gain_true_airspeed_ * error_tas;

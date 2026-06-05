@@ -14,17 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/EuclideanWaypointMonitor.h"
+
+#include <memory>
+
 #include "public/AircraftCalculations.h"
 
 aaesim::open_source::EuclideanWaypointMonitor::EuclideanWaypointMonitor(
-      const aaesim::LatitudeLongitudePoint &lat_lon_point) {
-   m_point_to_monitor =
-         aaesim::LatitudeLongitudePoint::CreateFromGeolibPrimitive(lat_lon_point.GetGeolibPrimitiveLLPoint());
-};
+      const aaesim::LatitudeLongitudePoint &lat_lon_point)
+   : m_point_to_monitor(
+           aaesim::LatitudeLongitudePoint::CreateFromGeolibPrimitive(lat_lon_point.GetGeolibPrimitiveLLPoint())) {};
 
 void aaesim::open_source::EuclideanWaypointMonitor::Update(const aaesim::LatitudeLongitudePoint &position,
                                                            const Units::SignedAngle &ground_course_enu) {
@@ -54,7 +56,7 @@ void aaesim::open_source::EuclideanWaypointMonitor::PerformFakeTranslationToEucl
 
 std::shared_ptr<aaesim::open_source::EuclideanWaypointMonitor>
       aaesim::open_source::EuclideanWaypointMonitor::OfWgs84PrecalcWaypoint(
-            const aaesim::Wgs84PrecalcWaypoint &waypoint) {
+            const aaesim::open_source::Wgs84PrecalcWaypoint &waypoint) {
    return std::make_shared<aaesim::open_source::EuclideanWaypointMonitor>(
          aaesim::open_source::EuclideanWaypointMonitor(waypoint.m_position));
 }

@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <memory>
 
 #include "public/LatitudeLongitudePoint.h"
 #include "public/WaypointPassingMonitor.h"
@@ -34,7 +36,7 @@ class EuclideanWaypointMonitor final : public WaypointPassingMonitor {
    bool IsPassedWaypoint() const override { return m_is_passed_waypoint; }
 
    static std::shared_ptr<EuclideanWaypointMonitor> OfWgs84PrecalcWaypoint(
-         const aaesim::Wgs84PrecalcWaypoint &waypoint);
+         const aaesim::open_source::Wgs84PrecalcWaypoint &waypoint);
 
    static std::shared_ptr<EuclideanWaypointMonitor> OfEllipsoidalPoint(
          const aaesim::LatitudeLongitudePoint &ellipsoidal_point);

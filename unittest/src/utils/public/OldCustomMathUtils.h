@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /* OldCustomMath.h		Initial code from Survsim 2.00R1  11/2/99*/
@@ -25,9 +25,10 @@
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 #include <scalar/Time.h>
+
+#include "loader/Logging.h"
 #include "public/DMatrix.h"
 #include "public/DVector.h"
-#include "public/Logging.h"
 
 /**
  * This contains the version of Math/CustomMath before Math/RandomGenerator

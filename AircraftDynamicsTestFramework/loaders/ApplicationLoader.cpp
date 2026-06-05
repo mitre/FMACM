@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/ApplicationLoader.h"
+
+#include <memory>
 
 #include "public/NullFlightDeckApplication.h"
 #include "public/StatisticalPilotDelay.h"
@@ -31,8 +33,10 @@ using namespace fmacm;
 
 ApplicationLoader::ApplicationLoader() {
 #ifdef SAMPLE_ALGORITHM_LIBRARY
-   m_sample_algorithm_time_goal = interval_management::open_source::IMTimeBasedAchieve();
-   m_sample_algorithm_distance_goal = interval_management::open_source::IMDistBasedAchieve();
+   m_sample_algorithm_time_goal =  // cppcheck-suppress useInitializationList
+         interval_management::open_source::IMTimeBasedAchieve();
+   m_sample_algorithm_distance_goal =  // cppcheck-suppress useInitializationList
+         interval_management::open_source::IMDistBasedAchieve();
 #endif
 }
 

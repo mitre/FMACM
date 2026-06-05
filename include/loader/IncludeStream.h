@@ -14,16 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "loader/Token.h"
-#include "loader/RunFileArchiveDirector.h"
-#include "loader/FilePath.h"
 #include <assert.h>
+
 #include <memory>
+#include <string>
+
+#include "loader/FilePath.h"
+#include "loader/RunFileArchiveDirector.h"
+#include "loader/Token.h"
 
 template <class PARENT>
 class IncludeStream : public PARENT {
@@ -50,7 +53,7 @@ class IncludeStream : public PARENT {
       return PARENT::open_file(file_name);
    }  //----------------------------------------------------------------------------------------------
 
-   inline FilePath get_file_path()  // TODO prototype this with a do nothing class  in the root class
+   inline const FilePath &get_file_path() const  // TODO prototype this with a do nothing class  in the root class
    {
       return local_path;
    }  //----------------------------------------------------------------------------------------------
@@ -161,7 +164,6 @@ class IncludeStream : public PARENT {
 
             // if(included_file.get_Num_Dir()>1 && included_file.get_Disk()!="" && included_file.get_Type()!="")
             if (has_mult_dirs && has_drive && has_file_ext) {
-
                local_path = included_file;
                abs_path_flag = true;
                break;
@@ -170,7 +172,6 @@ class IncludeStream : public PARENT {
             local_path = FilePath(local_path.get_Full_Path() + "\\" + included_file.get_Full_Path());
 #else
             if (has_mult_dirs && has_file_ext) {
-
                local_path = included_file;
                break;
             }
@@ -243,7 +244,7 @@ class IncludeStream : public PARENT {
          {
             std::string where_to_put_it = archive_director->get_Destination();
             FilePath loc = FilePath(where_to_put_it);
-            FilePath to_open = loc.Push(FilePath(archive_director->get_New_Link_Name(file_name)));
+            FilePath to_open = loc.Push(FilePath(archive_director->get_New_Link_Name(FilePath(file_name))));
             loc = loc.Push(FilePath(name));
             std::string comment = std::string("; This file is an archive copy of a file formerly called: \"") +
                                   file_name + std::string("\"\n");

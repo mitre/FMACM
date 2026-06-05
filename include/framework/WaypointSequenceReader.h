@@ -14,18 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/DataReader.h"
-
+#include <string>
 #include <vector>
 
-#include "utility/CustomUnits.h"
+#include "public/DataReader.h"
 #include "scalar/Angle.h"
 #include "scalar/Length.h"
+#include "utility/CustomUnits.h"
 
 namespace fmacm {
 class WaypointSequenceReader final : aaesim::open_source::DataReader {
@@ -35,13 +35,13 @@ class WaypointSequenceReader final : aaesim::open_source::DataReader {
          : latitude(Units::ZERO_ANGLE),
            longitude(Units::ZERO_ANGLE),
            bank_angle(Units::ZERO_ANGLE),
-           turn_radius(Units::ZERO_LENGTH){};
+           turn_radius(Units::ZERO_LENGTH) {};
       Units::Angle latitude;
       Units::Angle longitude;
       Units::Angle bank_angle;
       Units::Length turn_radius;
    };
-   WaypointSequenceReader(std::string file_name) : DataReader(file_name, 1, 4){};
+   WaypointSequenceReader(const std::string &file_name) : DataReader(file_name, 1, 4) {};
    std::vector<WaypointSequenceRow> ReadFile();
 };
 }  // namespace fmacm

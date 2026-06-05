@@ -14,12 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <memory>
+
 #include "public/VerticalController.h"
+
 namespace aaesim::open_source {
 struct AscentController {
    virtual void ComputeAscentCommands(const Guidance &guidance, const EquationsOfMotionState &equations_of_motion_state,

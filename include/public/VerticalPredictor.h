@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -89,9 +89,9 @@ class VerticalPredictor {
    double CalculateEsfUsingConstantMach(const double true_airspeed_mps, const double altitude_msl_meter,
                                         const Units::Temperature temperature);
 
-   PrecalcConstraint CheckActiveConstraint(double along_path_distance_to_go_meter, double altitude_msl_meter,
-                                           double calibrated_airspeed_mps, const PrecalcConstraint &constraints,
-                                           double transition_altitude_meter);
+   aaesim::open_source::PrecalcConstraint CheckActiveConstraint(
+         double along_path_distance_to_go_meter, double altitude_msl_meter, double calibrated_airspeed_mps,
+         const aaesim::open_source::PrecalcConstraint &constraints, double transition_altitude_meter);
 
    aaesim::open_source::Guidance CalculateGuidanceCommands(const aaesim::open_source::AircraftState &state,
                                                            const Units::Length distance_to_go,
@@ -99,15 +99,15 @@ class VerticalPredictor {
 
    void TrimDuplicatesFromVerticalPath();
 
-   PrecalcConstraint FindActiveConstraint(const double &along_path_distance_to_go_meters,
-                                          const std::vector<PrecalcWaypoint> &precalculated_waypoints);
+   aaesim::open_source::PrecalcConstraint FindActiveConstraint(
+         const double &along_path_distance_to_go_meters, const std::vector<PrecalcWaypoint> &precalculated_waypoints);
 
    const bool IsCruiseMachValid() const;
 
    inline static const double TIME_STEP_SECONDS{0.5};
-   inline static const Units::MetersPerSecondSpeed SPEED_DIFFERENCE_THRESHOLD{-0.1};
-   inline static const Units::KnotsSpeed HIGH_SPEED_CONSTRAINT_THRESHOLD{1000};
-   inline static const Units::FeetLength ALT_DIFFERENCE_THRESHOLD{100};
+   inline static const Units::MetersPerSecondSpeed SPEED_HIGH_CONSTRAINT_TOLERANCE{-0.1};
+   inline static const Units::KnotsSpeed SPEED_HIGH_MAXIMUM{1000};
+   inline static const Units::FeetLength ALT_HIGH_CONSTRAINT_TOLERANCE{100};
 
    const Units::KnotsSpeed LOW_GROUNDSPEED_WARNING;
    const Units::KnotsSpeed LOW_GROUNDSPEED_FATAL;
@@ -120,7 +120,7 @@ class VerticalPredictor {
    Units::Length m_transition_altitude_msl;
    double m_cruise_mach;
    double m_transition_mach;
-   PrecalcConstraint m_precalculated_constraints;
+   aaesim::open_source::PrecalcConstraint m_precalculated_constraints;
    aaesim::open_source::CalcWindGradControl m_wind_calculator;
    Units::MetersLength m_start_altitude_msl;
    VerticalPath m_vertical_path;

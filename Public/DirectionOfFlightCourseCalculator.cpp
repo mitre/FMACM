@@ -14,10 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/DirectionOfFlightCourseCalculator.h"
+
+#include <cstdio>
+#include <vector>
 
 #include "public/CoreUtils.h"
 
@@ -31,10 +34,9 @@ DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator() {}
 DirectionOfFlightCourseCalculator::DirectionOfFlightCourseCalculator(
       const std::vector<HorizontalPath> &horizontal_path,
       TrajectoryIndexProgressionDirection expected_index_progression)
-   : HorizontalPathTracker(horizontal_path, expected_index_progression) {
-   m_end_course = Units::RadiansAngle(horizontal_path.front().m_path_course) + Units::PI_RADIANS_ANGLE;
-   m_start_course = Units::RadiansAngle(horizontal_path.back().m_path_course) + Units::PI_RADIANS_ANGLE;
-}
+   : HorizontalPathTracker(horizontal_path, expected_index_progression),
+     m_end_course(Units::RadiansAngle(horizontal_path.front().m_path_course) + Units::PI_RADIANS_ANGLE),
+     m_start_course(Units::RadiansAngle(horizontal_path.back().m_path_course) + Units::PI_RADIANS_ANGLE) {}
 
 DirectionOfFlightCourseCalculator::~DirectionOfFlightCourseCalculator() = default;
 

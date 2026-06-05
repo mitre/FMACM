@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -23,17 +23,16 @@ namespace aaesim {
 namespace open_source {
 
 struct TurnAnticipation {
-
    double distance;     // turn anticipation in meters
    double bankAngle;    // bank angle in radians
    double maxAngle;     // max bank angle
    double radius;       // radius of turn
    double groundspeed;  // meters per second
 
-   TurnAnticipation() : distance(0), bankAngle(0), maxAngle(0), radius(0), groundspeed(0){};
+   TurnAnticipation() : distance(0), bankAngle(0), maxAngle(0), radius(0), groundspeed(0) {};
 
    TurnAnticipation(double pDist, double pBank, double pMaxBank, double pRadius, double pgs)
-      : distance(pDist), bankAngle(pBank), maxAngle(pMaxBank), radius(pRadius), groundspeed(pgs){};
+      : distance(pDist), bankAngle(pBank), maxAngle(pMaxBank), radius(pRadius), groundspeed(pgs) {};
 };
 }  // namespace open_source
 }  // namespace aaesim

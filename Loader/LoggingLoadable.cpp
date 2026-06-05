@@ -17,7 +17,11 @@
 // 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/LoggingLoadable.h"
+#include "loader/LoggingLoadable.h"
+
+#include <memory>
+#include <string>
+
 #include "loader/LoadError.h"
 
 using namespace std;

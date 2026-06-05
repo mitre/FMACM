@@ -14,10 +14,11 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ADSBSVReport.h"
+
 #include "public/CustomMath.h"
 
 namespace aaesim::open_source {
@@ -77,10 +78,7 @@ ADSBSVReport::ADSBSVReport(const Builder &builder) {
    }
 }
 
-ADSBSVReport::Builder::Builder(int unique_acid, Units::Time timestamp) {
-   id_ = unique_acid;
-   timestamp_ = timestamp;
-}
+ADSBSVReport::Builder::Builder(int unique_acid, Units::Time timestamp) : id_(unique_acid), timestamp_(timestamp) {}
 
 ADSBSVReport ADSBSVReport::Builder::Build() { return ADSBSVReport{*this}; }
 

@@ -14,11 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/SpeedOnPitchControl.h"
 
+#include <memory>
 #include <nlohmann/json.hpp>
 
 using namespace aaesim::open_source;
@@ -39,8 +40,16 @@ void SpeedOnPitchControl::ComputeVerticalCommands(
                                           flap_configuration);
 
    // Commands
-   const Units::Speed ias_com = guidance.m_ias_command;
-   true_airspeed_command = sensed_weather->GetTrueWeather()->CAS2TAS(ias_com, equations_of_motion_state.altitude_msl);
+   SpeedValueType speed_type = guidance.GetSelectedSpeed().GetSpeedType();
+   if (speed_type == SpeedValueType::MACH_SPEED) {
+      const auto mach_cmd = guidance.m_mach_command;
+      true_airspeed_command =
+            sensed_weather->GetTrueWeather()->MachToTAS(mach_cmd, equations_of_motion_state.altitude_msl);
+   } else {
+      const Units::Speed ias_com = guidance.m_ias_command;
+      true_airspeed_command =
+            sensed_weather->GetTrueWeather()->CAS2TAS(ias_com, equations_of_motion_state.altitude_msl);
+   }
    const Units::Force max_thrust = Units::NewtonsForce(aircraft_performance_->GetMaxThrust(
          equations_of_motion_state.altitude_msl, flap_configuration,
          aaesim::open_source::bada_utils::EngineThrustMode::MAXIMUM_CRUISE, Units::ZERO_CELSIUS));

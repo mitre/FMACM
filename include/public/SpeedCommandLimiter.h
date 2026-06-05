@@ -14,23 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include "public/BadaUtils.h"
+#include "public/WeatherPrediction.h"
 #include "scalar/Length.h"
 #include "scalar/Mass.h"
 #include "scalar/Speed.h"
-
-#include "public/BadaUtils.h"
-#include "public/WeatherPrediction.h"
 #include "utility/BoundedValue.h"
 
 namespace aaesim {
 namespace open_source {
 struct SpeedCommandLimiter {
-
    virtual ~SpeedCommandLimiter() = default;
 
    virtual Units::Speed LimitSpeedCommand(

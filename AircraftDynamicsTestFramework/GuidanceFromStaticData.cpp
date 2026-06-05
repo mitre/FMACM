@@ -14,12 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/GuidanceFromStaticData.h"
 
 #include <scalar/AngularSpeed.h>
+
+#include <vector>
 
 #include "public/CoreUtils.h"
 
@@ -37,16 +39,13 @@ GuidanceFromStaticData::GuidanceFromStaticData()
 
 GuidanceFromStaticData::GuidanceFromStaticData(const std::vector<HorizontalPath> &horizontal_path,
                                                const VerticalData &vertcal_path,
-                                               const PlannedDescentParameters &planned_descent_parameters) {
-   m_horizontal_trajectory = horizontal_path;
-   m_vertical_data = vertcal_path;
-   m_estimated_distance_to_go = Units::infinity();
-   m_decrementing_distance_calculator =
-         AlongPathDistanceCalculator(m_horizontal_trajectory, TrajectoryIndexProgressionDirection::DECREMENTING);
-   m_decrementing_position_calculator =
-         PositionCalculator(m_horizontal_trajectory, TrajectoryIndexProgressionDirection::DECREMENTING);
-   m_planned_descent_parameters = planned_descent_parameters;
-}
+                                               const PlannedDescentParameters &planned_descent_parameters)
+   : m_vertical_data(vertcal_path),
+     m_horizontal_trajectory(horizontal_path),
+     m_decrementing_distance_calculator(m_horizontal_trajectory, TrajectoryIndexProgressionDirection::DECREMENTING),
+     m_decrementing_position_calculator(m_horizontal_trajectory, TrajectoryIndexProgressionDirection::DECREMENTING),
+     m_estimated_distance_to_go(Units::infinity()),
+     m_planned_descent_parameters(planned_descent_parameters) {}
 
 aaesim::open_source::Guidance GuidanceFromStaticData::Update(const aaesim::open_source::AircraftState &state) {
    Units::UnsignedAngle estimated_course;
@@ -72,7 +71,6 @@ aaesim::open_source::Guidance GuidanceFromStaticData::Update(const aaesim::open_
 aaesim::open_source::Guidance GuidanceFromStaticData::CalculateVerticalGuidance(
       const aaesim::open_source::AircraftState &state, const Units::MetersLength &estimated_distance_to_go,
       const Units::UnsignedAngle &estimated_course) {
-
    aaesim::open_source::Guidance vertical_guidance;
    vertical_guidance.m_reference_altitude = state.GetAltitudeMsl();
    vertical_guidance.m_vertical_speed = Units::ZERO_SPEED;

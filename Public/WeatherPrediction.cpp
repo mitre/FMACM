@@ -14,16 +14,20 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include "public/Atmosphere.h"
 #include "public/WeatherPrediction.h"
+
+#include <memory>
+#include <utility>
+
+#include "public/Atmosphere.h"
 
 using namespace aaesim::open_source;
 
 WeatherPrediction::WeatherPrediction(std::shared_ptr<Wind> wind, std::shared_ptr<Atmosphere> atmosphere)
-   : WeatherEstimate(std::move(wind), std::move(atmosphere)), m_update_count(0) {
+   : WeatherEstimate(std::move(wind), std::move(atmosphere)), update_count_(0) {
    // inhibit 3-D predicted temperature for now.
    m_temperature_checked = true;
    m_temperature_available = false;

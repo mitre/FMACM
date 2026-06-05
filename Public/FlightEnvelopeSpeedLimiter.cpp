@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/FlightEnvelopeSpeedLimiter.h"
@@ -22,7 +22,7 @@
 using namespace aaesim::open_source;
 
 const Units::Speed FlightEnvelopeSpeedLimiter::MINIMUM_IAS_LIMIT = Units::KnotsSpeed(150);
-const BoundedValue<double, 0, 2> FlightEnvelopeSpeedLimiter::MINIMUM_MACH_LIMIT = BoundedValue<double, 0, 2>(0.68);
+const BoundedValue<double, 0, 2> FlightEnvelopeSpeedLimiter::MINIMUM_MACH_LIMIT = BoundedValue<double, 0, 2>(0.6);
 
 FlightEnvelopeSpeedLimiter::FlightEnvelopeSpeedLimiter(
       const aaesim::open_source::bada_utils::FlapSpeeds &flap_speeds,
@@ -34,7 +34,6 @@ Units::Speed FlightEnvelopeSpeedLimiter::LimitSpeedCommand(
       const Units::Speed reference_velocity_mps, const Units::Length speed_quantization_distance,
       const Units::Length distance_to_end_of_route, const Units::Length current_altitude,
       const aaesim::open_source::bada_utils::FlapConfiguration flap_configuration) {
-
    Units::Speed limited_ias = Units::max(MINIMUM_IAS_LIMIT, current_ias_speed_command);
 
    switch (flap_configuration) {

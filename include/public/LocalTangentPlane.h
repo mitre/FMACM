@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -26,13 +26,15 @@
 
 #pragma once
 
-#include "public/EarthModel.h"
+#include <string>
+
+#include "loader/Logging.h"
 #include "public/DMatrix.h"
-#include "public/Logging.h"
+#include "public/EarthModel.h"
 
 class LocalTangentPlane {
   public:
-   static void printCoordinates(std::string title, Units::Length x, Units::Length y, Units::Length z);
+   static void printCoordinates(const std::string &title, Units::Length x, Units::Length y, Units::Length z);
 
    LocalTangentPlane(const EarthModel *earthModel, const EarthModel::AbsolutePositionEcef &ecefPointOfTangency,
                      const EarthModel::LocalPositionEnu &enuPointOfTangency);

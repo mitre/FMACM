@@ -14,16 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <string>
+
 #include "MiniCSV/minicsv.h"
 
 struct OutputHandler {
-
   public:
    OutputHandler() = default;
 
@@ -54,7 +54,7 @@ struct OutputHandler {
 
    virtual std::string GetOutputFilename() const { return filename; }
 
-   std::string GetFileSuffix() const { return m_file_suffix; }
+   const std::string &GetFileSuffix() const { return m_file_suffix; }
 
   protected:
    // Everything in the filename after the scenario name, e.g. "-waypoints.csv"
@@ -67,7 +67,7 @@ struct OutputHandler {
    mini::csv::ofstream os;
 
    // indicates whether Finish() has been called, to complete writing
-   bool m_finished;
+   bool m_finished{false};
 };
 
 inline void OutputHandler::SetScenarioName(const std::string &scenario_name) {

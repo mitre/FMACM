@@ -14,11 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/USStandardAtmosphere1976.h"
-#include "public/Logging.h"
+
+#include <string>
+
+#include "loader/Logging.h"
 
 const Units::KelvinTemperature TEMPERATURE_TOLERANCE(0.1);
 
@@ -61,7 +64,6 @@ void USStandardAtmosphere1976::SetTemperatureOffset(const Units::Temperature tem
 
 void USStandardAtmosphere1976::CalibrateTemperatureAtAltitude(const Units::KelvinTemperature temperature,
                                                               const Units::Length altitude) {
-
    Units::KelvinTemperature difference = GetTemperature(altitude) - temperature;
    if (Units::abs(difference) <= TEMPERATURE_TOLERANCE) {
       LOG4CPLUS_WARN(m_logger,
@@ -75,7 +77,6 @@ void USStandardAtmosphere1976::CalibrateTemperatureAtAltitude(const Units::Kelvi
 }
 
 void USStandardAtmosphere1976::AirDensity(const Units::Length h, Units::Density &rho, Units::Pressure &P) const {
-
    Units::KelvinTemperature T = GetTemperature(h);
    if (h < H_TROP) {
       // troposphere
@@ -91,7 +92,6 @@ void USStandardAtmosphere1976::AirDensity(const Units::Length h, Units::Density 
 }
 
 Units::KelvinTemperature USStandardAtmosphere1976::GetTemperature(const Units::Length altitude_msl) const {
-
    if (altitude_msl < MINIMUM_ALTITUDE) {
       std::ostringstream s;
       s << "Lowest supported altitude is " << MINIMUM_ALTITUDE;
@@ -140,7 +140,7 @@ Units::Speed USStandardAtmosphere1976::TAS2CAS(const Units::Speed vtas, const Un
 
 Units::Speed USStandardAtmosphere1976::SpeedOfSound(Units::KelvinTemperature temperature) const {
    // from https://en.wikipedia.org/wiki/Speed_of_sound#Speed_of_sound_in_ideal_gases_and_air
-   Units::KnotsSpeed speed_of_sound = sqrt(GAMMA * R * temperature);
+   Units::KnotsSpeed speed_of_sound = sqrt(kGamma * R * temperature);
    return speed_of_sound;
 }
 
@@ -152,7 +152,6 @@ double USStandardAtmosphere1976::ESFconstantCAS(const Units::Speed true_airspeed
 }
 
 Units::Length USStandardAtmosphere1976::GetMachIASTransition(const Units::Speed ias, const double mach) const {
-
    // Find the altitude at which CAS2TAS matches Mach2TAS (mach * SpeedOfSound)
    Units::MetersLength h(H_TROP);  // Only altitude at which the derivative is discontinuous, start there
 
@@ -165,7 +164,7 @@ Units::Length USStandardAtmosphere1976::GetMachIASTransition(const Units::Speed 
    for (int i = 1; i <= max_iterations; ++i) {
       Units::HertzFrequency f_prime(0);
       if (below_trop) {
-         f_prime = mach * K_T * sqrt(GAMMA * R / (T0 + h * K_T));
+         f_prime = mach * K_T * sqrt(kGamma * R / (T0 + h * K_T));
          double temp = 1 + h * K_T / T0;
          f_prime -= ias * K_T / T0 * (-RHO_T_EXPONENT / 2) * std::pow(temp, -RHO_T_EXPONENT / 2 - 1);
       } else {

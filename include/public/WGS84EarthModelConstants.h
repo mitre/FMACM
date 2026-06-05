@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -23,7 +23,7 @@
 #include "utility/CustomUnits.h"
 
 namespace aaesim::open_source {
-inline static const Units::MetersLength WGS84_SEMIMINOR_AXIS{SEMI_MINOR_AXIS_METERS};
-inline static const Units::MetersLength WGS84_SEMIMAJOR_AXIS{SEMI_MAJOR_AXIS_METERS};
-inline static const double WGS84_ECCENTRICITY_SQUARED{ECCENTRICITY_SQ};
+inline static const Units::MetersLength kWgs84SemiMinorAxis{SEMI_MINOR_AXIS_METERS};
+inline static const Units::MetersLength kWgs84SemiMajorAxis{SEMI_MAJOR_AXIS_METERS};
+inline constexpr double kWgs84EccentricitySquared{ECCENTRICITY_SQ};
 }  // namespace aaesim::open_source

@@ -14,23 +14,24 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/ShapeOnEllipsoid.h"
+#include <utility>
+
 #include "public/LatitudeLongitudePoint.h"
-#include "geolib/Shape.h"
+#include "public/ShapeOnEllipsoid.h"
 
 namespace aaesim {
-class ArcOnEllipsoid : public ShapeOnEllipsoid {
+class ArcOnEllipsoid final : public ShapeOnEllipsoid {
   public:
    ArcOnEllipsoid() = default;
 
    ArcOnEllipsoid(const geolib_idealab::Arc &arc);
 
-   SHAPE_TYPE GetShapeType() const override;
+   kShapeType GetShapeType() const override;
 
    Units::Length GetShapeLength() const override;
 
@@ -68,7 +69,7 @@ class ArcOnEllipsoid : public ShapeOnEllipsoid {
 
    bool IsPointInsideArc(const LatitudeLongitudePoint &test_point) const;
 
-   DIRECTION_RELATIVE_TO_SHAPE GetRelativeDirection(
+   kDirectionRelativeToShape GetRelativeDirection(
          const LatitudeLongitudePoint &latitude_longitude_point) const override;
 
    Units::Length GetDistanceToEndPoint(const LatitudeLongitudePoint &latitude_longitude_point) const override;
@@ -86,7 +87,7 @@ class ArcOnEllipsoid : public ShapeOnEllipsoid {
 
   private:
    static log4cplus::Logger m_logger;
-   geolib_idealab::Arc m_arc_primitive;
+   geolib_idealab::Arc m_arc_primitive{};
 };
 
 inline Units::SignedAngle ArcOnEllipsoid::GetForwardCourseEnuAtStartPoint() const {
@@ -97,6 +98,6 @@ inline Units::SignedAngle ArcOnEllipsoid::GetForwardCourseEnuAtEndPoint() const 
    return GetCourseEnuTangentToEndPoint();
 }
 
-inline ShapeOnEllipsoid::SHAPE_TYPE ArcOnEllipsoid::GetShapeType() const { return ARC; }
+inline ShapeOnEllipsoid::kShapeType ArcOnEllipsoid::GetShapeType() const { return ARC; }
 
 }  // namespace aaesim

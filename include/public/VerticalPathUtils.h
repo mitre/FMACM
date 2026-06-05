@@ -14,20 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "scalar/Time.h"
+#include <vector>
+
+#include "public/CoreUtils.h"
 #include "scalar/Length.h"
 #include "scalar/Speed.h"
-#include "public/CoreUtils.h"
+#include "scalar/Time.h"
 
 namespace aaesim {
 namespace open_source {
 struct VerticalPathUtils {
-
    struct VerticalPathDataSet final {
       Units::Length along_path_distance{};
       Units::Length altitude_msl{};
@@ -115,7 +116,6 @@ inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
 inline aaesim::open_source::VerticalPathUtils::VerticalPathDataSet
       aaesim::open_source::VerticalPathUtils::GetInterpolatedPathData(const VerticalPath &vertical_path,
                                                                       Units::Length estimated_distance_to_path_end) {
-
    const Units::MetersLength distance_to_go{estimated_distance_to_path_end};
    const auto reference_lookup_index =
          CoreUtils::FindNearestIndex(distance_to_go.value(), vertical_path.along_path_distance_m);

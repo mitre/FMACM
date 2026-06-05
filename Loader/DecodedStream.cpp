@@ -14,12 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/DecodedStream.h"
 
 #include <limits>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -31,7 +33,7 @@ DecodedStream::~DecodedStream(void) {}
 
 //----------------------------------------------------------------------------------
 
-bool find_num(string temp, int j) {
+bool find_num(const string &temp, int j) {
    if (!(('0' <= temp[0] && temp[0] <= '9') || temp[0] == '-')) {
       return false;
    }

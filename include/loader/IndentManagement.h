@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -50,7 +50,7 @@ class IndentManagement {
 
    inline void set_Tab(int tab) { i = tab; }  //--------------------------------------------------------
 
-   inline std::string get_Space() { return s; }
+   inline const std::string &get_Space() const { return s; }
 
   protected:  //--------------------------------------------------------
    int i;

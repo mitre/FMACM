@@ -14,22 +14,23 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <scalar/Acceleration.h>
 #include <scalar/Angle.h>
-#include <scalar/UnsignedAngle.h>
-#include <scalar/SignedAngle.h>
+#include <scalar/Force.h>
 #include <scalar/Frequency.h>
 #include <scalar/Mass.h>
 #include <scalar/MassFlowRate.h>
 #include <scalar/Pressure.h>
+#include <scalar/SignedAngle.h>
 #include <scalar/Speed.h>
 #include <scalar/Time.h>
-#include <scalar/Force.h>
+#include <scalar/UnsignedAngle.h>
+
 #include "utility/UtilityConstants.h"
 
 /*
@@ -139,6 +140,7 @@ const Units::Acceleration ONE_G_ACCELERATION =
 
 // angle constants
 const Units::Angle PI_RADIANS_ANGLE = DegreesAngle(180.0);
+const Units::Angle HALF_PI_RADIANS_ANGLE = PI_RADIANS_ANGLE / 2;
 const Units::Angle ONE_RADIAN_ANGLE = RadiansAngle(1.0);
 const Units::Angle DUMMY_DEGREES_ANGLE = DegreesAngle(-999.0);
 // end constants-----------------------------------------------------------------------------------------------------

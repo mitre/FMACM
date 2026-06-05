@@ -14,16 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ThreeDOFDynamics.h"
 
 #include <iomanip>
-#include <nlohmann/json.hpp>
+#include <memory>
+#include <utility>
 
+#include "loader/Logging.h"
+#include "nlohmann/json.hpp"
 #include "public/CoreUtils.h"
-#include "public/Logging.h"
 
 using json = nlohmann::json;
 using namespace std;

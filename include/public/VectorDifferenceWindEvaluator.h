@@ -14,13 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/PredictedWindEvaluator.h"
 #include <map>
+#include <memory>
+
+#include "public/PredictedWindEvaluator.h"
 
 namespace aaesim {
 namespace open_source {
@@ -41,7 +43,7 @@ class VectorDifferenceWindEvaluator : public aaesim::open_source::PredictedWindE
    static std::map<Units::Speed, std::weak_ptr<PredictedWindEvaluator> > m_instances;
    const Units::Speed m_max_allowed_difference;
 
-   VectorDifferenceWindEvaluator(const Units::Speed &max_allowed_difference);
+   explicit VectorDifferenceWindEvaluator(const Units::Speed &max_allowed_difference);
 };
 }  // namespace open_source
 }  // namespace aaesim

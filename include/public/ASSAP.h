@@ -14,15 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
+#include <memory>
 #include <vector>
-#include "public/AircraftState.h"
-#include "public/ADSBSVReport.h"
+
 #include "public/ADSBReceiver.h"
+#include "public/ADSBSVReport.h"
+#include "public/AircraftState.h"
 
 namespace aaesim {
 namespace open_source {

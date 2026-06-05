@@ -14,21 +14,24 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftControl.h"
 
-#include <nlohmann/json.hpp>
+#include <map>
+#include <memory>
+#include <utility>
+
+#include "nlohmann/json.hpp"
 
 using namespace aaesim::open_source;
 
 AircraftControl::AircraftControl(
       const std::map<aaesim::open_source::GuidanceFlightPhase,
                      std::pair<std::shared_ptr<aaesim::open_source::LateralController>,
-                               std::shared_ptr<aaesim::open_source::VerticalController>>> &controller_pairs) {
-   controller_map_ = controller_pairs;
-}
+                               std::shared_ptr<aaesim::open_source::VerticalController>>> &controller_pairs)
+   : controller_map_(controller_pairs) {}
 
 void AircraftControl::Initialize(
       std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> aircraft_performance) {

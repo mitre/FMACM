@@ -14,30 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcConstraint.h"
 
+using namespace aaesim::open_source;
+
 bool operator<=(ActiveFlagType l, ActiveFlagType r) { return ((static_cast<int>(l)) <= (static_cast<int>(r))); }
-
-PrecalcConstraint::PrecalcConstraint() {
-
-   active_flag = ActiveFlagType::UNSET;
-   constraint_along_path_distance = Units::MetersLength(0.0);  // distance constraints-meters.
-   constraint_altHi = Units::MetersLength(0);                  // altitude max constraints-meters.
-   constraint_altLow = Units::MetersLength(0);                 // altitude min constraints-meters.
-   constraint_speedHi = Units::MetersPerSecondSpeed(0.0);      // speed max constraint-meters per second.
-   constraint_speedLow = Units::MetersPerSecondSpeed(0.0);     // speed min constraint-meters per second.
-   index = -1;
-   violation_flag = false;
-}
-
-PrecalcConstraint::~PrecalcConstraint() = default;
 
 PrecalcConstraint &PrecalcConstraint::operator=(const PrecalcConstraint &obj) {
    if (this != &obj) {
-
       constraint_along_path_distance = obj.constraint_along_path_distance;
       constraint_altHi = obj.constraint_altHi;
       constraint_altLow = obj.constraint_altLow;
@@ -72,15 +59,3 @@ bool PrecalcConstraint::operator==(const PrecalcConstraint &obj) const {
 }
 
 bool PrecalcConstraint::operator!=(const PrecalcConstraint &obj) const { return !operator==(obj); }
-
-std::ostream &operator<<(std::ostream &out, const PrecalcConstraint &constraint) {
-   out << "Constraint " << constraint.index << " at "
-       << Units::MetersLength(constraint.constraint_along_path_distance).value()
-       << " meters, active=" << static_cast<int>(constraint.active_flag) << " alt between "
-       << Units::MetersLength(constraint.constraint_altLow).value() << " and "
-       << Units::MetersLength(constraint.constraint_altHi).value() << " meters, "
-       << " speed between " << Units::MetersPerSecondSpeed(constraint.constraint_speedLow).value() << " and "
-       << Units::MetersPerSecondSpeed(constraint.constraint_speedHi).value() << " m/s, "
-       << " violation=" << constraint.violation_flag;
-   return out;
-}

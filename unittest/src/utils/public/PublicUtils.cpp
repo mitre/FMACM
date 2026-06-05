@@ -14,10 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "utils/public/PublicUtils.h"
+
+#include <cstdio>
+#include <iostream>
+#include <string>
+#include <vector>
+
 #include "public/SingleTangentPlaneSequence.h"
 
 using namespace std;
@@ -81,7 +87,6 @@ AircraftIntent aaesim::test::utils::PublicUtils::LoadAircraftIntent(std::string 
    if (fp == nullptr) {
       std::cout << "Intent file " << parmsfile.c_str() << " not found" << std::endl;
    } else {
-
       bool r = intentstream.open_file(parmsfile);
 
       if (!r) {

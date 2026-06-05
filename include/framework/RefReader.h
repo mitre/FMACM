@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -28,13 +28,15 @@
 
 #pragma once
 
+#include <string>
+
 #include "public/DataReader.h"
 
 namespace testvector {
 
 class RefReader : public aaesim::open_source::DataReader {
   public:
-   RefReader(std::string file_name, int header_lines, size_t expected_columns);
+   RefReader(const std::string &file_name, int header_lines, size_t expected_columns);
    RefReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns);
    virtual ~RefReader();
    virtual bool Advance();

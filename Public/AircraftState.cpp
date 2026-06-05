@@ -14,13 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftState.h"
 
-#include <iomanip>
 #include <cmath>
+#include <iomanip>
 
 #include "public/CustomMath.h"
 
@@ -137,15 +137,10 @@ AircraftState::AircraftState(const AircraftState::Builder &builder) {
    m_psi = builder.GetPsi();
 }
 
-AircraftState::Builder::Builder(int unique_acid, int time_since_epoch_seconds) {
-   id_ = unique_acid;
-   timestamp_ = Units::SecondsTime(time_since_epoch_seconds);
-}
+AircraftState::Builder::Builder(int unique_acid, int time_since_epoch_seconds)
+   : id_(unique_acid), timestamp_(Units::SecondsTime(time_since_epoch_seconds)) {}
 
-AircraftState::Builder::Builder(int unique_acid, Units::Time timestamp) {
-   id_ = unique_acid;
-   timestamp_ = timestamp;
-}
+AircraftState::Builder::Builder(int unique_acid, Units::Time timestamp) : id_(unique_acid), timestamp_(timestamp) {}
 
 AircraftState::Builder::Builder(const AircraftState &state_to_copy) {
    id_ = state_to_copy.GetUniqueId();

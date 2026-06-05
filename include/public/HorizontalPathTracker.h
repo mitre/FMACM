@@ -14,14 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include <public/HorizontalPath.h>
-#include <vector>
 #include <log4cplus/logger.h>
+#include <public/HorizontalPath.h>
+
+#include <vector>
 
 namespace aaesim::open_source {
 
@@ -46,7 +47,6 @@ enum TrajectoryIndexProgressionDirection {
 };
 
 class HorizontalPathTracker {
-
   public:
    HorizontalPathTracker() = default;
    HorizontalPathTracker(const std::vector<HorizontalPath> &horizontal_trajectory,
@@ -75,7 +75,7 @@ class HorizontalPathTracker {
     */
    virtual void UpdateHorizontalTrajectory(const std::vector<HorizontalPath> &horizontal_trajectory);
 
-   const std::vector<HorizontalPath> GetHorizontalPath() const;
+   const std::vector<HorizontalPath> &GetHorizontalPath() const;
 
    void UpdateCurrentIndex(std::vector<HorizontalPath>::size_type new_index);
 
@@ -126,7 +126,7 @@ class HorizontalPathTracker {
 
 inline bool HorizontalPathTracker::IsPassedEndOfRoute() const { return m_is_passed_end_of_route; }
 
-inline const std::vector<HorizontalPath> HorizontalPathTracker::GetHorizontalPath() const {
+inline const std::vector<HorizontalPath> &HorizontalPathTracker::GetHorizontalPath() const {
    return m_unmodified_horizontal_trajectory;
 }
 

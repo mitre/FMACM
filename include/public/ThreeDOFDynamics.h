@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -26,7 +26,9 @@
 #include <scalar/Speed.h>
 
 #include <map>
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "public/AircraftControl.h"
 #include "public/AircraftState.h"
@@ -61,11 +63,11 @@ class ThreeDOFDynamics final {
 
    const DynamicsState GetDynamicsState() const;
 
-   const EquationsOfMotionState GetEquationsOfMotionState() const;
+   const EquationsOfMotionState &GetEquationsOfMotionState() const;
 
    const EquationsOfMotionStateDeriv GetEquationsOfMotionStateDerivative() const;
 
-   std::map<const aaesim::open_source::SimulationTime, const DynamicsState> GetDynamicsStateHistory() const;
+   const std::map<const aaesim::open_source::SimulationTime, const DynamicsState> &GetDynamicsStateHistory() const;
 
   private:
    inline static log4cplus::Logger m_logger{log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ThreeDOFDynamics"))};
@@ -110,7 +112,7 @@ inline const DynamicsState ThreeDOFDynamics::GetDynamicsState() const {
    return std::prev(m_dynamics_history.cend())->second;
 }
 
-inline const EquationsOfMotionState ThreeDOFDynamics::GetEquationsOfMotionState() const {
+inline const EquationsOfMotionState &ThreeDOFDynamics::GetEquationsOfMotionState() const {
    return m_equations_of_motion_state;
 }
 
@@ -118,7 +120,7 @@ inline const EquationsOfMotionStateDeriv ThreeDOFDynamics::GetEquationsOfMotionS
    return m_equations_of_motion_state_derivative;
 }
 
-inline std::map<const aaesim::open_source::SimulationTime, const DynamicsState>
+inline const std::map<const aaesim::open_source::SimulationTime, const DynamicsState> &
       ThreeDOFDynamics::GetDynamicsStateHistory() const {
    return m_dynamics_history;
 }

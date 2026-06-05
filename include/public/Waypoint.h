@@ -14,12 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/LoggingLoadable.h"
+#include <list>
+#include <string>
+
+#include "loader/LoggingLoadable.h"
 
 class Waypoint : public LoggingLoadable {
   public:
@@ -28,7 +31,7 @@ class Waypoint : public LoggingLoadable {
    static const Units::KnotsSpeed MAX_SPEED_CONSTRAINT;
    static const Units::KnotsSpeed MIN_SPEED_CONSTRAINT;
 
-   Waypoint();
+   Waypoint() = default;
 
    ~Waypoint() = default;
 
@@ -36,7 +39,7 @@ class Waypoint : public LoggingLoadable {
             Units::Length altitude_constraint_upper = MAX_ALTITUDE_CONSTRAINT,
             Units::Length altitude_constraint_lower = MIN_ALTITUDE_CONSTRAINT,
             Units::Speed speed_constraint = MAX_SPEED_CONSTRAINT, Units::Length nominal_altitude = Units::ZERO_LENGTH,
-            Units::Speed nominal_ias = Units::ZERO_SPEED, std::string arinc424_leg_type = "");
+            Units::Speed nominal_ias = Units::ZERO_SPEED, const std::string &arinc424_leg_type = "");
 
    Waypoint &operator=(const Waypoint &in) {
       stream = NULL;
@@ -109,7 +112,7 @@ class Waypoint : public LoggingLoadable {
 
    Units::Length GetRfTurnArcRadius() const;
 
-   std::string GetArinc424LegType() const;
+   const std::string &GetArinc424LegType() const;
 
   private:
    std::string m_name{};
@@ -188,7 +191,7 @@ inline Units::Length Waypoint::GetRfTurnArcRadius() const { return m_rf_turn_arc
 
 inline void Waypoint::SetRfTurnArcRadius(const Units::Length &rf_turn_radius) { m_rf_turn_arc_radius = rf_turn_radius; }
 
-inline std::string Waypoint::GetArinc424LegType() const { return m_arinc424_leg_type; }
+inline const std::string &Waypoint::GetArinc424LegType() const { return m_arinc424_leg_type; }
 
 std::ostream &operator<<(std::ostream &out, const Waypoint &waypoint);
 

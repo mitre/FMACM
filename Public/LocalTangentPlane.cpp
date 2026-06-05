@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,6 +25,10 @@
  */
 
 #include "public/LocalTangentPlane.h"
+
+#include <memory>
+#include <string>
+
 #include "public/CustomMath.h"
 
 using namespace std;
@@ -51,17 +55,13 @@ void LocalTangentPlane::InitializeRotationForGeodeticOrigin() {
 }
 
 void LocalTangentPlane::RotateEnuFrame(const double x, const double y, const double z, const Units::Angle theta) {
-   DMatrix &r = CreateRotationMatrix(x, y, z, theta);
-   DMatrix &ecefToEnu1 = m_ecef_to_enu * r;
-   m_ecef_to_enu = ecefToEnu1;
-   delete &r;
-   delete &ecefToEnu1;
+   auto rotation = std::unique_ptr<DMatrix>(&CreateRotationMatrix(x, y, z, theta));
+   auto ecef_to_enu = std::unique_ptr<DMatrix>(&(m_ecef_to_enu * *rotation));
+   m_ecef_to_enu = *ecef_to_enu;
 
-   DMatrix &rInv = CreateRotationMatrix(x, y, z, -theta);
-   DMatrix &enuToEcef1 = rInv * m_enu_to_ecef;
-   m_enu_to_ecef = enuToEcef1;
-   delete &rInv;
-   delete &enuToEcef1;
+   auto inverse_rotation = std::unique_ptr<DMatrix>(&CreateRotationMatrix(x, y, z, -theta));
+   auto enu_to_ecef = std::unique_ptr<DMatrix>(&(*inverse_rotation * m_enu_to_ecef));
+   m_enu_to_ecef = *enu_to_ecef;
 }
 
 void LocalTangentPlane::ConvertGeodeticToAbsolute(const EarthModel::GeodeticPosition &geo,
@@ -74,7 +74,7 @@ void LocalTangentPlane::ConvertAbsoluteToGeodetic(const EarthModel::AbsolutePosi
    earthModel->ConvertAbsoluteToGeodetic(ecef, geo);
 }
 
-void LocalTangentPlane::printCoordinates(string title, Units::Length x, Units::Length y, Units::Length z) {
+void LocalTangentPlane::printCoordinates(const string &title, Units::Length x, Units::Length y, Units::Length z) {
    LOG4CPLUS_TRACE(logger, title << " (" << Units::MetersLength(x).value() << "," << Units::MetersLength(y).value()
                                  << "," << Units::MetersLength(z).value() << ")");
 }

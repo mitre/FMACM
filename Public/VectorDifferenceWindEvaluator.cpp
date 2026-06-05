@@ -14,10 +14,14 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/VectorDifferenceWindEvaluator.h"
+
+#include <map>
+#include <memory>
+
 #include "public/Environment.h"
 
 using namespace aaesim::open_source;
@@ -45,16 +49,15 @@ bool VectorDifferenceWindEvaluator::ArePredictedWindsAccurate(
       const aaesim::open_source::AircraftState &state, const aaesim::open_source::WeatherPrediction &weather_prediction,
       const Units::Speed reference_cas, const Units::Length reference_altitude,
       const std::shared_ptr<Atmosphere> &sensed_atmosphere) const {
-
-   Units::MetersPerSecondSpeed windeastcomp, windnorthcomp;  // units of mps as returned from AircraftCalculations
+   Units::MetersPerSecondSpeed wind_east, wind_north;
    Units::Frequency dtmp;
-   weather_prediction.east_west().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()),
-                                                                  windeastcomp, dtmp);
+   weather_prediction.east_west().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()), wind_east,
+                                                                  dtmp);
    weather_prediction.north_south().CalculateWindGradientAtAltitude(Units::FeetLength(state.GetAltitudeMsl()),
-                                                                    windnorthcomp, dtmp);
+                                                                    wind_north, dtmp);
 
-   Units::Speed xDiff = state.GetSensedWindEast() - windeastcomp;
-   Units::Speed yDiff = state.GetSensedWindNorth() - windnorthcomp;
+   Units::Speed x_diff = state.GetSensedWindEast() - wind_east;
+   Units::Speed y_diff = state.GetSensedWindNorth() - wind_north;
 
-   return Units::sqr(xDiff) + Units::sqr(yDiff) <= Units::sqr(m_max_allowed_difference);
+   return Units::sqr(x_diff) + Units::sqr(y_diff) <= Units::sqr(m_max_allowed_difference);
 }

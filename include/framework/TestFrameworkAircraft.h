@@ -14,34 +14,34 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/ScenarioEntity.h"
-
-#include <vector>
-#include <memory>
 #include <scalar/Length.h>
 
+#include <memory>
+#include <vector>
+
+#include "framework/GuidanceFromStaticData.h"
+#include "framework/WeatherTruthFromStaticData.h"
 #include "public/AircraftControl.h"
 #include "public/AircraftState.h"
-#include "public/SimulationTime.h"
-#include "public/ThreeDOFDynamics.h"
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/FlightDeckApplication.h"
 #include "public/NullADSBReceiver.h"
 #include "public/NullFlightDeckApplication.h"
+#include "public/ScenarioEntity.h"
+#include "public/SimulationTime.h"
+#include "public/ThreeDOFDynamics.h"
 #include "public/WeatherTruth.h"
-#include "framework/WeatherTruthFromStaticData.h"
-#include "framework/GuidanceFromStaticData.h"
 
 class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
   public:
    bool Update(const aaesim::open_source::SimulationTime &time) override;
 
-   std::vector<aaesim::open_source::AircraftState> GetAircraftStates() const { return m_states; }
+   const std::vector<aaesim::open_source::AircraftState> &GetAircraftStates() const { return m_states; }
 
    const int GetStartTime() const override { return m_states[0].GetTime().value(); };
 
@@ -56,12 +56,15 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
    class Builder final {
      public:
       Builder()
-         : performance_(), aircraft_dynamics_model_(), aircraft_control_(), guidance_calculator_(), initial_state_() {
-         receiver_ = std::make_shared<aaesim::open_source::NullADSBReceiver>();
-         speed_application_ = std::make_shared<aaesim::open_source::NullFlightDeckApplication>();
-         true_weather_ = std::make_shared<fmacm::WeatherTruthFromStaticData>(
-               fmacm::WeatherTruthFromStaticData::CreateZeroTruthWind());
-      };
+         : performance_(),
+           aircraft_dynamics_model_(),
+           aircraft_control_(),
+           true_weather_(std::make_shared<fmacm::WeatherTruthFromStaticData>(
+                 fmacm::WeatherTruthFromStaticData::CreateZeroTruthWind())),
+           receiver_(std::make_shared<aaesim::open_source::NullADSBReceiver>()),
+           guidance_calculator_(),
+           speed_application_(std::make_shared<aaesim::open_source::NullFlightDeckApplication>()),
+           initial_state_() {};
       ~Builder() = default;
       std::shared_ptr<TestFrameworkAircraft> Build() const;
       Builder *WithAircraftPerformance(std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &performance);
@@ -87,7 +90,7 @@ class TestFrameworkAircraft final : public aaesim::open_source::ScenarioEntity {
       std::shared_ptr<aaesim::open_source::FlightDeckApplication> GetFligthDeckApplication() const {
          return speed_application_;
       }
-      aaesim::open_source::AircraftState GetInitialState() const { return initial_state_; }
+      const aaesim::open_source::AircraftState &GetInitialState() const { return initial_state_; }
 
      private:
       std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> performance_;

@@ -14,10 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/FilePath.h"
+
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -94,17 +97,17 @@ bool FilePath::operator==(const FilePath &rhs) const {
    return false;
 }
 
-string FilePath::GetFullPath() const { return m_full_path; }
+const string &FilePath::GetFullPath() const { return m_full_path; }
 
-string FilePath::GetType() const { return m_type; }
+const string &FilePath::GetType() const { return m_type; }
 
-string FilePath::GetDisk() const { return m_drive; }
+const string &FilePath::GetDisk() const { return m_drive; }
 
-string FilePath::RemoveLastDirectory() const { return m_last_directory; }
+const string &FilePath::RemoveLastDirectory() const { return m_last_directory; }
 
 int FilePath::GetNumberOfDirectories() const { return m_number_of_directories; }
 
-vector<string> FilePath::ListDirectories() const { return m_list_of_directories; }
+const vector<string> &FilePath::ListDirectories() const { return m_list_of_directories; }
 
 FilePath FilePath::Pop() const {
    FilePath out = FilePath(m_last_directory);
@@ -133,7 +136,7 @@ FilePath FilePath::Cd(const FilePath &fp) const {
          out = temp.Pop();
       } else if (full.substr(0, 3) == "..\\" || full.substr(0, 3) == "../") {
          temp2 = temp.Pop();
-         out = temp2.Push(full.substr(3));
+         out = temp2.Push(FilePath(full.substr(3)));
       } else {
          size_t col = full.find_first_of(":");
          int len = full.length();

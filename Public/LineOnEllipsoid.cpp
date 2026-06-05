@@ -14,11 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/EllipsoidalEarthModel.h>
 #include "public/LineOnEllipsoid.h"
+
+#include <public/EllipsoidalEarthModel.h>
+
+#include <tuple>
+#include <utility>
+
 #include "public/GeolibUtils.h"
 
 using namespace aaesim;
@@ -26,19 +31,21 @@ using namespace geolib_idealab;
 
 log4cplus::Logger LineOnEllipsoid::m_logger = log4cplus::Logger::getInstance("LineOnEllipsoid");
 
-LineOnEllipsoid::LineOnEllipsoid(const geolib_idealab::Geodesic &geodesic) { m_geolib_geodesic = geodesic; }
+LineOnEllipsoid::LineOnEllipsoid(const geolib_idealab::Geodesic &geodesic) : geolib_geodesic_(geodesic) {
+   ComputeUnitVectorNormalToLineStartEnd();
+}
 
-const geolib_idealab::Geodesic &LineOnEllipsoid::GetGeolibPrimitiveGeodesic() const { return m_geolib_geodesic; }
+const geolib_idealab::Geodesic &LineOnEllipsoid::GetGeolibPrimitiveGeodesic() const { return geolib_geodesic_; }
 
 Units::SignedAngle LineOnEllipsoid::GetForwardCourseEnuAtStartPoint() const {
-   return GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(m_geolib_geodesic.startAz));
+   return GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(geolib_geodesic_.startAz));
 }
 
 Units::SignedAngle LineOnEllipsoid::GetForwardCourseEnuAtEndPoint() const {
-   return GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(m_geolib_geodesic.endAz));
+   return GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(geolib_geodesic_.endAz));
 }
 
-Units::Length LineOnEllipsoid::GetShapeLength() const { return Units::NauticalMilesLength(m_geolib_geodesic.length); }
+Units::Length LineOnEllipsoid::GetShapeLength() const { return Units::NauticalMilesLength(geolib_geodesic_.length); }
 
 LineOnEllipsoid LineOnEllipsoid::CreateFromPoints(const LatitudeLongitudePoint &start_point,
                                                   const LatitudeLongitudePoint &end_point) {
@@ -46,11 +53,11 @@ LineOnEllipsoid LineOnEllipsoid::CreateFromPoints(const LatitudeLongitudePoint &
 }
 
 LatitudeLongitudePoint LineOnEllipsoid::GetEndPoint() const {
-   return LatitudeLongitudePoint::CreateFromGeolibPrimitive(m_geolib_geodesic.endPoint);
+   return LatitudeLongitudePoint::CreateFromGeolibPrimitive(geolib_geodesic_.endPoint);
 }
 
 LatitudeLongitudePoint LineOnEllipsoid::GetStartPoint() const {
-   return LatitudeLongitudePoint::CreateFromGeolibPrimitive(m_geolib_geodesic.startPoint);
+   return LatitudeLongitudePoint::CreateFromGeolibPrimitive(geolib_geodesic_.startPoint);
 }
 
 const geolib_idealab::LineType LineOnEllipsoid::GetLineType() const { return geolib_idealab::LineType::SEGMENT; }
@@ -65,86 +72,63 @@ LineOnEllipsoid LineOnEllipsoid::CreateExtendedLine(Units::Length extended_dista
    return LineOnEllipsoid::CreateFromPoints(this->GetStartPoint(), new_end_point);
 }
 
-ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE LineOnEllipsoid::GetRelativeDirection(
+void LineOnEllipsoid::ComputeUnitVectorNormalToLineStartEnd() {
+   EllipsoidalEarthModel earth_model;
+   EllipsoidalEarthModel::GeodeticPosition start_point_position_geodetic;
+   start_point_position_geodetic.latitude = GetStartPoint().GetLatitude();
+   start_point_position_geodetic.longitude = GetStartPoint().GetLongitude();
+   EllipsoidalEarthModel::AbsolutePositionEcef start_point_position_absolute;
+   earth_model.ConvertGeodeticToAbsolute(start_point_position_geodetic, start_point_position_absolute);
+   const EllipsoidalEarthModel::AbsolutePositionEcef start_point_position_unit_vector =
+         start_point_position_absolute.ToUnitVector();
+
+   EllipsoidalEarthModel::GeodeticPosition end_point_position_geodetic;
+   end_point_position_geodetic.latitude = GetEndPoint().GetLatitude();
+   end_point_position_geodetic.longitude = GetEndPoint().GetLongitude();
+   EllipsoidalEarthModel::AbsolutePositionEcef end_point_position_absolute;
+   earth_model.ConvertGeodeticToAbsolute(end_point_position_geodetic, end_point_position_absolute);
+   const EllipsoidalEarthModel::AbsolutePositionEcef end_point_position_unit_vector =
+         end_point_position_absolute.ToUnitVector();
+
+   unit_vector_normal_to_line_start_end_ =
+         VectorCrossProduct(start_point_position_unit_vector, end_point_position_unit_vector).ToUnitVector();
+}
+
+ShapeOnEllipsoid::kDirectionRelativeToShape LineOnEllipsoid::GetRelativeDirection(
       const LatitudeLongitudePoint &point_not_on_shape) const {
-   // Don't call parent implementation at all
-   DIRECTION_RELATIVE_TO_SHAPE return_this = ShapeOnEllipsoid::UNSET;
-   if (IsPointOnShape(point_not_on_shape)) {
-      return_this = ShapeOnEllipsoid::ON_SHAPE;
-   } else {
-      /**
-       * Cross Product 1: cross product of ECEF vector pointing to nearest point on the line and ECEF vector pointing to
-       * test point Cross Product 2: cross product of ECEF vector pointing to line start point and ECEF vector pointing
-       * to nearest position on the line
-       */
-      EllipsoidalEarthModel earth_model;
-      EllipsoidalEarthModel::AbsolutePositionEcef test_point_position_absolute, nearest_point_position_absolute,
-            line_start_point_position_absolute;
-      std::tuple<LatitudeLongitudePoint, Units::SignedDegreesAngle, Units::Length> perp_info =
-            GeolibUtils::FindNearestPointOnLineUsingPerpendicularProjection(*this, point_not_on_shape);
-      const LatitudeLongitudePoint nearest_point_on_line = std::get<0>(perp_info);
+   EllipsoidalEarthModel earth_model;
 
-      // ECEF Vector from center of earth to test point
-      EllipsoidalEarthModel::GeodeticPosition test_point_position_geodetic;
-      test_point_position_geodetic.latitude = point_not_on_shape.GetLatitude();
-      test_point_position_geodetic.longitude = point_not_on_shape.GetLongitude();
-      earth_model.ConvertGeodeticToAbsolute(test_point_position_geodetic, test_point_position_absolute);
-      const EllipsoidalEarthModel::AbsolutePositionEcef test_point_position_unit_vector =
-            test_point_position_absolute.ToUnitVector();
+   // Cross product of line start and point not on shape
+   std::tuple<LatitudeLongitudePoint, Units::SignedDegreesAngle, Units::Length> perp_info =
+         GeolibUtils::FindNearestPointOnLineUsingPerpendicularProjection(*this, point_not_on_shape);
+   const LatitudeLongitudePoint nearest_point_on_line = std::get<0>(perp_info);
+   EllipsoidalEarthModel::GeodeticPosition nearest_point_position_geodetic;
+   nearest_point_position_geodetic.latitude = nearest_point_on_line.GetLatitude();
+   nearest_point_position_geodetic.longitude = nearest_point_on_line.GetLongitude();
+   EllipsoidalEarthModel::AbsolutePositionEcef nearest_point_position_absolute;
+   earth_model.ConvertGeodeticToAbsolute(nearest_point_position_geodetic, nearest_point_position_absolute);
 
-      // ECEF Vector from center of earth to line intersection point
-      EllipsoidalEarthModel::GeodeticPosition nearest_point_position_geodetic;
-      nearest_point_position_geodetic.latitude = nearest_point_on_line.GetLatitude();
-      nearest_point_position_geodetic.longitude = nearest_point_on_line.GetLongitude();
-      earth_model.ConvertGeodeticToAbsolute(nearest_point_position_geodetic, nearest_point_position_absolute);
-      const EllipsoidalEarthModel::AbsolutePositionEcef nearest_point_position_unit_vector =
-            nearest_point_position_absolute.ToUnitVector();
+   EllipsoidalEarthModel::GeodeticPosition test_point_position_geodetic;
+   test_point_position_geodetic.latitude = point_not_on_shape.GetLatitude();
+   test_point_position_geodetic.longitude = point_not_on_shape.GetLongitude();
+   EllipsoidalEarthModel::AbsolutePositionEcef test_point_position_absolute;
+   earth_model.ConvertGeodeticToAbsolute(test_point_position_geodetic, test_point_position_absolute);
+   const EllipsoidalEarthModel::AbsolutePositionEcef vector_to_test_point =
+         VectorDifference(nearest_point_position_absolute, test_point_position_absolute);
+   const EllipsoidalEarthModel::AbsolutePositionEcef vector_to_test_point_unit_vector =
+         vector_to_test_point.ToUnitVector();
 
-      const EllipsoidalEarthModel::AbsolutePositionEcef cross_product =
-            VectorCrossProduct(nearest_point_position_unit_vector, test_point_position_unit_vector).ToUnitVector();
-      const Units::SignedDegreesAngle east_west_tolerance(5);  // this is not very sensitive and does not need to be
-                                                               // very small
-      const bool line_is_almost_directly_east =
-            Units::abs(Units::SignedRadiansAngle(GetForwardCourseEnuAtStartPoint())) < east_west_tolerance;
-      const bool line_is_almost_directly_west =
-            Units::abs(Units::SignedRadiansAngle(GetForwardCourseEnuAtStartPoint()) - Units::PI_RADIANS_ANGLE) <
-            east_west_tolerance;
-      if (line_is_almost_directly_east) {
-         /*
-          * Note: the algorithm gets here only when the line being followed is "nearly directly" east.
-          */
-         if (cross_product.x < Units::zero()) {
-            return_this = ShapeOnEllipsoid::LEFT_OF_SHAPE;
-         } else {
-            return_this = ShapeOnEllipsoid::RIGHT_OF_SHAPE;
-         }
-      } else if (line_is_almost_directly_west) {
-         /*
-          * Note: the algorithm gets here only when the line being followed is "nearly directly" west.
-          */
-         if (cross_product.x > Units::zero()) {
-            return_this = ShapeOnEllipsoid::LEFT_OF_SHAPE;
-         } else {
-            return_this = ShapeOnEllipsoid::RIGHT_OF_SHAPE;
-         }
-      } else if (Units::SignedRadiansAngle(GetForwardCourseEnuAtStartPoint()) > Units::zero()) {
-         if (cross_product.z < Units::zero()) {
-            return_this = ShapeOnEllipsoid::LEFT_OF_SHAPE;
-         } else {
-            return_this = ShapeOnEllipsoid::RIGHT_OF_SHAPE;
-         }
-      } else {
-         if (cross_product.z < Units::zero()) {
-            return_this = ShapeOnEllipsoid::RIGHT_OF_SHAPE;
-         } else {
-            return_this = ShapeOnEllipsoid::LEFT_OF_SHAPE;
-         }
-      }
-      //----------------------------------------------------------------------------------------------------------------
+   // Use angle between vectors to compute relative direction
+   const Units::MetersLength dp =
+         VectorDotProduct(unit_vector_normal_to_line_start_end_, vector_to_test_point_unit_vector);
+   const double ratio = dp / Units::MetersLength(1.0);
+   const auto beta = Units::SignedRadiansAngle{std::acos(ratio)};
+   if (beta < Units::HALF_PI_RADIANS_ANGLE) {
+      return ShapeOnEllipsoid::RIGHT_OF_SHAPE;
+   } else if (beta > Units::HALF_PI_RADIANS_ANGLE) {
+      return ShapeOnEllipsoid::LEFT_OF_SHAPE;
    }
-
-   // done
-   return return_this;
+   return ShapeOnEllipsoid::ON_SHAPE;
 }
 
 Units::Length LineOnEllipsoid::GetDistanceToEndPoint(const LatitudeLongitudePoint &latitude_longitude_point) const {
@@ -170,12 +154,11 @@ LatitudeLongitudePoint LineOnEllipsoid::CalculatePointAtDistanceFromStartPoint(
 }
 std::pair<Units::SignedAngle, LatitudeLongitudePoint> LineOnEllipsoid::CalculateCourseAtDistanceFromStartPoint(
       const Units::Length &distance_along_shape_from_start_point) const {
-
    double temp_course_1, temp_course_2, dist_to_point;
    ErrorSet error_set{ErrorCodes::SUCCESS};
    LatitudeLongitudePoint point_on_geodesic =
          CalculatePointAtDistanceFromStartPoint(distance_along_shape_from_start_point);
-   double course_ned_at_point = geoCrs(m_geolib_geodesic, point_on_geodesic.GetGeolibPrimitiveLLPoint(), &temp_course_1,
+   double course_ned_at_point = geoCrs(geolib_geodesic_, point_on_geodesic.GetGeolibPrimitiveLLPoint(), &temp_course_1,
                                        &temp_course_2, &dist_to_point, &error_set, GEOLIB_TOLERANCE, GEOLIB_EPSILON);
    if (!GeolibUtils::IsSuccess(error_set)) {
       LOG4CPLUS_ERROR(m_logger, GeolibUtils::m_basic_error_message << formatErrorMessage(error_set));

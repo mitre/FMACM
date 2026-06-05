@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <memory>
 
 #include "public/TrueWeatherOperator.h"
 #include "public/WeatherTruth.h"
@@ -25,7 +27,7 @@
 namespace aaesim::open_source {
 class AbstractTrueWeatherOperator : public TrueWeatherOperator {
   public:
-   AbstractTrueWeatherOperator(std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather)
+   explicit AbstractTrueWeatherOperator(std::shared_ptr<aaesim::open_source::WeatherTruth> true_weather)
       : m_true_weather{true_weather} {}
    ~AbstractTrueWeatherOperator() = default;
    Units::KelvinTemperature GetTemperature() const override { return m_true_weather->GetTemperature(); }

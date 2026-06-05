@@ -14,19 +14,20 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "utility/CustomUnits.h"
+#include <log4cplus/logger.h>
+#include <scalar/Density.h>
 #include <scalar/Length.h>
+#include <scalar/Pressure.h>
 #include <scalar/Speed.h>
 #include <scalar/Temperature.h>
-#include <scalar/Density.h>
-#include <scalar/Pressure.h>
+
 #include "public/WindStack.h"
-#include <log4cplus/logger.h>
+#include "utility/CustomUnits.h"
 
 // Standard air pressure at sea level
 const Units::PascalsPressure P0_ISA(101325.);
@@ -39,10 +40,10 @@ const Units::KilogramsMeterDensity RHO0_ISA(1.225);
 const Units::MetersPerSecondSpeed A0(340.29);
 
 // Isentropic expansion coefficient for air
-constexpr double GAMMA = 1.4;
+constexpr double kGamma = 1.4;
 
 // mu
-constexpr double MU = ((GAMMA - 1) / (GAMMA));
+constexpr double MU = ((kGamma - 1) / (kGamma));
 
 // Real gas constant (m^2/K-s^2)
 const Units::MetersSecondsKelvinGasConstant R(287.05287);

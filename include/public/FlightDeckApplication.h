@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <memory>
 
 #include "public/ASSAP.h"
 #include "public/AircraftIntent.h"
@@ -27,13 +29,14 @@
 #include "public/Guidance.h"
 #include "public/TangentPlaneSequence.h"
 #include "public/WeatherPrediction.h"
+
 namespace aaesim {
 namespace open_source {
 struct OwnshipPerformanceParameters {
-   aaesim::open_source::bada_utils::FlapSpeeds flap_speeds;
-   aaesim::open_source::bada_utils::FlightEnvelope flight_envelope;
-   aaesim::open_source::bada_utils::Mass mass_data;
-   aaesim::open_source::bada_utils::Aerodynamics aerodynamics;
+   aaesim::open_source::bada_utils::FlapSpeeds flap_speeds{};
+   aaesim::open_source::bada_utils::FlightEnvelope flight_envelope{};
+   aaesim::open_source::bada_utils::Mass mass_data{};
+   aaesim::open_source::bada_utils::Aerodynamics aerodynamics{};
 };
 
 struct OwnshipFmsPredictionParameters {

@@ -14,16 +14,17 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include <string>
 #include <fstream>
+#include <string>
+
 #include "assert.h"
-#include "loader/Token.h"
 #include "loader/IndentManagement.h"
+#include "loader/Token.h"
 
 class TokenStream : public IndentManagement {
   public:

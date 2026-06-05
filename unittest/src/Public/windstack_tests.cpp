@@ -14,11 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
+
 #include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "loader/DecodedStream.h"
 #include "public/WindStack.h"
 
@@ -28,7 +33,6 @@ namespace aaesim {
 namespace test {
 namespace open_source {
 TEST(WindStack, operatorEqEq) {
-
    // 1.empty vs empty
    WindStack ws0;
    WindStack ws1;
@@ -112,7 +116,6 @@ TEST(WindStack, operatorEqEq) {
 }
 
 TEST(WindStack, operatorNotEq) {
-
    // 1.something vs. equals something
    WindStack ws0;
    ws0.SetBounds(0, 4);

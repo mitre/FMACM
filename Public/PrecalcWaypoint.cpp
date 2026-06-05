@@ -14,32 +14,10 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/PrecalcWaypoint.h"
-
-PrecalcWaypoint::PrecalcWaypoint() {
-   m_name = "";
-   m_leg_length = Units::zero();
-   m_course_angle = Units::DegreesAngle(0.0);
-
-   m_x_pos_meters = Units::MetersLength(0);
-   m_y_pos_meters = Units::MetersLength(0);
-
-   m_rf_leg_center_x = Units::MetersLength(0);
-   m_rf_leg_center_y = Units::MetersLength(0);
-   m_radius_rf_leg = Units::MetersLength(0);
-
-   m_precalc_constraints.constraint_along_path_distance = Units::MetersLength(0.0);  // distance constraints
-   m_precalc_constraints.constraint_altHi = Units::MetersLength(0.0);                // altitude max constraints
-   m_precalc_constraints.constraint_altLow = Units::MetersLength(0.0);               // altitude min constraints
-
-   m_bank_angle = Units::RadiansAngle(0);
-   m_ground_speed = Units::MetersPerSecondSpeed(0.0);
-
-   m_loaded = false;
-}
 
 PrecalcWaypoint::~PrecalcWaypoint() = default;
 

@@ -19,8 +19,11 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include "loader/Loadable.h"
-#include "public/Logging.h"
+#include "loader/Logging.h"
 
 class LoggingLoadable : public Loadable {
   public:

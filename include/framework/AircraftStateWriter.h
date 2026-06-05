@@ -14,13 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/OutputHandler.h"
+#include <string>
+#include <vector>
+
 #include "public/AircraftState.h"
+#include "public/OutputHandler.h"
 
 namespace fmacm {
 class AircraftStateWriter final : public OutputHandler {
@@ -32,29 +35,18 @@ class AircraftStateWriter final : public OutputHandler {
   private:
    static std::vector<std::string> COLUMN_NAMES;
    struct DataToWrite {
-      DataToWrite() {
-         simulation_time = Units::NegInfinity();
-         dynamics_ias = Units::NegInfinity();
-         dynamics_tas = Units::NegInfinity();
-         dynamics_altitude_rate = Units::NegInfinity();
-         euclidean_x = Units::NegInfinity();
-         euclidean_y = Units::NegInfinity();
-         altitude_msl = Units::NegInfinity();
-         dynamics_ground_speed = Units::NegInfinity();
-         latitude = Units::DegreesAngle(0);
-         longitude = Units::DegreesAngle(0);
-      }
+      DataToWrite() = default;
       ~DataToWrite() = default;
 
-      Units::Time simulation_time;
-      Units::Speed dynamics_ias;
-      Units::Speed dynamics_tas;
-      Units::Speed dynamics_altitude_rate;
-      Units::Length euclidean_x;
-      Units::Length euclidean_y;
-      Units::Length altitude_msl;
-      Units::Speed dynamics_ground_speed;
-      Units::DegreesAngle latitude, longitude;
+      Units::Time simulation_time{Units::NegInfinity()};
+      Units::Speed dynamics_ias{Units::NegInfinity()};
+      Units::Speed dynamics_tas{Units::NegInfinity()};
+      Units::Speed dynamics_altitude_rate{Units::NegInfinity()};
+      Units::Length euclidean_x{Units::NegInfinity()};
+      Units::Length euclidean_y{Units::NegInfinity()};
+      Units::Length altitude_msl{Units::NegInfinity()};
+      Units::Speed dynamics_ground_speed{Units::NegInfinity()};
+      Units::DegreesAngle latitude{0}, longitude{0};
    };
 
    std::vector<DataToWrite> m_data_to_write;

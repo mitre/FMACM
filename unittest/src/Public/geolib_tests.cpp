@@ -14,17 +14,23 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include <gtest/gtest.h>
+
+#include <iostream>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+#include "MiniCSV/minicsv.h"
+#include "geolib/Geolib.h"
 #include "public/ArcOnEllipsoid.h"
 #include "public/EarthModel.h"
-#include "public/LatitudeLongitudePoint.h"
-#include "geolib/Geolib.h"
-#include "public/LineOnEllipsoid.h"
 #include "public/GeolibUtils.h"
-#include "MiniCSV/minicsv.h"
+#include "public/LatitudeLongitudePoint.h"
+#include "public/LineOnEllipsoid.h"
 
 using namespace geolib_idealab;
 using namespace aaesim;
@@ -76,7 +82,6 @@ TEST(GeolibLibrary, basic_internal_consistency_test) {
 }
 
 TEST(LatitudeLongitudePoint, createObject) {
-
    LLPoint test_point;
    test_point.latitude = 10 * M_PI / 180;
    test_point.longitude = 5 * M_PI / 180;
@@ -124,7 +129,6 @@ TEST(LineOnEllipsoid, calculate_course_at_point_on_shape) {
 }
 
 TEST(LineOnEllipsoid, createLineFromTwoPoints) {
-
    LatitudeLongitudePoint start_point(Units::SignedDegreesAngle(4), Units::SignedRadiansAngle(-10));
    LatitudeLongitudePoint end_point(Units::SignedDegreesAngle(3), Units::SignedRadiansAngle(-103));
 
@@ -162,7 +166,6 @@ TEST(LineOnEllipsoid, createLineFromTwoPoints) {
 }
 
 TEST(GeolibUtils, createArcFromThreeKnownPoints) {
-
    // Calculate an arc
    const Units::NauticalMilesLength expected_radius(2.5);
    const LatitudeLongitudePoint center_point(Units::SignedDegreesAngle(33.3862), Units::SignedRadiansAngle(-111.887));
@@ -192,7 +195,6 @@ TEST(GeolibUtils, createArcFromThreeKnownPoints) {
 }
 
 TEST(LatitudeLongitudePoint, calculate_new_point_1nm) {
-
    const LatitudeLongitudePoint start_point(Units::DegreesAngle(0.0), Units::DegreesAngle(0));
    const Units::NauticalMilesLength distance(1.0);
    const Units::SignedDegreesAngle go_north_enu(0);
@@ -220,7 +222,6 @@ TEST(LatitudeLongitudePoint, calculate_new_point_1nm) {
 }
 
 TEST(LatitudeLongitudePoint, calculate_new_point_1meter) {
-
    const LatitudeLongitudePoint start_point(Units::DegreesAngle(0.0), Units::DegreesAngle(0));
    const Units::MetersLength distance(1.0);
    const Units::SignedDegreesAngle go_east_enu(90);
@@ -450,7 +451,6 @@ TEST(GeolibUtils, test_CalculateLineLineIntersectionPoint) {
 }
 
 TEST(GeolibUtils, test_NoPossibleLineLineIntersectionPoint) {
-
    // Define two lines that are guaranteed not to intersect
    const LatitudeLongitudePoint start_point1(Units::DegreesAngle(38.0), Units::DegreesAngle(-77.3));
    const LatitudeLongitudePoint end_point1 =
@@ -766,7 +766,6 @@ TEST(GeolibUtils, FindNearestPointOnArc) {
 }
 
 TEST(GeolibUtils, PointsAreMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -780,7 +779,6 @@ TEST(GeolibUtils, PointsAreMathematicallyEqual) {
 }
 
 TEST(GeolibUtils, PointsAreNotMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -796,7 +794,6 @@ TEST(GeolibUtils, PointsAreNotMathematicallyEqual) {
 }
 
 TEST(LatitudeLongitudePoint, PointsAreMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -810,7 +807,6 @@ TEST(LatitudeLongitudePoint, PointsAreMathematicallyEqual) {
 }
 
 TEST(LatitudeLongitudePoint, PointsAreNotMathematicallyEqual) {
-
    // Random location with lots of precision
    const LatitudeLongitudePoint point1(Units::SignedDegreesAngle(34.23423432341236),
                                        Units::SignedDegreesAngle(-112.1234123569987));
@@ -1284,7 +1280,6 @@ TEST(GeolibUtils, LineArcIntersection_valid_case) {
 }
 
 TEST(LineOnEllipsoid, GetRelativeDirection) {
-   // Output stream that handles writing when object is destroyed
    const std::vector<Waypoint> start_points = {
          Waypoint("kphx_airport", Units::DegreesAngle(33.4342778), Units::DegreesAngle(-112.0115833),
                   Units::ZERO_LENGTH, Units::ZERO_LENGTH, Units::ZERO_SPEED, Units::ZERO_LENGTH, Units::ZERO_SPEED),
@@ -1313,7 +1308,7 @@ TEST(LineOnEllipsoid, GetRelativeDirection) {
          const LatitudeLongitudePoint test_point_actually_on_line =
                start_point.ProjectDistanceAlongCourse(Units::NauticalMilesLength(1), course_enu);
          // This is the tested method -----------
-         ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir1 =
+         ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir1 =
                line_on_ellipsoid.GetRelativeDirection(test_point_actually_on_line);
          EXPECT_TRUE(actual_dir1 == ShapeOnEllipsoid::ON_SHAPE);
          // -------------------------------------
@@ -1324,7 +1319,7 @@ TEST(LineOnEllipsoid, GetRelativeDirection) {
                      distance_off_line, GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(crs_ned) -
                                                                                Units::RadiansAngle(M_PI_2)));
          // This is the tested method -----------
-         ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir2 =
+         ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir2 =
                line_on_ellipsoid.GetRelativeDirection(test_point_actually_left_of_line);
          EXPECT_TRUE(actual_dir2 == ShapeOnEllipsoid::LEFT_OF_SHAPE);
          // -------------------------------------
@@ -1335,12 +1330,48 @@ TEST(LineOnEllipsoid, GetRelativeDirection) {
                      distance_off_line, GeolibUtils::ConvertCourseFromNedToEnu(Units::UnsignedRadiansAngle(crs_ned) +
                                                                                Units::RadiansAngle(M_PI_2)));
          // This is the tested method -----------
-         ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir3 =
+         ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir3 =
                line_on_ellipsoid.GetRelativeDirection(test_point_actually_right_of_line);
          EXPECT_TRUE(actual_dir3 == ShapeOnEllipsoid::RIGHT_OF_SHAPE);
          // -------------------------------------
       }
    }
+}
+
+TEST(LineOnEllipsoid, test_GetRelativeDirection_aaes1666) {
+   const std::vector<Waypoint> waypoints = {
+         Waypoint("GUNUD", Units::DegreesAngle(1.1783333333333335), Units::DegreesAngle(105.10499999999999),
+                  Units::ZERO_LENGTH, Units::ZERO_LENGTH, Units::ZERO_SPEED, Units::ZERO_LENGTH, Units::ZERO_SPEED),
+         Waypoint("KEXAS", Units::DegreesAngle(1.1719444444444445), Units::DegreesAngle(104.80499999999998),
+                  Units::ZERO_LENGTH, Units::ZERO_LENGTH, Units::ZERO_SPEED, Units::ZERO_LENGTH, Units::ZERO_SPEED),
+         Waypoint("VIMAL", Units::DegreesAngle(1.1616666666666666), Units::DegreesAngle(104.39805555555556),
+                  Units::ZERO_LENGTH, Units::ZERO_LENGTH, Units::ZERO_SPEED, Units::ZERO_LENGTH, Units::ZERO_SPEED)};
+   const Units::MetersLength distance_off_line(1);
+
+   // create a point to the right of the line. Call the test method and see if the enumeration is correct
+   const LatitudeLongitudePoint start_point = LatitudeLongitudePoint::CreateFromWaypoint(waypoints[0]);
+   const LineOnEllipsoid line_on_ellipsoid =
+         LineOnEllipsoid::CreateFromPoints(start_point, LatitudeLongitudePoint::CreateFromWaypoint(waypoints[1]));
+   const auto point_on_line = line_on_ellipsoid.CalculatePointAtDistanceFromStartPoint(Units::NauticalMilesLength(1));
+   const auto relationship_info = start_point.CalculateRelationshipBetweenPoints(point_on_line);
+   const auto course_enu = std::get<1>(relationship_info);
+   const LatitudeLongitudePoint test_point_actually_right_of_line =
+         point_on_line.ProjectDistanceAlongCourse(distance_off_line, Units::RadiansAngle(M_PI_2));
+   // This is the tested method -----------
+   EXPECT_TRUE(point_on_line.GetLatitude() < test_point_actually_right_of_line.GetLatitude());
+   ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir =
+         line_on_ellipsoid.GetRelativeDirection(test_point_actually_right_of_line);
+   EXPECT_TRUE(actual_dir == ShapeOnEllipsoid::RIGHT_OF_SHAPE);
+   // -------------------------------------
+
+   // create a point to the left of the line. Call the test method and see if the enumeration is correct
+   const LatitudeLongitudePoint test_point_actually_left_of_line =
+         point_on_line.ProjectDistanceAlongCourse(distance_off_line, -Units::RadiansAngle(M_PI_2));
+   // This is the tested method -----------
+   EXPECT_TRUE(point_on_line.GetLatitude() > test_point_actually_left_of_line.GetLatitude());
+   actual_dir = line_on_ellipsoid.GetRelativeDirection(test_point_actually_left_of_line);
+   EXPECT_TRUE(actual_dir == ShapeOnEllipsoid::LEFT_OF_SHAPE);
+   // -------------------------------------
 }
 
 TEST(EarthModel, ToUnitVector) {
@@ -1383,7 +1414,6 @@ TEST(ArcOnEllipsoid, GetRelativeDirection) {
       const LatitudeLongitudePoint center_point_approximate = LatitudeLongitudePoint::CreateFromWaypoint(wpt);
 
       for (geolib_idealab::ArcDirection arc_direction : arc_directions) {
-
          for (double arc_start_course_ned = 3 * M_PI / 2; arc_start_course_ned <= 2 * M_PI;
               arc_start_course_ned += M_PI / 2) {
             const Units::SignedRadiansAngle arc_start_course_enu =
@@ -1417,13 +1447,13 @@ TEST(ArcOnEllipsoid, GetRelativeDirection) {
                      arc_on_ellipsoid.GetRadius(), arc_start_course_enu + Units::PI_RADIANS_ANGLE / 4);
             }
             // This is the tested method -----------
-            ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir1 =
+            ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir1 =
                   arc_on_ellipsoid.GetRelativeDirection(test_point_actually_on_arc);
             EXPECT_TRUE(actual_dir1 == ShapeOnEllipsoid::ON_SHAPE);
 
             // Test: point to left result
             LatitudeLongitudePoint test_point_actually_left_of_line;
-            ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir2;
+            ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir2;
             if (arc_direction == geolib_idealab::ArcDirection::CLOCKWISE) {
                test_point_actually_left_of_line = arc_on_ellipsoid.GetCenterPoint().ProjectDistanceAlongCourse(
                      arc_on_ellipsoid.GetRadius() + distance_off_arc,
@@ -1446,7 +1476,7 @@ TEST(ArcOnEllipsoid, GetRelativeDirection) {
 
             // Test: point to right result
             LatitudeLongitudePoint test_point_actually_right_of_line;
-            ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE actual_dir3;
+            ShapeOnEllipsoid::kDirectionRelativeToShape actual_dir3;
             if (arc_direction == geolib_idealab::ArcDirection::CLOCKWISE) {
                test_point_actually_right_of_line = arc_on_ellipsoid.GetCenterPoint().ProjectDistanceAlongCourse(
                      arc_on_ellipsoid.GetRadius() - distance_off_arc,

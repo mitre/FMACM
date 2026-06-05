@@ -54,8 +54,6 @@ set(SOURCE_FILES
         KinematicTrajectoryPredictor.cpp
         LegacyPositionEstimator.cpp
         LocalTangentPlane.cpp
-        Logging.cpp
-        LoggingLoadable.cpp
         NullSpeedLimiter.cpp
         NullWindEvaluator.cpp
         PassThroughAssap.cpp

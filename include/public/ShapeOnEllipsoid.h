@@ -14,12 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <scalar/Length.h>
+
+#include <utility>
+
 #include "LatitudeLongitudePoint.h"
 
 /*
@@ -29,40 +32,36 @@
 namespace aaesim {
 class ShapeOnEllipsoid {
   public:
-   enum SHAPE_TYPE { NO_SHAPE = INT32_MIN, LINE = 0, ARC = 1 };
+   enum kShapeType { NO_SHAPE = INT32_MIN, LINE = 0, ARC = 1 };
 
-   enum DIRECTION_RELATIVE_TO_SHAPE { UNSET = INT32_MIN, LEFT_OF_SHAPE = -1, RIGHT_OF_SHAPE = 1, ON_SHAPE = 0 };
+   enum kDirectionRelativeToShape { UNSET = INT32_MIN, LEFT_OF_SHAPE = -1, RIGHT_OF_SHAPE = 1, ON_SHAPE = 0 };
 
    ShapeOnEllipsoid() = default;
 
    virtual ~ShapeOnEllipsoid() = default;
 
-   virtual SHAPE_TYPE GetShapeType() const { return NO_SHAPE; };
+   virtual kShapeType GetShapeType() const { return NO_SHAPE; };
 
-   virtual Units::SignedAngle GetForwardCourseEnuAtStartPoint() const { return Units::ZERO_ANGLE; };
+   virtual Units::SignedAngle GetForwardCourseEnuAtStartPoint() const = 0;
 
-   virtual Units::SignedAngle GetForwardCourseEnuAtEndPoint() const { return Units::ZERO_ANGLE; }
+   virtual Units::SignedAngle GetForwardCourseEnuAtEndPoint() const = 0;
 
-   virtual LatitudeLongitudePoint GetStartPoint() const { return LatitudeLongitudePoint(); };
+   virtual LatitudeLongitudePoint GetStartPoint() const = 0;
 
-   virtual LatitudeLongitudePoint GetEndPoint() const { return LatitudeLongitudePoint(); };
+   virtual LatitudeLongitudePoint GetEndPoint() const = 0;
 
    virtual LatitudeLongitudePoint CalculatePointAtDistanceFromStartPoint(
-         const Units::Length &distance_along_shape_from_start_point) const {
-      return LatitudeLongitudePoint();
-   }
+         const Units::Length &distance_along_shape_from_start_point) const = 0;
 
    virtual std::pair<Units::SignedAngle, LatitudeLongitudePoint> CalculateCourseAtDistanceFromStartPoint(
-         const Units::Length &distance_along_shape_from_start_point) const {
-      return std::make_pair(Units::ZERO_ANGLE, LatitudeLongitudePoint());
-   }
+         const Units::Length &distance_along_shape_from_start_point) const = 0;
 
    /**
     * Returns the length of the shape along the ellipsoid.
     *
     * @return a Units::Length object. Any negative value indicates a failed calculation.
     */
-   virtual Units::Length GetShapeLength() const { return Units::negInfinity(); }
+   virtual Units::Length GetShapeLength() const = 0;
 
    /**
     * For a given latitude_longitude_point, determines the side relative to the shape's direction (defined by the start
@@ -71,7 +70,7 @@ class ShapeOnEllipsoid {
     * @param latitude_longitude_point
     * @return see return enum for possibilities
     */
-   virtual DIRECTION_RELATIVE_TO_SHAPE GetRelativeDirection(
+   virtual kDirectionRelativeToShape GetRelativeDirection(
          const LatitudeLongitudePoint &latitude_longitude_point) const {
       return UNSET;
    }

@@ -14,18 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include "BadaUtils.h"
-#include "utility/CustomUnits.h"
-#include "scalar/Speed.h"
+#include "scalar/Force.h"
 #include "scalar/Length.h"
 #include "scalar/SignedAngle.h"
-#include "scalar/Force.h"
+#include "scalar/Speed.h"
 #include "scalar/Temperature.h"
+#include "utility/CustomUnits.h"
 
 namespace aaesim {
 namespace open_source {
@@ -34,23 +34,23 @@ struct DynamicsState {
    // This structure is not used at all within the EOM function. It only serves to
    // represent the state outside the EOM function. Within the EOM function, the state is
    // represented with EquationsOfMotionState.
-   int id;
-   Units::MetersLength h;
-   Units::MetersPerSecondSpeed v_true_airspeed;
-   Units::KnotsSpeed v_indicated_airspeed;
-   double mach;
-   Units::SignedAngle psi;
-   Units::RadiansAngle phi;
+   int id{0};
+   Units::MetersLength h{};
+   Units::MetersPerSecondSpeed v_true_airspeed{};
+   Units::KnotsSpeed v_indicated_airspeed{};
+   double mach{0};
+   Units::SignedAngle psi{};
+   Units::RadiansAngle phi{};
    Units::RadiansAngle gamma;  // aircraft flight-path angle (rad) NOTE: for gamma, heading down is positive; heading
    // up is negative
-   Units::NewtonsForce thrust;
-   Units::MetersPerSecondSpeed xd;
-   Units::MetersPerSecondSpeed yd;
-   double speed_brake;  // % of deployment
+   Units::NewtonsForce thrust{};
+   Units::MetersPerSecondSpeed xd{};
+   Units::MetersPerSecondSpeed yd{};
+   double speed_brake{0};  // % of deployment
    aaesim::open_source::bada_utils::FlapConfiguration flap_configuration{
          aaesim::open_source::bada_utils::FlapConfiguration::UNDEFINED};
-   Units::Mass current_mass;
-   Units::AbsCelsiusTemperature true_temperature;
+   Units::Mass current_mass{};
+   Units::AbsCelsiusTemperature true_temperature{};
 };
 }  // namespace open_source
 }  // namespace aaesim

@@ -14,14 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <stdexcept>
-#include "utility/CustomUnits.h"
+#include <string>
+
 #include "scalar/Area.h"
+#include "utility/CustomUnits.h"
 
 namespace aaesim {
 namespace open_source {
@@ -64,133 +66,133 @@ static std::string GetFlapConfigurationAsString(FlapConfiguration flap_configura
    }
 }
 
-typedef struct {
-   int FL;
-   Units::Speed TAS;
+struct climb_struct {
+   int FL{0};
+   Units::Speed TAS{};
    struct {
-      Units::Speed lo;
-      Units::Speed nom;
-      Units::Speed hi;
-   } ROCD;
-   Units::MassFlowRate fuel;
-} climb_struct;
+      Units::Speed lo{};
+      Units::Speed nom{};
+      Units::Speed hi{};
+   } ROCD{};
+   Units::MassFlowRate fuel{};
+};
 
-typedef struct {
-   int FL;
-   Units::Speed TAS;
+struct cruise_struct {
+   int FL{0};
+   Units::Speed TAS{};
    struct {
-      Units::MassFlowRate lo;
-      Units::MassFlowRate nom;
-      Units::MassFlowRate hi;
-   } fuel;
-} cruise_struct;
+      Units::MassFlowRate lo{};
+      Units::MassFlowRate nom{};
+      Units::MassFlowRate hi{};
+   } fuel{};
+};
 
-typedef struct {
-   int FL;
-   Units::Speed TAS;
-   Units::Speed ROCD;
-   Units::MassFlowRate fuel;
-} descent_struct;
+struct descent_struct {
+   int FL{0};
+   Units::Speed TAS{};
+   Units::Speed ROCD{};
+   Units::MassFlowRate fuel{};
+};
 
-typedef struct {
+struct perf_speed_struct {
    struct {
-      int LO;
-      int HI;
-   } CAS;
-   double Mach;
-} perf_speed_struct;
+      int LO{0};
+      int HI{0};
+   } CAS{};
+   double Mach{0};
+};
 
 enum EngineThrustMode { MAXIMUM_CLIMB = 0, MAXIMUM_CRUISE, DESCENT };
 
 struct FlightEnvelope {
-   Units::Speed V_mo;                // maximum operating speed (CAS).
-   double M_mo;                      // maximum operating Mach number
-   Units::Length h_mo;               // maximum operating altitude
-   Units::Length h_max;              // maximum altitude at MTOW and ISA
-   Units::LengthToMassGradient G_w;  // weight gradient on max. altitude
-   double G_t;                       // temperature gradient on max. altitude (feet/C)
+   Units::Speed V_mo{};                // maximum operating speed (CAS).
+   double M_mo{0};                     // maximum operating Mach number
+   Units::Length h_mo{};               // maximum operating altitude
+   Units::Length h_max{};              // maximum altitude at MTOW and ISA
+   Units::LengthToMassGradient G_w{};  // weight gradient on max. altitude
+   double G_t{0};                      // temperature gradient on max. altitude (feet/C)
 };
 
 struct FlapSpeeds {
-   Units::Speed cas_approach_minimum;
-   Units::Speed cas_approach_maximum;
-   Units::Speed cas_landing_minimum;
-   Units::Speed cas_landing_maximum;
-   Units::Speed cas_gear_out_minimum;
-   Units::Speed cas_gear_out_maximum;
-   Units::Speed cas_takeoff_minimum;
-   Units::Speed cas_climb_minimum;
-   Units::Speed cas_cruise_minimum;
+   Units::Speed cas_approach_minimum{};
+   Units::Speed cas_approach_maximum{};
+   Units::Speed cas_landing_minimum{};
+   Units::Speed cas_landing_maximum{};
+   Units::Speed cas_gear_out_minimum{};
+   Units::Speed cas_gear_out_maximum{};
+   Units::Speed cas_takeoff_minimum{};
+   Units::Speed cas_climb_minimum{};
+   Units::Speed cas_cruise_minimum{};
 };
 
 struct Mass {
-   Units::Mass m_ref;   // reference mass
-   Units::Mass m_min;   // minimum mass
-   Units::Mass m_max;   // maximum mass
-   Units::Mass m_pyld;  // maximum payload mass
+   Units::Mass m_ref{};   // reference mass
+   Units::Mass m_min{};   // minimum mass
+   Units::Mass m_max{};   // maximum mass
+   Units::Mass m_pyld{};  // maximum payload mass
 };
 
 struct Aerodynamics {
-   Units::Area S;  // Reference wing surface area.
-   double C_Lbo;   // Buffet onset lift coeff.  (jet only)
-   double K;       // Buffeting gradient (jet only)
-   double C_M16;   // No idea, but it's in the OPF
+   Units::Area S{};  // Reference wing surface area.
+   double C_Lbo{0};  // Buffet onset lift coeff.  (jet only)
+   double K{0};      // Buffeting gradient (jet only)
+   double C_M16{0};  // No idea, but it's in the OPF
 
    struct {
-      Units::Speed V_stall;  // CAS
-      double cd0;            // parasitic drag coeff.
-      double cd2;            // induced drag coeff.
-   } cruise;
+      Units::Speed V_stall{};  // CAS
+      double cd0{0};           // parasitic drag coeff.
+      double cd2{0};           // induced drag coeff.
+   } cruise{};
 
    struct {
-      Units::Speed V_stall;  // CAS
-      double cd0;            // parasitic drag coeff.
-      double cd2;            // induced drag coeff.
-   } initial_climb;
+      Units::Speed V_stall{};  // CAS
+      double cd0{0};           // parasitic drag coeff.
+      double cd2{0};           // induced drag coeff.
+   } initial_climb{};
 
    struct {
-      Units::Speed V_stall;  // CAS
-      double cd0;            // parasitic drag coeff.
-      double cd2;            // induced drag coeff.
-   } take_off;
+      Units::Speed V_stall{};  // CAS
+      double cd0{0};           // parasitic drag coeff.
+      double cd2{0};           // induced drag coeff.
+   } take_off{};
 
    struct {
-      Units::Speed V_stall;  // CAS
-      double cd0;            // parasitic drag coeff.
-      double cd2;            // induced drag coeff.
-   } approach;
+      Units::Speed V_stall{};  // CAS
+      double cd0{0};           // parasitic drag coeff.
+      double cd2{0};           // induced drag coeff.
+   } approach{};
 
    struct {
-      Units::Speed V_stall;  // CAS
-      double cd0;            // parasitic drag coeff.
-      double cd2;            // induced drag coeff.
-   } landing;
+      Units::Speed V_stall{};  // CAS
+      double cd0{0};           // parasitic drag coeff.
+      double cd2{0};           // induced drag coeff.
+   } landing{};
 
    struct {
-      double cd0;  // parasitic drag coeff.
-   } landing_gear;
+      double cd0{0};  // parasitic drag coeff.
+   } landing_gear{};
 };
 
 struct EngineThrust {
    struct {
-      double CT_c1;  // 1st max. climb thrust coeff. (N, jet/piston)
+      double CT_c1{0};  // 1st max. climb thrust coeff. (N, jet/piston)
       //                              (kt-N, turboprop)
-      Units::Length CT_c2;  // 2nd max. climb thrust coeff.
-      double CT_c3;         // 3rd max. climb thrust coeff. (1/feet^2, jet)
+      Units::Length CT_c2{};  // 2nd max. climb thrust coeff.
+      double CT_c3{0};        // 3rd max. climb thrust coeff. (1/feet^2, jet)
       //                              (N, turboprop)
       //                              (kt-N, piston)
-      Units::AbsCelsiusTemperature CT_c4;  // 1st thrust temperature coeff.
-      double CT_c5;                        // 2nd thrust temperature coeff. (1/deg. C)
-   } max_climb;
+      Units::AbsCelsiusTemperature CT_c4{};  // 1st thrust temperature coeff.
+      double CT_c5{0};                       // 2nd thrust temperature coeff. (1/deg. C)
+   } max_climb{};
    struct {
-      double CT_low;       // low altitude descent thrust coeff.
-      double CT_high;      // high altitude descent thrust coeff.
-      Units::Length h;     // Transition altitude (feet)
-      double CT_app;       // approach thrust coeff.
-      double CT_ld;        // landing thrust coeff.
-      Units::Speed V_ref;  // reference descent speed (kt)
-      double M_ref;        // reference descent Mach number
-   } descent;
+      double CT_low{0};      // low altitude descent thrust coeff.
+      double CT_high{0};     // high altitude descent thrust coeff.
+      Units::Length h{};     // Transition altitude (feet)
+      double CT_app{0};      // approach thrust coeff.
+      double CT_ld{0};       // landing thrust coeff.
+      Units::Speed V_ref{};  // reference descent speed (kt)
+      double M_ref{0};       // reference descent Mach number
+   } descent{};
 };
 
 struct AircraftType {
@@ -200,39 +202,39 @@ struct AircraftType {
 };
 
 struct FuelFlow {
-   double C_f1;  // 1st Thrust specific fuel consumption coeff.
+   double C_f1{0};  // 1st Thrust specific fuel consumption coeff.
    // (kg/min*kN) (jet)
    // (kg/min*kN*knot) (turboprop)
    // (kg/min)  (piston)
-   Units::Speed C_f2;         // 2nd Thrust specific fuel consumption coeff.
-   Units::MassFlowRate C_f3;  // 1st descent thrust fuel flow coeff.
-   Units::Length C_f4;        // 2nd descent thrust fuel flow coeff.
-   double C_fcr;              // Cruise fuel flow coeff. (dimensionless)
+   Units::Speed C_f2{};         // 2nd Thrust specific fuel consumption coeff.
+   Units::MassFlowRate C_f3{};  // 1st descent thrust fuel flow coeff.
+   Units::Length C_f4{};        // 2nd descent thrust fuel flow coeff.
+   double C_fcr{0};             // Cruise fuel flow coeff. (dimensionless)
 };
 
 struct GroundMovement {
-   Units::Length TOL;     // Take-off length (m)
-   Units::Length LDL;     // Landing length (m)
-   Units::Length span;    // Wingspan (m)
-   Units::Length length;  // Length (m)
+   Units::Length TOL{};     // Take-off length (m)
+   Units::Length LDL{};     // Landing length (m)
+   Units::Length span{};    // Wingspan (m)
+   Units::Length length{};  // Length (m)
 };
 
 struct AircraftPerformance {
    struct {
-      perf_speed_struct climb;
-      perf_speed_struct cruise;
-      perf_speed_struct descent;
-   } speed;
+      perf_speed_struct climb{};
+      perf_speed_struct cruise{};
+      perf_speed_struct descent{};
+   } speed{};
 
    struct {
-      Units::Mass low;
-      Units::Mass nominal;
-      Units::Mass high;
-   } mass;
+      Units::Mass low{};
+      Units::Mass nominal{};
+      Units::Mass high{};
+   } mass{};
 
-   cruise_struct cruise[FL_NMAX];
-   climb_struct climb[FL_NMAX];
-   descent_struct descent[FL_NMAX];
+   cruise_struct cruise[FL_NMAX]{};
+   climb_struct climb[FL_NMAX]{};
+   descent_struct descent[FL_NMAX]{};
 };
 
 struct Procedure {

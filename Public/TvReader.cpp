@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -25,8 +25,10 @@
  */
 
 #include "public/TvReader.h"
-#include <stdexcept>
+
 #include <map>
+#include <stdexcept>
+#include <string>
 
 using namespace std;
 
@@ -35,7 +37,7 @@ namespace open_source {
 
 const size_t TvReader::EXPECTED_TV_COLUMN_COUNT(17);
 
-TvReader::TvReader(std::string file_name, int header_lines) : DataReader(file_name, 0, 0) {
+TvReader::TvReader(const std::string &file_name, int header_lines) : DataReader(file_name, 0, 0) {
    SetColumnIndexesFromHeader(header_lines);
 }
 

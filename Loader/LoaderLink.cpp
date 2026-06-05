@@ -14,10 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "loader/LoaderLink.h"
+
+#include <string>
+
 #include "loader/LoadError.h"
 
 using namespace std;
@@ -49,7 +52,6 @@ bool LoaderLink::load(DecodedStream *ds) {
    }
 
    if (loaded && !is_a_list) {
-
       ds->report_warning("\nWarning: This variable was already loaded once \n");
    }
 

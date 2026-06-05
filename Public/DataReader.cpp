@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -26,6 +26,10 @@
 
 #include "public/DataReader.h"
 
+#include <iostream>
+#include <memory>
+#include <string>
+
 namespace aaesim {
 namespace open_source {
 
@@ -34,7 +38,7 @@ const Units::SecondsTime DataReader::UNDEFINED_TIME(-9999);
 log4cplus::Logger DataReader::m_logger =
       log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("aaesim::open_source::DataReader"));
 
-DataReader::DataReader(std::string file_name, int header_lines, size_t expected_columns)
+DataReader::DataReader(const std::string &file_name, int header_lines, size_t expected_columns)
    : m_expected_column_count(expected_columns) {
    OpenFile(file_name, header_lines);
 }

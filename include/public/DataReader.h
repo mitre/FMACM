@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 /*
@@ -28,12 +28,15 @@
 
 #pragma once
 
+#include <scalar/Time.h>
+
+#include <istream>
 #include <map>
 #include <memory>
-#include <istream>
+#include <string>
+
+#include "loader/Logging.h"
 #include "utility/CsvParser.h"
-#include "public/Logging.h"
-#include <scalar/Time.h>
 
 namespace aaesim {
 namespace open_source {
@@ -42,7 +45,7 @@ class DataReader {
   public:
    static const Units::SecondsTime UNDEFINED_TIME;
    DataReader() = default;
-   DataReader(std::string file_name, int header_lines, size_t expected_columns);
+   DataReader(const std::string &file_name, int header_lines, size_t expected_columns);
    DataReader(std::shared_ptr<std::istream> input_stream, int header_lines, size_t expected_columns);
    virtual ~DataReader();
    void OpenFile(std::string file_name, int header_lines);
@@ -61,7 +64,7 @@ class DataReader {
   private:
    static log4cplus::Logger m_logger;
    std::shared_ptr<std::istream> m_input_stream;
-   size_t m_expected_column_count;
+   size_t m_expected_column_count{0};
    CsvParser::CsvRow m_csv_row;
    std::map<std::string, int> m_column_index;
 };

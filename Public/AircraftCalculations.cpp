@@ -14,15 +14,18 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/AircraftCalculations.h"
 
-#include <public/CoreUtils.h>
-#include <public/PositionCalculator.h>
-
+#include <climits>
 #include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "public/CoreUtils.h"
+#include "public/PositionCalculator.h"
 
 using namespace std;
 using namespace aaesim::open_source;
@@ -150,7 +153,7 @@ void AircraftCalculations::CrossTrackError(const Units::Length position_enu_x, c
    //  preceding segment.
 
    cross_track_error = Units::Infinity();
-   next_trajectory_index = (int)-INFINITY;
+   next_trajectory_index = INT_MIN;
 
    if (current_trajectory_index >= horizontal_trajectory.size() - 1) {
       // No segment going to first point on route (last trajectory point)

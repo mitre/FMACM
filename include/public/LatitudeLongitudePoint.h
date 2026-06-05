@@ -14,17 +14,19 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "scalar/Length.h"
-#include "public/Waypoint.h"
-#include "public/EllipsoidalEarthModel.h"
+#include <utility>
+
 #include "geolib/Geolib.h"
-#include "scalar/UnsignedAngle.h"
+#include "public/EllipsoidalEarthModel.h"
+#include "public/Waypoint.h"
+#include "scalar/Length.h"
 #include "scalar/SignedAngle.h"
+#include "scalar/UnsignedAngle.h"
 
 /*
  *
@@ -32,7 +34,6 @@
 namespace aaesim {
 
 class LatitudeLongitudePoint {
-
   public:
    LatitudeLongitudePoint() = default;
 
@@ -80,6 +81,6 @@ class LatitudeLongitudePoint {
 
   private:
    static log4cplus::Logger m_logger;
-   geolib_idealab::LLPoint m_llpoint;
+   geolib_idealab::LLPoint m_llpoint{};
 };
 }  // namespace aaesim

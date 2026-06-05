@@ -14,7 +14,7 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
@@ -49,7 +49,7 @@ struct GuidanceCalculator {
    }
 
    static Units::Length AddSignToCrossTrack(Units::Length cross_track_measurement,
-                                            aaesim::ShapeOnEllipsoid::DIRECTION_RELATIVE_TO_SHAPE side_of_shape) {
+                                            aaesim::ShapeOnEllipsoid::kDirectionRelativeToShape side_of_shape) {
       assert(side_of_shape != ShapeOnEllipsoid::UNSET);
       if (side_of_shape == ShapeOnEllipsoid::LEFT_OF_SHAPE) {
          return -Units::abs(cross_track_measurement);

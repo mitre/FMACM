@@ -14,18 +14,20 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "public/ConfigurationFileReader.h"
 
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
 #include <stdlib.h>
-#include <string>
 #include <unistd.h>
+
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -33,7 +35,7 @@ log4cplus::Logger aaesim::open_source::ConfigurationFileReader::m_logger =
       log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("ConfigurationFileReader"));
 
 const std::vector<std::filesystem::path> aaesim::open_source::ConfigurationFileReader::LoadConfigurationFile(
-      std::string suggested_filename) {
+      const std::string &suggested_filename) {
    std::string configuration_filename("");
    if (suggested_filename.find('/') != std::string::npos) {
       configuration_filename = suggested_filename;

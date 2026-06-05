@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #include "framework/TestFrameworkAircraft.h"
+
+#include <memory>
 
 #include "public/Guidance.h"
 
@@ -38,7 +40,6 @@ TestFrameworkAircraft::TestFrameworkAircraft()
      m_states() {}
 
 bool TestFrameworkAircraft::Update(const SimulationTime &time) {
-
    if (time.GetCurrentSimulationTime() <= m_states.cbegin()->GetTime()) {
       return false;
    }
@@ -68,14 +69,14 @@ std::shared_ptr<TestFrameworkAircraft> TestFrameworkAircraft::Builder::Build() c
    return std::make_shared<TestFrameworkAircraft>(*this);
 }
 
-TestFrameworkAircraft::TestFrameworkAircraft(const Builder &builder) {
-   m_weather_truth = builder.GetWeatherTruth();
-   m_adsb_receiver = builder.GetAdsbReceiver();
-   m_dynamics = builder.GetDynamicsModel();
-   m_guidance_calculator = builder.GetGuidanceCalculator();
-   m_aircraft_control = builder.GetAircraftControl();
-   m_bada_calculator = builder.GetAircraftPerformance();
-   m_speed_application = builder.GetFligthDeckApplication();
+TestFrameworkAircraft::TestFrameworkAircraft(const Builder &builder)
+   : m_weather_truth(builder.GetWeatherTruth()),
+     m_adsb_receiver(builder.GetAdsbReceiver()),
+     m_dynamics(builder.GetDynamicsModel()),
+     m_guidance_calculator(builder.GetGuidanceCalculator()),
+     m_aircraft_control(builder.GetAircraftControl()),
+     m_bada_calculator(builder.GetAircraftPerformance()),
+     m_speed_application(builder.GetFligthDeckApplication()) {
    auto initial_state = builder.GetInitialState();
    m_states.push_back(initial_state);
 }

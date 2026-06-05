@@ -14,53 +14,38 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/AircraftIntent.h>
 #include "public/Waypoint.h"
+
+#include <public/AircraftIntent.h>
+
+#include <list>
+#include <string>
 
 const Units::FeetLength Waypoint::MAX_ALTITUDE_CONSTRAINT(50000);
 const Units::FeetLength Waypoint::MIN_ALTITUDE_CONSTRAINT(0);
 const Units::KnotsSpeed Waypoint::MAX_SPEED_CONSTRAINT(1000);
 const Units::KnotsSpeed Waypoint::MIN_SPEED_CONSTRAINT(0);
 
-Waypoint::Waypoint() {
-   m_name = "";
-   m_arinc424_leg_type = "";
-   m_latitude = Units::ZERO_ANGLE;
-   m_longitude = Units::ZERO_ANGLE;
-   m_altitude = Units::ZERO_LENGTH;
-   m_nominal_ias = Units::ZERO_SPEED;
-   m_altitude_constraint_high = Units::ZERO_LENGTH;
-   m_altitude_constraint_low = Units::ZERO_LENGTH;
-   m_speed_constraint_high = Units::ZERO_SPEED;
-   m_speed_constraint_low = Units::ZERO_SPEED;
-   m_rf_turn_center_latitude = Units::ZERO_ANGLE;
-   m_rf_turn_center_longitude = Units::ZERO_ANGLE;
-   m_rf_turn_arc_radius = Units::ZERO_LENGTH;
-}
-
 Waypoint::Waypoint(const std::string &name, Units::Angle latitude, Units::Angle longitude,
                    Units::Length altitude_constraint_upper, Units::Length altitude_constraint_lower,
                    Units::Speed speed_constraint, Units::Length nominal_altitude, Units::Speed nominal_ias,
-                   std::string arinc424_leg_type) {
-   m_name = name;
-   m_arinc424_leg_type = arinc424_leg_type;
-   m_latitude = latitude;
-   m_longitude = longitude;
-   m_altitude = nominal_altitude;
-   m_nominal_ias = nominal_ias;
-
-   m_altitude_constraint_high = altitude_constraint_upper;
-   m_altitude_constraint_low = altitude_constraint_lower;
-   m_speed_constraint_high = speed_constraint;
-   m_speed_constraint_low = MIN_SPEED_CONSTRAINT;
-
-   m_rf_turn_center_latitude = Units::ZERO_ANGLE;
-   m_rf_turn_center_longitude = Units::ZERO_ANGLE;
-   m_rf_turn_arc_radius = Units::ZERO_LENGTH;
-}
+                   const std::string &arinc424_leg_type)
+   : m_name(name),
+     m_latitude(latitude),
+     m_longitude(longitude),
+     m_altitude(nominal_altitude),
+     m_nominal_ias(nominal_ias),
+     m_altitude_constraint_high(altitude_constraint_upper),
+     m_altitude_constraint_low(altitude_constraint_lower),
+     m_speed_constraint_high(speed_constraint),
+     m_speed_constraint_low(MIN_SPEED_CONSTRAINT),
+     m_rf_turn_center_latitude(Units::ZERO_ANGLE),
+     m_rf_turn_center_longitude(Units::ZERO_ANGLE),
+     m_rf_turn_arc_radius(Units::ZERO_LENGTH),
+     m_arinc424_leg_type(arinc424_leg_type) {}
 
 bool Waypoint::load(DecodedStream *input) {
    set_stream(input);

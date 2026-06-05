@@ -14,17 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/LoggingLoadable.h"
+#include <memory>
+#include <string>
+#include <tuple>
+
+#include "framework/ApplicationLoader.h"
+#include "framework/GuidanceDataLoader.h"
+#include "framework/TestFrameworkAircraft.h"
+#include "loader/LoggingLoadable.h"
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/WeatherTruth.h"
-#include "framework/TestFrameworkAircraft.h"
-#include "framework/GuidanceDataLoader.h"
-#include "framework/ApplicationLoader.h"
 
 namespace fmacm {
 class FrameworkAircraftLoader final : public LoggingLoadable {
@@ -48,7 +52,7 @@ class FrameworkAircraftLoader final : public LoggingLoadable {
    EarthModel::LocalPositionEnu m_initial_local_position{};
 
    std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> BuildAircraftPerformance(
-         std::string bada_aircraft_code);
+         const std::string &bada_aircraft_code);
    std::shared_ptr<aaesim::open_source::ThreeDOFDynamics> BuildAircraftDynamics(
          std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &performance,
          std::shared_ptr<fmacm::WeatherTruthFromStaticData> &true_weather,
@@ -57,8 +61,8 @@ class FrameworkAircraftLoader final : public LoggingLoadable {
    std::shared_ptr<aaesim::open_source::AircraftControl> BuildAircraftControl(
          std::string control_method,
          std::shared_ptr<aaesim::open_source::FixedMassAircraftPerformance> &bada_calculator);
-   std::shared_ptr<fmacm::WeatherTruthFromStaticData> BuildTrueWeather(std::string env_csv_file,
-                                                                       std::string env_csv_data_index,
+   std::shared_ptr<fmacm::WeatherTruthFromStaticData> BuildTrueWeather(const std::string &env_csv_file,
+                                                                       const std::string &env_csv_data_index,
                                                                        Units::Length initial_altitude);
    std::shared_ptr<aaesim::open_source::ADSBReceiver> BuildAdsbReceiver(std::string ttv_csv_file);
    aaesim::open_source::AircraftState BuildInitialState(

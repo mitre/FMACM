@@ -14,19 +14,21 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
-#include "public/FlightDeckApplication.h"
-#include "loader/Loadable.h"
-#include "public/Guidance.h"
-#include <scalar/Time.h>
 #include <scalar/Speed.h>
+#include <scalar/Time.h>
+
+#include <vector>
+
+#include "loader/Loadable.h"
+#include "public/FlightDeckApplication.h"
+#include "public/Guidance.h"
 
 class SpeedCommandsFromStaticData final : public aaesim::open_source::FlightDeckApplication {
-
   public:
    struct SpeedRecord {
       SpeedRecord() : simtime(Units::infinity()), speed_command(Units::infinity()) {}
@@ -53,6 +55,6 @@ class SpeedCommandsFromStaticData final : public aaesim::open_source::FlightDeck
    aaesim::open_source::Guidance Update(Units::Time time);
 
    std::vector<SpeedRecord> m_speed_data;
-   double m_ias_hist[m_hist_len];
+   double m_ias_hist[m_hist_len]{};
    Units::SecondsTime m_pilot_delay_seconds;
 };

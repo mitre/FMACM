@@ -14,15 +14,16 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <cmath>
+#include <string>
 
-#include "public/PrecalcWaypoint.h"
 #include "public/AircraftSpeed.h"
+#include "public/PrecalcWaypoint.h"
 
 namespace aaesim {
 namespace open_source {
@@ -55,7 +56,7 @@ class Guidance {
 
    void SetSelectedSpeed(const AircraftSpeed &selected_speed);
 
-   int GetIasCommandIntegerKnots() const;
+   int GetIasCommandIntegerKnots() const;  // FIXME Stuart is this needed anymore?
 
    double GetMachCommand() const;
 
@@ -71,13 +72,14 @@ class Guidance {
    Units::Length m_cross_track_error{Units::ZERO_LENGTH};
    Units::Angle m_reference_bank_angle{Units::ZERO_ANGLE};
    Units::SignedAngle m_enu_track_angle{Units::ZERO_ANGLE};
-   GuidanceFlightPhase m_active_guidance_phase;
+   GuidanceFlightPhase m_active_guidance_phase{GuidanceFlightPhase::TAKEOFF_ROLL};
 
    bool m_use_cross_track{false};
 
   private:
    bool m_valid{false};
-   AircraftSpeed m_selected_speed{};
+   AircraftSpeed m_selected_speed{};  // FIXME Stuart this is super dangerous...get rid of and only keep SpeedValueType
+                                      // in here
 };
 
 inline void Guidance::SetValid(bool value) { m_valid = value; }

@@ -14,10 +14,12 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
+
+#include <vector>
 
 #include "public/VerticalPredictor.h"
 
@@ -54,25 +56,25 @@ class KinematicDescent4DPredictor : public VerticalPredictor {
                                 const WeatherPrediction &weather_prediction,
                                 const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantCasVerticalPath(VerticalPath vertical_path, double altitude_at_end,
+   VerticalPath ConstantCasVerticalPath(const VerticalPath &vertical_path, double altitude_at_end,
                                         std::vector<HorizontalPath> &horizontal_path,
                                         std::vector<PrecalcWaypoint> &precalc_waypoints, double gamma,
                                         const WeatherPrediction &weather_prediction,
                                         const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantMachVerticalPath(VerticalPath vertical_path, double altitude_at_end,
+   VerticalPath ConstantMachVerticalPath(const VerticalPath &vertical_path, double altitude_at_end,
                                          std::vector<HorizontalPath> &horizontal_path,
                                          std::vector<PrecalcWaypoint> &precalc_waypoints, double gamma,
                                          const WeatherPrediction &weather_prediction,
                                          const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantGeometricFpaVerticalPath(VerticalPath vertical_path, double altitude_at_end,
+   VerticalPath ConstantGeometricFpaVerticalPath(const VerticalPath &vertical_path, double altitude_at_end,
                                                  double flight_path_angle, std::vector<HorizontalPath> &horizontal_path,
                                                  std::vector<PrecalcWaypoint> &precalc_waypoints,
                                                  const WeatherPrediction &weather_prediction,
                                                  const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantFpaDecelerationVerticalPath(VerticalPath vertical_path, double altitude_at_end,
+   VerticalPath ConstantFpaDecelerationVerticalPath(const VerticalPath &vertical_path, double altitude_at_end,
                                                     double deceleration, double velocity_cas_end,
                                                     double flight_path_angle,
                                                     std::vector<HorizontalPath> &horizontal_path,
@@ -80,29 +82,29 @@ class KinematicDescent4DPredictor : public VerticalPredictor {
                                                     const WeatherPrediction &weather_prediction,
                                                     const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath LevelVerticalPath(VerticalPath vertical_path, double x_end,
+   VerticalPath LevelVerticalPath(const VerticalPath &vertical_path, double x_end,
                                   std::vector<HorizontalPath> &horizontal_path,
                                   const WeatherPrediction &weather_prediction,
                                   const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantDecelerationVerticalPath(VerticalPath vertical_path, Units::Length distance_to_go,
+   VerticalPath ConstantDecelerationVerticalPath(const VerticalPath &vertical_path, Units::Length distance_to_go,
                                                  Units::Length altitude_high, double deceleration,
                                                  double velocity_cas_end, std::vector<HorizontalPath> &horizontal_path,
                                                  const WeatherPrediction &weather_prediction,
                                                  const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath LevelDecelerationVerticalPath(VerticalPath vertical_path, double deceleration, double velocity_cas_end,
-                                              std::vector<HorizontalPath> &horizontal_path,
+   VerticalPath LevelDecelerationVerticalPath(const VerticalPath &vertical_path, double deceleration,
+                                              double velocity_cas_end, std::vector<HorizontalPath> &horizontal_path,
                                               const WeatherPrediction &weather_prediction,
                                               const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath LevelDecelerationVerticalPath(VerticalPath vertical_path, Units::Length distance_to_go,
+   VerticalPath LevelDecelerationVerticalPath(const VerticalPath &vertical_path, Units::Length distance_to_go,
                                               double deceleration, double velocity_cas_end,
                                               std::vector<HorizontalPath> &horizontal_path,
                                               const WeatherPrediction &weather_prediction,
                                               const Units::Length &aircraft_distance_to_go);
 
-   VerticalPath ConstantFpaToCurrentPositionVerticalPath(VerticalPath vertical_path,
+   VerticalPath ConstantFpaToCurrentPositionVerticalPath(const VerticalPath &vertical_path,
                                                          std::vector<HorizontalPath> &horizontal_path,
                                                          std::vector<PrecalcWaypoint> &precalc_waypoints,
                                                          double const_gamma_mach,

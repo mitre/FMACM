@@ -14,12 +14,13 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
 #pragma once
 
 #include <memory>
+
 #include "public/WeatherEstimate.h"
 
 namespace aaesim {
@@ -52,20 +53,17 @@ class WeatherPrediction final : public WeatherEstimate {
 
    std::shared_ptr<Atmosphere> GetForecastAtmosphere() const;
 
-   int IncrementUpdateCount();
+   void IncrementUpdateCount();
 
    int GetUpdateCount() const;
 
   private:
-   int m_update_count{0};
+   int update_count_{0};
 };
 
-inline int WeatherPrediction::IncrementUpdateCount() {
-   m_update_count++;
-   return m_update_count;
-}
+inline void WeatherPrediction::IncrementUpdateCount() { ++update_count_; }
 
-inline int WeatherPrediction::GetUpdateCount() const { return m_update_count; }
+inline int WeatherPrediction::GetUpdateCount() const { return update_count_; }
 
 inline std::shared_ptr<Wind> WeatherPrediction::GetForecastWind() const { return getWind(); }
 

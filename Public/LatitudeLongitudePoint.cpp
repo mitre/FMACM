@@ -14,11 +14,15 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// 2023 The MITRE Corporation. All Rights Reserved.
+// (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <scalar/UnsignedAngle.h>
 #include "public/LatitudeLongitudePoint.h"
+
+#include <scalar/UnsignedAngle.h>
+
+#include <utility>
+
 #include "public/GeolibUtils.h"
 
 using namespace aaesim;

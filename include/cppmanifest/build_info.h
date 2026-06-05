@@ -41,13 +41,13 @@
 #define aaesim_CPPMANIFEST_BUILDHOSTNAME_STR CPPMANIFEST_MAKE_STR(MM292068 - PC)
 
 //! Git SCM info
-#define aaesim_CPPMANIFEST_GIT_BRANCH CPPMANIFEST_MAKE_STR(refs / heads / feat / update - to - v5.3.0)
-#define aaesim_CPPMANIFEST_GIT_HASH CPPMANIFEST_MAKE_STR(ed72905002e3075ada638de1067d0cdce8cc4e1d)
+#define aaesim_CPPMANIFEST_GIT_BRANCH CPPMANIFEST_MAKE_STR(refs / heads / master)
+#define aaesim_CPPMANIFEST_GIT_HASH CPPMANIFEST_MAKE_STR(93f0e93a5a0164a6a1508ace2663d7d751f89c2f)
 #define aaesim_CPPMANIFEST_GIT_TAG CPPMANIFEST_MAKE_STR()
 #define aaesim_CPPMANIFEST_GIT_LOCAL_CHANGES CPPMANIFEST_MAKE_STR(CLEAN)
 
 //! This is CPPMANIFEST version number as a string.
 //! Do not wrap the suffix in quotes, but it may be left empty for a release
-#define aaesim_CPPMANIFEST_VERSION_STR CPPMANIFEST_MAKE_VERSION_STR(5, 3, 0, SNAPSHOT)
+#define aaesim_CPPMANIFEST_VERSION_STR CPPMANIFEST_MAKE_VERSION_STR(5, 3, 0, 0)
 
 #endif

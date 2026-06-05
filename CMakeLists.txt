@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 5.2.0.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 5.3.0.1) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 20)
 

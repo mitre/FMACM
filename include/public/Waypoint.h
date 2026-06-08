@@ -22,6 +22,7 @@
 #include <list>
 #include <string>
 
+#include "utility/CustomUnits.h"
 #include "loader/LoggingLoadable.h"
 
 class Waypoint : public LoggingLoadable {

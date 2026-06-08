@@ -26,6 +26,7 @@
 
 #include "loader/DecodedStream.h"
 #include "public/WindStack.h"
+#include "utility/CustomUnits.h"
 
 using namespace aaesim::open_source;
 

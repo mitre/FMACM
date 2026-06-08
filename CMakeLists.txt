@@ -55,28 +55,19 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-function -
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-function -Wno-sign-compare -O3 -g3")
 
 CPMAddPackage(
-    NAME log4cplus
-    GITHUB_REPOSITORY log4cplus/log4cplus
-    GIT_TAG REL_2_1_2
+    NAME fsloader
+    GIT_REPOSITORY https://github.com/mitre/fsloader.git
+    GIT_TAG 1.0.0
     OPTIONS
+     "FSLOADER_BUILD_EXAMPLE OFF"
      "BUILD_SHARED_LIBS FALSE"
-     "LOG4CPLUS_BUILD_TESTING FALSE"
-     "LOG4CPLUS_BUILD_LOGGINGSERVER FALSE"
 )
-if (log4cplus_ADDED)
-    set (LOG4CPLUS_DIRS 
-        ${log4cplus_BINARY_DIR}/include
-        ${log4cplus_SOURCE_DIR}/include)
-endif ()
 
-set (unitslib_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1)
-set (LOADER_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
 set (PUBLIC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Public)
 set (FRAMEWORK_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include )
 set (UNITTEST_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
 
-add_subdirectory(${LOADER_DIR})
 add_subdirectory(${PUBLIC_DIR})
 
 include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)

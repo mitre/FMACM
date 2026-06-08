@@ -453,26 +453,6 @@ bool DecodedStream::get_datum(Units::PoundsMass &s) {
    return true;
 }
 
-bool DecodedStream::get_datum(Units::KilogramsPerHourMassFlowRate &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::KilogramsPerHourMassFlowRate(d);
-   return true;
-}
-
-bool DecodedStream::get_datum(Units::PoundsPerHourMassFlowRate &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::PoundsPerHourMassFlowRate(d);
-   return true;
-}
-
 bool DecodedStream::get_datum(Units::FeetArea &s) {
    double d = 0;
    bool getDouble = get_datum(d);
@@ -490,45 +470,5 @@ bool DecodedStream::get_datum(Units::MetersArea &s) {
       return false;
    }
    s = Units::MetersArea(d);
-   return true;
-}
-
-bool DecodedStream::get_datum(Units::FeetPerMinuteSpeed &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::FeetPerMinuteSpeed(d);
-   return true;
-}
-
-bool DecodedStream::get_datum(Units::SecondsPerNauticalMileInvertedSpeed &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::SecondsPerNauticalMileInvertedSpeed(d);
-   return true;
-}
-
-bool DecodedStream::get_datum(Units::HertzFrequency &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::HertzFrequency(d);
-   return true;
-}
-
-bool DecodedStream::get_datum(Units::MetersPerSecondSquaredLengthGain &s) {
-   double d = 0;
-   bool getDouble = get_datum(d);
-   if (!getDouble) {
-      return false;
-   }
-   s = Units::MetersPerSecondSquaredLengthGain(d);
    return true;
 }

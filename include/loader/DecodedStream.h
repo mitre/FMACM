@@ -19,22 +19,21 @@
 
 #pragma once
 
-#include <scalar/Angle.h>
-#include <scalar/Area.h>
-#include <scalar/Length.h>
-#include <scalar/Mass.h>
-#include <scalar/MassFlowRate.h>
-#include <scalar/Speed.h>
-#include <scalar/Time.h>
-
 #include <string>
 
+#include "scalar/Acceleration.h"
+#include "scalar/Angle.h"
+#include "scalar/Area.h"
+#include "scalar/Length.h"
+#include "scalar/Mass.h"
+#include "scalar/MassFlowRate.h"
+#include "scalar/Speed.h"
+#include "scalar/Time.h"
 #include "loader/ArchiveStreamEcho.h"
 #include "loader/CommentStream.h"
 #include "loader/IncludeStream.h"
 #include "loader/SinglePushBackStream.h"
 #include "loader/TokenStream.h"
-#include "utility/CustomUnits.h"
 
 class DecodedStream : public SinglePushBackStream<IncludeStream<ArchiveStreamEcho<CommentStream<TokenStream> > > > {
   public:
@@ -88,19 +87,7 @@ class DecodedStream : public SinglePushBackStream<IncludeStream<ArchiveStreamEch
 
    bool get_datum(Units::PoundsMass &s);
 
-   bool get_datum(Units::KilogramsPerHourMassFlowRate &s);
-
-   bool get_datum(Units::PoundsPerHourMassFlowRate &s);
-
    bool get_datum(Units::FeetArea &s);
 
    bool get_datum(Units::MetersArea &s);
-
-   bool get_datum(Units::FeetPerMinuteSpeed &s);
-
-   bool get_datum(Units::SecondsPerNauticalMileInvertedSpeed &s);
-
-   bool get_datum(Units::HertzFrequency &s);
-
-   bool get_datum(Units::MetersPerSecondSquaredLengthGain &s);
 };

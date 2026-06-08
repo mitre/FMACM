@@ -205,13 +205,6 @@ bool Loadable::loadSpeedKnots(Units::Speed &speed) {
    return result;
 }
 
-bool Loadable::loadAccelerationKnotsPerSecond(Units::Acceleration &acceleration) {
-   double value;
-   bool result = stream->get_datum(value);
-   acceleration = Units::KnotsPerSecondAcceleration(value);
-   return result;
-}
-
 shared_ptr<LoaderLink> Loadable::getLoaderLink(const string &name) {
    string varnameclean = clean_token(name);
    map<string, shared_ptr<LoaderLink> >::iterator it = lookup_table.find(varnameclean);

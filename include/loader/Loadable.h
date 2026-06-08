@@ -70,8 +70,6 @@ class Loadable : public LoaderSupport {
 
    bool loadSpeedKnots(Units::Speed &speed);
 
-   bool loadAccelerationKnotsPerSecond(Units::Acceleration &acceleration);
-
    bool loadLengthNM(Units::Length &length);
 
    //========================================================================

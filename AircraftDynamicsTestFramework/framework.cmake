@@ -27,7 +27,6 @@ if(NOT ${BUILD_LIBARIES_ONLY})
         $<BUILD_INTERFACE:${cppmanifest_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${aaesim_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${minicsv_INCLUDE_DIR}>
-        ${LOG4CPLUS_DIRS}
     )
     set_target_properties(FMACM PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin

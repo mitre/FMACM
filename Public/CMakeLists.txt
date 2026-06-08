@@ -30,7 +30,7 @@ CPMAddPackage(
     VERSION 3.11.3
 )
 
-set(SOURCE_FILES
+set(LIBRARY_SOURCE_FILES
         ADSBSVReport.cpp
         AircraftCalculations.cpp
         AircraftControl.cpp
@@ -103,16 +103,15 @@ set(SOURCE_FILES
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-add_library(pub STATIC ${SOURCE_FILES})
+add_library(pub STATIC ${LIBRARY_SOURCE_FILES})
 target_include_directories(pub PUBLIC
         ${geolib_idealab_INCLUDE_DIRS}
         ${aaesim_INCLUDE_DIRS}
         ${minicsv_INCLUDE_DIR})
 target_link_libraries(pub
         PUBLIC
-        loader
-        mitre::cppuom
+        mitre::fsloader
         geolib
-        log4cplusS
+        log4cplus::log4cplus
         nlohmann_json::nlohmann_json
         "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.1>>:-lstdc++fs>")

@@ -47,14 +47,13 @@ include(sample_algorithm_library.cmake OPTIONAL)
 add_library(framework STATIC ${SOURCE_FILES} ${DATA_READER_FILES} ${DATA_LOADER_FILES} ${DATA_WRITER_FILES})
 target_include_directories(framework PUBLIC
         ${aaesim_INCLUDE_DIRS} 
-        ${geolib_idealab_INCLUDE_DIRS} 
-        ${LOG4CPLUS_DIRS})
+        ${geolib_idealab_INCLUDE_DIRS})
 target_link_libraries(framework
    PUBLIC
-   mitre::cppuom
+   mitre::fsloader
    ${BADA_LIBRARY}
    ${SAMPLE_ALGORITHM_LIBRARY}
-   log4cplusS
+   log4cplus::log4cplus
    pub)
 if (DEFINED BADA_LIBRARY)
    # Add a compile definition to the build

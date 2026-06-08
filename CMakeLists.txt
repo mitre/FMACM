@@ -57,7 +57,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-functi
 CPMAddPackage(
     NAME fsloader
     GIT_REPOSITORY https://github.com/mitre/fsloader.git
-    GIT_TAG 1.0rc1
+    GIT_TAG 1.0.0
     OPTIONS
      "FSLOADER_BUILD_EXAMPLE OFF"
      "BUILD_SHARED_LIBS FALSE"

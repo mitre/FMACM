@@ -69,7 +69,12 @@ if (log4cplus_ADDED)
         ${log4cplus_SOURCE_DIR}/include)
 endif ()
 
-set (unitslib_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/unitsLib/units-2.1)
+CPMAddPackage(
+    NAME cppuom
+    GIT_REPOSITORY https://github.com/mitre/cppuom.git
+    GIT_TAG 2.2
+)
+
 set (LOADER_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Loader)
 set (PUBLIC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Public)
 set (FRAMEWORK_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)

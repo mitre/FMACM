@@ -109,8 +109,10 @@ target_include_directories(pub PUBLIC
         ${aaesim_INCLUDE_DIRS}
         ${minicsv_INCLUDE_DIR})
 target_link_libraries(pub
-        loader 
-        geolib 
-        log4cplusS 
-        nlohmann_json::nlohmann_json 
+        PUBLIC
+        loader
+        mitre::cppuom
+        geolib
+        log4cplusS
+        nlohmann_json::nlohmann_json
         "$<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.1>>:-lstdc++fs>")

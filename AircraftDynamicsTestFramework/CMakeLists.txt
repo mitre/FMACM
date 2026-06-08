@@ -50,6 +50,8 @@ target_include_directories(framework PUBLIC
         ${geolib_idealab_INCLUDE_DIRS} 
         ${LOG4CPLUS_DIRS})
 target_link_libraries(framework
+   PUBLIC
+   mitre::cppuom
    ${BADA_LIBRARY}
    ${SAMPLE_ALGORITHM_LIBRARY}
    log4cplusS

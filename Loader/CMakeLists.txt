@@ -16,9 +16,11 @@ add_library(loader STATIC
     LoggingLoadable.cpp
     RunFileArchiveDirector.cpp
     TokenStream.cpp)
-target_link_libraries(loader log4cplusS)
+target_link_libraries(loader
+        PUBLIC
+        log4cplusS
+        mitre::cppuom)
 target_include_directories(loader PUBLIC
-        ${unitslib_INCLUDE_DIRS}
         ${aaesim_INCLUDE_DIRS}
         ${LOG4CPLUS_DIRS}
 )

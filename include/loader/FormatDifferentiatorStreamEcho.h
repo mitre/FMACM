@@ -19,10 +19,12 @@
 
 #pragma once
 
-#include "loader/Token.h"
-#include "utility/MoreStringFunctions.h"
-#include "loader/HTMLDump.h"
 #include <sstream>
+#include <string>
+
+#include "loader/MoreStringFunctions.h"
+#include "loader/HTMLDump.h"
+#include "loader/Token.h"
 
 template <class PARENT>
 

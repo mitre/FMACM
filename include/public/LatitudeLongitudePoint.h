@@ -19,14 +19,15 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/SignedAngle.h>
+#include <scalar/UnsignedAngle.h>
+
 #include <utility>
 
 #include "geolib/Geolib.h"
 #include "public/EllipsoidalEarthModel.h"
 #include "public/Waypoint.h"
-#include "scalar/Length.h"
-#include "scalar/SignedAngle.h"
-#include "scalar/UnsignedAngle.h"
 
 /*
  *

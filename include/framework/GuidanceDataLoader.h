@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <loader/Loadable.h>
+
 #include <list>
 #include <memory>
 #include <string>
@@ -28,7 +30,6 @@
 #include "HfpReader2020.h"
 #include "MiniCSV/minicsv.h"
 #include "framework/GuidanceFromStaticData.h"
-#include "loader/Loadable.h"
 #include "public/TangentPlaneSequence.h"
 #include "public/Waypoint.h"
 

@@ -26,9 +26,10 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+
 #include <string>
 
-#include "loader/Logging.h"
 #include "public/DMatrix.h"
 #include "public/EarthModel.h"
 

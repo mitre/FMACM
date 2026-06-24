@@ -21,6 +21,7 @@
 
 #include "OldCustomMathUtils.h"
 
+#include <log4cplus/loggingmacros.h>
 #include <math.h>
 #include <stdio.h>
 

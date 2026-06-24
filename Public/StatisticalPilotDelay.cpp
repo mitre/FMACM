@@ -19,6 +19,8 @@
 
 #include "public/StatisticalPilotDelay.h"
 
+#include <log4cplus/loggingmacros.h>
+
 #include <iomanip>
 
 #include "public/CustomMath.h"

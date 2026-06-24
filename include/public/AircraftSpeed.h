@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include "scalar/Speed.h"
+#include <scalar/Speed.h>
+
 #include "utility/BoundedValue.h"
 
 enum SpeedValueType {

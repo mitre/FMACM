@@ -26,12 +26,13 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/SignedAngle.h>
+
 #include <memory>
 
 #include "public/AircraftState.h"
 #include "public/Waypoint.h"
-#include "scalar/Length.h"
-#include "scalar/SignedAngle.h"
 #include "utility/CustomUnits.h"
 
 // can't include LocalTangentPlane.h here because of mutual dependency

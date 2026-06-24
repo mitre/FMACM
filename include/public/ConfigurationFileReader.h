@@ -19,11 +19,11 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+
 #include <filesystem>
 #include <string>
 #include <vector>
-
-#include "loader/Logging.h"
 
 namespace aaesim::open_source {
 class ConfigurationFileReader {

@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <string>
+#include <scalar/Time.h>
 
-#include "scalar/Time.h"
+#include <string>
 
 namespace aaesim::open_source {
 class SimulationTime final {

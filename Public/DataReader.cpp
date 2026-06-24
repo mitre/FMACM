@@ -26,6 +26,8 @@
 
 #include "public/DataReader.h"
 
+#include <log4cplus/loggingmacros.h>
+
 #include <iostream>
 #include <memory>
 #include <string>

@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include <scalar/AngularSpeed.h>
+
 #include "public/EarthModel.h"
 #include "public/EquationsOfMotionState.h"
 #include "public/EquationsOfMotionStateDeriv.h"
 #include "public/SimulationTime.h"
-#include "scalar/AngularSpeed.h"
 
 namespace aaesim::open_source {
 struct LatLonDerivative {

@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "loader/Logging.h"
+#include <log4cplus/logger.h>
 
 class RandomGenerator final {
   public:

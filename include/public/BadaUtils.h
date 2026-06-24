@@ -19,10 +19,11 @@
 
 #pragma once
 
+#include <scalar/Area.h>
+
 #include <stdexcept>
 #include <string>
 
-#include "scalar/Area.h"
 #include "utility/CustomUnits.h"
 
 namespace aaesim {

@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <scalar/Angle.h>
+#include <scalar/Length.h>
+
 #include <string>
 #include <vector>
 
 #include "public/DataReader.h"
-#include "scalar/Angle.h"
-#include "scalar/Length.h"
 #include "utility/CustomUnits.h"
 
 namespace fmacm {

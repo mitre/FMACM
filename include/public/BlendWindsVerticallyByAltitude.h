@@ -19,8 +19,9 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+
 #include "public/WindBlendingAlgorithm.h"
-#include "scalar/Length.h"
 
 namespace aaesim::open_source {
 class BlendWindsVerticallyByAltitude final : public WindBlendingAlgorithm {

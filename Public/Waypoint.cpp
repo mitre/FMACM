@@ -19,9 +19,8 @@
 
 #include "public/Waypoint.h"
 
-#include <public/AircraftIntent.h>
-
 #include <list>
+#include <ostream>
 #include <string>
 
 const Units::FeetLength Waypoint::MAX_ALTITUDE_CONSTRAINT(50000);
@@ -46,97 +45,6 @@ Waypoint::Waypoint(const std::string &name, Units::Angle latitude, Units::Angle 
      m_rf_turn_center_longitude(Units::ZERO_ANGLE),
      m_rf_turn_arc_radius(Units::ZERO_LENGTH),
      m_arinc424_leg_type(arinc424_leg_type) {}
-
-bool Waypoint::load(DecodedStream *input) {
-   set_stream(input);
-
-   const unsigned int column_count_v4_schema = 13;
-   const unsigned int column_count_no_rf_legs_pre_v4_schema = 11;
-   const unsigned int column_count_complete_pre_v4_schema = 14;
-
-   bool f = load_datum(m_name);
-   if (!f) {
-      LoggingLoadable::report_error("could not load waypoint_name");
-   }
-
-   f = loadAngleDegrees(m_latitude);
-   if (!f) {
-      LoggingLoadable::report_error("could not load waypoint_Latitude");
-   }
-
-   f = loadAngleDegrees(m_longitude);
-   if (!f) {
-      LoggingLoadable::report_error("could not load waypoint_Longitude");
-   }
-
-   f = loadLengthFeet(m_altitude);
-   if (!f) {
-      LoggingLoadable::report_error("could not load waypoint_altitude");
-   }
-
-   double uninterpreted_loaded_values[column_count_complete_pre_v4_schema];
-   for (int i = 4; i < column_count_v4_schema - 1; ++i) {
-      bool f = load_datum(uninterpreted_loaded_values[i]);
-      if (!f) {
-         input->push_back();
-         if (i == column_count_no_rf_legs_pre_v4_schema) {
-            // use column_count_no_rf_legs_pre_v4_schema
-            m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[5]);
-            m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[7]);
-            m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[8]);
-            m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[9]);
-            m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
-            m_rf_turn_arc_radius = Units::zero();
-            m_rf_turn_center_latitude = Units::zero();
-            m_rf_turn_center_longitude = Units::zero();
-            return true;
-         }
-         LoggingLoadable::report_error("could not load a waypoint parameter");
-         return false;
-      }
-   }
-
-   // Load the next value as a string, then test its value
-   std::string uninterpreted_next_value;
-   f = load_datum(uninterpreted_next_value);
-   if (!f) {
-      LoggingLoadable::report_error("could not load a waypoint parameter...reason unknown");
-      return false;
-   } else {
-      auto loaded_character_length = uninterpreted_next_value.size();
-      const static auto leg_type_identifier_size = 2;
-      if (loaded_character_length == leg_type_identifier_size) {
-         // use column_count_v4_schema
-         m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[4]);
-         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[5]);
-         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[6]);
-         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[7]);
-         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[8]);
-         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[9]);
-         m_rf_turn_center_latitude = Units::DegreesAngle(uninterpreted_loaded_values[10]);
-         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[11]);
-         m_arinc424_leg_type = uninterpreted_next_value;
-         return true;
-      } else {
-         // use column_count_complete_pre_v4_schema
-         m_nominal_ias = Units::KnotsSpeed(uninterpreted_loaded_values[5]);
-         m_altitude_constraint_high = Units::FeetLength(uninterpreted_loaded_values[7]);
-         m_altitude_constraint_low = Units::FeetLength(uninterpreted_loaded_values[8]);
-         m_speed_constraint_high = Units::KnotsSpeed(uninterpreted_loaded_values[9]);
-         m_speed_constraint_low = Units::KnotsSpeed(uninterpreted_loaded_values[10]);
-         m_rf_turn_arc_radius = Units::NauticalMilesLength(uninterpreted_loaded_values[11]);
-         m_rf_turn_center_latitude = Units::DegreesAngle(std::strtod(uninterpreted_next_value.c_str(), NULL));
-         f = load_datum(uninterpreted_loaded_values[13]);
-         if (!f) {
-            LoggingLoadable::report_error("could not load a waypoint parameter");
-            return false;
-         }
-         m_rf_turn_center_longitude = Units::DegreesAngle(uninterpreted_loaded_values[13]);
-         m_arinc424_leg_type = "UNSET";
-         return true;
-      }
-   }
-}
 
 std::ostream &operator<<(std::ostream &out, const Waypoint &waypoint) {
    out << waypoint.GetName() << " ";

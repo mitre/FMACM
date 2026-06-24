@@ -19,13 +19,14 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+
 #include <map>
 #include <vector>
 
 #include "public/ADSBSVReport.h"
 #include "public/AircraftState.h"
 #include "public/SimulationTime.h"
-#include "scalar/Length.h"
 
 namespace aaesim {
 namespace open_source {

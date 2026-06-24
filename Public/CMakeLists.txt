@@ -35,6 +35,7 @@ set(LIBRARY_SOURCE_FILES
         AircraftCalculations.cpp
         AircraftControl.cpp
         AircraftIntent.cpp
+        AircraftIntentLoader.cpp
         AircraftSpeed.cpp
         AircraftState.cpp
         Atmosphere.cpp
@@ -71,6 +72,7 @@ set(LIBRARY_SOURCE_FILES
         VerticalPath.cpp
         VerticalPredictor.cpp
         Waypoint.cpp
+        WaypointLoader.cpp
         WeatherEstimate.cpp
         WeatherPrediction.cpp
         WeatherTruth.cpp

@@ -19,16 +19,17 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Time.h>
+
 #include <map>
 #include <memory>
 #include <utility>
 
-#include "loader/Logging.h"
 #include "public/Atmosphere.h"
 #include "public/PilotDelay.h"
-#include "scalar/Length.h"
-#include "scalar/Speed.h"
-#include "scalar/Time.h"
 
 namespace aaesim::open_source {
 class StatisticalPilotDelay final : public PilotDelay {

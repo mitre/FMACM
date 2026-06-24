@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+
 #include <utility>
 
 #include "public/LatitudeLongitudePoint.h"
 #include "public/ShapeOnEllipsoid.h"
-#include "scalar/Length.h"
 
 namespace aaesim {
 class LineOnEllipsoid final : public ShapeOnEllipsoid {

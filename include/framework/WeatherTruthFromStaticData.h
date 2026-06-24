@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <scalar/Speed.h>
+
 #include <algorithm>
 #include <map>
 #include <memory>
@@ -28,7 +30,6 @@
 #include "public/NullAtmosphere.h"
 #include "public/SimulationTime.h"
 #include "public/WeatherTruth.h"
-#include "scalar/Speed.h"
 
 #ifdef MITRE_BADA3_LIBRARY
 #include "bada/BadaAtmosphere37.h"

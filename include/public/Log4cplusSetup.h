@@ -14,22 +14,37 @@
 // For further information, please contact The MITRE Corporation, Contracts Management
 // Office, 7515 Colshire Drive, McLean, VA 22102-7539, (703) 983-6000.
 //
-// (c) 2026 The MITRE Corporation. All Rights Reserved.
+// 2023 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <log4cplus/initializer.h>
+#pragma once
+
+#include <log4cplus/configurator.h>
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
+#include <math.h>
+#include <unistd.h>
 
-#include "gtest/gtest.h"
-#include "public/Log4cplusSetup.h"
+static bool logging_initialized_ = false;
 
-GTEST_API_ int main(int argc, char **argv) {
-   log4cplus::Initializer initializer;
-   LoadLoggerProperties();
-   log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
-   LOG4CPLUS_INFO(logger, "Running main()");
-   testing::InitGoogleTest(&argc, argv);
-   (void)!RUN_ALL_TESTS();  // we ignore the return status here.
-   return 0;
+static void LoadLoggerProperties() {
+   if (logging_initialized_) return;
+   logging_initialized_ = true;
+
+   auto logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("logging.init"));
+   auto prop_file = getenv("LOG4CPLUS_PROPERTIES");
+   if (prop_file == NULL) {
+      // fall back to log4cplus.properties
+      prop_file = (char *)"log4cplus.properties";
+   }
+
+   if (access(prop_file, F_OK) == -1) {
+      log4cplus::BasicConfigurator config;
+      config.configure();
+      return;
+   }
+
+   log4cplus::PropertyConfigurator config(prop_file);
+   config.configure();
+   LOG4CPLUS_TRACE(logger, "LOG4CPLUS_PROPERTIES file is " << LOG4CPLUS_TEXT(prop_file));
 }

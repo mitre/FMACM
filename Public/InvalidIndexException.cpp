@@ -19,9 +19,10 @@
 
 #include "public/InvalidIndexException.h"
 
-#include <iostream>
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
 
-#include "loader/Logging.h"
+#include <iostream>
 
 InvalidIndexException::InvalidIndexException(const int value, const int low_limit, const int high_limit) : exception() {
    log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("InvalidIndexException"));

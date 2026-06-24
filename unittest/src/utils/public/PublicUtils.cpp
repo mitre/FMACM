@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include "public/AircraftIntentLoader.h"
 #include "public/SingleTangentPlaneSequence.h"
 
 using namespace std;
@@ -82,7 +83,7 @@ std::vector<HorizontalPath> aaesim::test::utils::PublicUtils::CreateStraightHori
 
 AircraftIntent aaesim::test::utils::PublicUtils::LoadAircraftIntent(std::string parmsfile) {
    DecodedStream intentstream;
-   AircraftIntent intent;
+   aaesim::loaders::AircraftIntentLoader intent_loader;
    FILE *fp = fopen(parmsfile.c_str(), "r");
    if (fp == nullptr) {
       std::cout << "Intent file " << parmsfile.c_str() << " not found" << std::endl;
@@ -96,12 +97,12 @@ AircraftIntent aaesim::test::utils::PublicUtils::LoadAircraftIntent(std::string 
 
          intentstream.set_echo(false);  // default set to false, must turn it on in input file
 
-         intent.load(&intentstream);
+         intent_loader.load(&intentstream);
       }
    }
 
    fclose(fp);
-   return intent;
+   return intent_loader.BuildAircraftIntent();
 }
 
 AircraftIntent aaesim::test::utils::PublicUtils::PrepareAircraftIntent(std::string parmsfile) {

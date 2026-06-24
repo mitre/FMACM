@@ -18,13 +18,13 @@
 // ****************************************************************************
 
 #include <gtest/gtest.h>
+#include <loader/DecodedStream.h>
 
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "loader/DecodedStream.h"
 #include "public/WindStack.h"
 #include "utility/CustomUnits.h"
 

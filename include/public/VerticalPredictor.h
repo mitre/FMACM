@@ -19,6 +19,10 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Time.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -33,9 +37,6 @@
 #include "public/PrecalcWaypoint.h"
 #include "public/VerticalPath.h"
 #include "public/WeatherPrediction.h"
-#include "scalar/Length.h"
-#include "scalar/Speed.h"
-#include "scalar/Time.h"
 
 class VerticalPredictor {
   public:

@@ -19,6 +19,10 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <scalar/Speed.h>
+
 #include <algorithm>
 #include <fstream>
 #include <list>
@@ -28,16 +32,19 @@
 #include <utility>
 #include <vector>
 
-#include "loader/Logging.h"
-#include "loader/LoggingLoadable.h"
 #include "nlohmann/json.hpp"
 #include "public/TangentPlaneSequence.h"
 #include "public/Waypoint.h"
-#include "scalar/Speed.h"
 #include "utility/BoundedValue.h"
 #include "utility/UtilityConstants.h"
 
-class AircraftIntent : public LoggingLoadable {
+namespace aaesim {
+namespace loaders {
+class AircraftIntentLoader;
+}  // namespace loaders
+}  // namespace aaesim
+
+class AircraftIntent {
   public:
    enum WaypointPhaseOfFlight { ASCENT, CRUISE, DESCENT };
 
@@ -78,8 +85,6 @@ class AircraftIntent : public LoggingLoadable {
    void Copy(const AircraftIntent &in);
 
    void Initialize();
-
-   bool load(DecodedStream *input);
 
    virtual void LoadWaypointsFromList(const std::list<Waypoint> &ascent_waypoints,
                                       const std::list<Waypoint> &cruise_waypoints,
@@ -195,6 +200,7 @@ class AircraftIntent : public LoggingLoadable {
 
    void DeleteRouteDataContent();
    void AddWaypointsToRouteDataVectors(const std::vector<Waypoint> &waypoints, enum WaypointPhaseOfFlight add_as_phase);
+   friend class aaesim::loaders::AircraftIntentLoader;
    friend std::ostream &operator<<(std::ostream &out, const AircraftIntent &intent);
    int m_id{-1};
 };

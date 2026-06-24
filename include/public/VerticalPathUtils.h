@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Time.h>
+
 #include <vector>
 
 #include "public/CoreUtils.h"
-#include "scalar/Length.h"
-#include "scalar/Speed.h"
-#include "scalar/Time.h"
 
 namespace aaesim {
 namespace open_source {

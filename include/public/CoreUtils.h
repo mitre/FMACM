@@ -19,19 +19,21 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <scalar/Length.h>
+#include <scalar/Time.h>
+
 #include <limits>
 #include <list>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "loader/Logging.h"
 #include "public/AircraftIntent.h"
 #include "public/AircraftState.h"
 #include "public/HorizontalPath.h"
 #include "public/LineOnEllipsoid.h"
-#include "scalar/Length.h"
-#include "scalar/Time.h"
 
 class CoreUtils {
   public:

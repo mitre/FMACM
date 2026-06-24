@@ -19,14 +19,15 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Temperature.h>
+
 #include <memory>
 
 #include "public/Atmosphere.h"
 #include "public/EarthModel.h"
 #include "public/WeatherTruth.h"
-#include "scalar/Length.h"
-#include "scalar/Speed.h"
-#include "scalar/Temperature.h"
 
 namespace aaesim::open_source {
 struct TrueWeatherOperator {

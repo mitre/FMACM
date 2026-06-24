@@ -26,6 +26,8 @@
 
 #include "public/LocalTangentPlane.h"
 
+#include <log4cplus/loggingmacros.h>
+
 #include <memory>
 #include <string>
 

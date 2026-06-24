@@ -20,6 +20,7 @@
 #include "public/RandomGenerator.h"
 
 #include <assert.h>
+#include <log4cplus/loggingmacros.h>
 #include <math.h>
 #include <time.h>
 

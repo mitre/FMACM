@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <loader/Loadable.h>
+
 #include <filesystem>
 #include <string>
 #include <vector>
 
 #include "framework/SpeedCommandsFromStaticData.h"
-#include "loader/Loadable.h"
 
 namespace fmacm::loader {
 class SpeedCommandsLoader final : public Loadable {

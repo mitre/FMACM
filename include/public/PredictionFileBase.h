@@ -29,7 +29,6 @@
 #include <string>
 #include <vector>
 
-#include "loader/Logging.h"
 #include "public/AircraftState.h"
 #include "public/OutputHandler.h"
 #include "public/VerticalPath.h"

@@ -23,18 +23,15 @@
 
 #include <string>
 
-#include "loader/LoggingLoadable.h"
 #include "public/PrecalcConstraint.h"
 
-class PrecalcWaypoint : public LoggingLoadable {
+class PrecalcWaypoint final {
   public:
    PrecalcWaypoint() = default;
 
-   virtual ~PrecalcWaypoint();
+   ~PrecalcWaypoint() = default;
 
    bool operator==(const PrecalcWaypoint &obj) const;
-
-   bool load(DecodedStream *input);
 
    std::string m_name{};
 
@@ -52,7 +49,4 @@ class PrecalcWaypoint : public LoggingLoadable {
    Units::MetersPerSecondSpeed m_ground_speed{Units::zero()};
 
    aaesim::open_source::PrecalcConstraint m_precalc_constraints{};
-
-  private:
-   bool m_loaded{false};
 };

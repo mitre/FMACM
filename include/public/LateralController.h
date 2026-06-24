@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <scalar/Angle.h>
+
 #include <memory>
 
 #include "public/EquationsOfMotionState.h"
 #include "public/Guidance.h"
 #include "public/TrueWeatherOperator.h"
-#include "scalar/Angle.h"
 
 namespace aaesim::open_source {
 struct LateralController {

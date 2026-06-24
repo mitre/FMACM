@@ -19,6 +19,7 @@
 
 #include "public/ConfigurationFileReader.h"
 
+#include <log4cplus/loggingmacros.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

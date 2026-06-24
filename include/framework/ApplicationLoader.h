@@ -19,15 +19,16 @@
 
 #pragma once
 
+#include <loader/LoggingLoadable.h>
+#include <scalar/Time.h>
+
 #include <map>
 #include <memory>
 #include <vector>
 
 #include "framework/SpeedCommandsLoader.h"
-#include "loader/LoggingLoadable.h"
 #include "public/FlightDeckApplication.h"
 #include "public/WeatherPrediction.h"
-#include "scalar/Time.h"
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
 #include "imalgs/IMDistBasedAchieve.h"

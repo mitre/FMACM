@@ -19,19 +19,21 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+#include <scalar/AngularSpeed.h>
+#include <scalar/Density.h>
+#include <scalar/Frequency.h>
+#include <scalar/Pressure.h>
+#include <scalar/Speed.h>
+#include <scalar/Temperature.h>
+#include <scalar/UnsignedAngle.h>
+
 #include <string>
 
-#include "loader/Logging.h"
 #include "public/ADSBSVReport.h"
 #include "public/BadaUtils.h"
 #include "public/DynamicsState.h"
-#include "scalar/AngularSpeed.h"
-#include "scalar/Density.h"
-#include "scalar/Frequency.h"
-#include "scalar/Pressure.h"
-#include "scalar/Speed.h"
-#include "scalar/Temperature.h"
-#include "scalar/UnsignedAngle.h"
 
 namespace aaesim {
 namespace open_source {

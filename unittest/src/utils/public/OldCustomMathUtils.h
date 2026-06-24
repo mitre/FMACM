@@ -21,12 +21,12 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
 #include <scalar/Angle.h>
 #include <scalar/Length.h>
 #include <scalar/Speed.h>
 #include <scalar/Time.h>
 
-#include "loader/Logging.h"
 #include "public/DMatrix.h"
 #include "public/DVector.h"
 

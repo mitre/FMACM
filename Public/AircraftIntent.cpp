@@ -266,41 +266,6 @@ void AircraftIntent::Copy(const AircraftIntent &in) {
    m_ascent_waypoints = in.m_ascent_waypoints;
 }
 
-bool AircraftIntent::load(DecodedStream *input) {
-   set_stream(input);
-
-   std::list<Waypoint> waypoints, descent_waypoints;
-   std::list<Waypoint> ascent_waypoints, cruise_waypoints;
-   double cruise_mach_loaded;
-   Units::FeetLength cruise_alt_loaded(0);
-
-   // register all the variables used by the Aircraft Intent
-   register_var("planned_cruise_mach", &cruise_mach_loaded, true);
-   register_var("planned_cruise_altitude", &cruise_alt_loaded, true);
-   register_named_list("descent_waypoints", &descent_waypoints, false);
-   register_named_list("cruise_waypoints", &cruise_waypoints, false);
-   register_named_list("ascent_waypoints", &ascent_waypoints, false);
-
-   // do the actual reading:
-   m_is_loaded = complete();
-
-   m_planned_cruise_altitude = cruise_alt_loaded;
-   planned_cruise_mach_ = cruise_mach_loaded;
-
-   if (!waypoints.empty() && descent_waypoints.empty()) {
-      descent_waypoints = waypoints;
-   }
-   if (waypoints.empty() && descent_waypoints.empty() && ascent_waypoints.empty() && cruise_waypoints.empty()) {
-      LOG4CPLUS_ERROR(m_logger,
-                      "No waypoints were found in the scenario file. Check the aircraft_intent{} input block.");
-      throw std::runtime_error("Must provide waypoints.");
-   } else {
-      LoadWaypointsFromList(ascent_waypoints, cruise_waypoints, descent_waypoints);
-   }
-
-   return m_is_loaded;
-}
-
 void AircraftIntent::DumpParms(const std::string &str) const {
    LOG4CPLUS_TRACE(AircraftIntent::m_logger, str);
    DoRouteDataLogging();

@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <loader/LoggingLoadable.h>
+
 #include <memory>
 #include <string>
 #include <tuple>
@@ -26,7 +28,6 @@
 #include "framework/ApplicationLoader.h"
 #include "framework/GuidanceDataLoader.h"
 #include "framework/TestFrameworkAircraft.h"
-#include "loader/LoggingLoadable.h"
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/WeatherTruth.h"
 

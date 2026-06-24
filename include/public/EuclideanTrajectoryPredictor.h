@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <scalar/Angle.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -33,7 +35,6 @@
 #include "public/TurnAnticipation.h"
 #include "public/VerticalPredictor.h"
 #include "public/WeatherPrediction.h"
-#include "scalar/Angle.h"
 
 namespace aaesim {
 namespace open_source {

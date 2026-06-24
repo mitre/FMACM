@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
 #include <scalar/Time.h>
 
 #include <istream>
@@ -35,7 +36,6 @@
 #include <memory>
 #include <string>
 
-#include "loader/Logging.h"
 #include "utility/CsvParser.h"
 
 namespace aaesim {

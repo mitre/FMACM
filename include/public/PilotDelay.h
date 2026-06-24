@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "scalar/Length.h"
-#include "scalar/Speed.h"
-#include "scalar/Time.h"
+#include <scalar/Length.h>
+#include <scalar/Speed.h>
+#include <scalar/Time.h>
 
 namespace aaesim::open_source {
 struct PilotDelay {

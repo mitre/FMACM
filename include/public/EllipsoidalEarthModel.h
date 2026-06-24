@@ -19,11 +19,12 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
 #include <scalar/Area.h>
 
 #include <memory>
 
-#include "loader/Logging.h"
 #include "public/EarthModel.h"
 #include "public/LocalTangentPlane.h"
 #include "public/WGS84EarthModelConstants.h"

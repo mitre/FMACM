@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 5.3.1.1) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
+project(aaesim VERSION 5.3.1.0) # the nano value is a boolean. 1 == SNAPSHOT, 0 == release # the nano value is a boolean. 1 == SNAPSHOT, 0 == release
 
 set (CMAKE_CXX_STANDARD 20)
 
@@ -57,7 +57,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-functi
 CPMAddPackage(
     NAME fsloader
     GIT_REPOSITORY https://github.com/mitre/fsloader.git
-    GIT_TAG 1.0.0
+    GIT_TAG 1.1.0
     OPTIONS
      "FSLOADER_BUILD_EXAMPLE OFF"
      "BUILD_SHARED_LIBS FALSE"

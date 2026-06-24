@@ -19,8 +19,6 @@
 
 #include "public/PrecalcWaypoint.h"
 
-PrecalcWaypoint::~PrecalcWaypoint() = default;
-
 bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
    bool match = (m_leg_length == obj.m_leg_length);
    match = match && (m_course_angle == obj.m_course_angle);
@@ -32,47 +30,4 @@ bool PrecalcWaypoint::operator==(const PrecalcWaypoint &obj) const {
    match = match && (m_radius_rf_leg == obj.m_radius_rf_leg);
 
    return match;
-}
-
-bool PrecalcWaypoint::load(DecodedStream *input) {
-   set_stream(input);
-
-   Units::NauticalMilesLength leg_length;
-   bool f = load_datum(leg_length);
-   if (!f) {
-      LoggingLoadable::report_error("could not load leg length");
-   }
-   m_leg_length = leg_length;
-
-   Units::DegreesAngle course_angle1;
-   f = load_datum(course_angle1);
-   if (!f) {
-      LoggingLoadable::report_error("could not load m_path_course angle");
-   }
-   m_course_angle = course_angle1;
-
-   Units::NauticalMilesLength path_distance;
-   f = load_datum(path_distance);
-   if (!f) {
-      LoggingLoadable::report_error("could not load distance constraint");
-   }
-   m_precalc_constraints.constraint_along_path_distance = path_distance;
-
-   Units::FeetLength in_altitude_high;
-   f = load_datum(in_altitude_high);
-   if (!f) {
-      LoggingLoadable::report_error("could not load max altitude constraint");
-   }
-   m_precalc_constraints.constraint_altHi = in_altitude_high;
-
-   Units::FeetLength in_altitude_low;
-   f = load_datum(in_altitude_low);
-   if (!f) {
-      LoggingLoadable::report_error("could not load min altitude constraint");
-   }
-   m_precalc_constraints.constraint_altLow = in_altitude_low;
-
-   m_loaded = true;
-
-   return m_loaded;
 }

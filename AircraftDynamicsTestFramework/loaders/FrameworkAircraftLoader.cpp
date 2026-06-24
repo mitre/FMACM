@@ -19,6 +19,9 @@
 
 #include "framework/FrameworkAircraftLoader.h"
 
+#include <loader/NullLoader.h>
+#include <scalar/Length.h>
+
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -28,7 +31,6 @@
 #include "framework/ForeWindReader.h"
 #include "framework/NullAircraftPerformance.h"
 #include "framework/PreloadedAdsbReceiver.h"
-#include "loader/NullLoader.h"
 #include "public/AircraftControllerFactory.h"
 #include "public/EllipsoidalPositionEstimator.h"
 #include "public/FullWindTrueWeatherOperator.h"
@@ -41,7 +43,6 @@
 #include "public/SpeedOnThrustControl.h"
 #include "public/USStandardAtmosphere1976.h"
 #include "public/WeatherPrediction.h"
-#include "scalar/Length.h"
 
 #ifdef SAMPLE_ALGORITHM_LIBRARY
 #include "imalgs/FIMAlgorithmInitializer.h"

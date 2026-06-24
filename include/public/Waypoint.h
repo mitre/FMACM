@@ -19,13 +19,13 @@
 
 #pragma once
 
+#include <iosfwd>
 #include <list>
 #include <string>
 
 #include "utility/CustomUnits.h"
-#include "loader/LoggingLoadable.h"
 
-class Waypoint : public LoggingLoadable {
+class Waypoint {
   public:
    static const Units::FeetLength MAX_ALTITUDE_CONSTRAINT;
    static const Units::FeetLength MIN_ALTITUDE_CONSTRAINT;
@@ -42,26 +42,7 @@ class Waypoint : public LoggingLoadable {
             Units::Speed speed_constraint = MAX_SPEED_CONSTRAINT, Units::Length nominal_altitude = Units::ZERO_LENGTH,
             Units::Speed nominal_ias = Units::ZERO_SPEED, const std::string &arinc424_leg_type = "");
 
-   Waypoint &operator=(const Waypoint &in) {
-      stream = NULL;
-      was_load_successful = in.was_load_successful;
-      m_name = in.m_name;
-      m_latitude = in.m_latitude;
-      m_longitude = in.m_longitude;
-      m_altitude = in.m_altitude;
-      m_nominal_ias = in.m_nominal_ias;
-      m_altitude_constraint_high = in.m_altitude_constraint_high;
-      m_altitude_constraint_low = in.m_altitude_constraint_low;
-      m_speed_constraint_high = in.m_speed_constraint_high;
-      m_speed_constraint_low = in.m_speed_constraint_low;
-      m_rf_turn_center_latitude = in.m_rf_turn_center_latitude;
-      m_rf_turn_center_longitude = in.m_rf_turn_center_longitude;
-      m_rf_turn_arc_radius = in.m_rf_turn_arc_radius;
-      m_arinc424_leg_type = in.m_arinc424_leg_type;
-      return *this;
-   }
-
-   bool load(DecodedStream *input);
+   Waypoint &operator=(const Waypoint &in) = default;
 
    const std::string &GetName() const;
 

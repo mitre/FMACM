@@ -17,7 +17,11 @@
 // (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
+#include <loader/Loadable.h>
+#include <loader/RunFileArchiveDirector.h>
 #include <log4cplus/initializer.h>
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,9 +35,7 @@
 
 #include "cppmanifest/cppmanifest.h"
 #include "framework/TestFrameworkScenario.h"
-#include "loader/Loadable.h"
-#include "loader/Logging.h"
-#include "loader/RunFileArchiveDirector.h"
+#include "public/Log4cplusSetup.h"
 #include "public/ScenarioUtils.h"
 
 #define _MAX_PATH 260

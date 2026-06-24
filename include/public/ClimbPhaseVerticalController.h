@@ -19,10 +19,12 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+
 #include <memory>
 #include <nlohmann/json.hpp>
 
-#include "loader/Logging.h"
 #include "public/AbstractAscentController.h"
 #include "public/FixedMassAircraftPerformance.h"
 

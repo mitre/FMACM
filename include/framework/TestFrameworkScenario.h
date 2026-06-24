@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <loader/LoggingLoadable.h>
 #include <scalar/Angle.h>
 #include <scalar/Time.h>
 
@@ -28,7 +29,6 @@
 
 #include "framework/FrameworkAircraftLoader.h"
 #include "framework/TestFrameworkAircraft.h"
-#include "loader/LoggingLoadable.h"
 #include "public/Scenario.h"
 #include "public/SimulationTime.h"
 

@@ -19,12 +19,12 @@
 
 #pragma once
 
+#include <loader/Loadable.h>
 #include <scalar/Angle.h>
 #include <scalar/Length.h>
 
 #include <vector>
 
-#include "loader/Loadable.h"
 #include "public/AircraftIntent.h"
 #include "public/AircraftState.h"
 #include "public/AlongPathDistanceCalculator.h"

@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <scalar/Length.h>
+#include <scalar/Mass.h>
+#include <scalar/Speed.h>
+
 #include <string>
 
 #include "public/BadaUtils.h"
-#include "scalar/Length.h"
-#include "scalar/Mass.h"
-#include "scalar/Speed.h"
 #include "utility/BoundedValue.h"
 
 namespace aaesim {

@@ -19,6 +19,10 @@
 
 #pragma once
 
+#include <scalar/Angle.h>
+#include <scalar/Force.h>
+#include <scalar/Speed.h>
+
 #include <memory>
 
 #include "public/BadaUtils.h"
@@ -26,9 +30,6 @@
 #include "public/FixedMassAircraftPerformance.h"
 #include "public/Guidance.h"
 #include "public/TrueWeatherOperator.h"
-#include "scalar/Angle.h"
-#include "scalar/Force.h"
-#include "scalar/Speed.h"
 #include "utility/BoundedValue.h"
 
 namespace aaesim::open_source {

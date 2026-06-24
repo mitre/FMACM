@@ -17,19 +17,29 @@
 // (c) 2026 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <log4cplus/initializer.h>
-#include <log4cplus/logger.h>
-#include <log4cplus/loggingmacros.h>
+#pragma once
 
-#include "gtest/gtest.h"
-#include "public/Log4cplusSetup.h"
+#include <loader/LoggingLoadable.h>
 
-GTEST_API_ int main(int argc, char **argv) {
-   log4cplus::Initializer initializer;
-   LoadLoggerProperties();
-   log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
-   LOG4CPLUS_INFO(logger, "Running main()");
-   testing::InitGoogleTest(&argc, argv);
-   (void)!RUN_ALL_TESTS();  // we ignore the return status here.
-   return 0;
-}
+#include "public/Waypoint.h"
+
+namespace aaesim {
+namespace loaders {
+
+class WaypointLoader final : public LoggingLoadable {
+  public:
+   WaypointLoader() = default;
+   ~WaypointLoader() override = default;
+
+   bool load(DecodedStream *input) override;
+
+   const Waypoint &BuildWaypoint() const;
+
+  private:
+   Waypoint waypoint_{};
+};
+
+inline const Waypoint &WaypointLoader::BuildWaypoint() const { return waypoint_; }
+
+}  // namespace loaders
+}  // namespace aaesim

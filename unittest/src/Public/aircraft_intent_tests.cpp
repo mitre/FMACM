@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "public/AircraftIntent.h"
+#include "public/AircraftIntentLoader.h"
 #include "public/CoreUtils.h"
 #include "public/SingleTangentPlaneSequence.h"
 #include "public/TangentPlaneSequence.h"
@@ -51,6 +52,12 @@ class AircraftIntentTester : public AircraftIntent {
       return AircraftIntentTester(aircraft_intent);
    }
 };
+
+AircraftIntent LoadAircraftIntent(DecodedStream *stream) {
+   aaesim::loaders::AircraftIntentLoader aircraft_intent_loader;
+   aircraft_intent_loader.load(stream);
+   return aircraft_intent_loader.BuildAircraftIntent();
+}
 
 TEST(AircraftIntent, Copy) {
    const AircraftIntent expected_intent = PublicUtils::PrepareAircraftIntent("./resources/enroute_waypoints_test1.txt");
@@ -131,8 +138,7 @@ TEST(AircraftIntent, LoadEndToEndWaypoints) {
    CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
 
    // This is the tested method ---------------
-   AircraftIntent aircraft_intent;
-   aircraft_intent.load(&stream);
+   AircraftIntent aircraft_intent = LoadAircraftIntent(&stream);
    // -----------------------------------------
 
    ASSERT_TRUE(aircraft_intent.GetNumberOfWaypoints() == 26);
@@ -169,8 +175,7 @@ TEST(AircraftIntent, LoadOldWaypointDefinitionCleanly) {
    CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
 
    // This is the tested method ---------------
-   AircraftIntent aircraft_intent;
-   aircraft_intent.load(&stream);
+   AircraftIntent aircraft_intent = LoadAircraftIntent(&stream);
    // -----------------------------------------
 
    ASSERT_TRUE(aircraft_intent.GetNumberOfWaypoints() == 15);
@@ -203,8 +208,7 @@ TEST(AircraftIntent, wgs84_to_xy) {
 
    SingleTangentPlaneSequence::ClearStaticMembers();
    CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
-   AircraftIntent aiTest;
-   aiTest.load(&stream);  // read the test data
+   AircraftIntent aiTest = LoadAircraftIntent(&stream);  // read the test data
    aiTest.UpdateXYZFromLatLonWgs84();
 
    /*
@@ -268,8 +272,7 @@ TEST(AircraftIntent, xyz_to_wgs84) {
    stream.set_echo(false);
 
    SingleTangentPlaneSequence::ClearStaticMembers();
-   AircraftIntent aiTest;
-   aiTest.load(&stream);
+   AircraftIntent aiTest = LoadAircraftIntent(&stream);
    aiTest.UpdateXYZFromLatLonWgs84();
 
    // Convert back to lat/lon
@@ -342,8 +345,7 @@ TEST(AircraftIntent, load_waypoints_variations) {
       CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
 
       // This is the tested method ---------------
-      AircraftIntent aircraft_intent;
-      aircraft_intent.load(&stream);
+      AircraftIntent aircraft_intent = LoadAircraftIntent(&stream);
       EXPECT_EQ(expected_waypoint_count, aircraft_intent.GetNumberOfWaypoints());
    }
 }
@@ -368,8 +370,8 @@ TEST(AircraftIntent, load_no_waypoints_throws) {
    SingleTangentPlaneSequence::ClearStaticMembers();
    CoreUtils::UpdateMaximumAllowableSingleLegLength(Units::infinity());
 
-   AircraftIntent aircraft_intent;
-   EXPECT_ANY_THROW(aircraft_intent.load(&stream));
+   aaesim::loaders::AircraftIntentLoader aircraft_intent_loader;
+   EXPECT_ANY_THROW(aircraft_intent_loader.load(&stream));
 }
 
 TEST(AircraftIntent, test_consistency_long_route) {
@@ -392,8 +394,7 @@ TEST(AircraftIntent, test_consistency_long_route) {
    }
    stream.set_echo(false);
 
-   AircraftIntent aircraft_intent;
-   aircraft_intent.load(&stream);
+   AircraftIntent aircraft_intent = LoadAircraftIntent(&stream);
    auto wplist = aircraft_intent.GetWaypointList();
    auto position_converter = std::make_shared<TangentPlaneSequence>(wplist);
    for (Waypoint wp : aircraft_intent.GetWaypointList()) {

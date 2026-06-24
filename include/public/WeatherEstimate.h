@@ -19,10 +19,12 @@
 
 #pragma once
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+
 #include <memory>
 #include <utility>
 
-#include "loader/Logging.h"
 #include "public/Atmosphere.h"
 #include "public/WindStack.h"
 

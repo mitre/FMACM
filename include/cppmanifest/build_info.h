@@ -28,7 +28,7 @@
 #define aaesim_CPPMANIFEST_USERNAME_STR CPPMANIFEST_MAKE_STR(sbowman)
 
 //! This is the build timestamp
-#define aaesim_CPPMANIFEST_BUILDTIMESTAMP_STR CPPMANIFEST_MAKE_STR(2026 / 06 / 05 - 17 : 10 : 45)
+#define aaesim_CPPMANIFEST_BUILDTIMESTAMP_STR CPPMANIFEST_MAKE_STR(2026 / 06 / 24 - 12 : 48 : 00)
 
 //! This is the gcc version
 #define aaesim_CPPMANIFEST_BUILD_C_VERSION_STR CPPMANIFEST_MAKE_STR(21.0.0.21000101)
@@ -42,12 +42,12 @@
 
 //! Git SCM info
 #define aaesim_CPPMANIFEST_GIT_BRANCH CPPMANIFEST_MAKE_STR(refs / heads / master)
-#define aaesim_CPPMANIFEST_GIT_HASH CPPMANIFEST_MAKE_STR(93f0e93a5a0164a6a1508ace2663d7d751f89c2f)
+#define aaesim_CPPMANIFEST_GIT_HASH CPPMANIFEST_MAKE_STR(b833018dd29fc1dc892a330cff0a8b0dfe9bc367)
 #define aaesim_CPPMANIFEST_GIT_TAG CPPMANIFEST_MAKE_STR()
 #define aaesim_CPPMANIFEST_GIT_LOCAL_CHANGES CPPMANIFEST_MAKE_STR(CLEAN)
 
 //! This is CPPMANIFEST version number as a string.
 //! Do not wrap the suffix in quotes, but it may be left empty for a release
-#define aaesim_CPPMANIFEST_VERSION_STR CPPMANIFEST_MAKE_VERSION_STR(5, 3, 0, 0)
+#define aaesim_CPPMANIFEST_VERSION_STR CPPMANIFEST_MAKE_VERSION_STR(5, 3, 1, 0)
 
 #endif

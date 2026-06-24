@@ -32,13 +32,13 @@ VerticalPredictor::VerticalPredictor()
      LOW_GROUNDSPEED_FATAL(0.1),
      DESCENT_ANGLE_MAX(6.0),
      DESCENT_ANGLE_WARNING(4.0),
-     m_transition_altitude_msl(Units::FeetLength(0.0)),
-     m_cruise_altitude_msl(Units::FeetLength(37000)),
-     m_transition_ias(Units::KnotsSpeed(310)),
-     m_transition_mach(0.8),
-     m_cruise_mach(0.8),
      m_current_trajectory_index(0),
-     m_descent_start_time(Units::SecondsTime(0.0)) {}
+     m_cruise_altitude_msl(Units::FeetLength(37000)),
+     m_descent_start_time(Units::SecondsTime(0.0)),
+     m_transition_ias(Units::KnotsSpeed(310)),
+     m_transition_altitude_msl(Units::FeetLength(0.0)),
+     m_cruise_mach(0.8),
+     m_transition_mach(0.8) {}
 
 void VerticalPredictor::SetMembers(const VerticalPredictor &vertical_predictor) {
    m_descent_start_time = vertical_predictor.m_descent_start_time;

@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <scalar/Force.h>
+#include <scalar/Length.h>
+#include <scalar/SignedAngle.h>
+#include <scalar/Speed.h>
+#include <scalar/Temperature.h>
+
 #include "BadaUtils.h"
-#include "scalar/Force.h"
-#include "scalar/Length.h"
-#include "scalar/SignedAngle.h"
-#include "scalar/Speed.h"
-#include "scalar/Temperature.h"
 #include "utility/CustomUnits.h"
 
 namespace aaesim {

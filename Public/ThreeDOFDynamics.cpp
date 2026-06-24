@@ -19,11 +19,13 @@
 
 #include "public/ThreeDOFDynamics.h"
 
+#include <log4cplus/logger.h>
+#include <log4cplus/loggingmacros.h>
+
 #include <iomanip>
 #include <memory>
 #include <utility>
 
-#include "loader/Logging.h"
 #include "nlohmann/json.hpp"
 #include "public/CoreUtils.h"
 

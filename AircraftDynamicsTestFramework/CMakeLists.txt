@@ -49,8 +49,10 @@ target_include_directories(framework PUBLIC
         ${aaesim_INCLUDE_DIRS})
 target_link_libraries(framework
    PUBLIC
+   mitre::fsloader
    ${BADA_LIBRARY}
    ${SAMPLE_ALGORITHM_LIBRARY}
+   log4cplus::log4cplus
    mitre::oss::simcore)
 if (DEFINED BADA_LIBRARY)
    # Add a compile definition to the build

@@ -55,6 +55,15 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-function -
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-function -Wno-sign-compare -O3 -g3")
 
 CPMAddPackage(
+    NAME fsloader
+    GIT_REPOSITORY https://github.com/mitre/fsloader.git
+    GIT_TAG 1.1.0
+    OPTIONS
+     "FSLOADER_BUILD_EXAMPLE OFF"
+     "BUILD_SHARED_LIBS FALSE"
+)
+
+CPMAddPackage(
     NAME aircraft_simulation_core
     GITHUB_REPOSITORY mitre/aircraft_simulation_core
     GIT_TAG feat/add-code # mitre/aircraft_simulation_core#1

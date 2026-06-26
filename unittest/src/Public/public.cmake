@@ -5,7 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 set(PUBLIC_LIBRARY_TEST_SOURCE
         ${UNITTEST_DIR}/src/Public/geolib_tests.cpp
-        ${UNITTEST_DIR}/src/Public/aircraft_intent_tests.cpp
         ${UNITTEST_DIR}/src/Public/windstack_tests.cpp
         ${UNITTEST_DIR}/src/Public/utility_tests.cpp
         ${UNITTEST_DIR}/src/Public/public_tests.cpp
@@ -13,6 +12,7 @@ set(PUBLIC_LIBRARY_TEST_SOURCE
         ${UNITTEST_DIR}/src/Public/tangent_plane_tests.cpp
         ${UNITTEST_DIR}/src/Public/wind_blending_tests.cpp
         ${UNITTEST_DIR}/src/Public/earth_model_tests.cpp
+        ${UNITTEST_DIR}/src/Public/threedof_glider_tests.cpp
 )
 
 add_executable(public_test 

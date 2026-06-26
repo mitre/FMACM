@@ -18,7 +18,6 @@
 // ****************************************************************************
 
 #include <gtest/gtest.h>
-#include <loader/DecodedStream.h>
 
 #include <iostream>
 #include <string>

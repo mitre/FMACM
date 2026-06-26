@@ -19,13 +19,7 @@
 
 #include "utils/public/PublicUtils.h"
 
-#include <cstdio>
-#include <iostream>
-#include <string>
 #include <vector>
-
-#include "public/AircraftIntentLoader.h"
-#include "public/SingleTangentPlaneSequence.h"
 
 using namespace std;
 using namespace aaesim::open_source;
@@ -79,37 +73,4 @@ std::vector<HorizontalPath> aaesim::test::utils::PublicUtils::CreateStraightHori
    horizontal_traj.push_back(hp2);
 
    return horizontal_traj;
-}
-
-AircraftIntent aaesim::test::utils::PublicUtils::LoadAircraftIntent(std::string parmsfile) {
-   DecodedStream intentstream;
-   aaesim::loaders::AircraftIntentLoader intent_loader;
-   FILE *fp = fopen(parmsfile.c_str(), "r");
-   if (fp == nullptr) {
-      std::cout << "Intent file " << parmsfile.c_str() << " not found" << std::endl;
-   } else {
-      bool r = intentstream.open_file(parmsfile);
-
-      if (!r) {
-         std::cout << "Can't open intent parameters file " << parmsfile.c_str() << std::endl;
-      } else {
-         SingleTangentPlaneSequence::ClearStaticMembers();  // make sure singleton is clear
-
-         intentstream.set_echo(false);  // default set to false, must turn it on in input file
-
-         intent_loader.load(&intentstream);
-      }
-   }
-
-   fclose(fp);
-   return intent_loader.BuildAircraftIntent();
-}
-
-AircraftIntent aaesim::test::utils::PublicUtils::PrepareAircraftIntent(std::string parmsfile) {
-   AircraftIntent intent = LoadAircraftIntent(parmsfile);
-   if (intent.IsLoaded()) {
-      intent.UpdateXYZFromLatLonWgs84();
-   }
-
-   return intent;
 }

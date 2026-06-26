@@ -52,14 +52,14 @@ jobs:
         run: |
           cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
 
-      - name: Run public tests
+      - name: Run tests
         run: |
-          cmake --build build --target run_public_test run_fmacm_test -j
+          cmake --build build --target run_tests -j
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: public-test-results
+          name: test-results
           path: unittest/*results.xml
 
       # - name: Publish JUnit test results

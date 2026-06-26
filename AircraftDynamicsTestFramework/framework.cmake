@@ -22,11 +22,8 @@ if(NOT ${BUILD_LIBARIES_ONLY})
     add_executable(FMACM ${FMACM_MAIN_SRC})
     target_link_libraries(FMACM framework)
     target_include_directories(FMACM PUBLIC 
-        $<BUILD_INTERFACE:${geolib_idealab_INCLUDE_DIRS}>
-        $<BUILD_INTERFACE:${nlohmann_json_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${cppmanifest_INCLUDE_DIR}>
         $<BUILD_INTERFACE:${aaesim_INCLUDE_DIRS}>
-        $<BUILD_INTERFACE:${minicsv_INCLUDE_DIR}>
     )
     set_target_properties(FMACM PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin

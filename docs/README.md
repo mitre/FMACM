@@ -67,7 +67,6 @@ Run from the terminal. Or compile the libraries here into a larger code base for
 The [main entry point](https://github.com/mitre/FMACM/blob/master/AircraftDynamicsTestFramework/fmacm.cpp) provides:
 
 - `--version`: report the build version;
-- `--buildinfo`: report the build environment;
 - a single positional argument is used to provide a configuration file.
 
 The above command line arguments may not be combined.
@@ -80,7 +79,7 @@ An example is provided in [./Run_Files/](https://github.com/mitre/FMACM/blob/mas
 The executable is then executed:
 
 ```bash
-./bin/FMACM ./Run_Files/test-framework-configuration.txt 
+./build/bin/FMACM ./Run_Files/test-framework-configuration.txt
 ```
 
 Data output is found in the run-time directory in the form of CSV files.

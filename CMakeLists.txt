@@ -50,25 +50,13 @@ CPMAddPackage(
   VERSION 1.2.5
 )
 
-# CPMAddPackage(
-#         NAME cppmanifest
-#         GIT_REPOSITORY https://mustache.mitre.org/scm/idea/cppmanifest.git
-#         GIT_TAG v1.7
-#         DOWNLOAD_ONLY TRUE
-# )
-# if (cppmanifest_ADDED)
-#     include(${cppmanifest_SOURCE_DIR}/cppmanifest_configure.cmake)
-#     cppmanifest_configure(${PROJECT_SOURCE_DIR}/include/cppmanifest)
-# endif()
-
-# cppmanifest does not do strings in the version, but we want them.
 # Append -SNAPSHOT to the version name if this is a pre-release version
-if (${PROJECT_VERSION_TWEAK})
-    set(aaesim_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-SNAPSHOT)
+if(PROJECT_VERSION_TWEAK)
+    set(FMACM_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-SNAPSHOT)
 else()
-    set(aaesim_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+    set(FMACM_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 endif()
-message("-- Generating build for ${PROJECT_NAME} version ${aaesim_VERSION}")
+message("-- Generating build for ${PROJECT_NAME} version ${FMACM_VERSION}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-function -Wno-sign-compare -O0 -g")

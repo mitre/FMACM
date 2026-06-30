@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 5.3.2)
+project(aaesim VERSION 5.3.3)
 
 set (CMAKE_CXX_STANDARD 20)
 

@@ -66,7 +66,7 @@ CPMAddPackage(
 CPMAddPackage(
     NAME aircraft_simulation_core
     GIT_REPOSITORY https://github.com/mitre/aircraft_simulation_core.git
-    GIT_TAG e7409164173c0bb043a846bfeb952d5cf046d679 # FIXME switch to a release tag when available
+    GIT_TAG a84dc78805bf35b6a45c68ac99f1c47fe47ad892 # FIXME switch to a release tag when available
     OPTIONS
      "SIMCORE_BUILD_TESTING OFF"
 )

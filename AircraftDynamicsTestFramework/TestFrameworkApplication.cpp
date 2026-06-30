@@ -18,7 +18,9 @@
 // ****************************************************************************
 
 #include "framework/TestFrameworkApplication.h"
-#include "utility/constants.h"
+
+#include <iostream>
+
 #include "public/AircraftCalculations.h"
 
 using namespace std;

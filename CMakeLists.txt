@@ -63,12 +63,17 @@ CPMAddPackage(
      "BUILD_SHARED_LIBS FALSE"
 )
 
-set (PUBLIC_DIR          ${CMAKE_CURRENT_SOURCE_DIR}/Public)
+CPMAddPackage(
+    NAME aircraft_simulation_core
+    GIT_REPOSITORY https://github.com/mitre/aircraft_simulation_core.git
+    GIT_TAG a84dc78805bf35b6a45c68ac99f1c47fe47ad892 # FIXME switch to a release tag when available
+    OPTIONS
+     "SIMCORE_BUILD_TESTING OFF"
+)
+
 set (FRAMEWORK_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include )
 set (UNITTEST_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
-
-add_subdirectory(${PUBLIC_DIR})
 
 include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
 include(${FRAMEWORK_DIR}/framework.cmake OPTIONAL)

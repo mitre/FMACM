@@ -18,12 +18,18 @@
 // ****************************************************************************
 
 #include "framework/TrajectoryFromFile.h"
+
+#include <iostream>
+#include <string>
+
+#include "scalar/AngularSpeed.h"
 #include "public/AircraftCalculations.h"
 #include "public/CoreUtils.h"
 #include "framework/HfpReader2020.h"
 #include "utility/CsvParser.h"
+#include "utility/UtilityConstants.h"
 
-#include <scalar/AngularSpeed.h>
+namespace constants = aaesim::open_source::constants;
 
 TrajectoryFromFile::TrajectoryFromFile()
    : m_vertical_data(),
@@ -107,12 +113,15 @@ aaesim::open_source::Guidance TrajectoryFromFile::Update(const aaesim::open_sour
 
    result.m_enu_track_angle = course_at_position;
 
-   double unsigned_cross_track_meters = sqrt(pow(state.m_x * FEET_TO_METERS - estimated_position_on_path_x.value(), 2) +
-                                             pow(state.m_y * FEET_TO_METERS - estimated_position_on_path_y.value(), 2));
+   const double state_x_meters = state.m_x * constants::FEET_TO_METERS;
+   const double state_y_meters = state.m_y * constants::FEET_TO_METERS;
+
+   double unsigned_cross_track_meters = sqrt(pow(state_x_meters - estimated_position_on_path_x.value(), 2) +
+                                             pow(state_y_meters - estimated_position_on_path_y.value(), 2));
 
    double center_dist_meters =
-         sqrt(pow(state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index].m_turn_info.x_position_meters, 2) +
-              pow(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index].m_turn_info.y_position_meters, 2));
+         sqrt(pow(state_x_meters - m_horizontal_trajectory[traj_index].m_turn_info.x_position_meters, 2) +
+              pow(state_y_meters - m_horizontal_trajectory[traj_index].m_turn_info.y_position_meters, 2));
 
    if (m_horizontal_trajectory[traj_index].m_segment_type == HorizontalPath::SegmentType::TURN) {
       Units::FeetLength distance_to_waypoint =
@@ -162,10 +171,8 @@ aaesim::open_source::Guidance TrajectoryFromFile::Update(const aaesim::open_sour
       }
    } else {
       result.m_cross_track_error = Units::MetersLength(
-            -(state.m_y * FEET_TO_METERS - m_horizontal_trajectory[traj_index].GetYPositionMeters()) *
-                  cos(estimated_course) +
-            (state.m_x * FEET_TO_METERS - m_horizontal_trajectory[traj_index].GetXPositionMeters()) *
-                  sin(estimated_course));
+            -(state_y_meters - m_horizontal_trajectory[traj_index].GetYPositionMeters()) * cos(estimated_course) +
+            (state_x_meters - m_horizontal_trajectory[traj_index].GetXPositionMeters()) * sin(estimated_course));
    }
 
    result.m_use_cross_track = true;

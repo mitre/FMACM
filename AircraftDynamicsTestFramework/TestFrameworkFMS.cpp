@@ -17,11 +17,18 @@
 // 2022 The MITRE Corporation. All Rights Reserved.
 // ****************************************************************************
 
-#include <public/CoreUtils.h>
-#include <public/AlongPathDistanceCalculator.h>
 #include "framework/TestFrameworkFMS.h"
-#include "math/CustomMath.h"
+
+#include <cmath>
+#include <vector>
+
+#include "public/CoreUtils.h"
+#include "public/AlongPathDistanceCalculator.h"
 #include "public/AircraftCalculations.h"
+#include "math/CustomMath.h"  // FIXME Stuart why is thsi here?
+#include "utility/UtilityConstants.h"
+
+namespace constants = aaesim::open_source::constants;
 
 Units::DegreesAngle TestFrameworkFMS::MAX_BANK_ANGLE(25.0);
 
@@ -113,7 +120,7 @@ void TestFrameworkFMS::Update(const aaesim::open_source::AircraftState &state,
 
       if (bank_angle_rad != 0.00) {
          double gs = Units::FeetPerSecondSpeed(state.GetGroundSpeed()).value();
-         m_turn_radius = gs * gs / (GRAVITY_METERS_PER_SECOND / FEET_TO_METERS * tan(bank_angle_rad));
+         m_turn_radius = gs * gs / (constants::GRAVITY_FEET_PER_SECOND * tan(bank_angle_rad));
 
          m_range_start_turn = fabs(m_turn_radius * tan(0.5 * m_delta_track));
       } else {
@@ -151,29 +158,29 @@ void TestFrameworkFMS::Update(const aaesim::open_source::AircraftState &state,
 
    double track_error = course - desired_course;
 
-   if (track_error > M_PI) {
-      while (track_error > M_PI) {
-         track_error = track_error - 2.0 * M_PI;
+   if (track_error > constants::PI) {
+      while (track_error > constants::PI) {
+         track_error = track_error - constants::TWO_PI;
       }
    }
-   if (track_error < -M_PI) {
-      while (track_error < -M_PI) {
-         track_error = track_error + 2.0 * M_PI;
+   if (track_error < -constants::PI) {
+      while (track_error < -constants::PI) {
+         track_error = track_error + constants::TWO_PI;
       }
    }
 
    if (m_mode == TURNING) {
       double DeltaGroundTrack = -1.0 * track_error;
 
-      if (cross_track_error < 0.00 && DeltaGroundTrack < 10.00 * DEGREES_TO_RADIAN) {
+      if (cross_track_error < 0.00 && DeltaGroundTrack < 10.00 * constants::DEGREES_TO_RADIAN) {
          m_mode = TRACKING;
       }
 
-      if (cross_track_error > 0.00 && DeltaGroundTrack > 10.00 * DEGREES_TO_RADIAN) {
+      if (cross_track_error > 0.00 && DeltaGroundTrack > 10.00 * constants::DEGREES_TO_RADIAN) {
          m_mode = TRACKING;
       }
 
-      if (fabs(cross_track_error) < 1000.0 && fabs(track_error) < 5.0 * DEGREES_TO_RADIAN) {
+      if (fabs(cross_track_error) < 1000.0 && fabs(track_error) < 5.0 * constants::DEGREES_TO_RADIAN) {
          m_mode = TRACKING;
       }
    }

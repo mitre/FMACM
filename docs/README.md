@@ -57,7 +57,7 @@ Unit tests can be run via the CMake infrastructure.
 Assuming the software already compiles:
 
 ```bash
-cmake --build build --target run_public_test run_fmacm_test
+cmake --build build --target run_tests
 ```
 
 ### Run a Simulation

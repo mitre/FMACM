@@ -17,7 +17,6 @@ jobs:
             container: ''
             install: |
               brew update
-              brew upgrade
           - os: ubuntu-latest
             container: rockylinux:9
             install: |
@@ -32,7 +31,7 @@ jobs:
         run: |
           cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
           cmake --build build --target FMACM -j
-          ./bin/FMACM --version
+          ./build/bin/FMACM --version
 
  
 
@@ -60,13 +59,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: unittest/*results.xml
-
-      # - name: Publish JUnit test results
-      #   uses: dorny/test-reporter@v2
-      #   if: always()
-      #   with:
-      #     name: Public Library Tests
-      #     path: unittest/*results.xml
-      #     reporter: jest-junit
-      #     fail-on-error: true
+          path: build/unittest/*results.xml

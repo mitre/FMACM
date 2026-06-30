@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -33,12 +34,14 @@
 #include <utility>
 #include <vector>
 
-#include "cppmanifest/cppmanifest.h"
 #include "framework/TestFrameworkScenario.h"
 #include "public/Log4cplusSetup.h"
 #include "public/ScenarioUtils.h"
 
 #define _MAX_PATH 260
+#ifndef FMACM_VERSION
+#define FMACM_VERSION "unknown"
+#endif
 
 const std::vector<std::pair<std::string, std::shared_ptr<TestFrameworkScenario>>> LoadConfigurationFile(
       const std::string &filename);
@@ -52,16 +55,12 @@ const std::string VERSION_FLAG("--version");
 int main(int argc, char *argv[]) {
    log4cplus::Initializer initializer;
    LoadLoggerProperties();
-   LOG4CPLUS_INFO(logger, "running " << aaesim::cppmanifest::GetVersion());
+   LOG4CPLUS_INFO(logger, "running " << FMACM_VERSION);
 
    if (argc == 2) {
       std::string arg1(argv[1]);
       if (arg1 == VERSION_FLAG) {
-         std::cout << "fmacm version " << aaesim::cppmanifest::GetVersion() << std::endl;
-         return EXIT_SUCCESS;
-      } else if (arg1 == aaesim::cppmanifest::BUILDINFO_CLI_FLAG) {
-         std::cout << "fmacm build info:" << std::endl;
-         aaesim::cppmanifest::PrintMetaData();
+         std::cout << "fmacm version " << FMACM_VERSION << std::endl;
          return EXIT_SUCCESS;
       }
    } else {

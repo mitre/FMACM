@@ -7,6 +7,7 @@ set(FMACM_TEST_SOURCE
    ${UNITTEST_DIR}/src/AircraftDynamicsTestFramework/framework_tests.cpp
    ${UNITTEST_DIR}/src/AircraftDynamicsTestFramework/true_weather_tests.cpp
 )
+set(FMACM_TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/unittest/bin)
 add_executable(fmacm_test 
    ${FMACM_TEST_SOURCE}
    ${UNITTEST_DIR}/src/main.cpp)
@@ -19,10 +20,10 @@ target_include_directories(fmacm_test
     ${nlohmann_json_INCLUDE_DIR}
 )
 set_target_properties(fmacm_test PROPERTIES
-   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/bin
+   RUNTIME_OUTPUT_DIRECTORY ${FMACM_TEST_OUTPUT_DIR}
    EXCLUDE_FROM_ALL TRUE)
 add_custom_target(run_fmacm_test
-   ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test --gtest_output=xml:fmacm_unit_test_results.xml
-   DEPENDS ${CMAKE_SOURCE_DIR}/unittest/bin/fmacm_test
-   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
+   $<TARGET_FILE:fmacm_test> --gtest_output=xml:${PROJECT_BINARY_DIR}/unittest/fmacm_unit_test_results.xml
+   DEPENDS fmacm_test
+   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/unittest/
 )

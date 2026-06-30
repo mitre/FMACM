@@ -8,13 +8,33 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 message ("${PROJECT_NAME}: Build type set to ${CMAKE_BUILD_TYPE}")
 
-option(BUILD_LIBARIES_ONLY "Build ${PROJECT_NAME} libraries only, no binaries" OFF)
-if(${BUILD_LIBARIES_ONLY})
-    message(STATUS "${PROJECT_NAME}: only building libraries, skipping binaries")
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(FMACM_IS_TOP_LEVEL ON)
+else()
+    set(FMACM_IS_TOP_LEVEL OFF)
 endif()
 
-option(BUILD_TESTING "Enable building ${PROJECT_NAME} tests" ON)
-if(NOT ${BUILD_TESTING})
+set(FMACM_BUILD_EXECUTABLE_DEFAULT ON)
+if(DEFINED BUILD_LIBARIES_ONLY AND BUILD_LIBARIES_ONLY)
+    set(FMACM_BUILD_EXECUTABLE_DEFAULT OFF)
+endif()
+option(FMACM_BUILD_EXECUTABLE "Build the FMACM executable" ${FMACM_BUILD_EXECUTABLE_DEFAULT})
+if(DEFINED BUILD_LIBARIES_ONLY AND BUILD_LIBARIES_ONLY)
+    message(STATUS "BUILD_LIBARIES_ONLY is deprecated; use FMACM_BUILD_EXECUTABLE instead")
+endif()
+if(NOT FMACM_BUILD_EXECUTABLE)
+    message(STATUS "${PROJECT_NAME}: only building libraries, skipping executable")
+endif()
+
+set(FMACM_BUILD_TESTING_DEFAULT OFF)
+if(FMACM_IS_TOP_LEVEL)
+    set(FMACM_BUILD_TESTING_DEFAULT ON)
+    if(DEFINED BUILD_TESTING)
+        set(FMACM_BUILD_TESTING_DEFAULT ${BUILD_TESTING})
+    endif()
+endif()
+option(FMACM_BUILD_TESTING "Build ${PROJECT_NAME} tests" ${FMACM_BUILD_TESTING_DEFAULT})
+if(NOT FMACM_BUILD_TESTING)
     message(STATUS "${PROJECT_NAME}: skipping test targets")
 endif()
 
@@ -54,26 +74,32 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-function -Wno-sign-compare -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-function -Wno-sign-compare -O3 -g3")
 
-CPMAddPackage(
-    NAME fsloader
-    GIT_REPOSITORY https://github.com/mitre/fsloader.git
-    GIT_TAG 1.1.0
-    OPTIONS
-     "FSLOADER_BUILD_EXAMPLE OFF"
-     "BUILD_SHARED_LIBS FALSE"
-)
+if(NOT TARGET mitre::fsloader)
+    CPMAddPackage(
+        NAME fsloader
+        GIT_REPOSITORY https://github.com/mitre/fsloader.git
+        GIT_TAG 1.1.0
+        OPTIONS
+         "FSLOADER_BUILD_EXAMPLE OFF"
+         "BUILD_SHARED_LIBS FALSE"
+    )
+endif()
 
-CPMAddPackage(
-    NAME aircraft_simulation_core
-    GIT_REPOSITORY https://github.com/mitre/aircraft_simulation_core.git
-    GIT_TAG a84dc78805bf35b6a45c68ac99f1c47fe47ad892 # FIXME switch to a release tag when available
-    OPTIONS
-     "SIMCORE_BUILD_TESTING OFF"
-)
+if(NOT TARGET mitre::oss::simcore)
+    CPMAddPackage(
+        NAME aircraft_simulation_core
+        GIT_REPOSITORY https://github.com/mitre/aircraft_simulation_core.git
+        GIT_TAG a84dc78805bf35b6a45c68ac99f1c47fe47ad892 # FIXME switch to a release tag when available
+        OPTIONS
+         "SIMCORE_BUILD_TESTING OFF"
+    )
+endif()
 
 set (FRAMEWORK_DIR       ${CMAKE_CURRENT_SOURCE_DIR}/AircraftDynamicsTestFramework)
 set (aaesim_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include )
 set (UNITTEST_DIR        ${CMAKE_CURRENT_SOURCE_DIR}/unittest)
 
-include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
 include(${FRAMEWORK_DIR}/framework.cmake OPTIONAL)
+if(FMACM_BUILD_TESTING)
+    include(${UNITTEST_DIR}/unittest.cmake OPTIONAL)
+endif()

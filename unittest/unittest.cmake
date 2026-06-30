@@ -8,7 +8,7 @@ include(${UNITTEST_DIR}/src/AircraftDynamicsTestFramework/framework.cmake)
 
 # add a target for running all of the unit test binaries at one time
 add_custom_target(run_tests
-   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/unittest/
+   WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/unittest/
 )
 add_dependencies(run_tests
    run_fmacm_test

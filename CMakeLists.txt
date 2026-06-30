@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.14)
-project(aaesim VERSION 5.3.3)
+cmake_minimum_required(VERSION 3.29)
+project(fmacm VERSION 5.3.4 LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 20)
 
@@ -50,12 +50,7 @@ CPMAddPackage(
   VERSION 1.2.5
 )
 
-# Append -SNAPSHOT to the version name if this is a pre-release version
-if(PROJECT_VERSION_TWEAK)
-    set(FMACM_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-SNAPSHOT)
-else()
-    set(FMACM_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-endif()
+set(FMACM_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 message("-- Generating build for ${PROJECT_NAME} version ${FMACM_VERSION}")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
@@ -77,7 +72,7 @@ if(NOT TARGET mitre::oss::simcore)
     CPMAddPackage(
         NAME aircraft_simulation_core
         GIT_REPOSITORY https://github.com/mitre/aircraft_simulation_core.git
-        GIT_TAG a84dc78805bf35b6a45c68ac99f1c47fe47ad892 # FIXME switch to a release tag when available
+        GIT_TAG 1.0.0
         OPTIONS
          "SIMCORE_BUILD_TESTING OFF"
     )

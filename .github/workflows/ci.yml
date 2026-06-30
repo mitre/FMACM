@@ -17,7 +17,6 @@ jobs:
             container: ''
             install: |
               brew update
-              brew upgrade
           - os: ubuntu-latest
             container: rockylinux:9
             install: |
